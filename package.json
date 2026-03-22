@@ -1,0 +1,9 @@
+{
+  "name": "base-app",
+  "version": "1.0.0",
+  "description": "BASE Fitness Tracker",
+  "dependencies": {
+    "web-push": "^3.6.7",
+    "@netlify/functions": "^2.4.0"
+  }
+}

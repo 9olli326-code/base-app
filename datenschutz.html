@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenschutz | BASE</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <meta name="theme-color" content="#06b6d4">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #09090b; font-family: 'Inter', sans-serif; }
+        h1, h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; }
+    </style>
+</head>
+<body class="text-zinc-300 antialiased min-h-screen">
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="9" fill="#09090b"/>
+                        <rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#0f0f12" stroke="#1f1f24" stroke-width="0.5"/>
+                        <rect x="7" y="10" width="1.5" height="21" rx="0.75" fill="#06b6d4"/>
+                        <circle cx="32" cy="11" r="1.5" fill="#06b6d4"/>
+                        <text x="11" y="29" font-family="'Arial Black',Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="-0.5">B</text>
+                    </svg>
+                </div>
+                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;" class="text-xl tracking-tighter text-white uppercase">BASE</span>
+            </a>
+            <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">← Zurück</a>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="max-w-2xl mx-auto px-6 pt-32 pb-24">
+
+        <h1 class="text-5xl md:text-7xl uppercase text-white mb-3 tracking-tighter">Datenschutz</h1>
+        <p class="text-zinc-600 text-sm font-medium mb-12">Datenschutzerklärung gemäß DSGVO</p>
+
+        <!-- Verantwortlicher -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Verantwortlicher</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-1">
+                <p class="text-white font-bold">Oliver Angermann</p>
+                <p>Akazienweg 7, 49808 Lingen</p>
+                <p>E-Mail: <a href="mailto:support.base-app@proton.me" class="text-cyan-400 hover:text-cyan-300 transition-colors">support.base-app@proton.me</a></p>
+            </div>
+        </div>
+
+        <!-- Überblick -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Überblick</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-3">
+                <p>BASE ist eine Progressive Web App (PWA) für Fitness- und Sport-Tracking. Die nachfolgende Erklärung informiert dich darüber, welche personenbezogenen Daten wir erheben, wie wir sie verwenden und welche Rechte du hast.</p>
+                <p>Wir nehmen den Schutz deiner persönlichen Daten ernst und behandeln sie vertraulich entsprechend der gesetzlichen Datenschutzvorschriften (DSGVO) und dieser Datenschutzerklärung.</p>
+            </div>
+        </div>
+
+        <!-- Welche Daten -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Erhobene Daten</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-4">
+
+                <div>
+                    <p class="text-white font-bold mb-1">1. Trainingsdaten (lokal & optional Cloud)</p>
+                    <p>Workout-Daten, Gewicht, Körpermessungen, Notizen und weitere von dir eingetragene Fitnessdaten. Diese werden standardmäßig lokal auf deinem Gerät gespeichert (localStorage). Wenn du einen Account anlegst, werden sie verschlüsselt in Firebase (Google) synchronisiert.</p>
+                </div>
+
+                <div>
+                    <p class="text-white font-bold mb-1">2. Account-Daten (optional)</p>
+                    <p>Bei freiwilliger Registrierung: E-Mail-Adresse und ggf. Google-Account-Daten über Firebase Authentication. Ohne Registrierung werden keine Account-Daten erhoben.</p>
+                </div>
+
+                <div>
+                    <p class="text-white font-bold mb-1">3. Nutzungsanalytik (Google Analytics)</p>
+                    <p>Wir verwenden Google Analytics 4 (GA4), um die Nutzung der Landing Page zu verstehen. Dabei werden anonymisierte Nutzungsdaten wie Seitenaufrufe und Verweildauer erhoben. IP-Adressen werden gekürzt. Du kannst die Erfassung durch Browser-Add-ons oder Einstellungen ablehnen.</p>
+                </div>
+
+                <div>
+                    <p class="text-white font-bold mb-1">4. Feedback (optional)</p>
+                    <p>Wenn du freiwillig Feedback absendest, werden der eingegebene Text, eine optionale E-Mail-Adresse, Sterne-Bewertung, Kategorie sowie technische Metadaten (App-Version, Anzahl Workouts, Zeitstempel) in Firebase gespeichert.</p>
+                </div>
+
+                <div>
+                    <p class="text-white font-bold mb-1">5. Strava-Integration (optional)</p>
+                    <p>Wenn du dein Strava-Konto verknüpfst, rufen wir über die Strava-API deine Aktivitätsdaten ab. Die Zugangsdaten (Access-Token) werden ausschließlich lokal auf deinem Gerät gespeichert. Es werden keine Strava-Daten auf unseren Servern gespeichert.</p>
+                </div>
+
+                <div>
+                    <p class="text-white font-bold mb-1">6. KI-Funktionen (Google Gemini API)</p>
+                    <p>Für die KI-Analyse-Funktionen (Coach, Co-Pilot, Trainingsplan etc.) werden deine Trainingsdaten anonymisiert an die Google Gemini API übermittelt. Es werden keine personenbezogenen Identifikationsmerkmale (Name, E-Mail) übertragen. Google verarbeitet die Daten gemäß den Google Cloud-Datenschutzbestimmungen.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rechtsgrundlage -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Rechtsgrundlage</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-2">
+                <p>Die Verarbeitung der Daten erfolgt auf Grundlage von:</p>
+                <p>• <span class="text-white font-semibold">Art. 6 Abs. 1 lit. a DSGVO</span> – Einwilligung (z.B. bei optionaler Registrierung und Analytics)</p>
+                <p>• <span class="text-white font-semibold">Art. 6 Abs. 1 lit. b DSGVO</span> – Vertragserfüllung (Bereitstellung der App-Funktionen)</p>
+                <p>• <span class="text-white font-semibold">Art. 6 Abs. 1 lit. f DSGVO</span> – Berechtigtes Interesse (Verbesserung der App, Fehlerbehebung)</p>
+            </div>
+        </div>
+
+        <!-- Speicherung & Weitergabe -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Speicherung & Weitergabe</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-3">
+                <p>Deine Daten werden nicht an Dritte verkauft oder für Werbezwecke weitergegeben.</p>
+                <p>Folgende Drittanbieter werden eingesetzt:</p>
+                <div class="space-y-2 mt-2">
+                    <div class="flex items-start gap-3 bg-zinc-950/50 rounded-xl p-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></div>
+                        <div><p class="text-white font-semibold text-xs">Google Firebase</p><p>Cloud-Datenbank & Authentifizierung. Server in Europa (Frankfurt). Datenschutzrichtlinie: firebase.google.com/support/privacy</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-zinc-950/50 rounded-xl p-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></div>
+                        <div><p class="text-white font-semibold text-xs">Google Analytics 4</p><p>Anonymisierte Nutzungsanalyse der Landing Page. Datenschutzrichtlinie: policies.google.com/privacy</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-zinc-950/50 rounded-xl p-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></div>
+                        <div><p class="text-white font-semibold text-xs">Google Gemini API</p><p>KI-Analyse-Funktionen. Anonymisierte Trainingsdaten. Datenschutzrichtlinie: ai.google.dev/terms</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-zinc-950/50 rounded-xl p-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></div>
+                        <div><p class="text-white font-semibold text-xs">Netlify</p><p>Hosting des Web-Auftritts. Datenschutzrichtlinie: netlify.com/privacy</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-zinc-950/50 rounded-xl p-3">
+                        <div class="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 flex-shrink-0"></div>
+                        <div><p class="text-white font-semibold text-xs">Strava (optional)</p><p>Nur bei aktiver Verknüpfung. Datenschutzrichtlinie: strava.com/legal/privacy</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Speicherdauer -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Speicherdauer</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-2">
+                <p>Lokale Daten (localStorage) bleiben bis zur manuellen Löschung oder Deinstallation der PWA auf deinem Gerät.</p>
+                <p>Cloud-Daten (Firebase) werden gespeichert solange du einen aktiven Account hast. Du kannst die Löschung jederzeit per E-Mail an <a href="mailto:support.base-app@proton.me" class="text-cyan-400 hover:text-cyan-300">support.base-app@proton.me</a> beantragen.</p>
+                <p>Analytics-Daten werden nach 14 Monaten automatisch gelöscht (Google-Standard).</p>
+            </div>
+        </div>
+
+        <!-- Deine Rechte -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Deine Rechte</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-2">
+                <p>Du hast jederzeit das Recht auf:</p>
+                <p>• <span class="text-white font-semibold">Auskunft</span> – Welche Daten wir über dich gespeichert haben</p>
+                <p>• <span class="text-white font-semibold">Berichtigung</span> – Korrektur falscher Daten</p>
+                <p>• <span class="text-white font-semibold">Löschung</span> – Vollständige Entfernung deiner Daten</p>
+                <p>• <span class="text-white font-semibold">Datenübertragbarkeit</span> – Export deiner Daten (CSV-Export in der App verfügbar)</p>
+                <p>• <span class="text-white font-semibold">Widerspruch</span> – Gegen bestimmte Verarbeitungen</p>
+                <p>• <span class="text-white font-semibold">Beschwerde</span> – Bei der zuständigen Datenschutzbehörde (LfDI Niedersachsen)</p>
+                <p class="mt-3">Zur Ausübung deiner Rechte wende dich an: <a href="mailto:support.base-app@proton.me" class="text-cyan-400 hover:text-cyan-300">support.base-app@proton.me</a></p>
+            </div>
+        </div>
+
+        <!-- Cookies -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Cookies & lokale Speicherung</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-3">
+                <p>Die App selbst verwendet keine klassischen Cookies. Trainingsdaten werden im localStorage deines Browsers gespeichert — ausschließlich lokal auf deinem Gerät, nicht auf unseren Servern.</p>
+                <p>Die Landing Page (index.html) verwendet Google Analytics, das technische Cookies setzt. Du kannst dem widersprechen, indem du das Google Analytics Opt-out Browser-Add-on installierst oder in deinen Browser-Einstellungen die Datenerfassung deaktivierst.</p>
+            </div>
+        </div>
+
+        <!-- Sicherheit -->
+        <div class="mb-10">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Datensicherheit</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed">
+                <p>Die Übertragung zwischen App und Cloud erfolgt ausschließlich über HTTPS (TLS-Verschlüsselung). Firebase setzt zusätzliche Sicherheitsregeln ein, die sicherstellen, dass jeder Nutzer nur auf seine eigenen Daten zugreifen kann.</p>
+            </div>
+        </div>
+
+        <!-- Änderungen -->
+        <div class="mb-16">
+            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Änderungen dieser Erklärung</h2>
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed">
+                <p>Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren. Die jeweils aktuelle Version ist stets unter dieser URL abrufbar. Stand: März 2026.</p>
+            </div>
+        </div>
+
+        <p class="text-center text-[10px] font-black text-zinc-700 uppercase tracking-widest">© 2026 Oliver Angermann · BASE</p>
+    </div>
+</body>
+</html>
