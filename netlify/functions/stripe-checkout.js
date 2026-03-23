@@ -27,9 +27,20 @@ exports.handler = async function(event) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ungültiges JSON' }) };
     }
 
-    const { priceId, userId, userEmail } = body;
-    if (!priceId || !userId) {
-        return { statusCode: 400, headers, body: JSON.stringify({ error: 'priceId und userId erforderlich' }) };
+    const { plan, userId, userEmail } = body;
+    if (!plan || !userId) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'plan und userId erforderlich' }) };
+    }
+
+    // Price ID serverseitig aus Environment Variables auflösen
+    const PRICE_MAP = {
+        pro: process.env.STRIPE_PRO_PRICE_ID,
+        elite_trainer: process.env.STRIPE_TRAINER_PRICE_ID
+    };
+
+    const priceId = PRICE_MAP[plan];
+    if (!priceId) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unbekannter Plan: ' + plan }) };
     }
 
     try {
@@ -40,7 +51,7 @@ exports.handler = async function(event) {
             line_items: [{ price: priceId, quantity: 1 }],
             success_url: 'https://base-app.tech/app.html?stripe=success',
             cancel_url: 'https://base-app.tech/app.html?stripe=cancel',
-            metadata: { userId: userId },
+            metadata: { userId: userId, plan: plan },
             client_reference_id: userId
         };
 

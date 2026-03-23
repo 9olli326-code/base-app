@@ -1964,10 +1964,6 @@
     <script>
         const appIdGlobal = "base-v2-beta-test";
 
-        // Stripe Price IDs (publishable, nicht geheim)
-        // Diese müssen mit den Netlify Env Vars übereinstimmen
-        window.STRIPE_PRO_PRICE_ID = '';      // → STRIPE_PRO_PRICE_ID aus Netlify Env
-        window.STRIPE_TRAINER_PRICE_ID = '';   // → STRIPE_TRAINER_PRICE_ID aus Netlify Env
 
         const hideLoader = () => { const l = document.getElementById('app-loader'); if(l && l.style.display !== 'none') { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 300); } };
 
@@ -3645,22 +3641,13 @@
                 return;
             }
 
-            const priceId = plan === 'elite_trainer'
-                ? (window._stripePrices?.trainer || '')
-                : (window._stripePrices?.pro || '');
-
-            if(!priceId) {
-                window.showToast('Preiskonfiguration fehlt', 'error');
-                return;
-            }
-
             try {
                 window.showToast('Weiterleitung zu Stripe...');
                 const res = await fetch('/.netlify/functions/stripe-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        priceId: priceId,
+                        plan: plan,
                         userId: user.uid,
                         userEmail: user.email || ''
                     })
@@ -5908,12 +5895,6 @@
                     window._loadSubscriptionStatus();
                 }
             });
-
-            // Stripe Price IDs aus Env (werden über inline-Config gesetzt)
-            window._stripePrices = {
-                pro: window.STRIPE_PRO_PRICE_ID || '',
-                trainer: window.STRIPE_TRAINER_PRICE_ID || ''
-            };
 
             // Firebase Auth Referenz global verfügbar machen
             window._firebaseAuth = auth;
