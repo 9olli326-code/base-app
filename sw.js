@@ -1,4 +1,4 @@
-const CACHE_NAME = 'base-v2-cache-v7';
+const CACHE_NAME = 'base-v2-cache-v8';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -7,8 +7,6 @@ const PRECACHE_URLS = [
     '/icon-192.png',
     '/icon-48.png',
     'https://unpkg.com/lucide@0.383.0',
-    'https://cdn.jsdelivr.net/npm/chart.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
     'https://js-de.sentry-cdn.com/287b90e183061df57c7f18944815186e.min.js',
     'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js',
     'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js',

@@ -198,8 +198,6 @@
     <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
 
     <script src="https://unpkg.com/lucide@0.383.0" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body class="selection:bg-cyan-500/30">
 
@@ -1942,6 +1940,25 @@
         const appIdGlobal = "base-v2-beta-test";
 
         const hideLoader = () => { const l = document.getElementById('app-loader'); if(l && l.style.display !== 'none') { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 300); } };
+
+        // Lazy-Load: Chart.js und html2canvas erst bei Bedarf laden
+        window._loadScript = function(src) {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if(existing) { resolve(); return; }
+                const s = document.createElement('script');
+                s.src = src; s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        };
+        window._ensureChartJS = function() {
+            if(typeof Chart !== 'undefined') return Promise.resolve();
+            return window._loadScript('https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js');
+        };
+        window._ensureHtml2Canvas = function() {
+            if(typeof html2canvas !== 'undefined') return Promise.resolve();
+            return window._loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+        };
         
         window.addEventListener('load', () => {
             // ✅ FIX: Sauberes einmaliges Event-Binding ohne Konflikte
@@ -3418,6 +3435,7 @@
         // ÜBUNGSHISTORIE
         // ============================================================
         window.openExerciseHistory = function(exerciseName) {
+            window._ensureChartJS().catch(e => console.error('Chart.js laden fehlgeschlagen:', e));
             const modal = document.getElementById('exerciseHistoryModal');
             if(!modal) return;
 
@@ -3934,7 +3952,8 @@
         window.exportToCSV = () => { if(!Array.isArray(window.workouts) || window.workouts.length === 0) { window.showToast("Keine Daten vorhanden."); return; } let allDynamicKeys = new Set(); window.workouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allDynamicKeys.add(k)); }); const dynamicHeaders = Array.from(allDynamicKeys); let csv = "Datum;Kategorie;Sportart;Aktivitaet;Dauer;Notiz;" + dynamicHeaders.join(";") + "\n"; window.workouts.forEach(w => { let row = [ w.date || "", w.category || "", w.sportCategory || "", w.exercise || "", w.sessionDuration || "", (w.sessionComment || "").replace(/;/g, ',').replace(/\n/g, ' ') ]; dynamicHeaders.forEach(header => { let val = (w.data && w.data[header] !== undefined) ? w.data[header] : ""; row.push(String(val).replace(/;/g, ',')); }); csv += row.join(";") + "\n"; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `BASE_Export.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast("Export erfolgreich!"); };
 
         // --- DIAGRAMME ---
-        window.initAnalytics = function() { if(!Array.isArray(window.workouts)) return; const exSelect = document.getElementById('analyticsExercise'); const uniqueExercises = [...new Set(window.workouts.map(w => w.exercise))].filter(Boolean); if (uniqueExercises.length === 0) { exSelect.innerHTML = '<option value="">Keine Daten</option>'; document.getElementById('analyticsMetric').innerHTML = '<option value="">-</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentSelection = exSelect.value; exSelect.innerHTML = uniqueExercises.map(ex => `<option value="${ex}">${ex}</option>`).join(''); if (currentSelection && uniqueExercises.includes(currentSelection)) exSelect.value = currentSelection; window.updateAnalyticsMetrics(); }
+        window.initAnalytics = function() { if(!Array.isArray(window.workouts)) return; window._ensureChartJS().then(() => window._initAnalyticsCore()).catch(e => console.error('Chart.js laden fehlgeschlagen:', e)); };
+        window._initAnalyticsCore = function() { const exSelect = document.getElementById('analyticsExercise'); const uniqueExercises = [...new Set(window.workouts.map(w => w.exercise))].filter(Boolean); if (uniqueExercises.length === 0) { exSelect.innerHTML = '<option value="">Keine Daten</option>'; document.getElementById('analyticsMetric').innerHTML = '<option value="">-</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentSelection = exSelect.value; exSelect.innerHTML = uniqueExercises.map(ex => `<option value="${ex}">${ex}</option>`).join(''); if (currentSelection && uniqueExercises.includes(currentSelection)) exSelect.value = currentSelection; window.updateAnalyticsMetrics(); }
         window.updateAnalyticsMetrics = function() { const selectedExercise = document.getElementById('analyticsExercise').value; const metricSelect = document.getElementById('analyticsMetric'); if(!selectedExercise || !Array.isArray(window.workouts)) return; const relevantWorkouts = window.workouts.filter(w => w.exercise === selectedExercise); let allKeys = new Set(); relevantWorkouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allKeys.add(k)); }); const keysArray = Array.from(allKeys); if (keysArray.length === 0) { metricSelect.innerHTML = '<option value="">Keine Metriken</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentMetric = metricSelect.value; metricSelect.innerHTML = keysArray.map(k => `<option value="${k}">${k}</option>`).join(''); if(currentMetric && keysArray.includes(currentMetric)) metricSelect.value = currentMetric; window.renderV2Chart(); };
         window.renderV2Chart = function() { const ex = document.getElementById('analyticsExercise').value; const metric = document.getElementById('analyticsMetric').value; if(!ex || !metric || !Array.isArray(window.workouts)) return; let chartData = window.workouts.filter(w => w.exercise === ex && w.data && w.data[metric] !== undefined).sort((a,b) => new Date(a.date) - new Date(b.date)); const labels = chartData.map(w => w.date.substring(5)); const dataPoints = chartData.map(w => { let val = String(w.data[metric]).replace(',', '.'); if(val.includes(':')) { const parts = val.split(':'); if(parts.length === 2) return parseInt(parts[0]) + (parseInt(parts[1])/60); } let floatVal = parseFloat(val); return isNaN(floatVal) ? 0 : floatVal; }); const ctx = document.getElementById('v2Chart').getContext('2d'); if(window.v2ChartInstance) window.v2ChartInstance.destroy(); const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-hex').trim() || '#06b6d4'; window.v2ChartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: metric, data: dataPoints, backgroundColor: primaryColor + '20', borderColor: primaryColor, borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: primaryColor, pointBorderColor: '#000', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { color: '#a1a1aa', font: { family: 'Inter' } } }, x: { grid: { display: false }, ticks: { color: '#a1a1aa', font: { family: 'Inter', weight: 'bold' } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#18181b', titleColor: '#fff', bodyColor: primaryColor, bodyFont: { weight: 'bold', size: 14 }, borderColor: '#27272a', borderWidth: 1, padding: 12, cornerRadius: 12, displayColors: false } } } }); };
 
@@ -4138,6 +4157,9 @@
         };
 
         window.renderBodyChart = function() {
+            window._ensureChartJS().then(() => window._renderBodyChartCore()).catch(e => console.error('Chart.js laden fehlgeschlagen:', e));
+        };
+        window._renderBodyChartCore = function() {
             const ctx = document.getElementById('bodyChart');
             if(!ctx || bodyMeasurements.length < 2) return;
 
@@ -4550,8 +4572,8 @@
 
         window.downloadBragCard = function() {
             const el = document.getElementById('bragCardContent');
-            if(!el || typeof html2canvas === 'undefined') { window.showToast('Download nicht verfügbar'); return; }
-            html2canvas(el, { backgroundColor: '#09090b', scale: 2, useCORS: true }).then(canvas => {
+            if(!el) { window.showToast('Download nicht verfügbar'); return; }
+            window._ensureHtml2Canvas().then(() => html2canvas(el, { backgroundColor: '#09090b', scale: 2, useCORS: true })).then(canvas => {
                 const a = document.createElement('a');
                 a.download = 'BASE_Workout_' + new Date().toISOString().slice(0,10) + '.png';
                 a.href = canvas.toDataURL('image/png');
@@ -4562,14 +4584,14 @@
 
         window.shareBragCard = function() {
             const el = document.getElementById('bragCardContent');
-            if(!el || typeof html2canvas === 'undefined') {
+            if(!el) {
                 // Fallback: Text teilen
                 const d = _bragCardData;
                 const text = `💪 Workout Complete!\n${d?.exercises || ''}\n⏱ ${d?.duration || ''}\nTracked with BASE Tracker`;
                 navigator.share ? navigator.share({ title: 'Workout', text }) : navigator.clipboard?.writeText(text).then(() => window.showToast('Kopiert! 📋'));
                 return;
             }
-            html2canvas(el, { backgroundColor: '#09090b', scale: 2, useCORS: true }).then(async canvas => {
+            window._ensureHtml2Canvas().then(() => html2canvas(el, { backgroundColor: '#09090b', scale: 2, useCORS: true })).then(async canvas => {
                 canvas.toBlob(async blob => {
                     if(navigator.share && blob) {
                         try {
@@ -4579,7 +4601,7 @@
                         window.downloadBragCard();
                     }
                 });
-            });
+            }).catch(() => window.showToast('Fehler beim Teilen'));
         };
 
         // ============================================================
