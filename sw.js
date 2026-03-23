@@ -1,4 +1,4 @@
-const CACHE_NAME = 'base-v2-cache-v10';
+const CACHE_NAME = 'base-v2-cache-v11';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -63,7 +63,9 @@ self.addEventListener('fetch', function(event) {
 
     // CACHE FIRST for navigation + known assets
     // Try cache immediately, update in background
-    if (event.request.mode === 'navigate') {
+    // Nur /app.html cachen — andere HTML-Seiten (Impressum, Datenschutz) normal laden
+    var pathname = new URL(url).pathname;
+    if (event.request.mode === 'navigate' && (pathname === '/' || pathname === '/app.html')) {
         event.respondWith(
             caches.match('/app.html').then(function(cached) {
                 if (cached) {

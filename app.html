@@ -1055,8 +1055,8 @@
                     <a href="/datenschutz.html" target="_blank" class="text-[10px] text-zinc-600 hover:text-zinc-400 font-bold uppercase tracking-widest transition-colors pointer-events-auto">Datenschutz</a>
                 </div>
 
-                <!-- Subscription Plan Anzeige -->
-                <div id="subscriptionPlanRow" class="mb-2">
+                <!-- Subscription Plan Anzeige (versteckt wenn _showPaywall=false) -->
+                <div id="subscriptionPlanRow" class="mb-2 hidden">
                     <button onclick="window.showPaywall()" class="w-full flex items-center gap-4 bg-amber-500/5 hover:bg-amber-500/10 p-4 rounded-2xl text-amber-400 font-black border border-amber-500/20 cursor-pointer pointer-events-auto transition-all">
                         <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="crown" class="w-5 h-5 pointer-events-none"></i></div>
                         <div class="text-left">
@@ -3574,6 +3574,7 @@
         // ============================================================
         // PAYWALL + KI RATE LIMITING (unsichtbar bis paywallActive=true)
         // ============================================================
+        window._showPaywall = false; // Master-Schalter: false = alle Upgrade-UI versteckt
         window._aiCallsToday = 0;
         window._paywallActive = false;
         window._userIsPro = false;
@@ -3591,6 +3592,11 @@
         // Gate-Funktion: vor jedem KI-Call aufrufen
         // Returns true = darf callen, false = zeige Paywall
         window.aiGate = async function() {
+            // Paywall-UI deaktiviert? Immer erlauben.
+            if(!window._showPaywall) {
+                if(window._aiTrackCall) await window._aiTrackCall();
+                return true;
+            }
             // Paywall nicht aktiv? Nur tracken, immer erlauben.
             if(!window._paywallActive) {
                 if(window._aiTrackCall) await window._aiTrackCall();
@@ -3613,8 +3619,9 @@
             return true;
         };
 
-        // Paywall-Modal anzeigen
+        // Paywall-Modal anzeigen (nur wenn _showPaywall aktiv)
         window.showPaywall = function() {
+            if(!window._showPaywall) return;
             var m = document.getElementById('paywallModal');
             if(m) { m.classList.remove('hidden'); m.classList.add('flex'); }
         };
@@ -3689,6 +3696,8 @@
             const statusEl = document.getElementById('menuPlanStatus');
             const row = document.getElementById('subscriptionPlanRow');
             if(!nameEl || !statusEl) return;
+            // Row nur zeigen wenn Paywall-UI aktiviert ist
+            if(row) { if(window._showPaywall) row.classList.remove('hidden'); else row.classList.add('hidden'); }
 
             const plans = {
                 free: { name: 'Free Plan', status: 'Upgrade verfügbar', color: 'amber' },
