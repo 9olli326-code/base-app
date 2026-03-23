@@ -4,13 +4,19 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["web-push", "@netlify/functions"]
+  external_node_modules = ["web-push", "@netlify/functions", "stripe"]
 
 [functions."gemini"]
   timeout = 26
 
 [functions."strava-token"]
   timeout = 26
+
+[functions."stripe-checkout"]
+  timeout = 15
+
+[functions."stripe-webhook"]
+  timeout = 15
 
 [[redirects]]
   from = "/"

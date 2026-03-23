@@ -692,7 +692,7 @@ window.ptShiftMonth = function(dir) {
 _ptCalMonth += dir;
 if(_ptCalMonth > 11) { _ptCalMonth = 0; _ptCalYear++; }
 if(_ptCalMonth < 0) { _ptCalMonth = 11; _ptCalYear--; }
-window.renderCalendar();
+window.renderPTCalendar();
 };
 
 // Keep ptShiftDay for backward compat (Quick-Track uses it indirectly)
@@ -702,13 +702,13 @@ d.setDate(d.getDate() + dir);
 _ptSelectedDate = d.toISOString().split('T')[0];
 _ptCalMonth = d.getMonth();
 _ptCalYear = d.getFullYear();
-window.renderCalendar();
+window.renderPTCalendar();
 window.renderDayDetail(_ptSelectedDate);
 };
 
-window.renderDayView = function() { window.renderCalendar(); };
+window.renderDayView = function() { window.renderPTCalendar(); };
 
-window.renderCalendar = function() {
+window.renderPTCalendar = function() {
 const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const labelEl = document.getElementById('ptCalMonthLabel');
 if(labelEl) labelEl.textContent = `${monthNames[_ptCalMonth]} ${_ptCalYear}`;
@@ -766,7 +766,7 @@ window.renderDayDetail(_ptSelectedDate);
 
 window.selectCalDay = function(dateStr) {
 _ptSelectedDate = dateStr;
-window.renderCalendar();
+window.renderPTCalendar();
 };
 
 window.openSessionModalForDay = function() {
@@ -872,7 +872,7 @@ el.innerHTML = monthNames.map((name, mi) => {
 
 window._goToMonth = function(month) {
 _ptCalMonth = month;
-window.renderCalendar();
+window.renderPTCalendar();
 document.getElementById('ptYearView')?.classList.add('hidden');
 };
 

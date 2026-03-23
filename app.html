@@ -2584,12 +2584,6 @@
         let _chDuration = 7;
         let _chVisibility = 'private';
 
-        window.openChallenges = function() {
-            window.toggleModal('challengeModal');
-            window.switchChallengeTab('my');
-            window.loadMyChallenges();
-        };
-
         window.switchChallengeTab = function(tab) {
             ['my','create','discover'].forEach(function(t) {
                 var panel = document.getElementById('chPanel-' + t);
@@ -4074,17 +4068,7 @@
         // ============================================================
 
         // --- MODAL SYSTEM ---
-        window.toggleModal = function(id) {
-            const modal = document.getElementById(id);
-            if (!modal) return;
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        };
+        // toggleModal: aktive Definition weiter unten (mit settingsModal-Redirect + Lucide refresh)
 
         window.showToast = function(msg, type, actionLabel, actionCallback, duration) {
             const toast = document.getElementById('toast');
