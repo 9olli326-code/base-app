@@ -12,18 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BASE">
     
-    <!-- Sentry Error Monitoring — nach LCP laden -->
-    <script>
-        window.addEventListener('load', function() {
-            requestIdleCallback ? requestIdleCallback(loadSentry) : setTimeout(loadSentry, 3000);
-            function loadSentry() {
-                var s = document.createElement('script');
-                s.src = 'https://js-de.sentry-cdn.com/287b90e183061df57c7f18944815186e.min.js';
-                s.crossOrigin = 'anonymous';
-                document.head.appendChild(s);
-            }
-        });
-    </script>
+    <!-- Sentry Error Monitoring -->
+    <script src="https://js-de.sentry-cdn.com/287b90e183061df57c7f18944815186e.min.js" crossorigin="anonymous" defer></script>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
@@ -173,10 +163,6 @@
         @keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,0.5); } 50% { box-shadow: 0 0 0 6px rgba(168,85,247,0); } }
         .mic-active { animation: mic-pulse 1s ease-in-out infinite; background: rgba(168,85,247,0.25) !important; border-color: rgba(168,85,247,0.6) !important; color: #c084fc !important; }
         
-        /* Offscreen-Sections erst bei Sichtbarkeit rendern (Lighthouse Performance) */
-        .tab-content[style*="display: none"], .tab-content.hidden,
-        [id$="Modal"].hidden { content-visibility: auto; contain-intrinsic-size: 0 500px; }
-
         /* Modal Scroll Fix */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-hex); border-radius: 10px; }
@@ -205,15 +191,13 @@
     <!-- Resource hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="tailwind-production.css" fetchpriority="high">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="tailwind-production.css">
+    <link rel="preconnect" href="https://unpkg.com">
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
 
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" as="script">
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" defer></script>
+    <script src="https://unpkg.com/lucide@0.383.0" defer></script>
 </head>
 <body class="selection:bg-cyan-500/30">
 
