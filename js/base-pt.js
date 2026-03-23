@@ -158,7 +158,7 @@ listEl.innerHTML = window.clients.map(c => {
     const profile = window.getClientProfile(c.id);
     const goalTag = profile.goal ? `<span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[8px] font-bold uppercase" style="background:rgba(99,102,241,0.1);color:rgba(99,102,241,0.7)">${window._escapeHtml(profile.goal)}</span>` : '';
 
-    return `<div onclick="window.openClientDetail('${c.id}')"
+    return `<div role="button" tabindex="0" aria-label="${window._escapeHtml(c.name)} Details öffnen" onclick="window.openClientDetail('${c.id}')"
         class="p-4 rounded-2xl cursor-pointer transition-all hover:opacity-90 active:scale-[0.98] pointer-events-auto"
         style="background:var(--surface-hex);border:1px solid var(--border-hex)">
         <div class="flex items-center gap-3 mb-2">
