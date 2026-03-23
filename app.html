@@ -1994,7 +1994,7 @@
             else { if(btnConnect) btnConnect.classList.remove('hidden'); if(btnDisconnect) btnDisconnect.classList.add('hidden'); if(statusText) { statusText.textContent = "Nicht verbunden"; statusText.classList.replace('text-green-500', 'text-zinc-500'); } if(btnSync) { btnSync.classList.add('hidden'); btnSync.classList.remove('flex'); } }
         };
         window.connectStrava = function() { const currentUrl = window.location.origin + window.location.pathname; const authUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${currentUrl}&approval_prompt=force&scope=activity:read_all`; window.location.href = authUrl; };
-        window.disconnectStrava = function() { if(confirm("Strava Verbindung trennen?")) { localStorage.removeItem('beastmode_strava_tokens'); stravaTokens = null; window.updateStravaUI(); window.showToast("Strava getrennt."); } };
+        window.disconnectStrava = function() { window.showModal('Strava trennen?', 'Strava Verbindung wirklich trennen?', true, () => { localStorage.removeItem('beastmode_strava_tokens'); stravaTokens = null; window.updateStravaUI(); window.showToast("Strava getrennt."); }); };
         window.handleStravaCallback = async function(code) { try { const res = await fetch('/.netlify/functions/strava-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: code, grant_type: 'authorization_code' }) }); if(!res.ok) throw new Error("Strava Token-Exchange fehlgeschlagen"); const data = await res.json(); stravaTokens = { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at }; localStorage.setItem('beastmode_strava_tokens', JSON.stringify(stravaTokens)); window.showToast("Strava erfolgreich verbunden!"); window.updateStravaUI(); } catch(e) { alert("Strava Login fehlgeschlagen: " + e.message); } };
         window.refreshStravaTokenIfNeeded = async function() { if(!stravaTokens) return false; if(Date.now() / 1000 > (stravaTokens.expires_at - 300)) { try { const res = await fetch('/.netlify/functions/strava-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: stravaTokens.refresh_token }) }); if(!res.ok) throw new Error("Token Refresh fehlgeschlagen"); const data = await res.json(); stravaTokens.access_token = data.access_token; stravaTokens.refresh_token = data.refresh_token; stravaTokens.expires_at = data.expires_at; localStorage.setItem('beastmode_strava_tokens', JSON.stringify(stravaTokens)); return true; } catch(e) { return false; } } return true; };
         window.syncStravaActivities = async function() {
@@ -2766,10 +2766,11 @@
         };
 
         window.deleteChallenge = function(id) {
-            if(!confirm('Challenge wirklich löschen?')) return;
-            window._chDelete(id).then(function(result) {
-                if(result === true) { window.showToast('Challenge gelöscht!'); window.loadMyChallenges(); }
-                else { window.showToast('Fehler: ' + result); }
+            window.showModal('Challenge löschen?', 'Diese Challenge wird dauerhaft gelöscht.', true, () => {
+                window._chDelete(id).then(function(result) {
+                    if(result === true) { window.showToast('Challenge gelöscht!'); window.loadMyChallenges(); }
+                    else { window.showToast('Fehler: ' + result); }
+                });
             });
         };
 
@@ -2802,7 +2803,7 @@
         };
 
         window.leaveChallenge = function(challengeId) {
-            if(!confirm('Challenge wirklich verlassen?')) return;
+            window.showModal('Challenge verlassen?', 'Willst du diese Challenge wirklich verlassen?', true, () => {
             var uid = window._chGetUid ? window._chGetUid() : null;
             if(!uid) return;
             window._chList(function(all) {
@@ -2814,6 +2815,7 @@
                     if(result === true) { window.showToast('Challenge verlassen'); window.loadMyChallenges(); }
                     else { window.showToast('Fehler: ' + result); }
                 });
+            });
             });
         };
 
@@ -5672,14 +5674,15 @@
             window.deleteAccount = async function() {
                 if(!auth.currentUser) {
                     // Nur lokale Daten löschen
-                    if(!confirm('Alle lokalen Daten löschen? Das kann nicht rückgängig gemacht werden.')) return;
-                    localStorage.clear();
-                    window.showToast('Lokale Daten gelöscht.');
-                    setTimeout(function() { window.location.reload(); }, 1000);
+                    window.showModal('Daten löschen?', 'Alle lokalen Daten löschen? Das kann nicht rückgängig gemacht werden.', true, () => {
+                        localStorage.clear();
+                        window.showToast('Lokale Daten gelöscht.');
+                        setTimeout(function() { window.location.reload(); }, 1000);
+                    });
                     return;
                 }
-                if(!confirm('Account und alle Daten dauerhaft löschen? Das kann NICHT rückgängig gemacht werden!')) return;
-                if(!confirm('Bist du wirklich sicher? Alle Workouts, Einstellungen und Daten werden unwiderruflich gelöscht.')) return;
+                window.showModal('Account löschen?', 'Account und alle Daten dauerhaft löschen? Das kann NICHT rückgängig gemacht werden!', true, () => {
+                window.showModal('Bist du sicher?', 'Alle Workouts, Einstellungen und Daten werden unwiderruflich gelöscht.', true, async () => {
                 try {
                     // Firestore Daten löschen
                     if(window._db && window.firestoreLib) {
@@ -5703,6 +5706,8 @@
                         window.showToast('Fehler: ' + e.message);
                     }
                 }
+                });
+                });
             };
             
             

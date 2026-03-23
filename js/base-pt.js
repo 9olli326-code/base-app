@@ -243,19 +243,19 @@ window.deleteClient = function() {
 if(!_activeClientDetailId) return;
 const c = window.clients.find(c => c.id === _activeClientDetailId);
 if(!c) return;
-if(!confirm(`"${c.name}" wirklich löschen? Alle Daten gehen verloren.`)) return;
-window.clients = window.clients.filter(c => c.id !== _activeClientDetailId);
-localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
-localStorage.removeItem(`beastmode_v2_cache_${_activeClientDetailId}`);
-localStorage.removeItem(`base_client_profile_${_activeClientDetailId}`);
-delete _clientWorkoutCache[_activeClientDetailId];
-delete _clientProfileCache[_activeClientDetailId];
-// Remove sessions for this client
-const sessions = window.getSessions().filter(s => s.clientId !== _activeClientDetailId);
-window.saveSessions(sessions);
-window.toggleModal('clientDetailModal');
-window.renderPTClientsDashboard();
-window.showToast('Kunde gelöscht');
+window.showModal('Kunde löschen?', `"${window._escapeHtml(c.name)}" wirklich löschen? Alle Daten gehen verloren.`, true, () => {
+    window.clients = window.clients.filter(c => c.id !== _activeClientDetailId);
+    localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+    localStorage.removeItem(`beastmode_v2_cache_${_activeClientDetailId}`);
+    localStorage.removeItem(`base_client_profile_${_activeClientDetailId}`);
+    delete _clientWorkoutCache[_activeClientDetailId];
+    delete _clientProfileCache[_activeClientDetailId];
+    const sessions = window.getSessions().filter(s => s.clientId !== _activeClientDetailId);
+    window.saveSessions(sessions);
+    window.toggleModal('clientDetailModal');
+    window.renderPTClientsDashboard();
+    window.showToast('Kunde gelöscht');
+});
 };
 
 window.editClientProfile = function() {
@@ -673,13 +673,14 @@ window.showToast('Session gespeichert ✅');
 
 window.deleteSession = function() {
 if(!_editingSessionId) return;
-if(!confirm('Session löschen?')) return;
-const sessions = window.getSessions().filter(s => s.id !== _editingSessionId);
-window.saveSessions(sessions);
-_editingSessionId = null;
-window.toggleModal('sessionPlannerModal');
-window.renderDayView();
-window.showToast('Session gelöscht');
+window.showModal('Session löschen?', 'Diese Session wird dauerhaft gelöscht.', true, () => {
+    const sessions = window.getSessions().filter(s => s.id !== _editingSessionId);
+    window.saveSessions(sessions);
+    _editingSessionId = null;
+    window.toggleModal('sessionPlannerModal');
+    window.renderDayView();
+    window.showToast('Session gelöscht');
+});
 };
 
 // ── KALENDER (Month + Year View) ──────────────────────────
@@ -1043,12 +1044,12 @@ window._renderQtExercises();
 };
 
 window.endQuickTrack = function() {
-if(confirm('Session beenden ohne zu speichern?')) {
+window.showModal('Abbrechen?', 'Session beenden ohne zu speichern?', true, () => {
     if(_qtTimerInterval) clearInterval(_qtTimerInterval);
     _qtTimerInterval = null;
     _qtStartTime = null;
     window.toggleModal('quickTrackModal');
-}
+});
 };
 
 window.finishQuickTrack = function() {

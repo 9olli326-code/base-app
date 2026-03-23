@@ -570,12 +570,14 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
 
 window.deleteCurrentSchema = function() {
     if(window.currentCategory === 'strength' || window.currentCategory === 'cardio') { window.showToast("Standard-Schema kann nicht gelöscht werden."); return; }
-    window.categorySchemas[window.currentCategory] = null;
-    const all = JSON.parse(localStorage.getItem('beastmode_v2_multi_schemas')||'{}');
-    delete all[window.currentCategory];
-    localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(all));
-    window.switchCategory(window.currentCategory);
-    window.showToast("Schema gelöscht.");
+    window.showModal('Schema löschen?', 'Das aktuelle Schema wird dauerhaft gelöscht.', true, () => {
+        window.categorySchemas[window.currentCategory] = null;
+        const all = JSON.parse(localStorage.getItem('beastmode_v2_multi_schemas')||'{}');
+        delete all[window.currentCategory];
+        localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(all));
+        window.switchCategory(window.currentCategory);
+        window.showToast("Schema gelöscht.");
+    });
 };
 
 let planGoal = '';
