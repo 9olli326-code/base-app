@@ -1280,7 +1280,7 @@ doc.rect(0, 0, w, 38, 'F');
 // Trainer logo
 const logoData = localStorage.getItem('base_trainer_logo');
 if(logoData) {
-    try { doc.addImage(logoData, 'PNG', 12, 6, 26, 26); } catch(e) {}
+    try { doc.addImage(logoData, 'PNG', 12, 6, 26, 26); } catch(e) { console.error('Fehler beim Einfügen des Trainer-Logos:', e); }
 }
 const logoOffset = logoData ? 44 : 15;
 

@@ -656,11 +656,11 @@ window.generateTrainingPlan = async function() {
         var resp = JSON.parse(raw);
         if(!resp.reply) throw new Error(resp.error || 'Keine Antwort');
         var obj = null;
-        try { obj = JSON.parse(resp.reply); } catch(e) {}
+        try { obj = JSON.parse(resp.reply); } catch(e) { console.error('Fehler beim Parsen der KI-Antwort:', e); }
         if(!obj) {
             var si = resp.reply.indexOf('{');
             var ei = resp.reply.lastIndexOf('}');
-            if(si > -1 && ei > si) try { obj = JSON.parse(resp.reply.slice(si, ei+1)); } catch(e) {}
+            if(si > -1 && ei > si) try { obj = JSON.parse(resp.reply.slice(si, ei+1)); } catch(e) { console.error('Fehler beim Fallback-Parsen der KI-Antwort:', e); }
         }
         return obj;
     }

@@ -186,7 +186,7 @@
                         root.style.setProperty('--ui-font-heading', `"${fontH}", sans-serif`); root.style.setProperty('--ui-font-body', `"${fontB}", sans-serif`);
                     }
                     if (th.radius) root.style.setProperty('--ui-radius', th.radius); if (th.shadow) root.style.setProperty('--ui-shadow', th.shadow); if (th.blur) root.style.setProperty('--ui-blur', th.blur);
-                } catch(e) {}
+                } catch(e) { console.error('Fehler in applyTheme:', e); }
             }
         }
         applyTheme();
@@ -1986,7 +1986,7 @@
 
         // --- 1. STRAVA LOGIK ---
         const STRAVA_CLIENT_ID = '211278'; let stravaTokens = null;
-        try { stravaTokens = JSON.parse(localStorage.getItem('beastmode_strava_tokens')); } catch(e) {}
+        try { stravaTokens = JSON.parse(localStorage.getItem('beastmode_strava_tokens')); } catch(e) { console.error('Fehler beim Laden der Strava-Tokens:', e); }
         
         window.updateStravaUI = function() {
             const btnConnect = document.getElementById('btnStravaConnect'); const btnDisconnect = document.getElementById('btnStravaDisconnect'); const statusText = document.getElementById('stravaStatusText'); const btnSync = document.getElementById('btnStravaSync');
@@ -2078,10 +2078,10 @@
             const lsCF = localStorage.getItem('beastmode_v2_custom_fields'); if(lsCF) savedCustomFields = JSON.parse(lsCF);
             const lsP = localStorage.getItem('beastmode_v2_profile'); 
             
-            if(lsP) { try { window.userProfile = { ...window.userProfile, ...JSON.parse(lsP) }; if(!window.userProfile.widgets) window.userProfile.widgets = { readiness: false, ptMode: false }; if(!window.userProfile.modules) window.userProfile.modules = { main: false, strength: true, cardio: true, recovery: false }; if(window.userProfile.injuries && Array.isArray(window.userProfile.injuries)) window.selectedInjuries = new Set(window.userProfile.injuries); } catch(e) {} } 
+            if(lsP) { try { window.userProfile = { ...window.userProfile, ...JSON.parse(lsP) }; if(!window.userProfile.widgets) window.userProfile.widgets = { readiness: false, ptMode: false }; if(!window.userProfile.modules) window.userProfile.modules = { main: false, strength: true, cardio: true, recovery: false }; if(window.userProfile.injuries && Array.isArray(window.userProfile.injuries)) window.selectedInjuries = new Set(window.userProfile.injuries); } catch(e) { console.error('Fehler beim Laden des Profils:', e); } } 
 
             // ✅ FIX: Schemas ZUERST laden, DANN applyModules (damit renderDynamicForm korrekte Schemas hat)
-            try { const lsSchemas = localStorage.getItem('beastmode_v2_multi_schemas'); if(lsSchemas) { window.categorySchemas = { ...window.categorySchemas, ...JSON.parse(lsSchemas) }; } } catch(e) {}
+            try { const lsSchemas = localStorage.getItem('beastmode_v2_multi_schemas'); if(lsSchemas) { window.categorySchemas = { ...window.categorySchemas, ...JSON.parse(lsSchemas) }; } } catch(e) { console.error('Fehler beim Laden der Schemas:', e); }
             if (!window.categorySchemas.strength || !window.categorySchemas.strength.schema || window.categorySchemas.strength.schema.length === 0) { window.categorySchemas.strength = { sportName: "Klassisches Krafttraining", schema: window.DEFAULT_STRENGTH_SCHEMA }; localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(window.categorySchemas)); }
             if (!window.categorySchemas.cardio || !window.categorySchemas.cardio.schema || window.categorySchemas.cardio.schema.length === 0) { window.categorySchemas.cardio = { sportName: "Ausdauersport", schema: window.DEFAULT_CARDIO_SCHEMA }; localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(window.categorySchemas)); }
 
@@ -3016,7 +3016,7 @@
 
                 // --- "Jemand hat dich überholt" Check ---
                 var savedRanks = {};
-                try { savedRanks = JSON.parse(localStorage.getItem('base_ch_ranks') || '{}'); } catch(e) {}
+                try { savedRanks = JSON.parse(localStorage.getItem('base_ch_ranks') || '{}'); } catch(e) { console.error('Fehler beim Laden der Challenge-Ranks:', e); }
                 var newRanks = {};
                 var overtakeMessages = [];
 
@@ -3543,7 +3543,7 @@
             try {
                 if(window._aiCheckPaywall) window._paywallActive = await window._aiCheckPaywall();
                 if(window._aiGetUsage) window._aiCallsToday = await window._aiGetUsage();
-            } catch(e) {}
+            } catch(e) { console.error('Fehler in _initPaywall:', e); }
         };
         setTimeout(function() { if(window._initPaywall) window._initPaywall(); }, 3000);
 
@@ -3668,7 +3668,7 @@
                     const reg = await navigator.serviceWorker.ready;
                     const sub = await reg.pushManager.getSubscription();
                     if (sub) await sub.unsubscribe();
-                } catch(e) {}
+                } catch(e) { console.error('Fehler beim Push-Unsubscribe (handlePushRowClick):', e); }
                 localStorage.removeItem('base_push_subscribed');
                 localStorage.removeItem('base_push_last_sent');
                 if (toggle) toggle.checked = false;
@@ -3711,7 +3711,7 @@
                     const reg = await navigator.serviceWorker.ready;
                     const sub = await reg.pushManager.getSubscription();
                     if (sub) await sub.unsubscribe();
-                } catch(e) {}
+                } catch(e) { console.error('Fehler beim Push-Unsubscribe (togglePush):', e); }
                 localStorage.removeItem('base_push_subscribed');
                 localStorage.removeItem('base_push_last_sent');
                 const statusText = document.getElementById('pushStatusText');
@@ -3751,7 +3751,7 @@
                     })
                 });
                 var raw = await res.text();
-                try { var data = JSON.parse(raw); } catch(e) {}
+                try { var data = JSON.parse(raw); } catch(e) { console.error('Fehler beim Parsen der Push-Antwort:', e); }
 
                 localStorage.setItem('base_push_last_sent', now.toISOString());
             } catch(e) { console.error('Push send error:', e); }
