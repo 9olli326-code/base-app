@@ -2091,8 +2091,8 @@ SCHEMA (antworte NUR mit diesem JSON, kein Text davor oder danach):
 
         window.workouts = []; window.clients = []; let savedRoutines = [], savedCustomFields = [], userProfile = { age: '', weight: '', height: '', gender: '', experience: '', injuries: [], medicalDetails: '', modules: { main: false, strength: true, cardio: true, recovery: false }, widgets: { readiness: false, ptMode: false } }, selectedInjuries = new Set(), currentChartType = 'bar'; window.currentMode = 'personal'; window.currentClient = 'personal'; let currentLang = localStorage.getItem('beastmode_lang') || 'de', currentCategory = 'strength', currentTableFilter = 'all';
         let editingWorkoutId = null; let currentReadinessScore = 100; let currentView = 'active';
-        let isWorkoutTimerRunning = false; let workoutTimerSeconds = 0; let workoutTimerInterval = null;
-        let selectedRestTime = 90; let restTimerSeconds = 0; let restTimerInterval = null;
+        window.isWorkoutTimerRunning = false; window.workoutTimerSeconds = 0; window.workoutTimerInterval = null;
+        window.selectedRestTime = 90; window.restTimerSeconds = 0; window.restTimerInterval = null;
 
         const DEFAULT_STRENGTH_SCHEMA = [ {"id": "saetze", "label": "Sätze", "type": "number", "placeholder": "z.B. 3"}, {"id": "wdh", "label": "Wiederholungen", "type": "number", "placeholder": "z.B. 10"}, {"id": "gewicht", "label": "Gewicht (kg)", "type": "number", "placeholder": "z.B. 80"} ];
         const DEFAULT_CARDIO_SCHEMA = [ {"id": "distanz", "label": "Distanz (km)", "type": "number", "placeholder": "z.B. 5.5"}, {"id": "dauer", "label": "Dauer (min)", "type": "number", "placeholder": "z.B. 30"}, {"id": "pace", "label": "Pace (min/km)", "type": "text", "placeholder": "z.B. 5:30"}, {"id": "puls", "label": "Ø Puls", "type": "number", "placeholder": "z.B. 140"} ];
@@ -2305,7 +2305,7 @@ SCHEMA (antworte NUR mit diesem JSON, kein Text davor oder danach):
                         }, 500); 
                     } else { 
                         window.showToast("Training gesichert! ✅"); 
-                        if(typeof window.startRestCountdown === 'function') window.startRestCountdown(selectedRestTime); 
+                        if(typeof window.startRestCountdown === 'function') window.startRestCountdown(window.selectedRestTime); 
                     } 
                 }
                 
@@ -2331,7 +2331,7 @@ SCHEMA (antworte NUR mit diesem JSON, kein Text davor oder danach):
         window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(currentView === 'chart') window.initAnalytics(); if(window.removeFromCloud) window.removeFromCloud(id); }); };
 
         // --- DASHBOARD & TABELLE ---
-        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !isWorkoutTimerRunning) durationStr = ""; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); }, true); };
+        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); }, true); };
         window.deleteAllArchive = () => { if(!Array.isArray(window.workouts)) return; window.showModal("Leeren?", "Gesamtes Archiv löschen?", true, async () => { const archivedWorkouts = window.workouts.filter(w => w.archived); window.workouts = window.workouts.filter(w => !w.archived); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.removeFromCloud) { for(const w of archivedWorkouts) await window.removeFromCloud(w.id); } }); };
         window.switchView = function(view) { currentView = view; const activeClass = "bg-zinc-800 text-white px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors shadow-sm cursor-pointer interactive-z"; const inactiveClass = "text-zinc-500 hover:text-white px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer interactive-z"; document.getElementById('btnViewActive').className = view === 'active' ? activeClass : inactiveClass; document.getElementById('btnViewArchive').className = view === 'archive' ? activeClass : inactiveClass; document.getElementById('btnViewChart').className = view === 'chart' ? activeClass : inactiveClass; document.getElementById('btnFinish').style.display = view === 'active' ? 'flex' : 'none'; document.getElementById('btnClear').style.display = view === 'archive' ? 'flex' : 'none'; if(view === 'chart') { document.getElementById('viewTableContainer').classList.add('hidden'); document.getElementById('viewAnalyticsContainer').classList.remove('hidden'); window.initAnalytics(); } else { document.getElementById('viewTableContainer').classList.remove('hidden'); document.getElementById('viewAnalyticsContainer').classList.add('hidden'); window.renderTable(); } };
         
@@ -2595,98 +2595,8 @@ SCHEMA (antworte NUR mit diesem JSON, kein Text davor oder danach):
             });
         };
 
-        // ============================================================
-        // FEATURE 4: HIIT INTERVALL-TIMER (Timestamp-basiert — Sperrbildschirm-fest)
-        // ============================================================
-        let _hiitInterval = null;
-        let _hiitPhaseEndTime = null;
-        let _hiitCurrentPhase = 'work';
-        let _hiitCurrentRound = 0;
-        let _hiitTotalRounds = 8;
-        let _hiitRunning = false;
-        let _hiitPausedRemaining = 0;
 
-        window.toggleHiitTimer = function() {
-            const settings = document.getElementById('hiitSettings');
-            const btn = document.getElementById('btnHiitToggle');
-            if(!settings) return;
-            const isVisible = !settings.classList.contains('hidden');
-            settings.classList.toggle('hidden', isVisible);
-            if(btn) btn.textContent = isVisible ? 'Einrichten' : 'Fertig';
-        };
-
-        function _hiitGetWorkSecs() { return parseInt(document.getElementById('hiitWork')?.value) || 40; }
-        function _hiitGetRestSecs() { return parseInt(document.getElementById('hiitRest')?.value) || 20; }
-
-        window.startHiit = function() {
-            if(_hiitRunning) {
-                _hiitPausedRemaining = Math.max(0, Math.ceil((_hiitPhaseEndTime - Date.now()) / 1000));
-                clearInterval(_hiitInterval); _hiitRunning = false; _hiitPhaseEndTime = null;
-                const btn = document.getElementById('btnHiitStart');
-                if(btn) btn.textContent = '▶ Weiter';
-                return;
-            }
-            if(_hiitCurrentRound === 0) {
-                _hiitTotalRounds = parseInt(document.getElementById('hiitRounds')?.value) || 8;
-                _hiitCurrentRound = 1; _hiitCurrentPhase = 'work';
-                _hiitPausedRemaining = _hiitGetWorkSecs();
-            }
-            _hiitRunning = true;
-            _hiitPhaseEndTime = Date.now() + (_hiitPausedRemaining * 1000);
-            const btn = document.getElementById('btnHiitStart');
-            if(btn) btn.textContent = '⏸ Pause';
-            const tick = () => {
-                const remaining = Math.max(0, Math.ceil((_hiitPhaseEndTime - Date.now()) / 1000));
-                _hiitPausedRemaining = remaining;
-                if(remaining <= 0) {
-                    if(_hiitCurrentPhase === 'work') {
-                        _hiitCurrentPhase = 'rest';
-                        _hiitPhaseEndTime = Date.now() + (_hiitGetRestSecs() * 1000);
-                        window.playBeep && window.playBeep();
-                    } else {
-                        _hiitCurrentRound++;
-                        if(_hiitCurrentRound > _hiitTotalRounds) {
-                            window.resetHiit(); window.showToast('🎉 HIIT abgeschlossen!');
-                            window.playBeep && window.playBeep(); return;
-                        }
-                        _hiitCurrentPhase = 'work';
-                        _hiitPhaseEndTime = Date.now() + (_hiitGetWorkSecs() * 1000);
-                        window.playBeep && window.playBeep();
-                    }
-                }
-                window.updateHiitDisplay();
-            };
-            tick();
-            _hiitInterval = setInterval(tick, 1000);
-        };
-
-        window.updateHiitDisplay = function() {
-            const timeEl = document.getElementById('hiitTime');
-            const phaseEl = document.getElementById('hiitPhaseLabel');
-            const roundEl = document.getElementById('hiitRoundLabel');
-            const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-hex').trim() || '#06b6d4';
-            const restColor = '#10b981';
-            const secs = _hiitPhaseEndTime ? Math.max(0, Math.ceil((_hiitPhaseEndTime - Date.now()) / 1000)) : _hiitPausedRemaining;
-            const mins = Math.floor(secs / 60);
-            const s = secs % 60;
-            if(timeEl) { timeEl.textContent = String(mins).padStart(2,'0') + ':' + String(s).padStart(2,'0'); timeEl.style.color = _hiitCurrentPhase === 'work' ? primary : restColor; }
-            if(phaseEl) { phaseEl.textContent = _hiitCurrentPhase === 'work' ? '💪 Arbeit' : '😮‍💨 Pause'; phaseEl.style.color = _hiitCurrentPhase === 'work' ? primary : restColor; }
-            if(roundEl) roundEl.textContent = 'Runde ' + _hiitCurrentRound + ' / ' + _hiitTotalRounds;
-        };
-
-        window.resetHiit = function() {
-            clearInterval(_hiitInterval); _hiitRunning = false;
-            _hiitCurrentRound = 0; _hiitCurrentPhase = 'work';
-            _hiitPhaseEndTime = null; _hiitPausedRemaining = 0;
-            const timeEl = document.getElementById('hiitTime');
-            const phaseEl = document.getElementById('hiitPhaseLabel');
-            const roundEl = document.getElementById('hiitRoundLabel');
-            const btn = document.getElementById('btnHiitStart');
-            if(timeEl) timeEl.textContent = '00:00';
-            if(phaseEl) { phaseEl.textContent = 'Bereit'; phaseEl.style.color = 'var(--text-muted)'; }
-            if(roundEl) roundEl.textContent = '—';
-            if(btn) btn.textContent = '▶ Start';
-        };
+        // ── HIIT TIMER → ausgelagert in js/base-timers.js ──
 
 
 
@@ -5673,92 +5583,9 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
             window.switchCategory(cat);
         };
 
-        // --- WORKOUT TIMER (Timestamp-basiert — Sperrbildschirm-fest) ---
-        let _workoutStartedAt = null;
-        let _workoutAccumulated = 0;
-        function _updateWorkoutDisplay() {
-            let total = _workoutAccumulated;
-            if (isWorkoutTimerRunning && _workoutStartedAt) total += Math.floor((Date.now() - _workoutStartedAt) / 1000);
-            workoutTimerSeconds = total;
-            const m = String(Math.floor(total / 60)).padStart(2, '0');
-            const s = String(total % 60).padStart(2, '0');
-            const display = document.getElementById('workoutTimerDisplay');
-            if (display) display.textContent = m + ':' + s;
-        }
-        window.toggleWorkoutTimer = function() {
-            if (isWorkoutTimerRunning) {
-                _workoutAccumulated += Math.floor((Date.now() - _workoutStartedAt) / 1000);
-                _workoutStartedAt = null;
-                clearInterval(workoutTimerInterval); isWorkoutTimerRunning = false;
-                const icon = document.getElementById('workoutTimerIcon');
-                if (icon) { icon.setAttribute('data-lucide', 'play'); if (window.lucide) lucide.createIcons(); }
-            } else {
-                _workoutStartedAt = Date.now();
-                isWorkoutTimerRunning = true;
-                const icon = document.getElementById('workoutTimerIcon');
-                if (icon) { icon.setAttribute('data-lucide', 'pause'); if (window.lucide) lucide.createIcons(); }
-                workoutTimerInterval = setInterval(_updateWorkoutDisplay, 1000);
-                _updateWorkoutDisplay();
-            }
-        };
-        window.resetWorkoutTimer = function() {
-            clearInterval(workoutTimerInterval); isWorkoutTimerRunning = false;
-            workoutTimerSeconds = 0; _workoutAccumulated = 0; _workoutStartedAt = null;
-            const display = document.getElementById('workoutTimerDisplay');
-            const icon = document.getElementById('workoutTimerIcon');
-            if (display) display.textContent = '00:00';
-            if (icon) { icon.setAttribute('data-lucide', 'play'); if (window.lucide) lucide.createIcons(); }
-        };
 
-        // --- REST TIMER (Timestamp-basiert — Sperrbildschirm-fest) ---
-        let _restEndTime = null;
-        window.setAndStartRestTimer = function(secs) { selectedRestTime = secs; window.startRestCountdown(secs); };
-        window.startRestCountdown = function(secs) {
-            if (!secs || secs <= 0) return;
-            clearInterval(restTimerInterval);
-            _restEndTime = Date.now() + (secs * 1000);
-            const stopBtn = document.getElementById('btnStopRest');
-            if (stopBtn) stopBtn.classList.remove('hidden');
-            const tick = () => {
-                if (!document.getElementById('restDisplay')) { clearInterval(restTimerInterval); return; }
-                const remaining = Math.max(0, Math.ceil((_restEndTime - Date.now()) / 1000));
-                restTimerSeconds = remaining;
-                const m = String(Math.floor(remaining / 60)).padStart(2, '0');
-                const s = String(remaining % 60).padStart(2, '0');
-                const d = document.getElementById('restDisplay');
-                if (d) { d.textContent = m + ':' + s; d.classList.add('timer-active'); }
-                if (remaining <= 0) {
-                    clearInterval(restTimerInterval); _restEndTime = null;
-                    if (d) { d.textContent = '00:00'; d.classList.remove('timer-active'); }
-                    if (stopBtn) stopBtn.classList.add('hidden');
-                    window.playBeep();
-                }
-            };
-            tick();
-            restTimerInterval = setInterval(tick, 1000);
-        };
-        window.startCustomRestTimer = function() {
-            const val = parseInt(document.getElementById('customRestInput')?.value);
-            if (val > 0) window.startRestCountdown(val);
-        };
-        window.stopRestTimer = function() {
-            clearInterval(restTimerInterval); restTimerSeconds = 0; _restEndTime = null;
-            const d = document.getElementById('restDisplay');
-            if (d) { d.textContent = '00:00'; d.classList.remove('timer-active'); }
-            document.getElementById('btnStopRest')?.classList.add('hidden');
-        };
+        // ── WORKOUT TIMER + REST TIMER + AUDIO → ausgelagert in js/base-timers.js ──
 
-        // --- AUDIO ---
-        window.initAudio = function() {};
-        window.playBeep = function() {
-            try {
-                const ctx = new (window.AudioContext||window.webkitAudioContext)();
-                const osc = ctx.createOscillator(); const gain = ctx.createGain();
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.frequency.value = 880; gain.gain.value = 0.25;
-                osc.start(); osc.stop(ctx.currentTime + 0.15);
-            } catch(e) {}
-        };
 
         // --- ONBOARDING FALLBACK ---
         // ============================================================
@@ -6751,6 +6578,7 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
 
     </script>
 
+    <script src="js/base-timers.js" defer></script>
     <script src="js/base-pt.js" defer></script>
 
     <script type="module">
