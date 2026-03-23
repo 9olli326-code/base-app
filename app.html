@@ -5422,40 +5422,29 @@
             const container = document.getElementById('dynamicSportTabs');
             if(!container) return;
             const coreCategories = ['strength', 'cardio', 'recovery', 'main'];
-            const meinSportAktiv = window.userProfile?.modules?.main !== false;
-
             // Non-core Sports als eigene Tabs
             const sportTabs = window.activeSports.filter(id => !coreCategories.includes(id));
 
-            // "Mein Sport" Tab: nur zeigen wenn Modul AN und KEINE eigenen Sports vorhanden
+            // "Mein Sport" Tab: nur zeigen wenn KEINE eigenen Sports vorhanden
             const mainBtn = document.getElementById('btnCat_main');
             if(mainBtn) {
-                if(meinSportAktiv && sportTabs.length === 0) {
-                    mainBtn.style.display = ''; // zeigen als Platzhalter
-                } else {
-                    mainBtn.style.display = 'none'; // verstecken wenn eigene Sports da
-                }
+                mainBtn.style.display = sportTabs.length === 0 ? '' : 'none';
             }
 
-            // Eigene Sport-Tabs: nur zeigen wenn Mein Sport Modul AN
-            if(meinSportAktiv) {
-                container.innerHTML = sportTabs.map(id => {
-                    const sport = window.SPORT_LIBRARY.find(s => s.id === id);
-                    if(!sport) return '';
-                    const isActive = window.currentCategory === id;
-                    return `<button onclick="window.switchCategory('${sport.id}')" id="btnCat_${sport.id}" 
-                        class="cat-pill flex-shrink-0 cursor-pointer interactive-z ${isActive ? 'cat-pill-active' : ''}">
-                        <i data-lucide="${sport.icon}" class="w-3.5 h-3.5 pointer-events-none"></i> ${sport.name}
-                    </button>`;
-                }).join('');
-            } else {
-                // Modul AUS → alle custom Tabs ausblenden
-                container.innerHTML = '';
-                // Falls gerade auf einem custom Sport → zu Kraft wechseln
-                if(!coreCategories.includes(window.currentCategory)) {
-                    window.switchCategory('strength');
+            // Eigene Sport-Tabs immer rendern
+            container.innerHTML = sportTabs.map(id => {
+                const sport = window.SPORT_LIBRARY.find(s => s.id === id);
+                if(!sport) return '';
+                const isActive = window.currentCategory === id;
+                // CAT_UI Eintrag sicherstellen (für Form-Icons/Farben)
+                if(!window.CAT_UI[id]) {
+                    window.CAT_UI[id] = { name: sport.name, icon: sport.icon, color: sport.color || 'text-cyan-400', border: sport.border || 'border-cyan-400/30', bg: sport.bg || 'bg-cyan-400/20' };
                 }
-            }
+                return `<button onclick="window.switchCategory('${sport.id}')" id="btnCat_${sport.id}"
+                    class="cat-pill flex-shrink-0 cursor-pointer interactive-z ${isActive ? 'cat-pill-active' : ''}">
+                    <i data-lucide="${sport.icon}" class="w-3.5 h-3.5 pointer-events-none"></i> ${sport.name}
+                </button>`;
+            }).join('');
 
             if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
             window.renderMeinSportSelector();
