@@ -1048,6 +1048,18 @@
                     <a href="/datenschutz.html" target="_blank" class="text-[10px] text-zinc-600 hover:text-zinc-400 font-bold uppercase tracking-widest transition-colors pointer-events-auto">Datenschutz</a>
                 </div>
 
+                <!-- Subscription Plan Anzeige -->
+                <div id="subscriptionPlanRow" class="mb-2">
+                    <button onclick="window.showPaywall()" class="w-full flex items-center gap-4 bg-amber-500/5 hover:bg-amber-500/10 p-4 rounded-2xl text-amber-400 font-black border border-amber-500/20 cursor-pointer pointer-events-auto transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="crown" class="w-5 h-5 pointer-events-none"></i></div>
+                        <div class="text-left">
+                            <p class="text-sm font-black" id="menuPlanName">Free Plan</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest opacity-70" id="menuPlanStatus">Upgrade verfügbar</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
+                    </button>
+                </div>
+
                 <div class="h-px bg-zinc-800 my-2"></div>
                 <button onclick="window.toggleModal('authModal')" class="w-full flex items-center gap-4 bg-indigo-500/5 hover:bg-indigo-500/10 p-4 rounded-2xl text-indigo-400 font-black border border-indigo-500/20 cursor-pointer pointer-events-auto transition-all">
                     <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="shield-check" class="w-5 h-5 pointer-events-none"></i></div>
@@ -1893,51 +1905,69 @@
     <div id="authModal" class="fixed inset-0 bg-black/95 z-[600] hidden items-center justify-center backdrop-blur-xl px-4 text-left"><div class="card-bg p-8 md:p-10 max-w-md w-full shadow-2xl relative border-indigo-500/30"><button aria-label="Schließen" onclick="window.toggleModal('authModal')" class="absolute top-5 right-5 text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button><div class="text-center mb-8"><div class="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 mx-auto mb-4 border border-indigo-500/20"><i data-lucide="lock" class="w-8 h-8"></i></div><h2 id="authTitle" class="text-2xl font-black text-white uppercase tracking-tighter">Account Erstellen</h2><p id="authSubtitle" class="text-xs text-zinc-500 font-bold uppercase mt-2">Sichere deine Workouts für immer</p></div><div class="space-y-4"><div><label class="block text-[10px] font-black text-zinc-500 uppercase mb-2">E-Mail Adresse</label><input type="email" id="authEmail" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto"></div><div><label class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Passwort (min. 6 Zeichen)</label><input type="password" id="authPassword" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto"></div><button onclick="window.handleAuthAction()" id="btnSubmitAuth" class="w-full bg-indigo-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all mt-4 cursor-pointer pointer-events-auto">Account Verknüpfen</button><p class="text-center text-xs text-zinc-600 mt-4"><span id="authSwitchText">Schon einen Account?</span> <button onclick="window.toggleAuthMode()" id="authSwitchLink" class="text-indigo-400 font-black cursor-pointer hover:text-indigo-300 transition-colors pointer-events-auto">Einloggen</button></p></div></div></div>
 
     <!-- PAYWALL MODAL (hidden until paywallActive=true in Firestore) -->
-    <div id="paywallModal" class="fixed inset-0 bg-black/95 z-[800] hidden items-center justify-center backdrop-blur-xl px-4">
-        <div class="bg-zinc-950 border border-amber-500/20 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+    <div id="paywallModal" class="fixed inset-0 bg-black/95 z-[800] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto py-8">
+        <div class="bg-zinc-950 border border-amber-500/20 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative">
             <button aria-label="Schließen" onclick="window.closePaywall()" class="absolute top-5 right-5 text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-400 mx-auto mb-4 border border-amber-500/20">
                     <i data-lucide="crown" class="w-8 h-8"></i>
                 </div>
-                <h2 class="text-2xl font-black text-white uppercase tracking-tighter">BASE PRO</h2>
-                <p class="text-xs text-zinc-500 font-bold uppercase mt-2">Dein KI-Limit für heute ist erreicht</p>
+                <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Wähle deinen Plan</h2>
+                <p class="text-xs text-zinc-500 font-bold uppercase mt-2" id="paywallSubtitle">Schalte alle Features frei</p>
             </div>
-            <div class="space-y-3 mb-6">
-                <div class="flex items-center gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
-                    <i data-lucide="infinity" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
-                    <span class="text-sm text-zinc-300 font-bold">Unbegrenzte KI-Analysen</span>
+
+            <!-- Plan: BASE PRO -->
+            <div class="border border-amber-500/20 rounded-2xl p-5 mb-4 bg-amber-500/5">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+                        <h3 class="text-lg font-black text-white uppercase tracking-tight">BASE PRO</h3>
+                    </div>
+                    <p class="text-xl font-black text-white">4,99€<span class="text-xs text-zinc-500 font-bold">/Mo</span></p>
                 </div>
-                <div class="flex items-center gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
-                    <i data-lucide="brain" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
-                    <span class="text-sm text-zinc-300 font-bold">KI-Trainingsplan Generator</span>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-amber-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">Unbegrenzte KI-Calls</span></div>
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-amber-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">Alle 86 Sportarten</span></div>
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-amber-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">Cloud Sync</span></div>
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-amber-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">KI-Trainingsplan</span></div>
                 </div>
-                <div class="flex items-center gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
-                    <i data-lucide="shield-check" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
-                    <span class="text-sm text-zinc-300 font-bold">Pre-Hab Verletzungsprävention</span>
-                </div>
-                <div class="flex items-center gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
-                    <i data-lucide="activity" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
-                    <span class="text-sm text-zinc-300 font-bold">ZNS Readiness Analyse</span>
-                </div>
-                <div class="flex items-center gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
-                    <i data-lucide="trophy" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
-                    <span class="text-sm text-zinc-300 font-bold">Unbegrenzte Challenges</span>
-                </div>
+                <button onclick="window.startCheckout('pro')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black py-3.5 rounded-xl uppercase tracking-widest text-xs cursor-pointer pointer-events-auto active:scale-95 transition-all shadow-lg shadow-amber-500/20">
+                    PRO wählen
+                </button>
             </div>
-            <div class="text-center mb-4">
-                <p class="text-4xl font-black text-white">4,99€<span class="text-sm text-zinc-500 font-bold">/Monat</span></p>
-                <p class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-1">Jederzeit kündbar</p>
+
+            <!-- Plan: Elite Trainer -->
+            <div class="border border-indigo-500/20 rounded-2xl p-5 mb-4 bg-indigo-500/5 relative">
+                <div class="absolute -top-2.5 right-4 bg-indigo-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Beliebt</div>
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="crown" class="w-5 h-5 text-indigo-400"></i>
+                        <h3 class="text-lg font-black text-white uppercase tracking-tight">Elite Trainer</h3>
+                    </div>
+                    <p class="text-xl font-black text-white">19,99€<span class="text-xs text-zinc-500 font-bold">/Mo</span></p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-indigo-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">Alles aus PRO</span></div>
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-indigo-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">PT Business Modus</span></div>
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-indigo-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">PDF Export</span></div>
+                    <div class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-indigo-400 flex-shrink-0"></i><span class="text-[11px] text-zinc-300 font-bold">Trainer Branding</span></div>
+                </div>
+                <button onclick="window.startCheckout('elite_trainer')" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-black py-3.5 rounded-xl uppercase tracking-widest text-xs cursor-pointer pointer-events-auto active:scale-95 transition-all shadow-lg shadow-indigo-500/20">
+                    Elite Trainer wählen
+                </button>
             </div>
-            <button id="btnUpgradePro" onclick="window.upgradeToPro()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto active:scale-95 transition-all shadow-lg shadow-amber-500/20">
-                Jetzt upgraden
-            </button>
-            <p class="text-center text-[10px] text-zinc-600 font-bold mt-3">Morgen wieder 1 kostenlose KI-Analyse</p>
+
+            <p class="text-center text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Jederzeit kündbar · Sichere Zahlung via Stripe</p>
         </div>
     </div>
 
     <script>
         const appIdGlobal = "base-v2-beta-test";
+
+        // Stripe Price IDs (publishable, nicht geheim)
+        // Diese müssen mit den Netlify Env Vars übereinstimmen
+        window.STRIPE_PRO_PRICE_ID = '';      // → STRIPE_PRO_PRICE_ID aus Netlify Env
+        window.STRIPE_TRAINER_PRICE_ID = '';   // → STRIPE_TRAINER_PRICE_ID aus Netlify Env
 
         const hideLoader = () => { const l = document.getElementById('app-loader'); if(l && l.style.display !== 'none') { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 300); } };
 
@@ -3596,10 +3626,103 @@
             if(m) { m.classList.add('hidden'); m.classList.remove('flex'); }
         };
         window.upgradeToPro = function() {
-            // Placeholder — wird mit Stripe/RevenueCat verbunden
-            window.showToast('Bezahlung wird bald freigeschaltet!');
-            window.closePaywall();
+            window.showPaywall();
         };
+
+        // Stripe Checkout starten
+        window.startCheckout = async function(plan) {
+            if(!window._firebaseAuth || !window._firebaseAuth.currentUser) {
+                window.showToast('Bitte zuerst Account verknüpfen', 'error');
+                window.closePaywall();
+                window.toggleModal('authModal');
+                return;
+            }
+            const user = window._firebaseAuth.currentUser;
+            if(user.isAnonymous) {
+                window.showToast('Bitte zuerst Account mit E-Mail verknüpfen', 'error');
+                window.closePaywall();
+                window.toggleModal('authModal');
+                return;
+            }
+
+            const priceId = plan === 'elite_trainer'
+                ? (window._stripePrices?.trainer || '')
+                : (window._stripePrices?.pro || '');
+
+            if(!priceId) {
+                window.showToast('Preiskonfiguration fehlt', 'error');
+                return;
+            }
+
+            try {
+                window.showToast('Weiterleitung zu Stripe...');
+                const res = await fetch('/.netlify/functions/stripe-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        priceId: priceId,
+                        userId: user.uid,
+                        userEmail: user.email || ''
+                    })
+                });
+                const data = await res.json();
+                if(data.url) {
+                    window.location.href = data.url;
+                } else {
+                    window.showToast(data.error || 'Checkout fehlgeschlagen', 'error');
+                }
+            } catch(e) {
+                console.error('Stripe Checkout Error:', e);
+                window.showToast('Verbindungsfehler', 'error');
+            }
+        };
+
+        // Stripe Callback verarbeiten (nach Redirect zurück)
+        window._handleStripeCallback = function() {
+            const params = new URLSearchParams(window.location.search);
+            const stripeStatus = params.get('stripe');
+            if(stripeStatus === 'success') {
+                window.showToast('Zahlung erfolgreich! PRO wird aktiviert...');
+                // Status wird asynchron via Webhook in Firestore gesetzt
+                // Beim nächsten Load wird er geladen
+                setTimeout(() => { if(window._loadSubscriptionStatus) window._loadSubscriptionStatus(); }, 2000);
+                // URL aufräumen
+                window.history.replaceState({}, '', window.location.pathname);
+            } else if(stripeStatus === 'cancel') {
+                window.showToast('Zahlung abgebrochen');
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        };
+        window.addEventListener('load', () => { window._handleStripeCallback(); });
+
+        // Plan-Status im Menü aktualisieren
+        window._updatePlanUI = function(plan) {
+            const nameEl = document.getElementById('menuPlanName');
+            const statusEl = document.getElementById('menuPlanStatus');
+            const row = document.getElementById('subscriptionPlanRow');
+            if(!nameEl || !statusEl) return;
+
+            const plans = {
+                free: { name: 'Free Plan', status: 'Upgrade verfügbar', color: 'amber' },
+                pro: { name: 'BASE PRO', status: 'Aktiv', color: 'amber' },
+                elite_trainer: { name: 'Elite Trainer', status: 'Aktiv', color: 'indigo' }
+            };
+            const p = plans[plan] || plans.free;
+            nameEl.textContent = p.name;
+            statusEl.textContent = p.status;
+
+            // Button-Styling für aktive Pläne
+            const btn = row?.querySelector('button');
+            if(btn && plan !== 'free') {
+                btn.onclick = null; // Kein Upgrade-Dialog für aktive Subscriber
+                statusEl.textContent = 'Aktiv';
+                const icon = btn.querySelector('[data-lucide="chevron-right"]');
+                if(icon) icon.remove();
+            }
+        };
+
+        // Subscription Status: wird noch nicht zum Gating benutzt
+        window._userSubscriptionPlan = 'free';
 
         // ============================================================
         // PUSH NOTIFICATIONS
@@ -5780,9 +5903,43 @@
                     if(status) { status.innerHTML = user.isAnonymous ? `<i data-lucide="cloud-check" class="w-3 h-3"></i> Sync` : `<i data-lucide="shield-check" class="w-3 h-3"></i> Gesichert`; status.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] uppercase font-black tracking-widest border shadow-sm " + (user.isAnonymous ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"); }
                     if(!user.isAnonymous) { const secBtn = document.getElementById('btnSecureAccount'); if(secBtn) secBtn.classList.add('hidden'); }
                     window.listenToWorkouts();
+
+                    // Subscription-Status aus Firestore laden
+                    window._loadSubscriptionStatus();
                 }
             });
-            
+
+            // Stripe Price IDs aus Env (werden über inline-Config gesetzt)
+            window._stripePrices = {
+                pro: window.STRIPE_PRO_PRICE_ID || '',
+                trainer: window.STRIPE_TRAINER_PRICE_ID || ''
+            };
+
+            // Firebase Auth Referenz global verfügbar machen
+            window._firebaseAuth = auth;
+
+            // Subscription-Status aus Firestore laden
+            window._loadSubscriptionStatus = async function() {
+                if(!auth.currentUser) return;
+                var uid = auth.currentUser.uid;
+                try {
+                    var subData = await new Promise((resolve) => {
+                        var u = onSnapshot(doc(db, `artifacts/${appIdGlobal}/users/${uid}/subscription`, 'status'), (snap) => {
+                            u();
+                            resolve(snap.exists() ? snap.data() : null);
+                        });
+                    });
+                    if(subData && subData.active && subData.plan) {
+                        window._userSubscriptionPlan = subData.plan;
+                        window._userIsPro = true;
+                    } else {
+                        window._userSubscriptionPlan = 'free';
+                        window._userIsPro = false;
+                    }
+                    window._updatePlanUI(window._userSubscriptionPlan);
+                } catch(e) { console.error('Fehler beim Laden des Subscription-Status:', e); }
+            };
+
             window.syncToCloud = async (e) => { 
                 if(!navigator.onLine) { let q = JSON.parse(localStorage.getItem('beastmode_v2_offline_queue') || '[]'); q.push(e); localStorage.setItem('beastmode_v2_offline_queue', JSON.stringify(q)); return; }
                 if(!auth.currentUser) return; 
