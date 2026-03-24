@@ -5875,7 +5875,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y", authDomain: "beastmode-17f0d.firebaseapp.com", projectId: "beastmode-17f0d", storageBucket: "beastmode-17f0d.firebasestorage.app", messagingSenderId: "276195983881", appId: "1:276195983881:web:99d55a5656e6ed7daa2ed8" };
@@ -6017,9 +6017,10 @@
                 });
             }
 
-            const initAuth = async () => { try { await signInAnonymously(auth); } catch(e) { console.error("Firebase Auth Error", e); } }; initAuth();
+            // Auth Persistence setzen BEVOR irgendein Login passiert
+            await setPersistence(auth, browserLocalPersistence);
 
-            onAuthStateChanged(auth, user => {
+            onAuthStateChanged(auth, async (user) => {
                 if(user) {
                     window._chAuthUid = user.uid;
                     window._chAuthName = user.email ? user.email.split('@')[0] : 'Athlet';
@@ -6030,6 +6031,9 @@
 
                     // Subscription-Status aus Firestore laden
                     window._loadSubscriptionStatus();
+                } else {
+                    // Kein bestehender User → erst jetzt anonym einloggen
+                    try { await signInAnonymously(auth); } catch(e) { console.error("Firebase Auth Error", e); }
                 }
             });
 
