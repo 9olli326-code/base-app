@@ -522,6 +522,7 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
             }
 
             localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(all));
+            localStorage.setItem('base_builder_used', '1');
 
             // Builder schließen
             const builderSection = document.getElementById('builderSection');
@@ -548,6 +549,7 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
                 all[window.currentCategory] = window.categorySchemas[window.currentCategory];
             }
             localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(all));
+            localStorage.setItem('base_builder_used', '1');
 
             const builderSection = document.getElementById('builderSection');
             if(builderSection) { builderSection.classList.add('hidden'); builderSection.classList.remove('block'); }
