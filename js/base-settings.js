@@ -7,16 +7,18 @@
 window.applyModules = function() {
     const modules = window.userProfile.modules || { strength: true, cardio: true, recovery: false, main: false };
     const widgets = window.userProfile.widgets || { readiness: false, ptMode: false };
-    // Core Categories (außer main — das wird von renderDynamicSportTabs gesteuert)
+    // Alle Core-Kategorien steuern (Kraft, Ausdauer, Regeneration)
     ['strength','cardio','recovery'].forEach(cat => {
         const btn = document.getElementById('btnCat_'+cat);
         if(btn) btn.style.display = modules[cat] !== false ? '' : 'none';
     });
-    // Mein Sport Button + dynamische Sport-Tabs (prüft modules.main intern)
-    window.renderDynamicSportTabs();
-    // Falls aktuelle Kategorie deaktiviert wurde, zur nächsten aktiven wechseln
+    // Mein Sport Tab + dynamische Sport-Tabs + Plus-Button (prüft modules.main intern)
+    if(typeof window.renderDynamicSportTabs === 'function') window.renderDynamicSportTabs();
+    // Falls aktuelle Kategorie deaktiviert wurde, zur ersten aktiven wechseln
+    const coreCategories = ['strength','cardio','recovery','main'];
     const curCat = window.currentCategory;
-    if(modules[curCat] === false || (!['strength','cardio','recovery','main'].includes(curCat) && modules.main === false)) {
+    const curDisabled = coreCategories.includes(curCat) ? modules[curCat] === false : modules.main === false;
+    if(curDisabled) {
         const fallback = ['strength','cardio','recovery','main'].find(c => modules[c] !== false);
         if(fallback) window.currentCategory = fallback;
     }

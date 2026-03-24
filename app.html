@@ -625,7 +625,7 @@
                 <!-- Dynamische Sport-Tabs (KI-erstellte & ausgewählte Sports) -->
                 <div id="dynamicSportTabs" class="flex gap-2 flex-shrink-0"></div>
                 <!-- + Button -->
-                <button aria-label="Hinzufügen" onclick="window.openSportPicker()" class="cat-pill flex-shrink-0 cursor-pointer border-dashed hover:border-primary/50 hover:text-primary transition-all" title="Sport hinzufügen">
+                <button id="btnAddSport" aria-label="Hinzufügen" onclick="window.openSportPicker()" class="cat-pill flex-shrink-0 cursor-pointer border-dashed hover:border-primary/50 hover:text-primary transition-all" title="Sport hinzufügen">
                     <i data-lucide="plus" class="w-3.5 h-3.5 pointer-events-none"></i>
                 </button>
             </div>
@@ -5716,34 +5716,29 @@
             const modules = window.userProfile.modules || { strength: true, cardio: true, recovery: false, main: false };
             const mainEnabled = modules.main !== false;
             const coreCategories = ['strength', 'cardio', 'recovery', 'main'];
+
             // Non-core Sports als eigene Tabs (nur wenn Mein Sport aktiv)
             const sportTabs = mainEnabled ? window.activeSports.filter(id => !coreCategories.includes(id)) : [];
 
-            // "Mein Sport" Tab: verstecken wenn Modul deaktiviert ODER eigene Sports vorhanden
+            // "Mein Sport" Tab: sichtbar wenn Modul aktiv UND keine eigenen Sports
             const mainBtn = document.getElementById('btnCat_main');
-            if(mainBtn) {
-                mainBtn.style.display = mainEnabled && sportTabs.length === 0 ? '' : 'none';
-            }
+            if(mainBtn) mainBtn.style.display = mainEnabled && sportTabs.length === 0 ? '' : 'none';
 
-            // Dynamische Sport-Tabs leeren wenn Modul deaktiviert
+            // + Button: nur sichtbar wenn Mein Sport aktiv
+            const addBtn = document.getElementById('btnAddSport');
+            if(addBtn) addBtn.style.display = mainEnabled ? '' : 'none';
+
+            // Dynamische Sport-Tabs
             if(!mainEnabled) {
                 container.innerHTML = '';
-                // Zur nächsten aktiven Kategorie wechseln falls aktuell auf main/custom
-                const curCat = window.currentCategory;
-                if(curCat === 'main' || !coreCategories.includes(curCat)) {
-                    const fallback = ['strength','cardio','recovery'].find(c => modules[c] !== false);
-                    if(fallback && typeof window.switchCategory === 'function') window.switchCategory(fallback);
-                }
                 if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
                 return;
             }
 
-            // Eigene Sport-Tabs rendern
             container.innerHTML = sportTabs.map(id => {
                 const sport = window.SPORT_LIBRARY.find(s => s.id === id);
                 if(!sport) return '';
                 const isActive = window.currentCategory === id;
-                // CAT_UI Eintrag sicherstellen (für Form-Icons/Farben)
                 if(!window.CAT_UI[id]) {
                     window.CAT_UI[id] = { name: sport.name, icon: sport.icon, color: sport.color || 'text-cyan-400', border: sport.border || 'border-cyan-400/30', bg: sport.bg || 'bg-cyan-400/20' };
                 }
