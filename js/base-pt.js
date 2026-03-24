@@ -156,7 +156,7 @@ listEl.innerHTML = window.clients.map(c => {
     const initials = window._escapeHtml(c.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2));
     const safeName = window._escapeHtml(c.name);
     const profile = window.getClientProfile(c.id);
-    const goalTag = profile.goal ? `<span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[8px] font-bold uppercase" style="background:rgba(99,102,241,0.1);color:rgba(99,102,241,0.7)">${window._escapeHtml(profile.goal)}</span>` : '';
+    const goalTag = profile.goal ? `<span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase" style="background:rgba(99,102,241,0.1);color:rgba(99,102,241,0.7)">${window._escapeHtml(profile.goal)}</span>` : '';
 
     return `<div role="button" tabindex="0" aria-label="${window._escapeHtml(c.name)} Details öffnen" onclick="window.openClientDetail('${c.id}')"
         class="p-4 rounded-2xl cursor-pointer transition-all hover:opacity-90 active:scale-[0.98] pointer-events-auto"
@@ -165,14 +165,14 @@ listEl.innerHTML = window.clients.map(c => {
             <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0 text-white" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">${initials}</div>
             <div class="flex-1 min-w-0">
                 <p class="font-black text-white text-sm truncate">${safeName}</p>
-                <p class="text-[9px] font-bold uppercase tracking-widest truncate" style="color:var(--text-muted)">${lastStr}</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest truncate" style="color:var(--text-muted)">${lastStr}</p>
             </div>
         </div>
         ${goalTag}
         <div class="flex items-center justify-between mt-2">
             <div class="flex items-center gap-1.5">
                 <div class="w-1.5 h-1.5 rounded-full" style="background:${weekCount > 0 ? '#10b981' : '#52525b'}"></div>
-                <p class="text-[9px] font-bold" style="color:var(--text-muted)">${weekCount}× diese Woche</p>
+                <p class="text-[10px] font-bold" style="color:var(--text-muted)">${weekCount}× diese Woche</p>
             </div>
             <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 pointer-events-none"></i>
         </div>
@@ -315,9 +315,9 @@ const topOrm = Object.entries(orms).sort((a,b)=>b[1]-a[1])[0];
 
 const statsEl = document.getElementById('clientDetailStats');
 if(statsEl) statsEl.innerHTML = `
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Gesamt</p><p class="text-2xl font-black text-white">${stats.total}</p><p class="text-[9px] text-zinc-500">Workouts</p></div>
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Diese Woche</p><p class="text-2xl font-black text-white">${stats.week}</p><p class="text-[9px] text-zinc-500">Sessions</p></div>
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Top 1RM</p><p class="text-xl font-black text-white">${topOrm ? topOrm[1]+'kg' : '—'}</p><p class="text-[9px] text-zinc-500 truncate">${topOrm ? window._escapeHtml(topOrm[0]) : 'Keine Daten'}</p></div>`;
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Gesamt</p><p class="text-2xl font-black text-white">${stats.total}</p><p class="text-[10px] text-zinc-500">Workouts</p></div>
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Diese Woche</p><p class="text-2xl font-black text-white">${stats.week}</p><p class="text-[10px] text-zinc-500">Sessions</p></div>
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Top 1RM</p><p class="text-xl font-black text-white">${topOrm ? topOrm[1]+'kg' : '—'}</p><p class="text-[10px] text-zinc-500 truncate">${topOrm ? window._escapeHtml(topOrm[0]) : 'Keine Daten'}</p></div>`;
 if(subEl) subEl.textContent = `${stats.total} Workouts · ${stats.week} diese Woche`;
 
 // Profile tab
@@ -623,7 +623,7 @@ el.innerHTML = window.clients.map(c => {
     const active = c.id === _sessionSelectedClient;
     const style = active ? 'background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.4);color:#6366f1' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
     return `<button onclick="window._selectSessionClient('${c.id}')" class="flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest cursor-pointer transition-all pointer-events-auto" style="${style}">
-        <div class="w-5 h-5 rounded-full flex items-center justify-center text-white font-black text-[9px]" style="background:#6366f1">${c.name.charAt(0).toUpperCase()}</div>
+        <div class="w-5 h-5 rounded-full flex items-center justify-center text-white font-black text-[10px]" style="background:#6366f1">${c.name.charAt(0).toUpperCase()}</div>
         ${window._escapeHtml(c.name)}
     </button>`;
 }).join('');
@@ -820,12 +820,12 @@ if(listEl) listEl.innerHTML = sorted.map(s => {
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:${t.pill}"><i data-lucide="${t.icon}" class="w-4 h-4 pointer-events-none" style="color:${t.color}"></i></div>
                 <div>
                     <p class="text-white font-black text-sm">${clientName}</p>
-                    <p class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">${s.time} · ${s.duration} min</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">${s.time} · ${s.duration} min</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <span class="px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest" style="background:${t.pill};color:${t.pillText}">${t.label}</span>
-                <button onclick="window.startQuickTrack('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all active:scale-95 flex items-center gap-1" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4">
+                <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest" style="background:${t.pill};color:${t.pillText}">${t.label}</span>
+                <button onclick="window.startQuickTrack('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all active:scale-95 flex items-center gap-1" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4">
                     <i data-lucide="play" class="w-3 h-3 pointer-events-none"></i> Start
                 </button>
             </div>
@@ -865,7 +865,7 @@ el.innerHTML = monthNames.map((name, mi) => {
     const border = sessionCount > 0 ? `rgba(99,102,241,${0.15 + intensity * 0.3})` : 'var(--border-hex)';
     return `<button onclick="window._goToMonth(${mi})" class="p-3 rounded-xl text-center cursor-pointer pointer-events-auto transition-all hover:opacity-80" style="background:${bg};border:1px solid ${border}">
         <p class="text-xs font-black text-white">${name}</p>
-        <p class="text-[9px] font-bold" style="color:${sessionCount > 0 ? '#6366f1' : 'var(--text-muted)'}">${sessionCount} Tage</p>
+        <p class="text-[10px] font-bold" style="color:${sessionCount > 0 ? '#6366f1' : 'var(--text-muted)'}">${sessionCount} Tage</p>
     </button>`;
 }).join('');
 };
@@ -969,7 +969,7 @@ if(pctText) pctText.textContent = `${doneCount}/${total}`;
 listEl.innerHTML = _qtExercises.map((ex, idx) => {
     const setRows = ex.sets.map((s, si) => `
         <div class="flex items-center gap-2 mt-1.5">
-            <span class="text-[9px] font-bold w-5 text-center" style="color:var(--text-muted)">S${si+1}</span>
+            <span class="text-[10px] font-bold w-5 text-center" style="color:var(--text-muted)">S${si+1}</span>
             <input type="number" placeholder="Wdh" value="${s.reps||''}" onchange="window._qtUpdateSet(${idx},${si},'reps',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">
             <span class="text-zinc-600 text-xs">×</span>
             <input type="number" placeholder="kg" value="${s.weight||''}" onchange="window._qtUpdateSet(${idx},${si},'weight',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">
@@ -990,7 +990,7 @@ listEl.innerHTML = _qtExercises.map((ex, idx) => {
         ${!ex.done ? `
             ${setRows}
             <div class="flex items-center gap-2 mt-2">
-                <button onclick="window._qtAddSet(${idx})" class="flex items-center gap-1 px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4">
+                <button onclick="window._qtAddSet(${idx})" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4">
                     <i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set
                 </button>
                 <input type="text" placeholder="Notiz..." value="${window._escapeHtml(ex.notes||'')}" onchange="window._qtNoteEx(${idx},this.value)" class="flex-1 px-2 py-1 bg-zinc-900/50 border border-zinc-800/50 rounded text-zinc-400 text-[10px] outline-none pointer-events-auto cursor-text">

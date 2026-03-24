@@ -699,7 +699,7 @@ window.renderTrainingPlan = function(plan) {
         <div class="bg-zinc-950/60 border ${weekColors[wi % weekColors.length]} rounded-2xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-white font-black text-sm uppercase tracking-tight">Woche ${week.week}</p>
-                <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">${week.focus || ''}</span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">${week.focus || ''}</span>
             </div>
             <div class="space-y-2">
                 ${(week.sessions || []).map(session => `
@@ -716,7 +716,7 @@ window.renderTrainingPlan = function(plan) {
                                     </div>
                                     <div class="text-right flex-shrink-0">
                                         <p class="text-primary text-[11px] font-black">${ex.sets}×${ex.reps}</p>
-                                        <p class="text-zinc-500 text-[9px] font-bold">${ex.intensity || ''}</p>
+                                        <p class="text-zinc-500 text-[10px] font-bold">${ex.intensity || ''}</p>
                                     </div>
                                 </div>`).join('')}
                         </div>
