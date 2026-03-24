@@ -169,6 +169,12 @@
         @keyframes pulse-timer { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; color: var(--primary-hex); } } .timer-active { animation: pulse-timer 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,0.5); } 50% { box-shadow: 0 0 0 6px rgba(168,85,247,0); } }
         .mic-active { animation: mic-pulse 1s ease-in-out infinite; background: rgba(168,85,247,0.25) !important; border-color: rgba(168,85,247,0.6) !important; color: #c084fc !important; }
+        @keyframes pr-glow { 0%, 100% { box-shadow: 0 0 40px rgba(16,185,129,0.3), 0 0 80px rgba(16,185,129,0.1); } 50% { box-shadow: 0 0 60px rgba(16,185,129,0.5), 0 0 120px rgba(16,185,129,0.2); } }
+        @keyframes pr-scale-in { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes pr-fade-out { 0% { opacity: 1; } 100% { opacity: 0; transform: scale(0.95); } }
+        .pr-celebration { animation: pr-scale-in 0.4s ease-out forwards; }
+        .pr-celebration-out { animation: pr-fade-out 0.3s ease-in forwards; }
+        .pr-glow-pulse { animation: pr-glow 1s ease-in-out infinite; }
         
         /* Modal Scroll Fix */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -1897,21 +1903,16 @@
         </div>
     </div>
 
-    <!-- ✅ PR MODAL (war komplett fehlend) -->
-    <div id="prModal" class="fixed inset-0 bg-black/95 z-[800] hidden items-center justify-center backdrop-blur-xl px-4">
-        <div id="prModalCard" class="card-bg p-10 max-w-sm w-full relative text-center border-emerald-500/50 shadow-[0_0_80px_rgba(16,185,129,0.2)] animate-in zoom-in duration-500">
-            <button aria-label="Schließen" onclick="window.toggleModal('prModal')" class="absolute top-5 right-5 text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
-            <div id="prIconContainer" class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 mx-auto mb-6 border border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-                <i id="prIcon" data-lucide="medal" class="w-12 h-12"></i>
+    <!-- PR Celebration Fullscreen Overlay -->
+    <div id="prCelebration" class="fixed inset-0 bg-black/95 z-[900] hidden items-center justify-center backdrop-blur-xl" style="pointer-events:none">
+        <div id="prCelebrationCard" class="text-center pr-celebration">
+            <div class="w-28 h-28 bg-emerald-500/15 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-emerald-500/40 pr-glow-pulse">
+                <svg class="w-14 h-14 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </div>
-            <h1 id="prModalTitle" class="text-5xl font-black text-white uppercase italic mb-4">NEUER PR!</h1>
-            <div id="prInnerBg" class="inner-bg p-5 rounded-xl mb-6 border border-emerald-500/20 shadow-inner">
-                <p id="prExerciseText" class="text-emerald-400 font-bold text-lg mb-2 uppercase tracking-widest">Übung</p>
-                <p id="prSubLabelText" class="text-zinc-400 text-xs uppercase tracking-widest mb-3">Neues Max Gewicht</p>
-                <p id="prWeightText" class="text-5xl font-black text-white">0<span class="text-2xl text-zinc-500 ml-1">kg</span></p>
-                <p id="prIncreaseText" class="text-xs text-emerald-400 font-black mt-3 flex items-center justify-center gap-1.5"><i data-lucide="trending-up" class="w-4 h-4"></i> +0kg</p>
-            </div>
-            <button onclick="window.toggleModal('prModal')" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto">Weiter 💪</button>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-emerald-400 mb-2" id="prCelebSub">Neues Max Gewicht</p>
+            <p class="text-6xl font-black text-white mb-2" id="prCelebValue">0<span class="text-3xl text-zinc-500 ml-1">kg</span></p>
+            <p class="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-1" id="prCelebExercise">Übung</p>
+            <p class="text-xs text-emerald-400 font-black mt-3" id="prCelebDiff">+0kg</p>
         </div>
     </div>
 
@@ -2290,20 +2291,21 @@
                     window.workouts.unshift(entry); 
                     if(isPR) { 
                         // ✅ FIX: PR-Modal nur anzeigen wenn DOM-Elemente existieren
-                        setTimeout(() => { 
-                            const prModal = document.getElementById('prModal');
-                            if(prModal) {
+                        setTimeout(() => {
+                            const prOverlay = document.getElementById('prCelebration');
+                            if(prOverlay) {
                                 const setText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-                                setText('prExerciseText', entry.exercise);
-                                setText('prSubLabelText', prSubText);
-                                const pwEl = document.getElementById('prWeightText'); if(pwEl) pwEl.innerHTML = `${prValue}<span class="text-2xl text-zinc-500 ml-1">${prUnit}</span>`;
-                                const incEl = document.getElementById('prIncreaseText'); if(incEl) incEl.innerHTML = `<i data-lucide="${prDiffText.startsWith('-') ? 'trending-down' : 'trending-up'}" class="w-4 h-4"></i> ${prDiffText}`;
-                                if(window.lucide) lucide.createIcons();
-                                window.toggleModal('prModal');
+                                setText('prCelebExercise', entry.exercise);
+                                setText('prCelebSub', prSubText);
+                                setText('prCelebDiff', prDiffText);
+                                const valEl = document.getElementById('prCelebValue'); if(valEl) valEl.innerHTML = `${prValue}<span class="text-3xl text-zinc-500 ml-1">${prUnit}</span>`;
+                                const card = document.getElementById('prCelebrationCard');
+                                if(card) { card.classList.remove('pr-celebration-out'); card.classList.add('pr-celebration'); }
+                                prOverlay.classList.remove('hidden'); prOverlay.classList.add('flex');
                                 if(typeof window.playBeep === 'function') { window.playBeep(); setTimeout(window.playBeep, 200); }
+                                setTimeout(() => { if(card) card.classList.add('pr-celebration-out'); setTimeout(() => { prOverlay.classList.add('hidden'); prOverlay.classList.remove('flex'); }, 300); }, 2000);
                             } else {
-                                // Kein PR-Modal im DOM → einfach Toast zeigen
-                                window.showToast(`🏆 Neuer PR: ${prValue}${prUnit} bei ${entry.exercise}!`);
+                                window.showToast(`Neuer PR: ${prValue}${prUnit} bei ${entry.exercise}!`);
                             }
                         }, 500); 
                     } else { 
