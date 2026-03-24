@@ -199,6 +199,23 @@
             }
         }
         applyTheme();
+
+        const _themePresets = {
+            cyan: { primary:'#06b6d4', secondary:'#6366f1', bg:'#07070a', textMain:'#f4f4f5', textMuted:'#82828c', fontHeading:'Barlow Condensed', fontBody:'DM Sans', radius:'18px' },
+            indigo: { primary:'#818cf8', secondary:'#a78bfa', bg:'#0a0a14', textMain:'#e8e8f0', textMuted:'#7878a0', fontHeading:'Orbitron', fontBody:'Inter', radius:'16px' },
+            emerald: { primary:'#10b981', secondary:'#2dd4bf', bg:'#070a08', textMain:'#ecfdf5', textMuted:'#6b8f7b', fontHeading:'Rajdhani', fontBody:'Outfit', radius:'20px' },
+            amber: { primary:'#f59e0b', secondary:'#fb923c', bg:'#0d0a06', textMain:'#fef3c7', textMuted:'#a08560', fontHeading:'Bebas Neue', fontBody:'Nunito Sans', radius:'14px' },
+            rose: { primary:'#f43f5e', secondary:'#fb7185', bg:'#0a0708', textMain:'#fff1f2', textMuted:'#9a7880', fontHeading:'Montserrat', fontBody:'Plus Jakarta Sans', radius:'22px' }
+        };
+        window.applyThemePreset = function(name) {
+            const preset = _themePresets[name]; if(!preset) return;
+            localStorage.setItem('beastmode_v2_theme', JSON.stringify(preset));
+            location.reload();
+        };
+        window.resetThemeToDefault = function() {
+            localStorage.removeItem('beastmode_v2_theme');
+            location.reload();
+        };
     </script>
 
     <!-- Resource hints -->
@@ -1243,10 +1260,47 @@
         <div class="card-bg p-8 md:p-10 max-w-md w-full relative">
             <button aria-label="Schließen" onclick="window.toggleModal('designModal')" class="absolute top-6 right-6 text-zinc-600 cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-6 h-6 pointer-events-none"></i></button>
             <div class="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto mb-8 border border-primary/20"><i data-lucide="hammer" class="w-8 h-8"></i></div>
-            <h3 class="text-2xl font-black text-white mb-6 uppercase tracking-tighter" data-i18n="bAi">App Builder KI</h3>
-            <textarea id="designPrompt" aria-label="Design Beschreibung" rows="5" class="w-full inner-bg p-5 text-white font-bold mb-8 outline-none border-none shadow-inner cursor-text pointer-events-auto relative z-50" data-i18n-placeholder="bAiP" placeholder="Bsp: 'Hacker Style, Schrift grün, Hintergrund schwarz, alles eckig'"></textarea>
-            <button id="btnRunDesignAi" onclick="window.runDesignAI()" class="w-full bg-primary text-black font-black py-5 dynamic-radius uppercase shadow-xl hover:opacity-90 transition-all tracking-tighter text-lg cursor-pointer pointer-events-auto">
-                <i data-lucide="sparkles" class="w-6 h-6 inline-block mr-2 pointer-events-none"></i> <span data-i18n="bAiG" class="pointer-events-none">UMBAUEN</span>
+            <h3 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter" data-i18n="bAi">App Builder KI</h3>
+
+            <!-- Theme Presets -->
+            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 text-left">Theme Presets</p>
+            <div class="grid grid-cols-3 gap-2 mb-4" id="themePresetGrid">
+                <button onclick="window.applyThemePreset('cyan')" class="group relative p-3 rounded-xl border border-cyan-500/30 bg-[#07070a] hover:border-cyan-500/60 transition-all cursor-pointer pointer-events-auto">
+                    <div class="flex items-center gap-2 mb-1.5"><div class="w-4 h-4 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]"></div><div class="w-3 h-3 rounded-full bg-indigo-500"></div></div>
+                    <p class="text-[10px] font-black text-white uppercase tracking-widest">Cyan Dark</p>
+                    <p class="text-[9px] text-zinc-600 font-bold">Standard</p>
+                </button>
+                <button onclick="window.applyThemePreset('indigo')" class="group relative p-3 rounded-xl border border-indigo-500/30 bg-[#0a0a14] hover:border-indigo-500/60 transition-all cursor-pointer pointer-events-auto">
+                    <div class="flex items-center gap-2 mb-1.5"><div class="w-4 h-4 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.4)]"></div><div class="w-3 h-3 rounded-full bg-violet-400"></div></div>
+                    <p class="text-[10px] font-black text-white uppercase tracking-widest">Indigo Night</p>
+                    <p class="text-[9px] text-zinc-600 font-bold">Tief & fokussiert</p>
+                </button>
+                <button onclick="window.applyThemePreset('emerald')" class="group relative p-3 rounded-xl border border-emerald-500/30 bg-[#070a08] hover:border-emerald-500/60 transition-all cursor-pointer pointer-events-auto">
+                    <div class="flex items-center gap-2 mb-1.5"><div class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div><div class="w-3 h-3 rounded-full bg-teal-400"></div></div>
+                    <p class="text-[10px] font-black text-white uppercase tracking-widest">Emerald Forest</p>
+                    <p class="text-[9px] text-zinc-600 font-bold">Natur & Ruhe</p>
+                </button>
+                <button onclick="window.applyThemePreset('amber')" class="group relative p-3 rounded-xl border border-amber-500/30 bg-[#0d0a06] hover:border-amber-500/60 transition-all cursor-pointer pointer-events-auto">
+                    <div class="flex items-center gap-2 mb-1.5"><div class="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"></div><div class="w-3 h-3 rounded-full bg-orange-400"></div></div>
+                    <p class="text-[10px] font-black text-white uppercase tracking-widest">Amber Warm</p>
+                    <p class="text-[9px] text-zinc-600 font-bold">Warm & motivierend</p>
+                </button>
+                <button onclick="window.applyThemePreset('rose')" class="group relative p-3 rounded-xl border border-rose-500/30 bg-[#0a0708] hover:border-rose-500/60 transition-all cursor-pointer pointer-events-auto">
+                    <div class="flex items-center gap-2 mb-1.5"><div class="w-4 h-4 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></div><div class="w-3 h-3 rounded-full bg-pink-300"></div></div>
+                    <p class="text-[10px] font-black text-white uppercase tracking-widest">Rose Minimal</p>
+                    <p class="text-[9px] text-zinc-600 font-bold">Clean & elegant</p>
+                </button>
+                <button onclick="window.resetThemeToDefault()" class="group relative p-3 rounded-xl border border-zinc-700 bg-zinc-900/50 hover:border-zinc-500 transition-all cursor-pointer pointer-events-auto flex flex-col items-center justify-center">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors pointer-events-none mb-1"></i>
+                    <p class="text-[10px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest transition-colors">Reset</p>
+                </button>
+            </div>
+
+            <!-- KI Freitext -->
+            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 text-left">Eigenes Design per KI</p>
+            <textarea id="designPrompt" aria-label="Design Beschreibung" rows="3" class="w-full inner-bg p-5 text-white font-bold mb-4 outline-none border-none shadow-inner cursor-text pointer-events-auto relative z-50 rounded-xl text-sm" data-i18n-placeholder="bAiP" placeholder="Bsp: 'Hacker Style, Schrift grün, Hintergrund schwarz, alles eckig'"></textarea>
+            <button id="btnRunDesignAi" onclick="window.runDesignAI()" class="w-full bg-primary text-black font-black py-4 dynamic-radius uppercase shadow-xl hover:opacity-90 transition-all tracking-tighter text-sm cursor-pointer pointer-events-auto">
+                <i data-lucide="sparkles" class="w-5 h-5 inline-block mr-2 pointer-events-none"></i> <span data-i18n="bAiG" class="pointer-events-none">UMBAUEN</span>
             </button>
         </div>
     </div>
