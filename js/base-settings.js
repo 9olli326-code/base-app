@@ -12,8 +12,14 @@ window.applyModules = function() {
         const btn = document.getElementById('btnCat_'+cat);
         if(btn) btn.style.display = modules[cat] !== false ? '' : 'none';
     });
-    // Mein Sport + eigene Sports über renderDynamicSportTabs steuern
+    // Mein Sport Button + dynamische Sport-Tabs (prüft modules.main intern)
     window.renderDynamicSportTabs();
+    // Falls aktuelle Kategorie deaktiviert wurde, zur nächsten aktiven wechseln
+    const curCat = window.currentCategory;
+    if(modules[curCat] === false || (!['strength','cardio','recovery','main'].includes(curCat) && modules.main === false)) {
+        const fallback = ['strength','cardio','recovery','main'].find(c => modules[c] !== false);
+        if(fallback) window.currentCategory = fallback;
+    }
     const readWidget = document.getElementById('readinessWidget');
     if(readWidget) {
         if(widgets.readiness) { readWidget.classList.remove('hidden'); readWidget.classList.add('flex'); }

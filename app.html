@@ -5713,17 +5713,32 @@
         window.renderDynamicSportTabs = function() {
             const container = document.getElementById('dynamicSportTabs');
             if(!container) return;
+            const modules = window.userProfile.modules || { strength: true, cardio: true, recovery: false, main: false };
+            const mainEnabled = modules.main !== false;
             const coreCategories = ['strength', 'cardio', 'recovery', 'main'];
-            // Non-core Sports als eigene Tabs
-            const sportTabs = window.activeSports.filter(id => !coreCategories.includes(id));
+            // Non-core Sports als eigene Tabs (nur wenn Mein Sport aktiv)
+            const sportTabs = mainEnabled ? window.activeSports.filter(id => !coreCategories.includes(id)) : [];
 
-            // "Mein Sport" Tab: nur zeigen wenn KEINE eigenen Sports vorhanden
+            // "Mein Sport" Tab: verstecken wenn Modul deaktiviert ODER eigene Sports vorhanden
             const mainBtn = document.getElementById('btnCat_main');
             if(mainBtn) {
-                mainBtn.style.display = sportTabs.length === 0 ? '' : 'none';
+                mainBtn.style.display = mainEnabled && sportTabs.length === 0 ? '' : 'none';
             }
 
-            // Eigene Sport-Tabs immer rendern
+            // Dynamische Sport-Tabs leeren wenn Modul deaktiviert
+            if(!mainEnabled) {
+                container.innerHTML = '';
+                // Zur nächsten aktiven Kategorie wechseln falls aktuell auf main/custom
+                const curCat = window.currentCategory;
+                if(curCat === 'main' || !coreCategories.includes(curCat)) {
+                    const fallback = ['strength','cardio','recovery'].find(c => modules[c] !== false);
+                    if(fallback && typeof window.switchCategory === 'function') window.switchCategory(fallback);
+                }
+                if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                return;
+            }
+
+            // Eigene Sport-Tabs rendern
             container.innerHTML = sportTabs.map(id => {
                 const sport = window.SPORT_LIBRARY.find(s => s.id === id);
                 if(!sport) return '';
