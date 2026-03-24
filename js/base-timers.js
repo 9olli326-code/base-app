@@ -106,8 +106,27 @@ function _updateWorkoutDisplay() {
     window.workoutTimerSeconds = total;
     const m = String(Math.floor(total / 60)).padStart(2, '0');
     const s = String(total % 60).padStart(2, '0');
+    const timeStr = m + ':' + s;
     const display = document.getElementById('workoutTimerDisplay');
-    if (display) display.textContent = m + ':' + s;
+    if (display) display.textContent = timeStr;
+    const fabText = document.getElementById('fabTimerText');
+    if (fabText) fabText.textContent = timeStr;
+}
+function _showFloatingTimer() {
+    const fab = document.getElementById('floatingTimerFab');
+    const headerBtn = document.getElementById('btnStartTimerHeader');
+    if (fab) { fab.classList.remove('hidden'); }
+    if (headerBtn) headerBtn.style.display = 'none';
+}
+function _hideFloatingTimer() {
+    const fab = document.getElementById('floatingTimerFab');
+    const headerBtn = document.getElementById('btnStartTimerHeader');
+    const expanded = document.getElementById('floatingTimerExpanded');
+    const collapsed = document.getElementById('floatingTimerCollapsed');
+    if (fab) fab.classList.add('hidden');
+    if (headerBtn) headerBtn.style.display = '';
+    if (expanded) expanded.classList.add('hidden');
+    if (collapsed) collapsed.classList.remove('hidden');
 }
 window.toggleWorkoutTimer = function() {
     if (window.isWorkoutTimerRunning) {
@@ -116,11 +135,16 @@ window.toggleWorkoutTimer = function() {
         clearInterval(window.workoutTimerInterval); window.isWorkoutTimerRunning = false;
         const icon = document.getElementById('workoutTimerIcon');
         if (icon) { icon.setAttribute('data-lucide', 'play'); if (window.lucide) lucide.createIcons(); }
+        const fabIcon = document.getElementById('btnWorkoutTimer');
+        if (fabIcon) { const i = fabIcon.querySelector('[data-lucide]'); if(i) { i.setAttribute('data-lucide', 'play'); if(window.lucide) lucide.createIcons(); } }
     } else {
         _workoutStartedAt = Date.now();
         window.isWorkoutTimerRunning = true;
         const icon = document.getElementById('workoutTimerIcon');
         if (icon) { icon.setAttribute('data-lucide', 'pause'); if (window.lucide) lucide.createIcons(); }
+        const fabIcon = document.getElementById('btnWorkoutTimer');
+        if (fabIcon) { const i = fabIcon.querySelector('[data-lucide]'); if(i) { i.setAttribute('data-lucide', 'pause'); if(window.lucide) lucide.createIcons(); } }
+        _showFloatingTimer();
         window.workoutTimerInterval = setInterval(_updateWorkoutDisplay, 1000);
         _updateWorkoutDisplay();
     }
@@ -132,6 +156,7 @@ window.resetWorkoutTimer = function() {
     const icon = document.getElementById('workoutTimerIcon');
     if (display) display.textContent = '00:00';
     if (icon) { icon.setAttribute('data-lucide', 'play'); if (window.lucide) lucide.createIcons(); }
+    _hideFloatingTimer();
 };
 
 // --- REST TIMER (Timestamp-basiert — Sperrbildschirm-fest) ---

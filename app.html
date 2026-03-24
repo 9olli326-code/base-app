@@ -309,6 +309,24 @@
         </div>
     </nav>
 
+    <!-- Floating Workout Timer FAB -->
+    <div id="floatingTimerFab" class="fixed z-[150] hidden" style="bottom:calc(70px + env(safe-area-inset-bottom,0px));right:16px">
+        <div id="floatingTimerCollapsed" onclick="document.getElementById('floatingTimerExpanded').classList.toggle('hidden');document.getElementById('floatingTimerCollapsed').classList.toggle('hidden')" class="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-2xl transition-all" style="background:var(--primary-hex);box-shadow:0 0 20px color-mix(in srgb, var(--primary-hex), transparent 50%)">
+            <span id="fabTimerText" class="text-black font-black text-xs" style="font-family:'DM Sans',sans-serif">00:00</span>
+        </div>
+        <div id="floatingTimerExpanded" class="hidden rounded-2xl p-4 shadow-2xl w-48" style="background:var(--surface-hex);border:1px solid var(--border-hex);box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] font-black uppercase tracking-widest" style="color:var(--primary-hex)">Workout Timer</p>
+                <button onclick="document.getElementById('floatingTimerExpanded').classList.add('hidden');document.getElementById('floatingTimerCollapsed').classList.remove('hidden')" class="text-zinc-600 hover:text-white cursor-pointer transition-colors"><i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+            </div>
+            <p id="workoutTimerDisplay" class="text-3xl font-black text-center mb-3" style="color:var(--text-main);font-family:'Barlow Condensed',sans-serif">00:00</p>
+            <div class="flex items-center justify-center gap-2">
+                <button id="btnWorkoutTimer" aria-label="Workout Timer starten/stoppen" onclick="window.toggleWorkoutTimer()" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all" style="background:var(--primary-hex);color:#000"><i data-lucide="pause" class="w-5 h-5 fill-current pointer-events-none"></i></button>
+                <button aria-label="Timer zurücksetzen" onclick="window.resetWorkoutTimer()" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all text-zinc-600 hover:text-rose-400" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><i data-lucide="square" class="w-4 h-4 fill-current pointer-events-none"></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- PT BUSINESS NAV -->
     <nav id="ptBottomNav" class="fixed bottom-0 left-0 right-0 z-[200] shadow-2xl hidden transition-all duration-300" style="background:rgba(7,7,10,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(99,102,241,0.2);">
         <div class="max-w-4xl mx-auto flex px-2" style="padding-bottom:env(safe-area-inset-bottom,0px)">
@@ -365,12 +383,8 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Timer kompakter im Header -->
-                <div class="flex items-center rounded-2xl overflow-hidden h-10" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);box-shadow:0 4px 12px rgba(0,0,0,0.3)">
-                    <button id="btnWorkoutTimer" aria-label="Workout Timer starten/stoppen" onclick="window.toggleWorkoutTimer()" class="px-3 h-full transition-colors flex items-center justify-center cursor-pointer interactive-z hover:opacity-80" style="color:var(--primary-hex)"><i data-lucide="play" id="workoutTimerIcon" class="w-4 h-4 fill-current pointer-events-none"></i></button>
-                    <span id="workoutTimerDisplay" class="px-1 font-bold text-sm min-w-[52px] text-center" style="color:var(--text-main);font-family:'DM Sans',sans-serif;letter-spacing:0.05em">00:00</span>
-                    <button aria-label="Timer zurücksetzen" onclick="window.resetWorkoutTimer()" class="px-3 h-full text-zinc-600 hover:text-rose-400 transition-colors flex items-center justify-center cursor-pointer interactive-z" style="border-left:1px solid var(--border-hex)"><i data-lucide="square" class="w-3 h-3 fill-current pointer-events-none"></i></button>
-                </div>
+                <!-- Timer Start Button (startet Timer und zeigt FAB) -->
+                <button id="btnStartTimerHeader" aria-label="Workout Timer starten" onclick="window.toggleWorkoutTimer()" class="w-10 h-10 rounded-2xl flex items-center justify-center cursor-pointer interactive-z hover:opacity-80 transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--primary-hex)"><i data-lucide="play" id="workoutTimerIcon" class="w-4 h-4 fill-current pointer-events-none"></i></button>
             </div>
         </div>
 
