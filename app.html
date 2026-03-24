@@ -2300,7 +2300,7 @@
                 window.cancelEdit();
                 if(window.syncToCloud) window.syncToCloud(entry);
                 const totalArchived = window.workouts.filter(w => w.archived).length;
-                if (totalArchived === 1 && !localStorage.getItem('base_push_subscribed') && Notification.permission === 'default') {
+                if (totalArchived === 1 && !localStorage.getItem('base_push_subscribed') && typeof Notification !== 'undefined' && Notification.permission === 'default') {
                     setTimeout(() => window.requestPushPermission(false), 2000);
                 }
             } catch (err) { 
@@ -3765,7 +3765,7 @@
         };
 
         window.requestPushPermission = async function(silent = false) {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') return;
             if (Notification.permission === 'denied') return;
             if (Notification.permission === 'granted') { await window.setupPushSubscription(); return; }
             if (!silent) {
@@ -3785,8 +3785,8 @@
                 statusText.textContent = 'Nicht verfügbar in diesem Browser';
                 toggle.disabled = true; return;
             }
-            if (Notification.permission === 'denied') {
-                statusText.textContent = 'In Einstellungen blockiert';
+            if (typeof Notification === 'undefined' || Notification.permission === 'denied') {
+                statusText.textContent = typeof Notification === 'undefined' ? 'Nicht verfügbar in diesem Browser' : 'In Einstellungen blockiert';
                 toggle.checked = false; toggle.disabled = true; return;
             }
             const isSubscribed = !!localStorage.getItem('base_push_subscribed');
@@ -3856,7 +3856,7 @@
 
         // --- INTELLIGENTE PUSH NOTIFICATIONS ---
         window.checkDailyPushLogic = async function() {
-            if (Notification.permission !== 'granted') return;
+            if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
             if (!localStorage.getItem('base_push_subscribed')) return;
             var lastSent = localStorage.getItem('base_push_last_sent');
             var now = new Date();
