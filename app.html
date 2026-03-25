@@ -1601,9 +1601,14 @@
             </div>
 
             <!-- Finish Session -->
-            <button onclick="window.finishQuickTrack()" class="mt-3 w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-xs cursor-pointer pointer-events-auto transition-all active:scale-95 flex-shrink-0" style="background:linear-gradient(135deg,#06b6d4,#6366f1);color:#000">
-                Session abschließen & speichern
-            </button>
+            <div class="mt-3 flex gap-2 flex-shrink-0">
+                <button onclick="window.finishQuickTrack()" class="flex-1 py-3.5 rounded-xl font-black uppercase tracking-widest text-xs cursor-pointer pointer-events-auto transition-all active:scale-95" style="background:linear-gradient(135deg,#06b6d4,#6366f1);color:#000">
+                    Abschließen & speichern
+                </button>
+                <button onclick="window.saveQtAsTemplate()" title="Als Vorlage speichern" class="px-4 py-3.5 rounded-xl cursor-pointer pointer-events-auto transition-all active:scale-95" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">
+                    <i data-lucide="bookmark-plus" class="w-4 h-4 pointer-events-none"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1728,6 +1733,19 @@
                         <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                 </div>
+            </div>
+
+            <!-- Vorlagen -->
+            <div class="flex gap-2 mb-4">
+                <button onclick="window.showSessionTemplates()" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">
+                    <i data-lucide="folder-open" class="w-3.5 h-3.5 pointer-events-none"></i> Aus Vorlage
+                </button>
+                <button onclick="window.saveSessionAsTemplate()" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">
+                    <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 pointer-events-none"></i> Als Vorlage
+                </button>
+            </div>
+            <div id="sessionTemplateSection" class="hidden mb-4">
+                <div id="sessionTemplateList" class="space-y-2 max-h-40 overflow-y-auto hide-scrollbar"></div>
             </div>
 
             <!-- Speichern -->

@@ -730,6 +730,70 @@ window.renderDayView();
 window.showToast('Session gespeichert ✅');
 };
 
+// --- SESSION VORLAGEN ---
+window.saveSessionAsTemplate = function() {
+    if(_sessionExercises.length === 0) { window.showToast('Keine Übungen zum Speichern'); return; }
+    const name = (document.getElementById('sessionFocus')?.value || '').trim() || (_sessionType === 'kraft' ? 'Kraft-Vorlage' : _sessionType === 'ausdauer' ? 'Ausdauer-Vorlage' : 'Mobility-Vorlage');
+    const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
+    templates.push({
+        id: 'tpl_' + Date.now(),
+        name: name.substring(0, 80),
+        type: _sessionType,
+        duration: parseInt(document.getElementById('sessionDuration')?.value) || 60,
+        focus: name,
+        exercises: JSON.parse(JSON.stringify(_sessionExercises)),
+        createdAt: new Date().toISOString()
+    });
+    localStorage.setItem('base_pt_session_templates', JSON.stringify(templates));
+    window.showToast('Vorlage gespeichert ✅');
+};
+
+window.showSessionTemplates = function() {
+    const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
+    if(templates.length === 0) { window.showToast('Noch keine Vorlagen gespeichert'); return; }
+    const list = document.getElementById('sessionTemplateList');
+    const container = document.getElementById('sessionTemplateSection');
+    if(!list || !container) return;
+    container.classList.toggle('hidden');
+    if(container.classList.contains('hidden')) return;
+    list.innerHTML = templates.map((t, i) => {
+        const typeLabel = { kraft:'Kraft', ausdauer:'Ausdauer', mobility:'Mobility' }[t.type] || t.type;
+        const exCount = (t.exercises || []).length;
+        return `<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer pointer-events-auto hover:bg-white/5 transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" onclick="window.loadSessionTemplate(${i})">
+            <div class="flex-1 min-w-0">
+                <p class="text-white text-sm font-bold truncate">${window._escapeHtml(t.name)}</p>
+                <p class="text-[10px] text-zinc-500 font-bold">${typeLabel} · ${exCount} Übungen · ${t.duration}min</p>
+            </div>
+            <button onclick="event.stopPropagation();window.deleteSessionTemplate(${i})" class="text-zinc-600 hover:text-rose-400 cursor-pointer pointer-events-auto p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+        </div>`;
+    }).join('');
+    window._refreshLucide();
+};
+
+window.loadSessionTemplate = function(idx) {
+    const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
+    const t = templates[idx];
+    if(!t) return;
+    _sessionType = t.type || 'kraft';
+    _sessionExercises = JSON.parse(JSON.stringify(t.exercises || []));
+    window.setSessionType(_sessionType);
+    const durEl = document.getElementById('sessionDuration');
+    const focusEl = document.getElementById('sessionFocus');
+    if(durEl) durEl.value = t.duration || 60;
+    if(focusEl) focusEl.value = t.focus || '';
+    window._renderSessionExercises();
+    document.getElementById('sessionTemplateSection')?.classList.add('hidden');
+    window.showToast('Vorlage geladen');
+};
+
+window.deleteSessionTemplate = function(idx) {
+    const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
+    templates.splice(idx, 1);
+    localStorage.setItem('base_pt_session_templates', JSON.stringify(templates));
+    window.showSessionTemplates();
+    window.showToast('Vorlage gelöscht');
+};
+
 window.deleteSession = function() {
 if(!_editingSessionId) return;
 window.showModal('Session löschen?', 'Diese Session wird dauerhaft gelöscht.', true, () => {
@@ -1115,6 +1179,24 @@ window.showModal('Abbrechen?', 'Session beenden ohne zu speichern?', true, () =>
     _qtStartTime = null;
     window.toggleModal('quickTrackModal');
 });
+};
+
+window.saveQtAsTemplate = function() {
+    if(!_qtExercises || _qtExercises.length === 0) { window.showToast('Keine Übungen zum Speichern'); return; }
+    const s = window.getSessions().find(s => s.id === _qtSessionId);
+    const name = s?.focus || 'Quick-Track Vorlage';
+    const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
+    templates.push({
+        id: 'tpl_' + Date.now(),
+        name: name.substring(0, 80),
+        type: s?.type || 'kraft',
+        duration: s?.duration || 60,
+        focus: name,
+        exercises: _qtExercises.map(ex => ({ name: ex.name, sets: String(ex.sets?.length || 3), reps: ex.sets?.[0]?.reps ? String(ex.sets[0].reps) : '10', weight: ex.sets?.[0]?.weight ? String(ex.sets[0].weight) : '' })),
+        createdAt: new Date().toISOString()
+    });
+    localStorage.setItem('base_pt_session_templates', JSON.stringify(templates));
+    window.showToast('Vorlage gespeichert ✅');
 };
 
 window.finishQuickTrack = function() {
