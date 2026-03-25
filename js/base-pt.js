@@ -1621,3 +1621,558 @@ if(navigator.share) {
     navigator.clipboard?.writeText(text).then(() => window.showToast('Kopiert! 📋'));
 }
 };
+
+// ============================================================
+// TRAINER-PROFIL & AKQUISE-SYSTEM (8a-8f)
+// ============================================================
+
+const TRAINER_SPECS = [
+    'Krafttraining', 'Ausdauer', 'Gewichtsverlust', 'Rehabilitation',
+    'Bodybuilding', 'CrossFit', 'Yoga/Pilates', 'Kampfsport',
+    'Schwimmen', 'Senioren-Fitness', 'Prä/Postnatal', 'Athletik'
+];
+
+const CONTACT_TYPES = ['WhatsApp', 'E-Mail', 'Telefon'];
+
+let _trainerProfileCache = null;
+let _allTrainersCache = null;
+let _selectedSpecs = [];
+let _selectedContacts = [];
+let _reviewTrainerId = null;
+let _reviewRating = 0;
+
+// ── 8a: TRAINER-PROFIL ERSTELLEN ──────────────────────────
+
+window.openTrainerProfileEditor = function() {
+    window._renderSpecChips();
+    window._renderContactChips();
+    // Vorhandenes Profil laden
+    if(_trainerProfileCache) {
+        const p = _trainerProfileCache;
+        const el = (id) => document.getElementById(id);
+        if(el('tpName')) el('tpName').value = p.name || '';
+        if(el('tpCity')) el('tpCity').value = p.city || '';
+        if(el('tpAbout')) el('tpAbout').value = p.about || '';
+        if(el('tpPrice')) el('tpPrice').value = p.pricePerSession || '';
+        if(el('tpCerts')) el('tpCerts').value = p.certifications || '';
+        if(el('tpInstagram')) el('tpInstagram').value = (p.social && p.social.instagram) || '';
+        if(el('tpTiktok')) el('tpTiktok').value = (p.social && p.social.tiktok) || '';
+        _selectedSpecs = p.specializations || [];
+        _selectedContacts = p.contact ? Object.keys(p.contact) : [];
+        window._renderSpecChips();
+        window._renderContactChips();
+        window._renderContactFields();
+        if(p.contact) {
+            setTimeout(() => {
+                if(p.contact.whatsapp && el('tpContactWhatsApp')) el('tpContactWhatsApp').value = p.contact.whatsapp;
+                if(p.contact.email && el('tpContactEmail')) el('tpContactEmail').value = p.contact.email;
+                if(p.contact.telefon && el('tpContactTelefon')) el('tpContactTelefon').value = p.contact.telefon;
+            }, 50);
+        }
+        if(p.availability) {
+            ['wd_m','wd_d','wd_e','sa_m','sa_d','sa_e','so_m','so_d','so_e'].forEach(k => {
+                const cb = el('tpAvail_' + k);
+                if(cb) cb.checked = !!p.availability[k];
+            });
+        }
+        if(p.photo) {
+            const preview = el('tpPhotoPreview');
+            if(preview) preview.innerHTML = `<img src="${p.photo}" class="w-full h-full object-cover" alt="Foto">`;
+        }
+    } else {
+        // Branding-Daten vorausfüllen
+        const branding = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
+        const el = (id) => document.getElementById(id);
+        if(branding.name && el('tpName')) el('tpName').value = branding.name;
+        _selectedSpecs = [];
+        _selectedContacts = [];
+        window._renderSpecChips();
+        window._renderContactChips();
+    }
+    window.toggleModal('trainerProfileModal');
+    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+};
+
+window._renderSpecChips = function() {
+    const container = document.getElementById('tpSpecChips');
+    if(!container) return;
+    container.innerHTML = TRAINER_SPECS.map(s => {
+        const active = _selectedSpecs.includes(s);
+        return `<button onclick="window._toggleSpec('${s}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${window._escapeHtml(s)}</button>`;
+    }).join('');
+};
+
+window._toggleSpec = function(spec) {
+    const idx = _selectedSpecs.indexOf(spec);
+    if(idx >= 0) _selectedSpecs.splice(idx, 1);
+    else _selectedSpecs.push(spec);
+    window._renderSpecChips();
+};
+
+window._renderContactChips = function() {
+    const container = document.getElementById('tpContactChips');
+    if(!container) return;
+    container.innerHTML = CONTACT_TYPES.map(c => {
+        const active = _selectedContacts.includes(c);
+        return `<button onclick="window._toggleContact('${c}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${window._escapeHtml(c)}</button>`;
+    }).join('');
+};
+
+window._toggleContact = function(type) {
+    const idx = _selectedContacts.indexOf(type);
+    if(idx >= 0) _selectedContacts.splice(idx, 1);
+    else _selectedContacts.push(type);
+    window._renderContactChips();
+    window._renderContactFields();
+};
+
+window._renderContactFields = function() {
+    const container = document.getElementById('tpContactFields');
+    if(!container) return;
+    if(_selectedContacts.length === 0) { container.classList.add('hidden'); container.innerHTML = ''; return; }
+    container.classList.remove('hidden');
+    container.innerHTML = _selectedContacts.map(c => {
+        const id = 'tpContact' + c;
+        const placeholder = c === 'WhatsApp' ? '+49...' : c === 'E-Mail' ? 'mail@example.com' : '+49...';
+        const type = c === 'E-Mail' ? 'email' : 'tel';
+        return `<div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">${window._escapeHtml(c)}</p><input type="${type}" id="${id}" placeholder="${placeholder}" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto"></div>`;
+    }).join('');
+};
+
+window.previewTrainerPhoto = function(input) {
+    const file = input.files && input.files[0];
+    if(!file) return;
+    if(file.size > 500 * 1024) { window.showToast('Bild zu groß (max 500KB)'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('tpPhotoPreview');
+        if(preview) preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover" alt="Foto">`;
+    };
+    reader.readAsDataURL(file);
+};
+
+window.saveTrainerProfile = async function() {
+    const db = window._fbDb;
+    const auth = window._fbAuth;
+    if(!db || !auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
+    const el = (id) => document.getElementById(id);
+    const name = (el('tpName')?.value || '').trim();
+    if(!name) { window.showToast('Name ist Pflichtfeld!'); return; }
+    if(_selectedSpecs.length === 0) { window.showToast('Mindestens eine Spezialisierung wählen!'); return; }
+
+    const preview = document.getElementById('tpPhotoPreview');
+    const img = preview?.querySelector('img');
+    const photo = img ? img.src : '';
+
+    const availability = {};
+    ['wd_m','wd_d','wd_e','sa_m','sa_d','sa_e','so_m','so_d','so_e'].forEach(k => {
+        const cb = el('tpAvail_' + k);
+        if(cb && cb.checked) availability[k] = true;
+    });
+
+    const contact = {};
+    _selectedContacts.forEach(c => {
+        const val = (el('tpContact' + c)?.value || '').trim();
+        if(val) contact[c.toLowerCase()] = val;
+    });
+
+    const profile = {
+        name: name.substring(0, 60),
+        photo: photo,
+        specializations: _selectedSpecs,
+        city: (el('tpCity')?.value || '').trim().substring(0, 60),
+        about: (el('tpAbout')?.value || '').trim().substring(0, 500),
+        pricePerSession: parseInt(el('tpPrice')?.value) || 0,
+        availability: availability,
+        contact: contact,
+        social: {
+            instagram: (el('tpInstagram')?.value || '').trim().substring(0, 60),
+            tiktok: (el('tpTiktok')?.value || '').trim().substring(0, 60)
+        },
+        certifications: (el('tpCerts')?.value || '').trim().substring(0, 200),
+        rating: _trainerProfileCache?.rating || 0,
+        reviewCount: _trainerProfileCache?.reviewCount || 0,
+        active: true,
+        createdAt: _trainerProfileCache?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+
+    try {
+        const docRef = window._fbDoc(db, 'trainer_profiles', auth.currentUser.uid);
+        await window._fbSetDoc(docRef, profile);
+        _trainerProfileCache = profile;
+
+        // Stats-Dokument initialisieren falls noch nicht vorhanden
+        const statsRef = window._fbDoc(db, 'trainer_profiles', auth.currentUser.uid, 'stats', 'views');
+        try {
+            const statsSnap = await window._fbGetDoc(statsRef);
+            if(!statsSnap.exists()) {
+                await window._fbSetDoc(statsRef, { profileViews: 0, contactClicks: 0 });
+            }
+        } catch(e) { /* ignore */ }
+
+        window.toggleModal('trainerProfileModal');
+        window.showToast('Trainer-Profil gespeichert!');
+        window._updateTrainerProfileUI();
+    } catch(err) {
+        console.error('Trainer-Profil Fehler:', err);
+        window.showToast('Fehler: ' + err.message);
+    }
+};
+
+window.loadOwnTrainerProfile = async function() {
+    const db = window._fbDb;
+    const auth = window._fbAuth;
+    if(!db || !auth || !auth.currentUser) return;
+    try {
+        const docRef = window._fbDoc(db, 'trainer_profiles', auth.currentUser.uid);
+        const snap = await window._fbGetDoc(docRef);
+        if(snap.exists()) {
+            _trainerProfileCache = snap.data();
+            window._updateTrainerProfileUI();
+        }
+    } catch(e) { /* ignore */ }
+};
+
+window._updateTrainerProfileUI = function() {
+    const label = document.getElementById('trainerProfileBtnLabel');
+    const sub = document.getElementById('trainerProfileBtnSub');
+    const statsBar = document.getElementById('trainerStatsBar');
+    if(_trainerProfileCache) {
+        if(label) label.textContent = 'Profil bearbeiten';
+        if(sub) sub.textContent = _trainerProfileCache.active ? 'Aktiv — sichtbar für alle' : 'Inaktiv';
+        if(statsBar) {
+            statsBar.classList.remove('hidden');
+            statsBar.classList.add('grid');
+            window._loadTrainerStats();
+        }
+    }
+};
+
+window._loadTrainerStats = async function() {
+    const db = window._fbDb;
+    const auth = window._fbAuth;
+    if(!db || !auth || !auth.currentUser) return;
+    try {
+        const statsRef = window._fbDoc(db, 'trainer_profiles', auth.currentUser.uid, 'stats', 'views');
+        const snap = await window._fbGetDoc(statsRef);
+        if(snap.exists()) {
+            const data = snap.data();
+            const viewsEl = document.getElementById('trainerStatViews');
+            const contactsEl = document.getElementById('trainerStatContacts');
+            if(viewsEl) viewsEl.textContent = data.profileViews || 0;
+            if(contactsEl) contactsEl.textContent = data.contactClicks || 0;
+        }
+        // Rating
+        if(_trainerProfileCache) {
+            const ratingEl = document.getElementById('trainerStatRating');
+            if(ratingEl) {
+                if(_trainerProfileCache.reviewCount > 0) {
+                    ratingEl.textContent = (_trainerProfileCache.rating || 0).toFixed(1) + ' ★';
+                } else {
+                    ratingEl.textContent = '—';
+                }
+            }
+        }
+    } catch(e) { /* ignore */ }
+};
+
+// ── 8b: TRAINER-VERZEICHNIS ────────────────────────────────
+
+window.openTrainerDirectory = async function() {
+    window.toggleModal('trainerDirectoryModal');
+    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    window._renderTrainerSpecFilter();
+    await window._loadAllTrainers();
+};
+
+let _trainerFilterSpec = '';
+
+window._renderTrainerSpecFilter = function() {
+    const container = document.getElementById('trainerSpecFilter');
+    if(!container) return;
+    container.innerHTML = '<button onclick="window._setTrainerSpecFilter(\'\')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ' + (!_trainerFilterSpec ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800') + '">Alle</button>' +
+        TRAINER_SPECS.map(s => {
+            const active = _trainerFilterSpec === s;
+            return `<button onclick="window._setTrainerSpecFilter('${s}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ${active ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800'}">${window._escapeHtml(s)}</button>`;
+        }).join('');
+};
+
+window._setTrainerSpecFilter = function(spec) {
+    _trainerFilterSpec = spec;
+    window._renderTrainerSpecFilter();
+    window.filterTrainerList();
+};
+
+window._loadAllTrainers = async function() {
+    const db = window._fbDb;
+    if(!db) { document.getElementById('trainerDirectoryList').innerHTML = '<p class="text-zinc-500 text-sm col-span-full text-center py-8">Firebase nicht verfügbar</p>'; return; }
+    try {
+        const q = window._fbQuery(
+            window._fbCollection(db, 'trainer_profiles'),
+            window._fbWhere('active', '==', true)
+        );
+        const snap = await window._fbGetDocs(q);
+        _allTrainersCache = [];
+        snap.forEach(d => {
+            _allTrainersCache.push({ uid: d.id, ...d.data() });
+        });
+        window.filterTrainerList();
+    } catch(err) {
+        console.error('Trainer laden Fehler:', err);
+        document.getElementById('trainerDirectoryList').innerHTML = '<p class="text-zinc-500 text-sm col-span-full text-center py-8">Fehler beim Laden</p>';
+    }
+};
+
+window.filterTrainerList = function() {
+    if(!_allTrainersCache) return;
+    const searchInput = document.getElementById('trainerSearchInput');
+    const q = (searchInput?.value || '').toLowerCase().trim();
+    let filtered = _allTrainersCache;
+    if(q) {
+        filtered = filtered.filter(t => (t.name || '').toLowerCase().includes(q) || (t.city || '').toLowerCase().includes(q));
+    }
+    if(_trainerFilterSpec) {
+        filtered = filtered.filter(t => t.specializations && t.specializations.includes(_trainerFilterSpec));
+    }
+    window._renderTrainerCards(filtered);
+};
+
+window._renderTrainerCards = function(trainers) {
+    const list = document.getElementById('trainerDirectoryList');
+    if(!list) return;
+    if(trainers.length === 0) {
+        list.innerHTML = '<p class="text-zinc-500 text-sm col-span-full text-center py-8">Keine Trainer gefunden</p>';
+        return;
+    }
+    const esc = window._escapeHtml;
+    list.innerHTML = trainers.map(t => {
+        const specs = (t.specializations || []).slice(0, 3).map(s => `<span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-1.5 py-0.5 rounded">${esc(s)}</span>`).join(' ');
+        const stars = t.reviewCount > 0 ? (t.rating || 0).toFixed(1) + ' ★ <span class="text-zinc-500">(' + t.reviewCount + ')</span>' : '<span class="text-zinc-500">Neu</span>';
+        const photo = t.photo ? `<img src="${t.photo}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" alt="">` : `<div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 text-sm font-black">${esc((t.name || '??').substring(0,2).toUpperCase())}</div>`;
+        return `<div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 hover:border-cyan-500/30 transition-all">
+            <div class="flex items-center gap-3 mb-3">
+                ${photo}
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-black text-white truncate">${esc(t.name)}</p>
+                    <p class="text-[10px] text-zinc-500 font-bold truncate">${esc(t.city || 'Keine Stadt')}</p>
+                    <p class="text-[10px] font-bold text-amber-400 mt-0.5">${stars}</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-1 mb-3">${specs}</div>
+            <div class="flex items-center justify-between">
+                ${t.pricePerSession ? `<span class="text-white font-black text-sm">${t.pricePerSession}€<span class="text-zinc-500 text-[10px] font-bold">/Session</span></span>` : '<span class="text-zinc-500 text-[10px] font-bold">Preis n.V.</span>'}
+                <button onclick="window.openTrainerDetail('${t.uid}')" class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-cyan-500/20 transition-all">Profil</button>
+            </div>
+        </div>`;
+    }).join('');
+    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+};
+
+// ── 8c: TRAINER-DETAILSEITE ────────────────────────────────
+
+window.openTrainerDetail = async function(uid) {
+    const db = window._fbDb;
+    if(!db) return;
+
+    // View-Counter inkrementieren
+    const auth = window._fbAuth;
+    if(auth && auth.currentUser && auth.currentUser.uid !== uid) {
+        try {
+            const statsRef = window._fbDoc(db, 'trainer_profiles', uid, 'stats', 'views');
+            await window._fbUpdateDoc(statsRef, { profileViews: window._fbIncrement(1) }).catch(() => {});
+        } catch(e) { /* ignore */ }
+    }
+
+    let trainer = _allTrainersCache?.find(t => t.uid === uid);
+    if(!trainer) {
+        try {
+            const snap = await window._fbGetDoc(window._fbDoc(db, 'trainer_profiles', uid));
+            if(snap.exists()) trainer = { uid: uid, ...snap.data() };
+        } catch(e) { /* ignore */ }
+    }
+    if(!trainer) { window.showToast('Trainer nicht gefunden'); return; }
+
+    // Reviews laden
+    let reviews = [];
+    try {
+        const rq = window._fbQuery(
+            window._fbCollection(db, 'trainer_reviews'),
+            window._fbWhere('trainerUid', '==', uid),
+            window._fbOrderBy('createdAt', 'desc'),
+            window._fbLimit(5)
+        );
+        const rSnap = await window._fbGetDocs(rq);
+        rSnap.forEach(d => reviews.push(d.data()));
+
+        // Live Rating berechnen
+        if(reviews.length > 0) {
+            const allReviewsSnap = await window._fbGetDocs(window._fbQuery(
+                window._fbCollection(db, 'trainer_reviews'),
+                window._fbWhere('trainerUid', '==', uid)
+            ));
+            let sum = 0, count = 0;
+            allReviewsSnap.forEach(d => { sum += d.data().rating || 0; count++; });
+            trainer.rating = count > 0 ? sum / count : 0;
+            trainer.reviewCount = count;
+        }
+    } catch(e) { /* ignore */ }
+
+    window._renderTrainerDetail(trainer, reviews);
+    window.toggleModal('trainerDetailModal');
+    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+};
+
+window._renderTrainerDetail = function(t, reviews) {
+    const content = document.getElementById('trainerDetailContent');
+    if(!content) return;
+    const esc = window._escapeHtml;
+
+    const photo = t.photo ? `<img src="${t.photo}" class="w-full h-48 object-cover rounded-2xl mb-4" alt="${esc(t.name)}">` : '';
+    const specs = (t.specializations || []).map(s => `<span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-2 py-1 rounded-lg">${esc(s)}</span>`).join(' ');
+    const stars = t.reviewCount > 0 ? `<span class="text-amber-400 font-black">${(t.rating || 0).toFixed(1)} ★</span> <span class="text-zinc-500 text-xs">(${t.reviewCount} Bewertungen)</span>` : '<span class="text-zinc-500 text-xs">Noch keine Bewertungen</span>';
+
+    // Verfügbarkeit Grid
+    let availHtml = '';
+    if(t.availability && Object.keys(t.availability).length > 0) {
+        const days = [['Mo-Fr','wd'],['Sa','sa'],['So','so']];
+        const times = [['Morgens','m'],['Mittags','d'],['Abends','e']];
+        availHtml = '<div class="mt-4"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Verfügbarkeit</p><div class="grid grid-cols-4 gap-1 text-center">';
+        availHtml += '<div></div>' + days.map(d => `<div class="text-[9px] text-zinc-500 font-bold">${d[0]}</div>`).join('');
+        times.forEach(time => {
+            availHtml += `<div class="text-[9px] text-zinc-500 font-bold text-right pr-2">${time[0]}</div>`;
+            days.forEach(day => {
+                const key = day[1] + '_' + time[1];
+                const active = t.availability[key];
+                availHtml += `<div class="flex justify-center"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] ${active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-900 text-zinc-700'}">•</span></div>`;
+            });
+        });
+        availHtml += '</div></div>';
+    }
+
+    // Kontakt-Buttons
+    let contactHtml = '<div class="flex flex-wrap gap-2 mt-4">';
+    if(t.contact) {
+        if(t.contact.whatsapp) contactHtml += `<a href="https://wa.me/${t.contact.whatsapp.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hi, ich habe dich auf BASE gefunden und hätte Interesse an einem Probetraining!')}" target="_blank" onclick="window._trackTrainerContact('${t.uid}')" class="flex-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-center cursor-pointer pointer-events-auto hover:bg-emerald-500/20 transition-all">WhatsApp</a>`;
+        if(t.contact.email || t.contact['e-mail']) contactHtml += `<a href="mailto:${esc(t.contact.email || t.contact['e-mail'])}?subject=${encodeURIComponent('Trainingsanfrage über BASE')}&body=${encodeURIComponent('Hi, ich habe dein Profil auf BASE gesehen und hätte Interesse an einem Probetraining!')}" onclick="window._trackTrainerContact('${t.uid}')" class="flex-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-center cursor-pointer pointer-events-auto hover:bg-indigo-500/20 transition-all">E-Mail</a>`;
+        if(t.contact.telefon) contactHtml += `<a href="tel:${esc(t.contact.telefon)}" onclick="window._trackTrainerContact('${t.uid}')" class="flex-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-center cursor-pointer pointer-events-auto hover:bg-cyan-500/20 transition-all">Anrufen</a>`;
+    }
+    contactHtml += '</div>';
+
+    // Reviews
+    let reviewsHtml = '';
+    if(reviews.length > 0) {
+        reviewsHtml = '<div class="mt-4"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Bewertungen</p>';
+        reviews.forEach(r => {
+            const starsStr = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+            reviewsHtml += `<div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 mb-2"><div class="flex items-center justify-between mb-1"><span class="text-amber-400 text-xs font-bold">${starsStr}</span><span class="text-[9px] text-zinc-600">${r.createdAt ? new Date(r.createdAt).toLocaleDateString('de-DE') : ''}</span></div>${r.text ? `<p class="text-zinc-300 text-xs">${esc(r.text)}</p>` : ''}</div>`;
+        });
+        reviewsHtml += '</div>';
+    }
+
+    // Bewerten-Button
+    const auth = window._fbAuth;
+    const canReview = auth && auth.currentUser && auth.currentUser.uid !== t.uid;
+    const reviewBtn = canReview ? `<button onclick="window.openTrainerReview('${t.uid}')" class="w-full mt-4 bg-amber-500/10 text-amber-400 border border-amber-500/20 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-amber-500/20 transition-all">Bewertung abgeben</button>` : '';
+
+    content.innerHTML = `
+        ${photo}
+        <h3 class="text-xl font-black text-white">${esc(t.name)}</h3>
+        <p class="text-sm text-zinc-400 mt-1">${esc(t.city || '')}</p>
+        <p class="mt-2">${stars}</p>
+        <div class="flex flex-wrap gap-1.5 mt-3">${specs}</div>
+        ${t.about ? `<div class="mt-4"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Über mich</p><p class="text-zinc-300 text-sm">${esc(t.about)}</p></div>` : ''}
+        ${t.certifications ? `<div class="mt-3"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Zertifizierungen</p><p class="text-zinc-300 text-sm">${esc(t.certifications)}</p></div>` : ''}
+        ${t.pricePerSession ? `<div class="mt-3"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Preis pro Session</p><p class="text-white text-lg font-black">${t.pricePerSession}€</p></div>` : ''}
+        ${t.social && (t.social.instagram || t.social.tiktok) ? `<div class="flex gap-2 mt-3">${t.social.instagram ? `<a href="https://instagram.com/${esc(t.social.instagram.replace('@',''))}" target="_blank" class="text-pink-400 text-xs font-bold hover:underline cursor-pointer pointer-events-auto">Instagram</a>` : ''}${t.social.tiktok ? `<a href="https://tiktok.com/@${esc(t.social.tiktok.replace('@',''))}" target="_blank" class="text-zinc-300 text-xs font-bold hover:underline cursor-pointer pointer-events-auto">TikTok</a>` : ''}</div>` : ''}
+        ${availHtml}
+        ${contactHtml}
+        ${reviewsHtml}
+        ${reviewBtn}
+    `;
+};
+
+// ── 8d: KONTAKT-TRACKING ──────────────────────────────────
+
+window._trackTrainerContact = async function(trainerUid) {
+    const db = window._fbDb;
+    if(!db) return;
+    try {
+        const statsRef = window._fbDoc(db, 'trainer_profiles', trainerUid, 'stats', 'views');
+        await window._fbUpdateDoc(statsRef, { contactClicks: window._fbIncrement(1) }).catch(() => {});
+    } catch(e) { /* ignore */ }
+};
+
+// ── 8e: TRAINER-BEWERTUNGEN ────────────────────────────────
+
+window.openTrainerReview = function(trainerUid) {
+    _reviewTrainerId = trainerUid;
+    _reviewRating = 0;
+    document.getElementById('reviewText').value = '';
+    window._renderReviewStars();
+    window.toggleModal('trainerReviewModal');
+};
+
+window._renderReviewStars = function() {
+    const container = document.getElementById('reviewStars');
+    if(!container) return;
+    container.innerHTML = [1,2,3,4,5].map(i => {
+        const active = i <= _reviewRating;
+        return `<button onclick="window._setReviewRating(${i})" class="text-3xl cursor-pointer pointer-events-auto transition-transform hover:scale-110 ${active ? 'text-amber-400' : 'text-zinc-700'}">${active ? '★' : '☆'}</button>`;
+    }).join('');
+};
+
+window._setReviewRating = function(rating) {
+    _reviewRating = rating;
+    window._renderReviewStars();
+};
+
+window.submitTrainerReview = async function() {
+    const db = window._fbDb;
+    const auth = window._fbAuth;
+    if(!db || !auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
+    if(_reviewRating < 1 || _reviewRating > 5) { window.showToast('Bitte Sterne auswählen!'); return; }
+    if(!_reviewTrainerId) return;
+
+    const text = (document.getElementById('reviewText')?.value || '').trim().substring(0, 300);
+
+    try {
+        await window._fbAddDoc(window._fbCollection(db, 'trainer_reviews'), {
+            trainerUid: _reviewTrainerId,
+            reviewerUid: auth.currentUser.uid,
+            rating: _reviewRating,
+            text: text,
+            createdAt: new Date().toISOString()
+        });
+
+        // Rating im Trainer-Profil aktualisieren
+        const allReviewsSnap = await window._fbGetDocs(window._fbQuery(
+            window._fbCollection(db, 'trainer_reviews'),
+            window._fbWhere('trainerUid', '==', _reviewTrainerId)
+        ));
+        let sum = 0, count = 0;
+        allReviewsSnap.forEach(d => { sum += d.data().rating || 0; count++; });
+        const avgRating = count > 0 ? sum / count : 0;
+        await window._fbUpdateDoc(window._fbDoc(db, 'trainer_profiles', _reviewTrainerId), {
+            rating: Math.round(avgRating * 10) / 10,
+            reviewCount: count
+        });
+
+        window.toggleModal('trainerReviewModal');
+        window.showToast('Bewertung abgeschickt!');
+        // Detail-Modal aktualisieren
+        window.openTrainerDetail(_reviewTrainerId);
+    } catch(err) {
+        console.error('Review Fehler:', err);
+        window.showToast('Fehler: ' + err.message);
+    }
+};
+
+// ── INIT: Trainer-Profil beim PT-Tab-Switch laden ──────────
+const _origSwitchPTTab = window.switchPTTab;
+window.switchPTTab = function(tab) {
+    _origSwitchPTTab(tab);
+    if(tab === 'pttools') {
+        window.loadOwnTrainerProfile();
+    }
+};

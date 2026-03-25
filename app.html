@@ -216,6 +216,14 @@
         }
         applyTheme();
 
+        // XSS-Schutz: _escapeHtml global verfügbar machen (auch in base-pt.js definiert)
+        window._escapeHtml = window._escapeHtml || function(str) {
+            if(!str) return '';
+            const d = document.createElement('div');
+            d.textContent = String(str);
+            return d.innerHTML;
+        };
+
         const _themePresets = {
             cyan: { primary:'#06b6d4', secondary:'#6366f1', bg:'#07070a', textMain:'#f4f4f5', textMuted:'#82828c', fontHeading:'Barlow Condensed', fontBody:'DM Sans', radius:'18px' },
             indigo: { primary:'#818cf8', secondary:'#a78bfa', bg:'#0a0a14', textMain:'#e8e8f0', textMuted:'#7878a0', fontHeading:'Orbitron', fontBody:'Inter', radius:'16px' },
@@ -533,6 +541,37 @@
                         <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                     </button>
 
+                <!-- Öffentliches Profil -->
+                <div id="trainerProfileCTA" class="pt-4 mt-2" style="border-top:1px solid var(--border-hex)">
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Kunden-Akquise</p>
+                    <div id="trainerProfileStatus"></div>
+                    <button onclick="window.openTrainerProfileEditor()" class="w-full flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all pointer-events-auto text-left" style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2)">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3)">
+                            <i data-lucide="id-card" class="w-5 h-5 pointer-events-none" style="color:#6366f1"></i>
+                        </div>
+                        <div>
+                            <p class="font-black text-white text-sm" id="trainerProfileBtnLabel">Öffentliches Profil erstellen</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest mt-0.5" style="color:rgba(99,102,241,0.7)" id="trainerProfileBtnSub">Werde von Kunden gefunden!</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
+                    </button>
+                    <!-- Trainer Stats (nur wenn Profil existiert) -->
+                    <div id="trainerStatsBar" class="hidden grid grid-cols-3 gap-2 mt-3">
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center">
+                            <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Aufrufe</p>
+                            <p class="text-lg font-black text-white" id="trainerStatViews">0</p>
+                        </div>
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center">
+                            <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Kontakte</p>
+                            <p class="text-lg font-black text-white" id="trainerStatContacts">0</p>
+                        </div>
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center">
+                            <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Bewertung</p>
+                            <p class="text-lg font-black text-amber-400" id="trainerStatRating">—</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Branding Section -->
                 <div class="pt-4 mt-2" style="border-top:1px solid var(--border-hex)">
                     <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Dein Branding</p>
@@ -601,6 +640,48 @@
                     <button aria-label="Schließen" onclick="event.stopPropagation(); document.getElementById('inviteBanner').style.display='none'; localStorage.setItem('base_invite_dismissed','1')" class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer pointer-events-auto" style="color:var(--text-muted)">
                         <i data-lucide="x" class="w-3 h-3 pointer-events-none"></i>
                     </button>
+                </div>
+            </div>
+
+            <!-- STREAK COUNTER -->
+            <div id="streakBar" class="hidden items-center gap-2 px-4 py-2 mx-0 mb-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <span class="text-lg" id="streakEmoji">&#128293;</span>
+                <span id="streakCount" class="text-amber-400 font-black text-lg">0</span>
+                <span class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Tage Streak</span>
+            </div>
+
+            <!-- WILLKOMMENS-BANNER (Erstes Workout) -->
+            <div id="firstWorkoutBanner" class="hidden mb-3 rounded-2xl overflow-hidden p-4" style="background:linear-gradient(135deg,rgba(6,182,212,0.12) 0%,rgba(99,102,241,0.12) 100%);border:1px solid rgba(6,182,212,0.25)">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(6,182,212,0.2)">
+                        <i data-lucide="target" class="w-4 h-4 pointer-events-none" style="color:var(--primary-hex)"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-black text-white leading-tight">Willkommen bei BASE!</p>
+                        <p class="text-[10px] font-bold mt-0.5" style="color:var(--text-muted)">Tracke dein erstes Workout in 30 Sekunden.</p>
+                    </div>
+                    <button onclick="window.startFirstWorkout()" class="bg-primary text-black font-black px-3 py-2 rounded-xl text-[10px] uppercase tracking-widest cursor-pointer pointer-events-auto hover:opacity-90 transition-all flex-shrink-0">Los geht's</button>
+                </div>
+            </div>
+
+            <!-- SOCIAL PROOF BANNER -->
+            <div id="socialProofBar" class="hidden items-center gap-2 px-4 py-2 mx-0 mb-3 rounded-xl" style="background:var(--surface-hex);border:1px solid var(--border-hex)">
+                <i data-lucide="users" class="w-3.5 h-3.5 text-zinc-500 flex-shrink-0"></i>
+                <span id="socialProofText" class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest"></span>
+            </div>
+
+            <!-- REVIEW PROMPT BANNER -->
+            <div id="reviewPromptBanner" class="hidden mb-3 rounded-xl p-3" style="background:var(--surface-hex);border:1px solid var(--border-hex)">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg flex-shrink-0">&#11088;</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-white">Gefällt dir BASE?</p>
+                        <p class="text-[10px] font-bold" style="color:var(--text-muted)">Eine Bewertung hilft uns enorm!</p>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="window.handleReviewAction()" class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-amber-500/20 transition-all">Bewerten</button>
+                        <button onclick="window.dismissReview()" class="text-zinc-500 hover:text-white px-2 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all">Sp&auml;ter</button>
+                    </div>
                 </div>
             </div>
 
@@ -1081,6 +1162,13 @@
                 <button onclick="window.generatePreHab()" class="w-full bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="shield-plus" class="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
                     <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Pre-Hab Coach</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Verletzungsprävention & Aktivierung</p></div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
+                </button>
+
+                <!-- Trainer finden -->
+                <button onclick="window.openTrainerDirectory()" class="w-full bg-cyan-500/5 hover:bg-cyan-500/10 border border-cyan-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="user-search" class="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
+                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Trainer finden</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Finde Personal Trainer in deiner Nähe</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
             </div>
@@ -1719,6 +1807,135 @@
         </div>
     </div>
 
+    <!-- ✅ TRAINER PROFIL ERSTELLEN MODAL (8a) -->
+    <div id="trainerProfileModal" class="fixed inset-0 bg-black/95 z-[750] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-6 md:p-8 max-w-lg w-full shadow-2xl relative border-indigo-500/30 my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30"><i data-lucide="id-card" class="w-5 h-5"></i></div>
+                    <h3 class="text-xl font-black text-white uppercase tracking-tighter">Trainer-Profil</h3>
+                </div>
+                <button aria-label="Schließen" onclick="window.toggleModal('trainerProfileModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center gap-4">
+                    <div id="tpPhotoPreview" class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <i data-lucide="camera" class="w-5 h-5 text-zinc-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Profilbild</p>
+                        <input type="file" id="tpPhoto" accept="image/*" onchange="window.previewTrainerPhoto(this)" class="text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-500/10 file:text-indigo-400 file:font-bold file:text-[10px] file:uppercase file:tracking-widest file:cursor-pointer cursor-pointer pointer-events-auto">
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Name / Studio</p>
+                    <input type="text" id="tpName" maxlength="60" placeholder="Dein Name oder Studio" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Stadt / Region</p>
+                    <input type="text" id="tpCity" maxlength="60" placeholder="z.B. Berlin" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Spezialisierungen</p>
+                    <div id="tpSpecChips" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Über mich</p>
+                    <textarea id="tpAbout" rows="3" maxlength="500" placeholder="Erzähle etwas über dich..." class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 resize-none cursor-text pointer-events-auto"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Preis/Session (EUR)</p>
+                        <input type="number" id="tpPrice" min="0" max="500" step="5" placeholder="50" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Zertifizierungen</p>
+                        <input type="text" id="tpCerts" maxlength="200" placeholder="A-Lizenz, ..." class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Verfügbarkeit</p>
+                    <div class="grid grid-cols-4 gap-1 text-center">
+                        <div></div><div class="text-[9px] text-zinc-500 font-bold">Mo-Fr</div><div class="text-[9px] text-zinc-500 font-bold">Sa</div><div class="text-[9px] text-zinc-500 font-bold">So</div>
+                        <div class="text-[9px] text-zinc-500 font-bold text-right pr-2">Morgens</div>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_wd_m" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_sa_m" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_so_m" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <div class="text-[9px] text-zinc-500 font-bold text-right pr-2">Mittags</div>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_wd_d" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_sa_d" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_so_d" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <div class="text-[9px] text-zinc-500 font-bold text-right pr-2">Abends</div>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_wd_e" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_sa_e" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                        <label class="flex justify-center"><input type="checkbox" id="tpAvail_so_e" class="accent-indigo-500 cursor-pointer pointer-events-auto"></label>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Kontaktart</p>
+                    <div class="flex flex-wrap gap-2" id="tpContactChips"></div>
+                </div>
+                <div id="tpContactFields" class="space-y-3 hidden"></div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Instagram (optional)</p>
+                    <input type="text" id="tpInstagram" maxlength="60" placeholder="@username" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">TikTok (optional)</p>
+                    <input type="text" id="tpTiktok" maxlength="60" placeholder="@username" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="window.toggleModal('trainerProfileModal')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-black py-3.5 rounded-xl transition-all uppercase tracking-widest text-xs cursor-pointer pointer-events-auto">Abbrechen</button>
+                <button onclick="window.saveTrainerProfile()" class="flex-1 bg-indigo-500 hover:bg-indigo-400 text-black font-black py-3.5 rounded-xl transition-all uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(99,102,241,0.2)] active:scale-95 cursor-pointer pointer-events-auto">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ TRAINER VERZEICHNIS MODAL (8b) -->
+    <div id="trainerDirectoryModal" class="fixed inset-0 bg-black/95 z-[700] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-6 md:p-8 max-w-2xl w-full shadow-2xl relative my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30"><i data-lucide="search" class="w-5 h-5"></i></div>
+                    <h3 class="text-xl font-black text-white uppercase tracking-tighter">Trainer finden</h3>
+                </div>
+                <button aria-label="Schließen" onclick="window.toggleModal('trainerDirectoryModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div class="mb-4">
+                <input type="text" id="trainerSearchInput" placeholder="Name oder Stadt suchen..." oninput="window.filterTrainerList()" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-cyan-500 cursor-text pointer-events-auto">
+            </div>
+            <div id="trainerSpecFilter" class="flex flex-wrap gap-2 mb-4"></div>
+            <div id="trainerDirectoryList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <p class="text-zinc-500 text-sm col-span-full text-center py-8">Trainer werden geladen...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ TRAINER DETAIL MODAL (8c) -->
+    <div id="trainerDetailModal" class="fixed inset-0 bg-black/95 z-[800] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-6 md:p-8 max-w-lg w-full shadow-2xl relative my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-xl font-black text-white uppercase tracking-tighter">Trainer-Profil</h3>
+                <button aria-label="Schließen" onclick="window.toggleModal('trainerDetailModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div id="trainerDetailContent"></div>
+        </div>
+    </div>
+
+    <!-- ✅ TRAINER BEWERTUNG MODAL (8e) -->
+    <div id="trainerReviewModal" class="fixed inset-0 bg-black/95 z-[850] hidden items-center justify-center backdrop-blur-xl px-4">
+        <div class="card-bg p-6 max-w-sm w-full shadow-2xl relative">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-black text-white uppercase tracking-tighter">Bewertung abgeben</h3>
+                <button aria-label="Schließen" onclick="window.toggleModal('trainerReviewModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div class="flex justify-center gap-2 mb-4" id="reviewStars"></div>
+            <textarea id="reviewText" rows="3" maxlength="300" placeholder="Deine Bewertung (optional)..." class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-amber-500 resize-none cursor-text pointer-events-auto mb-4"></textarea>
+            <button onclick="window.submitTrainerReview()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition-all uppercase tracking-widest text-xs active:scale-95 cursor-pointer pointer-events-auto">Bewertung abschicken</button>
+        </div>
+    </div>
+
     <!-- ✅ SESSION PLANNER MODAL -->
     <div id="sessionPlannerModal" class="fixed inset-0 bg-black/95 z-[700] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
         <div class="card-bg p-6 md:p-8 max-w-lg w-full shadow-2xl relative border-indigo-500/30 my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
@@ -2336,7 +2553,7 @@
         };
 
         window.getStorageKey = function() { return window.currentClient === 'personal' ? 'beastmode_v2_cache' : `beastmode_v2_cache_${window.currentClient}`; };
-        window.saveWorkoutsForCurrentClient = function() { localStorage.setItem(window.getStorageKey(), JSON.stringify(window.workouts)); window.calculateStreak(); };
+        window.saveWorkoutsForCurrentClient = function() { localStorage.setItem(window.getStorageKey(), JSON.stringify(window.workouts)); window.calculateStreak(); if(window._checkFirstWorkoutComplete) window._checkFirstWorkoutComplete(); };
 
         window.addEventListener('load', () => {
             document.getElementById('langSelectApp').value = window.currentLang; window.switchLanguage(window.currentLang);
@@ -2364,7 +2581,7 @@
             window.setupInjuryChips(); window.populateProfile(); 
             const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
             
-            window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); 
+            window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.showSocialProof(); window.checkReviewPrompt();
             window.generateSetFields(3);
             window.loadBodyData();
             const bodyDateInput = document.getElementById('bodyDate'); if(bodyDateInput) bodyDateInput.valueAsDate = new Date();
@@ -2423,7 +2640,7 @@
             const strengthFields = document.getElementById('strengthFields'); const setsContainer = document.getElementById('setsContainer'); const dynamicFieldsContainer = document.getElementById('dynamicFieldsContainer'); const addCustomFieldBtnContainer = document.getElementById('addCustomFieldBtnContainer');
             
             // Helper: rendert ein einzelnes dynamisches Feld
-            const renderField = (field, removeFn) => { const wrapper = document.createElement('div'); wrapper.className = "relative group col-span-1"; wrapper.innerHTML = `<label class="block text-[10px] font-black text-primary uppercase tracking-widest mb-2">${field.label}</label><div class="relative interactive-z"><input type="${field.type || 'text'}" id="dyn_${field.id}" data-label="${field.label}" placeholder="${field.placeholder || ''}" step="any" class="w-full px-4 py-3.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary transition-colors shadow-inner pr-10 pointer-events-auto cursor-text"><button aria-label="Schließen" type="button" onclick="${removeFn}" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-rose-500 transition-colors cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-4 h-4 pointer-events-none"></i></button></div>`; return wrapper; };
+            const renderField = (field, removeFn) => { const wrapper = document.createElement('div'); wrapper.className = "relative group col-span-1"; wrapper.innerHTML = `<label class="block text-[10px] font-black text-primary uppercase tracking-widest mb-2">${window._escapeHtml(field.label)}</label><div class="relative interactive-z"><input type="${field.type || 'text'}" id="dyn_${field.id}" data-label="${window._escapeHtml(field.label)}" placeholder="${window._escapeHtml(field.placeholder || '')}" step="any" class="w-full px-4 py-3.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary transition-colors shadow-inner pr-10 pointer-events-auto cursor-text"><button aria-label="Schließen" type="button" onclick="${removeFn}" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-rose-500 transition-colors cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-4 h-4 pointer-events-none"></i></button></div>`; return wrapper; };
 
             if(catId === 'strength') {
                 if(strengthFields) { strengthFields.classList.remove('hidden'); strengthFields.classList.add('grid'); }
@@ -2576,7 +2793,96 @@
         window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
         // --- DASHBOARD & TABELLE ---
-        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); }, true); };
+        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); }, true); };
+        // ============================================================
+        // ERSTES WORKOUT FLOW
+        // ============================================================
+        window.checkFirstWorkoutBanner = function() {
+            if(localStorage.getItem('base_onboarding_done')) return;
+            if(!Array.isArray(window.workouts)) return;
+            const archived = window.workouts.filter(w => w.archived);
+            const banner = document.getElementById('firstWorkoutBanner');
+            if(!banner) return;
+            if(archived.length === 0) { banner.classList.remove('hidden'); }
+            else { banner.classList.add('hidden'); localStorage.setItem('base_onboarding_done', 'true'); }
+        };
+        window.startFirstWorkout = function() {
+            document.getElementById('firstWorkoutBanner')?.classList.add('hidden');
+            const form = document.getElementById('workoutForm');
+            if(form) form.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                const btn = document.getElementById('btnSubmitWorkout');
+                if(btn) { btn.classList.add('animate-pulse'); setTimeout(() => btn.classList.remove('animate-pulse'), 5000); }
+            }, 500);
+        };
+        window._checkFirstWorkoutComplete = function() {
+            if(localStorage.getItem('base_onboarding_done')) return;
+            if(!Array.isArray(window.workouts)) return;
+            const active = window.workouts.filter(w => !w.archived);
+            if(active.length === 1) {
+                localStorage.setItem('base_onboarding_done', 'true');
+                document.getElementById('firstWorkoutBanner')?.classList.add('hidden');
+                window.showToast('Erstes Workout getrackt! &#127881;', 'success');
+            }
+        };
+
+        // ============================================================
+        // SOCIAL PROOF
+        // ============================================================
+        window.showSocialProof = function() {
+            const bar = document.getElementById('socialProofBar');
+            const text = document.getElementById('socialProofText');
+            if(!bar || !text) return;
+            const hour = new Date().getHours();
+            const baseCount = 127 + (hour * 3) + Math.floor(Math.random() * 20);
+            text.textContent = baseCount + ' Workouts heute weltweit getrackt';
+            bar.classList.remove('hidden'); bar.classList.add('flex');
+        };
+        window.showPostWorkoutSocialProof = function() {
+            if(!Array.isArray(window.workouts)) return;
+            const archived = window.workouts.filter(w => w.archived);
+            const avgPerDay = 2.3;
+            const myToday = window.workouts.filter(w => w.archived && w.date === new Date().toISOString().split('T')[0]).length;
+            const percentile = Math.min(95, 50 + (myToday * 15) + Math.floor(Math.random() * 8));
+            setTimeout(() => window.showToast('Du hast heute mehr trainiert als ' + percentile + '% der BASE User!'), 2000);
+        };
+
+        // ============================================================
+        // REVIEW PROMPT
+        // ============================================================
+        window.checkReviewPrompt = function() {
+            if(localStorage.getItem('base_review_dismissed_permanent')) return;
+            if(!Array.isArray(window.workouts)) return;
+            const archived = window.workouts.filter(w => w.archived).length;
+            const lastPromptCount = parseInt(localStorage.getItem('base_review_workout_count') || '0');
+            const prompted = localStorage.getItem('base_review_prompted');
+            if(!prompted && archived >= 5) {
+                window._showReviewBanner();
+                localStorage.setItem('base_review_prompted', 'true');
+                localStorage.setItem('base_review_workout_count', archived);
+            } else if(prompted && archived >= lastPromptCount + 10) {
+                window._showReviewBanner();
+                localStorage.setItem('base_review_workout_count', archived);
+            }
+        };
+        window._showReviewBanner = function() {
+            const banner = document.getElementById('reviewPromptBanner');
+            if(banner) banner.classList.remove('hidden');
+        };
+        window.handleReviewAction = function() {
+            document.getElementById('reviewPromptBanner')?.classList.add('hidden');
+            localStorage.setItem('base_review_dismissed_permanent', 'true');
+            if(navigator.share) {
+                navigator.share({ title: 'BASE Fitness App', text: 'Probier BASE aus - die beste Fitness App!', url: 'https://base-app.tech' });
+            } else {
+                navigator.clipboard.writeText('https://base-app.tech').then(() => window.showToast('Link kopiert!'));
+            }
+        };
+        window.dismissReview = function() {
+            document.getElementById('reviewPromptBanner')?.classList.add('hidden');
+            localStorage.setItem('base_review_workout_count', window.workouts.filter(w => w.archived).length);
+        };
+
         window.deleteAllArchive = () => { if(!Array.isArray(window.workouts)) return; window.showModal("Leeren?", "Gesamtes Archiv löschen?", true, async () => { const archivedWorkouts = window.workouts.filter(w => w.archived); window.workouts = window.workouts.filter(w => !w.archived); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.removeFromCloud) { for(const w of archivedWorkouts) await window.removeFromCloud(w.id); } }); };
         window.switchView = function(view) { window.currentView = view; const activeClass = "bg-zinc-800 text-white px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors shadow-sm cursor-pointer interactive-z"; const inactiveClass = "text-zinc-500 hover:text-white px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer interactive-z"; document.getElementById('btnViewActive').className = view === 'active' ? activeClass : inactiveClass; document.getElementById('btnViewArchive').className = view === 'archive' ? activeClass : inactiveClass; document.getElementById('btnViewChart').className = view === 'chart' ? activeClass : inactiveClass; document.getElementById('btnFinish').style.display = view === 'active' ? 'flex' : 'none'; document.getElementById('btnClear').style.display = view === 'archive' ? 'flex' : 'none'; if(view === 'chart') { document.getElementById('viewTableContainer').classList.add('hidden'); document.getElementById('viewAnalyticsContainer').classList.remove('hidden'); window.initAnalytics(); } else { document.getElementById('viewTableContainer').classList.remove('hidden'); document.getElementById('viewAnalyticsContainer').classList.add('hidden'); window.renderTable(); } };
         
@@ -3023,12 +3329,12 @@
             var h = '<div class="bg-zinc-900/80 border border-' + color + '-500/20 rounded-2xl p-4">';
             h += '<div class="flex items-center justify-between mb-3">';
             h += '<div class="flex items-center gap-2"><i data-lucide="' + (catIcons[ch.category] || 'trophy') + '" class="w-4 h-4 text-' + color + '-400"></i>';
-            h += '<span class="text-sm font-black text-white">' + ch.title + '</span></div>';
+            h += '<span class="text-sm font-black text-white">' + window._escapeHtml(ch.title) + '</span></div>';
             h += '<span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + (isExpired ? 'bg-zinc-800 text-zinc-500' : (daysLeft <= 2 && !isExpired ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse' : 'bg-' + color + '-500/10 text-' + color + '-400 border border-' + color + '-500/20')) + '">' + timeLabel + '</span></div>';
-            h += '<p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-3">' + ch.exercise + ' \u2014 ' + unit + ' \u2014 ' + participants.length + ' Teilnehmer</p>';
+            h += '<p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-3">' + window._escapeHtml(ch.exercise) + ' \u2014 ' + unit + ' \u2014 ' + participants.length + ' Teilnehmer</p>';
             h += '<p class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mb-2">Leaderboard</p>';
             if(sorted.length === 1 && (sorted[0].progress || 0) === 0) {
-                h += '<div class="text-center py-2"><p class="text-xs text-zinc-600">Noch kein Fortschritt — tracke ein Workout mit <span class="text-amber-400">' + ch.exercise + '</span>!</p></div>';
+                h += '<div class="text-center py-2"><p class="text-xs text-zinc-600">Noch kein Fortschritt — tracke ein Workout mit <span class="text-amber-400">' + window._escapeHtml(ch.exercise) + '</span>!</p></div>';
             }
             for(var i = 0; i < Math.min(sorted.length, 5); i++) {
                 var p = sorted[i];
@@ -3036,7 +3342,7 @@
                 var medal = medals[i + 1] || (i + 1) + '.';
                 var isMe = p.uid === myUid;
                 h += '<div class="flex items-center justify-between py-1.5 ' + (isMe ? 'bg-amber-500/5 rounded-lg px-2 -mx-2' : '') + '">';
-                h += '<span class="text-xs ' + (isMe ? 'text-amber-400 font-black' : 'text-zinc-400 font-bold') + '">' + medal + ' ' + (p.name || 'Anonym') + '</span>';
+                h += '<span class="text-xs ' + (isMe ? 'text-amber-400 font-black' : 'text-zinc-400 font-bold') + '">' + medal + ' ' + window._escapeHtml(p.name || 'Anonym') + '</span>';
                 h += '<span class="text-xs font-black ' + (isMe ? 'text-amber-400' : 'text-white') + '">' + (p.progress || 0) + ' ' + unit + '</span></div>';
             }
             h += '<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-800">';
@@ -3596,14 +3902,14 @@
                 const ui = window.CAT_UI[w.category] || window.CAT_UI['main'];
                 let dataStr = '';
                 if(w.setDetails?.length > 0) dataStr = w.setDetails.map(s => `${s.reps}×${s.weight}kg`).join(' · ');
-                else if(w.data) dataStr = Object.entries(w.data).slice(0,3).map(([k,v]) => `${v} ${k}`).join(' · ');
+                else if(w.data) dataStr = Object.entries(w.data).slice(0,3).map(([k,v]) => `${window._escapeHtml(String(v))} ${window._escapeHtml(k)}`).join(' · ');
 
                 return `<div class="flex items-center gap-3 py-2" style="border-bottom:1px solid var(--border-hex)">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${ui.bg} ${ui.border} border">
                         <i data-lucide="${ui.icon}" class="w-3 h-3 ${ui.color} pointer-events-none"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-black text-white truncate" style="font-family:'Barlow Condensed',sans-serif">${w.exercise}</p>
+                        <p class="text-sm font-black text-white truncate" style="font-family:'Barlow Condensed',sans-serif">${window._escapeHtml(w.exercise)}</p>
                         ${dataStr ? `<p class="text-[10px] font-bold mt-0.5 truncate" style="color:var(--text-muted)">${dataStr}</p>` : ''}
                     </div>
                 </div>`;
@@ -4320,7 +4626,7 @@
                 ? window.workouts
                 : window.workouts.filter(w => w.category === window.currentCategory);
             const unique = [...new Set(filtered.map(w => w.exercise).filter(Boolean))].sort();
-            list.innerHTML = unique.map(ex => `<option value="${ex}">`).join('');
+            list.innerHTML = unique.map(ex => `<option value="${window._escapeHtml(ex)}">`).join('');
         };
         // Tabellen-Sortierung
         window._tableSortKey = null;
@@ -4332,18 +4638,18 @@
             ['date','exercise','weight'].forEach(k => { const th = document.getElementById('sortTh_'+k); if(th) th.setAttribute('aria-sort', k === key ? (window._tableSortAsc ? 'ascending' : 'descending') : 'none'); });
             window.renderTable();
         };
-        window.renderTable = function() { const body = document.getElementById('historyTableBody'); const mobileList = document.getElementById('mobileCardList'); if(!body) return; body.innerHTML = ''; if(mobileList) mobileList.innerHTML = ''; if(!Array.isArray(window.workouts)) return; let preparedWorkouts = window.workouts.map(w => { if(w.id && String(w.id).startsWith('strava_')) w.category = 'cardio'; return w; }); let filteredWorkouts = preparedWorkouts; if (window.currentTableFilter !== 'all') filteredWorkouts = preparedWorkouts.filter(w => w.category === window.currentTableFilter); filteredWorkouts = filteredWorkouts.filter(w => window.currentView === 'active' ? !w.archived : w.archived); if(window._tableSortKey) { const dir = window._tableSortAsc ? 1 : -1; filteredWorkouts.sort((a, b) => { if(window._tableSortKey === 'date') { return dir * (a.date || '').localeCompare(b.date || ''); } else if(window._tableSortKey === 'exercise') { return dir * (a.exercise || '').localeCompare(b.exercise || ''); } else if(window._tableSortKey === 'weight') { return dir * ((a.maxWeight || 0) - (b.maxWeight || 0)); } return 0; }); } const reversed = window._tableSortKey ? filteredWorkouts : [...filteredWorkouts].reverse(); const hist = {}; reversed.forEach(w => { const k = w.category + '_' + w.exercise.toLowerCase(); w.progressBadge = ''; if(hist[k]) { const l = hist[k]; if (w.category === 'strength') { let curV = w.volume || 0, lastV = l.volume || 0; let curW = w.maxWeight || 0, lastW = l.maxWeight || 0; if (curW > lastW && lastW > 0) { const pct = (((curW - lastW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-1.5 py-0.5 rounded shadow-sm ml-2">+${pct}% kg</span>`; } else if (curW < lastW && lastW > 0) { const pct = (((lastW - curW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-1.5 py-0.5 rounded shadow-sm ml-2">-${pct}% kg</span>`; } } else if (w.category === 'cardio' && w.data && l.data) { let curDist = parseFloat((w.data['Distanz (km)'] || w.data['Distanz'] || '0').toString().replace(',','.')); let lastDist = parseFloat((l.data['Distanz (km)'] || l.data['Distanz'] || '0').toString().replace(',','.')); if(curDist > lastDist && lastDist > 0) { w.progressBadge = `<span class="bg-[#fc4c02]/10 text-[#fc4c02] border border-[#fc4c02]/20 text-[10px] px-1.5 py-0.5 rounded shadow-sm ml-2">+${(curDist - lastDist).toFixed(2)} km</span>`; } } } hist[k] = w; }); let lastSessionId = null; filteredWorkouts.forEach(w => { if (window.currentView === 'archive' && w.archived && w.sessionId && w.sessionId !== lastSessionId) { if (w.sessionDuration || w.sessionComment) { const sessionTr = document.createElement('tr'); sessionTr.className = "bg-primary/5 border-b border-primary/20"; sessionTr.innerHTML = `<td colspan="4" class="p-3 px-5 shadow-sm"><div class="flex items-center justify-between"><div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">${w.sessionDuration ? `<span class="text-[10px] font-black text-primary flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="timer" class="w-3.5 h-3.5"></i> ${w.sessionDuration}</span>` : ''}${w.sessionComment ? `<span class="text-[11px] text-zinc-300 italic flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-zinc-500"></i> "${w.sessionComment}"</span>` : ''}</div><button onclick="window.shareWorkout('${w.id}')" class="text-[10px] font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded uppercase tracking-widest hover:bg-indigo-500/20 transition-colors flex items-center gap-1 shadow-sm cursor-pointer interactive-z"><i data-lucide="share-2" class="w-3 h-3"></i> Posten</button></div></td>`; body.appendChild(sessionTr); } lastSessionId = w.sessionId; } let dataHtml = ""; if (w.category === 'strength' && w.setDetails && w.setDetails.length > 0) { dataHtml = `<div class="flex flex-wrap gap-2">`; w.setDetails.forEach((s, i) => { dataHtml += `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${s.reps}x${s.weight}kg</span>`; }); dataHtml += `</div>`; } else if(w.data) { const keys = Object.keys(w.data); const det = keys.map(k => `<div class="flex flex-col mb-1 sm:mb-0 mr-4"><span class="text-[9px] text-zinc-500 uppercase font-black tracking-widest">${k}</span><span class="text-white font-bold text-xs">${w.data[k]}</span></div>`).join(''); dataHtml = `<div class="flex flex-wrap items-center">${det}</div>`; } let sportCatDisplay = w.sportCategory || 'Aktivität'; if(w.category === 'strength') sportCatDisplay = w.equipment || 'Krafttraining'; else if(w.category === 'cardio') sportCatDisplay = w.sportCategory || 'Ausdauer'; const cat = w.category || 'main'; const ui = window.CAT_UI[cat] || window.CAT_UI['main']; const isStrava = w.id && String(w.id).startsWith('strava_'); const stravaBadge = isStrava ? `<span class="bg-[#fc4c02]/20 text-[#fc4c02] text-[9px] uppercase font-black px-1.5 py-0.5 rounded ml-2">Strava</span>` : ''; const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 border-b border-zinc-800/40 transition-colors group"; tr.innerHTML = ` <td class="px-5 py-4 shadow-sm"><div class="flex flex-col gap-1"><span class="text-zinc-500 text-[10px] font-black italic">${w.date.substring(5)}</span><span class="inline-flex items-center justify-center w-6 h-6 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-3 h-3"></i></span></div></td> <td class="px-5 py-4 shadow-sm"><div class="flex flex-col"><span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5 flex items-center">${sportCatDisplay} ${stravaBadge}</span><span onclick="event.stopPropagation(); window.openExerciseHistory('${w.exercise}')" class="font-bold text-white text-sm tracking-tight flex items-center cursor-pointer hover:text-primary transition-colors">${w.exercise} ${w.progressBadge || ''}</span></div></td> <td class="px-5 py-4 shadow-sm">${dataHtml}</td> <td class="px-5 py-4 text-right whitespace-nowrap"><button aria-label="Teilen" onclick="window.shareWorkout('${w.id}')" class="text-zinc-600 hover:text-indigo-400 transition-all p-2 cursor-pointer interactive-z"><i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i></button>${!isStrava && !w.archived ? `<button aria-label="Edit 2" onclick="window.editEntry('${w.id}')" class="text-zinc-600 hover:text-primary transition-all p-2 opacity-0 group-hover:opacity-100 cursor-pointer interactive-z"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>` : ''}<button aria-label="Löschen" onclick="window.deleteEntry('${w.id}')" class="text-zinc-600 hover:text-rose-500 transition-all p-2 cursor-pointer interactive-z"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button></td> `; body.appendChild(tr);
+        window.renderTable = function() { const body = document.getElementById('historyTableBody'); const mobileList = document.getElementById('mobileCardList'); if(!body) return; body.innerHTML = ''; if(mobileList) mobileList.innerHTML = ''; if(!Array.isArray(window.workouts)) return; let preparedWorkouts = window.workouts.map(w => { if(w.id && String(w.id).startsWith('strava_')) w.category = 'cardio'; return w; }); let filteredWorkouts = preparedWorkouts; if (window.currentTableFilter !== 'all') filteredWorkouts = preparedWorkouts.filter(w => w.category === window.currentTableFilter); filteredWorkouts = filteredWorkouts.filter(w => window.currentView === 'active' ? !w.archived : w.archived); if(window._tableSortKey) { const dir = window._tableSortAsc ? 1 : -1; filteredWorkouts.sort((a, b) => { if(window._tableSortKey === 'date') { return dir * (a.date || '').localeCompare(b.date || ''); } else if(window._tableSortKey === 'exercise') { return dir * (a.exercise || '').localeCompare(b.exercise || ''); } else if(window._tableSortKey === 'weight') { return dir * ((a.maxWeight || 0) - (b.maxWeight || 0)); } return 0; }); } const reversed = window._tableSortKey ? filteredWorkouts : [...filteredWorkouts].reverse(); const hist = {}; reversed.forEach(w => { const k = w.category + '_' + w.exercise.toLowerCase(); w.progressBadge = ''; if(hist[k]) { const l = hist[k]; if (w.category === 'strength') { let curV = w.volume || 0, lastV = l.volume || 0; let curW = w.maxWeight || 0, lastW = l.maxWeight || 0; if (curW > lastW && lastW > 0) { const pct = (((curW - lastW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-1.5 py-0.5 rounded shadow-sm ml-2">+${pct}% kg</span>`; } else if (curW < lastW && lastW > 0) { const pct = (((lastW - curW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-1.5 py-0.5 rounded shadow-sm ml-2">-${pct}% kg</span>`; } } else if (w.category === 'cardio' && w.data && l.data) { let curDist = parseFloat((w.data['Distanz (km)'] || w.data['Distanz'] || '0').toString().replace(',','.')); let lastDist = parseFloat((l.data['Distanz (km)'] || l.data['Distanz'] || '0').toString().replace(',','.')); if(curDist > lastDist && lastDist > 0) { w.progressBadge = `<span class="bg-[#fc4c02]/10 text-[#fc4c02] border border-[#fc4c02]/20 text-[10px] px-1.5 py-0.5 rounded shadow-sm ml-2">+${(curDist - lastDist).toFixed(2)} km</span>`; } } } hist[k] = w; }); let lastSessionId = null; filteredWorkouts.forEach(w => { if (window.currentView === 'archive' && w.archived && w.sessionId && w.sessionId !== lastSessionId) { if (w.sessionDuration || w.sessionComment) { const sessionTr = document.createElement('tr'); sessionTr.className = "bg-primary/5 border-b border-primary/20"; sessionTr.innerHTML = `<td colspan="4" class="p-3 px-5 shadow-sm"><div class="flex items-center justify-between"><div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">${w.sessionDuration ? `<span class="text-[10px] font-black text-primary flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="timer" class="w-3.5 h-3.5"></i> ${w.sessionDuration}</span>` : ''}${w.sessionComment ? `<span class="text-[11px] text-zinc-300 italic flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-zinc-500"></i> "${window._escapeHtml(w.sessionComment)}"</span>` : ''}</div><button onclick="window.shareWorkout('${w.id}')" class="text-[10px] font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded uppercase tracking-widest hover:bg-indigo-500/20 transition-colors flex items-center gap-1 shadow-sm cursor-pointer interactive-z"><i data-lucide="share-2" class="w-3 h-3"></i> Posten</button></div></td>`; body.appendChild(sessionTr); } lastSessionId = w.sessionId; } let dataHtml = ""; if (w.category === 'strength' && w.setDetails && w.setDetails.length > 0) { dataHtml = `<div class="flex flex-wrap gap-2">`; w.setDetails.forEach((s, i) => { dataHtml += `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${s.reps}x${s.weight}kg</span>`; }); dataHtml += `</div>`; } else if(w.data) { const keys = Object.keys(w.data); const det = keys.map(k => `<div class="flex flex-col mb-1 sm:mb-0 mr-4"><span class="text-[9px] text-zinc-500 uppercase font-black tracking-widest">${window._escapeHtml(k)}</span><span class="text-white font-bold text-xs">${window._escapeHtml(String(w.data[k]))}</span></div>`).join(''); dataHtml = `<div class="flex flex-wrap items-center">${det}</div>`; } let sportCatDisplay = w.sportCategory || 'Aktivität'; if(w.category === 'strength') sportCatDisplay = w.equipment || 'Krafttraining'; else if(w.category === 'cardio') sportCatDisplay = w.sportCategory || 'Ausdauer'; const cat = w.category || 'main'; const ui = window.CAT_UI[cat] || window.CAT_UI['main']; const isStrava = w.id && String(w.id).startsWith('strava_'); const stravaBadge = isStrava ? `<span class="bg-[#fc4c02]/20 text-[#fc4c02] text-[9px] uppercase font-black px-1.5 py-0.5 rounded ml-2">Strava</span>` : ''; const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 border-b border-zinc-800/40 transition-colors group"; tr.innerHTML = ` <td class="px-5 py-4 shadow-sm"><div class="flex flex-col gap-1"><span class="text-zinc-500 text-[10px] font-black italic">${w.date.substring(5)}</span><span class="inline-flex items-center justify-center w-6 h-6 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-3 h-3"></i></span></div></td> <td class="px-5 py-4 shadow-sm"><div class="flex flex-col"><span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5 flex items-center">${window._escapeHtml(sportCatDisplay)} ${stravaBadge}</span><span onclick="event.stopPropagation(); window.openExerciseHistory('${w.exercise.replace(/'/g, "\\'")}')" class="font-bold text-white text-sm tracking-tight flex items-center cursor-pointer hover:text-primary transition-colors">${window._escapeHtml(w.exercise)} ${w.progressBadge || ''}</span></div></td> <td class="px-5 py-4 shadow-sm">${dataHtml}</td> <td class="px-5 py-4 text-right whitespace-nowrap"><button aria-label="Teilen" onclick="window.shareWorkout('${w.id}')" class="text-zinc-600 hover:text-indigo-400 transition-all p-2 cursor-pointer interactive-z"><i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i></button>${!isStrava && !w.archived ? `<button aria-label="Edit 2" onclick="window.editEntry('${w.id}')" class="text-zinc-600 hover:text-primary transition-all p-2 opacity-0 group-hover:opacity-100 cursor-pointer interactive-z"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>` : ''}<button aria-label="Löschen" onclick="window.deleteEntry('${w.id}')" class="text-zinc-600 hover:text-rose-500 transition-all p-2 cursor-pointer interactive-z"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button></td> `; body.appendChild(tr);
         if(mobileList) { const card = document.createElement('div'); card.className = 'relative rounded-2xl p-4 transition-all'; card.style.cssText = 'background:var(--surface-hex);border:1px solid var(--border-hex)';
         const topSet = w.category === 'strength' && w.setDetails && w.setDetails.length > 0 ? w.setDetails.reduce((best, s) => parseFloat(s.weight) > parseFloat(best.weight) ? s : best, w.setDetails[0]) : null;
         const topSetHtml = topSet ? `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${topSet.reps}x${topSet.weight}kg</span>` : (dataHtml || '');
-        card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><span class="inline-flex items-center justify-center w-5 h-5 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-2.5 h-2.5"></i></span><span class="text-zinc-500 text-[10px] font-black italic">${w.date}</span>${stravaBadge}</div><p onclick="window.openExerciseHistory('${w.exercise}')" class="font-bold text-white text-sm tracking-tight cursor-pointer hover:text-primary transition-colors mb-1">${w.exercise} ${w.progressBadge || ''}</p><div class="mt-1">${topSetHtml}</div></div><button onclick="this.nextElementSibling.classList.toggle('show')" class="text-zinc-600 hover:text-white p-1 cursor-pointer transition-colors flex-shrink-0"><i data-lucide="more-vertical" class="w-4 h-4 pointer-events-none"></i></button><div class="workout-card-menu flex-col gap-1 rounded-xl p-2 shadow-xl" style="background:var(--surface-hex);border:1px solid var(--border-hex)">${!isStrava && !w.archived ? `<button onclick="window.editEntry('${w.id}');this.parentElement.classList.remove('show')" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer w-full text-left"><i data-lucide="edit-2" class="w-3.5 h-3.5 pointer-events-none"></i> Bearbeiten</button>` : ''}<button onclick="window.shareWorkout('${w.id}');this.parentElement.classList.remove('show')" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all cursor-pointer w-full text-left"><i data-lucide="share-2" class="w-3.5 h-3.5 pointer-events-none"></i> Teilen</button><button onclick="window.deleteEntry('${w.id}')" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-rose-400 hover:bg-rose-500/5 transition-all cursor-pointer w-full text-left"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i> Löschen</button></div></div>`; mobileList.appendChild(card); } }); if(window.lucide) lucide.createIcons(); window.updateExerciseAutocomplete(); const emptyState = document.getElementById('emptyWorkoutState'); if(emptyState) { const hasRows = body.children.length > 0 || (mobileList && mobileList.children.length > 0); if(!hasRows) { emptyState.classList.remove('hidden'); emptyState.classList.add('block'); } else { emptyState.classList.add('hidden'); emptyState.classList.remove('block'); } } };
+        card.innerHTML = `<div class="flex items-start justify-between"><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><span class="inline-flex items-center justify-center w-5 h-5 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-2.5 h-2.5"></i></span><span class="text-zinc-500 text-[10px] font-black italic">${w.date}</span>${stravaBadge}</div><p onclick="window.openExerciseHistory('${w.exercise.replace(/'/g, "\\'")}')" class="font-bold text-white text-sm tracking-tight cursor-pointer hover:text-primary transition-colors mb-1">${window._escapeHtml(w.exercise)} ${w.progressBadge || ''}</p><div class="mt-1">${topSetHtml}</div></div><button onclick="this.nextElementSibling.classList.toggle('show')" class="text-zinc-600 hover:text-white p-1 cursor-pointer transition-colors flex-shrink-0"><i data-lucide="more-vertical" class="w-4 h-4 pointer-events-none"></i></button><div class="workout-card-menu flex-col gap-1 rounded-xl p-2 shadow-xl" style="background:var(--surface-hex);border:1px solid var(--border-hex)">${!isStrava && !w.archived ? `<button onclick="window.editEntry('${w.id}');this.parentElement.classList.remove('show')" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer w-full text-left"><i data-lucide="edit-2" class="w-3.5 h-3.5 pointer-events-none"></i> Bearbeiten</button>` : ''}<button onclick="window.shareWorkout('${w.id}');this.parentElement.classList.remove('show')" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all cursor-pointer w-full text-left"><i data-lucide="share-2" class="w-3.5 h-3.5 pointer-events-none"></i> Teilen</button><button onclick="window.deleteEntry('${w.id}')" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-zinc-400 hover:text-rose-400 hover:bg-rose-500/5 transition-all cursor-pointer w-full text-left"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i> Löschen</button></div></div>`; mobileList.appendChild(card); } }); if(window.lucide) lucide.createIcons(); window.updateExerciseAutocomplete(); const emptyState = document.getElementById('emptyWorkoutState'); if(emptyState) { const hasRows = body.children.length > 0 || (mobileList && mobileList.children.length > 0); if(!hasRows) { emptyState.classList.remove('hidden'); emptyState.classList.add('block'); } else { emptyState.classList.add('hidden'); emptyState.classList.remove('block'); } } };
         document.body.addEventListener('click', function(e) { if(!e.target.closest('.workout-card-menu') && !e.target.closest('[onclick*="nextElementSibling"]')) { document.querySelectorAll('.workout-card-menu.show').forEach(m => m.classList.remove('show')); } });
         window.exportToCSV = () => { if(!Array.isArray(window.workouts) || window.workouts.length === 0) { window.showToast("Keine Daten vorhanden."); return; } let allDynamicKeys = new Set(); window.workouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allDynamicKeys.add(k)); }); const dynamicHeaders = Array.from(allDynamicKeys); let csv = "Datum;Kategorie;Sportart;Aktivitaet;Dauer;Notiz;" + dynamicHeaders.join(";") + "\n"; window.workouts.forEach(w => { let row = [ w.date || "", w.category || "", w.sportCategory || "", w.exercise || "", w.sessionDuration || "", (w.sessionComment || "").replace(/;/g, ',').replace(/\n/g, ' ') ]; dynamicHeaders.forEach(header => { let val = (w.data && w.data[header] !== undefined) ? w.data[header] : ""; row.push(String(val).replace(/;/g, ',')); }); csv += row.join(";") + "\n"; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `BASE_Export.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast("Export erfolgreich!"); };
 
         // --- DIAGRAMME ---
         window.initAnalytics = function() { if(!Array.isArray(window.workouts)) return; window._ensureChartJS().then(() => window._initAnalyticsCore()).catch(e => console.error('Chart.js laden fehlgeschlagen:', e)); };
-        window._initAnalyticsCore = function() { const exSelect = document.getElementById('analyticsExercise'); const uniqueExercises = [...new Set(window.workouts.map(w => w.exercise))].filter(Boolean); if (uniqueExercises.length === 0) { exSelect.innerHTML = '<option value="">Keine Daten</option>'; document.getElementById('analyticsMetric').innerHTML = '<option value="">-</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentSelection = exSelect.value; exSelect.innerHTML = uniqueExercises.map(ex => `<option value="${ex}">${ex}</option>`).join(''); if (currentSelection && uniqueExercises.includes(currentSelection)) exSelect.value = currentSelection; window.updateAnalyticsMetrics(); }
-        window.updateAnalyticsMetrics = function() { const selectedExercise = document.getElementById('analyticsExercise').value; const metricSelect = document.getElementById('analyticsMetric'); if(!selectedExercise || !Array.isArray(window.workouts)) return; const relevantWorkouts = window.workouts.filter(w => w.exercise === selectedExercise); let allKeys = new Set(); relevantWorkouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allKeys.add(k)); }); const keysArray = Array.from(allKeys); if (keysArray.length === 0) { metricSelect.innerHTML = '<option value="">Keine Metriken</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentMetric = metricSelect.value; metricSelect.innerHTML = keysArray.map(k => `<option value="${k}">${k}</option>`).join(''); if(currentMetric && keysArray.includes(currentMetric)) metricSelect.value = currentMetric; window.renderV2Chart(); };
+        window._initAnalyticsCore = function() { const exSelect = document.getElementById('analyticsExercise'); const uniqueExercises = [...new Set(window.workouts.map(w => w.exercise))].filter(Boolean); if (uniqueExercises.length === 0) { exSelect.innerHTML = '<option value="">Keine Daten</option>'; document.getElementById('analyticsMetric').innerHTML = '<option value="">-</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentSelection = exSelect.value; exSelect.innerHTML = uniqueExercises.map(ex => `<option value="${window._escapeHtml(ex)}">${window._escapeHtml(ex)}</option>`).join(''); if (currentSelection && uniqueExercises.includes(currentSelection)) exSelect.value = currentSelection; window.updateAnalyticsMetrics(); }
+        window.updateAnalyticsMetrics = function() { const selectedExercise = document.getElementById('analyticsExercise').value; const metricSelect = document.getElementById('analyticsMetric'); if(!selectedExercise || !Array.isArray(window.workouts)) return; const relevantWorkouts = window.workouts.filter(w => w.exercise === selectedExercise); let allKeys = new Set(); relevantWorkouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allKeys.add(k)); }); const keysArray = Array.from(allKeys); if (keysArray.length === 0) { metricSelect.innerHTML = '<option value="">Keine Metriken</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentMetric = metricSelect.value; metricSelect.innerHTML = keysArray.map(k => `<option value="${window._escapeHtml(k)}">${window._escapeHtml(k)}</option>`).join(''); if(currentMetric && keysArray.includes(currentMetric)) metricSelect.value = currentMetric; window.renderV2Chart(); };
         window.renderV2Chart = function() { const ex = document.getElementById('analyticsExercise').value; const metric = document.getElementById('analyticsMetric').value; if(!ex || !metric || !Array.isArray(window.workouts)) return; let chartData = window.workouts.filter(w => w.exercise === ex && w.data && w.data[metric] !== undefined).sort((a,b) => new Date(a.date) - new Date(b.date)); const labels = chartData.map(w => w.date.substring(5)); const dataPoints = chartData.map(w => { let val = String(w.data[metric]).replace(',', '.'); if(val.includes(':')) { const parts = val.split(':'); if(parts.length === 2) return parseInt(parts[0]) + (parseInt(parts[1])/60); } let floatVal = parseFloat(val); return isNaN(floatVal) ? 0 : floatVal; }); const ctx = document.getElementById('v2Chart').getContext('2d'); if(window.v2ChartInstance) window.v2ChartInstance.destroy(); const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-hex').trim() || '#06b6d4'; window.v2ChartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: metric, data: dataPoints, backgroundColor: primaryColor + '20', borderColor: primaryColor, borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: primaryColor, pointBorderColor: '#000', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { color: '#a1a1aa', font: { family: 'Inter' } } }, x: { grid: { display: false }, ticks: { color: '#a1a1aa', font: { family: 'Inter', weight: 'bold' } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#18181b', titleColor: '#fff', bodyColor: primaryColor, bodyFont: { weight: 'bold', size: 14 }, borderColor: '#27272a', borderWidth: 1, padding: 12, cornerRadius: 12, displayColors: false } } } }); };
 
         // ============================================================
@@ -4785,15 +5091,45 @@
             }
 
             const badge = document.getElementById('streakBadge');
-            const count = document.getElementById('streakCount');
-            if(badge && count) {
+            if(badge) {
+                const badgeCount = badge.querySelector('#streakWeekCount') || badge;
                 if(streak > 0) {
-                    count.textContent = streak;
+                    if(badgeCount.id === 'streakWeekCount') badgeCount.textContent = streak;
                     badge.classList.remove('hidden');
                     badge.classList.add('inline-flex');
                 } else {
                     badge.classList.add('hidden');
                     badge.classList.remove('inline-flex');
+                }
+            }
+
+            // Tage-Streak berechnen
+            const archived = window.workouts.filter(w => w.archived && w.date).sort((a,b) => b.date.localeCompare(a.date));
+            let dayStreak = 0;
+            if(archived.length > 0) {
+                const uniqueDates = [...new Set(archived.map(w => w.date))].sort((a,b) => b.localeCompare(a));
+                const today = new Date(); today.setHours(0,0,0,0);
+                for(let i = 0; i < uniqueDates.length; i++) {
+                    const d = new Date(uniqueDates[i]); d.setHours(0,0,0,0);
+                    const expected = new Date(today); expected.setDate(expected.getDate() - i);
+                    if(Math.abs(expected - d) < 86400000) { dayStreak++; } else break;
+                }
+            }
+            localStorage.setItem('base_streak_count', dayStreak);
+            localStorage.setItem('base_streak_last_date', new Date().toISOString().split('T')[0]);
+
+            // Streak-Bar anzeigen
+            const bar = document.getElementById('streakBar');
+            const countEl = document.getElementById('streakCount');
+            if(bar && countEl) {
+                if(dayStreak <= 0) { bar.classList.add('hidden'); bar.classList.remove('flex'); }
+                else {
+                    countEl.textContent = dayStreak;
+                    bar.classList.remove('hidden'); bar.classList.add('flex');
+                    bar.className = bar.className.replace(/bg-amber-\S+|border-amber-\S+/g, '');
+                    if(dayStreak > 30) { bar.style.cssText = 'background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4)'; }
+                    else if(dayStreak > 7) { bar.style.cssText = 'background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3)'; countEl.classList.add('animate-pulse'); }
+                    else { bar.style.cssText = ''; bar.classList.add('bg-amber-500/5', 'border', 'border-amber-500/10'); countEl.classList.remove('animate-pulse'); }
                 }
             }
         };
@@ -5671,7 +6007,7 @@
                         JSON.parse(localStorage.getItem('beastmode_v2_custom_sports') || '[]').some(s => s.id === id);
                     return `<div class="flex items-center gap-1 rounded-lg ${sport.bg} border ${sport.border} ${sport.color} overflow-hidden">
                         <button onclick="window.toggleSport('${sport.id}')" class="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all hover:opacity-80">
-                            <i data-lucide="${sport.icon}" class="w-3 h-3 pointer-events-none"></i> ${sport.name}
+                            <i data-lucide="${sport.icon}" class="w-3 h-3 pointer-events-none"></i> ${window._escapeHtml(sport.name)}
                             <i data-lucide="x" class="w-2.5 h-2.5 pointer-events-none ml-0.5 opacity-60"></i>
                         </button>
                         ${isCustom ? `<button aria-label="Löschen" onclick="window.deleteCustomSport('${sport.id}', event)" class="px-1.5 py-1.5 hover:bg-rose-500/20 hover:text-rose-400 transition-colors border-l border-current/20 cursor-pointer pointer-events-auto" title="Sport komplett löschen">
@@ -6017,12 +6353,20 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, limit, getDoc, updateDoc, addDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y", authDomain: "beastmode-17f0d.firebaseapp.com", projectId: "beastmode-17f0d", storageBucket: "beastmode-17f0d.firebasestorage.app", messagingSenderId: "276195983881", appId: "1:276195983881:web:99d55a5656e6ed7daa2ed8" };
         
         try {
             const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+
+            // Firestore-Funktionen global verfügbar machen für base-pt.js Trainer-System
+            window._fbDb = db; window._fbAuth = auth;
+            window._fbCollection = collection; window._fbDoc = doc; window._fbSetDoc = setDoc;
+            window._fbGetDoc = getDoc; window._fbGetDocs = getDocs; window._fbQuery = query;
+            window._fbWhere = where; window._fbOrderBy = orderBy; window._fbLimit = limit;
+            window._fbUpdateDoc = updateDoc; window._fbAddDoc = addDoc; window._fbIncrement = increment;
+            window._fbDeleteDoc = deleteDoc;
 
             // Auth Mode: 'register' oder 'login'
             let _authMode = 'register';

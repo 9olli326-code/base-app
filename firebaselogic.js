@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, EmailAuthProvider, linkWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, runTransaction, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, runTransaction, increment, getDocs, query, where, orderBy, limit, getDoc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- ⚙️ KONFIGURATION ---
 const firebaseConfig = { 
@@ -19,6 +19,23 @@ const db = getFirestore(app);
 
 // WICHTIG: Die App-ID für die Datenbank-Struktur
 const appIdGlobal = "base-v2-beta-test";
+
+// Firestore-Instanz und Hilfsfunktionen global verfügbar machen
+window._fbDb = db;
+window._fbAuth = auth;
+window._fbCollection = collection;
+window._fbDoc = doc;
+window._fbSetDoc = setDoc;
+window._fbGetDoc = getDoc;
+window._fbGetDocs = getDocs;
+window._fbQuery = query;
+window._fbWhere = where;
+window._fbOrderBy = orderBy;
+window._fbLimit = limit;
+window._fbUpdateDoc = updateDoc;
+window._fbAddDoc = addDoc;
+window._fbIncrement = increment;
+window._fbDeleteDoc = deleteDoc;
 
 console.log("BASE V2 FIREBASE MODULE - Aktiv ✅");
 
