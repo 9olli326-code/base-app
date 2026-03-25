@@ -8,7 +8,7 @@ const FIREBASE_PROJECT_ID = 'beastmode-17f0d';
 // Firestore REST API Helper
 function firestoreRequest(method, path, data) {
     return new Promise((resolve, reject) => {
-        const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${path}`;
+        const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${path}${path.includes('?') ? '&' : '?'}key=AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y`;
         const parsed = new URL(url);
         const options = {
             hostname: parsed.hostname,
