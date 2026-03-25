@@ -552,28 +552,72 @@ if(btns[idx]) {
 };
 
 window.addSessionExercise = function() {
-const input = document.getElementById('sessionExInput');
-if(!input || !input.value.trim()) return;
-_sessionExercises.push(input.value.trim().substring(0, 80));
-input.value = '';
-window._renderSessionExercises();
+    const input = document.getElementById('sessionExInput');
+    if(!input || !input.value.trim()) return;
+    const isCardio = _sessionType === 'ausdauer';
+    const isMobility = _sessionType === 'mobility';
+    _sessionExercises.push({
+        name: input.value.trim().substring(0, 80),
+        sets: isCardio || isMobility ? '' : '3',
+        reps: isCardio || isMobility ? '' : '10',
+        weight: isCardio ? '' : '',
+        duration: isCardio || isMobility ? '30' : '',
+        distance: isCardio ? '' : '',
+        intensity: isCardio ? '' : '',
+        notes: isMobility ? '' : ''
+    });
+    input.value = '';
+    window._renderSessionExercises();
 };
 
 window.removeSessionExercise = function(idx) {
-_sessionExercises.splice(idx, 1);
-window._renderSessionExercises();
+    _sessionExercises.splice(idx, 1);
+    window._renderSessionExercises();
+};
+
+window.updateSessionExField = function(idx, field, value) {
+    if(_sessionExercises[idx]) _sessionExercises[idx][field] = value;
 };
 
 window._renderSessionExercises = function() {
-const el = document.getElementById('sessionExercisesList');
-if(!el) return;
-el.innerHTML = _sessionExercises.map((ex, i) => `
-    <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
-        <span class="flex-1 text-white text-sm font-bold truncate">${window._escapeHtml(ex)}</span>
-        <button onclick="window.removeSessionExercise(${i})" class="text-zinc-500 hover:text-rose-400 cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i></button>
-    </div>
-`).join('');
-window._refreshLucide();
+    const el = document.getElementById('sessionExercisesList');
+    if(!el) return;
+    const isCardio = _sessionType === 'ausdauer';
+    const isMobility = _sessionType === 'mobility';
+    el.innerHTML = _sessionExercises.map((ex, i) => {
+        const esc = window._escapeHtml;
+        const name = typeof ex === 'string' ? ex : ex.name;
+        const obj = typeof ex === 'string' ? { name: ex, sets:'3', reps:'10', weight:'' } : ex;
+        // Sicherstellen dass _sessionExercises[i] ein Objekt ist
+        if(typeof ex === 'string') _sessionExercises[i] = obj;
+        let detailHtml = '';
+        if(isCardio) {
+            detailHtml = `<div class="flex gap-2 mt-2">
+                <input type="number" placeholder="Min" value="${esc(obj.duration||'')}" onchange="window.updateSessionExField(${i},'duration',this.value)" class="w-16 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto">
+                <input type="text" placeholder="Distanz" value="${esc(obj.distance||'')}" onchange="window.updateSessionExField(${i},'distance',this.value)" class="w-20 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto">
+                <input type="text" placeholder="Intensität" value="${esc(obj.intensity||'')}" onchange="window.updateSessionExField(${i},'intensity',this.value)" class="flex-1 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+            </div>`;
+        } else if(isMobility) {
+            detailHtml = `<div class="flex gap-2 mt-2">
+                <input type="number" placeholder="Min" value="${esc(obj.duration||'')}" onchange="window.updateSessionExField(${i},'duration',this.value)" class="w-16 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto">
+                <input type="text" placeholder="Notizen" value="${esc(obj.notes||'')}" onchange="window.updateSessionExField(${i},'notes',this.value)" class="flex-1 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+            </div>`;
+        } else {
+            detailHtml = `<div class="flex gap-2 mt-2">
+                <div class="flex items-center gap-1"><input type="number" placeholder="Sets" value="${esc(obj.sets||'')}" onchange="window.updateSessionExField(${i},'sets',this.value)" class="w-12 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto"><span class="text-zinc-600 text-[10px] font-black">×</span></div>
+                <input type="number" placeholder="Reps" value="${esc(obj.reps||'')}" onchange="window.updateSessionExField(${i},'reps',this.value)" class="w-12 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto">
+                <div class="flex items-center gap-1"><span class="text-zinc-600 text-[10px] font-black">@</span><input type="number" placeholder="kg" value="${esc(obj.weight||'')}" onchange="window.updateSessionExField(${i},'weight',this.value)" class="w-14 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto"></div>
+            </div>`;
+        }
+        return `<div class="px-3 py-2.5 rounded-lg" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
+            <div class="flex items-center gap-2">
+                <span class="flex-1 text-white text-sm font-bold truncate">${esc(name)}</span>
+                <button onclick="window.removeSessionExercise(${i})" class="text-zinc-500 hover:text-rose-400 cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+            </div>
+            ${detailHtml}
+        </div>`;
+    }).join('');
+    window._refreshLucide();
 };
 
 window.openSessionModal = function(preselectedClientId) {
@@ -926,13 +970,19 @@ if(!client) return;
 
 _qtSessionId = sessionId;
 _qtStartTime = Date.now();
-_qtExercises = (s.exercises || []).map((ex, i) => ({
-    id: 'ex_' + i,
-    name: ex,
-    sets: [],
-    done: false,
-    notes: ''
-}));
+_qtExercises = (s.exercises || []).map((ex, i) => {
+    const isObj = typeof ex === 'object' && ex !== null;
+    const name = isObj ? ex.name : ex;
+    // Pre-fill sets from planned data
+    const preSets = [];
+    if(isObj && ex.sets && ex.reps) {
+        const numSets = parseInt(ex.sets) || 0;
+        const reps = parseInt(ex.reps) || 0;
+        const weight = parseFloat(ex.weight) || 0;
+        for(let s = 0; s < numSets; s++) preSets.push({ reps, weight });
+    }
+    return { id: 'ex_' + i, name, sets: preSets, done: false, notes: isObj ? (ex.notes || '') : '' };
+});
 
 // If session has no exercises, add 3 empty slots
 if(_qtExercises.length === 0) {
