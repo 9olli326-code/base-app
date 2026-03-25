@@ -208,6 +208,11 @@ window.currentMode = mode;
 const btnP = document.getElementById('btnModePersonal');
 const btnPT = document.getElementById('btnModePT');
 const ptDash = document.getElementById('ptDashboard');
+// KI-Buttons: nur im Athleten-Modus sichtbar
+var bWarm = document.getElementById('btnWarmup');
+var bRec = document.getElementById('btnExerciseRec');
+if(bWarm) bWarm.style.display = mode === 'personal' ? 'flex' : 'none';
+if(bRec) bRec.style.display = mode === 'personal' ? 'flex' : 'none';
 if(mode === 'pt') {
     if(btnP) { btnP.classList.remove('bg-zinc-800','text-primary'); btnP.classList.add('text-zinc-500'); }
     if(btnPT) { btnPT.classList.add('bg-zinc-800','text-primary'); btnPT.classList.remove('text-zinc-500'); }

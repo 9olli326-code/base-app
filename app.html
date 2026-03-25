@@ -847,6 +847,8 @@
                             <button onclick="window.switchView('chart')" id="btnViewChart" class="text-zinc-500 hover:text-white px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer" data-i18n="tDia">Diagramme</button>
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button id="btnWarmup" onclick="window.getWarmupRecommendation()" class="hidden text-[10px] font-black bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-lg uppercase tracking-widest transition-all flex items-center gap-1.5 cursor-pointer"><i data-lucide="flame" class="w-3.5 h-3.5 pointer-events-none"></i> Aufwärmen</button>
+                            <button id="btnExerciseRec" onclick="window.getExerciseRecommendation()" class="hidden text-[10px] font-black bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 px-3 py-1.5 rounded-lg uppercase tracking-widest transition-all flex items-center gap-1.5 cursor-pointer"><i data-lucide="sparkles" class="w-3.5 h-3.5 pointer-events-none"></i> KI Empfehlung</button>
                             <button id="btnFinish" onclick="window.archiveWorkouts()" class="w-full sm:w-auto text-[10px] font-black bg-zinc-800 hover:bg-zinc-700 text-primary border border-zinc-700 px-4 py-1.5 rounded-lg uppercase tracking-widest shadow-sm transition-all flex justify-center items-center gap-1.5 cursor-pointer"><i data-lucide="check-circle" class="w-3.5 h-3.5 pointer-events-none"></i> <span data-i18n="btnEnd" class="pointer-events-none">Beenden</span></button>
                             <button id="btnClear" onclick="window.deleteAllArchive()" class="hidden w-full sm:w-auto text-[10px] font-black text-rose-500 hover:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-4 py-1.5 rounded-lg uppercase tracking-widest transition-all justify-center items-center gap-1.5 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i> <span data-i18n="btnDel" class="pointer-events-none">Leeren</span></button>
                             <button aria-label="CSV Export" onclick="window.exportToCSV()" class="text-[10px] font-black text-zinc-500 hover:text-white bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg uppercase tracking-widest transition-all flex items-center gap-1.5 cursor-pointer"><i data-lucide="download" class="w-3.5 h-3.5 pointer-events-none"></i></button>
@@ -1453,6 +1455,37 @@
     </div>
 
     <!-- ✅ PT CLIENT DETAIL MODAL -->
+    <!-- ✅ WARMUP EMPFEHLUNG MODAL -->
+    <div id="warmupModal" class="fixed inset-0 bg-black/95 z-[700] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-5 md:p-6 max-w-md w-full shadow-2xl relative my-4 max-h-[90vh] flex flex-col" style="border:1px solid rgba(245,158,11,0.3)">
+            <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#000"><i data-lucide="flame" class="w-5 h-5"></i></div>
+                    <div><h3 class="text-lg font-black text-white uppercase tracking-tighter">Aufwärmen</h3><p class="text-[10px] text-amber-400 font-bold uppercase tracking-widest">KI-Empfehlung</p></div>
+                </div>
+                <button aria-label="Schließen" onclick="window.toggleModal('warmupModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div id="warmupList" class="flex-1 overflow-y-auto hide-scrollbar space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- ✅ EXERCISE EMPFEHLUNG MODAL -->
+    <div id="exerciseRecModal" class="fixed inset-0 bg-black/95 z-[700] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-5 md:p-6 max-w-md w-full shadow-2xl relative my-4 max-h-[90vh] flex flex-col" style="border:1px solid rgba(6,182,212,0.3)">
+            <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#06b6d4,#6366f1);color:#000"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
+                    <div><h3 class="text-lg font-black text-white uppercase tracking-tighter">Übungsempfehlung</h3><p class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">Personalisiert per KI</p></div>
+                </div>
+                <button aria-label="Schließen" onclick="window.toggleModal('exerciseRecModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div id="exerciseRecList" class="flex-1 overflow-y-auto hide-scrollbar space-y-2"></div>
+            <button onclick="window._addAllRecsToWorkout()" class="mt-3 w-full py-3 rounded-xl font-black uppercase tracking-widest text-xs cursor-pointer pointer-events-auto transition-all active:scale-95 flex-shrink-0 flex items-center justify-center gap-2" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4">
+                <i data-lucide="check-check" class="w-4 h-4 pointer-events-none"></i> Alle übernehmen
+            </button>
+        </div>
+    </div>
+
     <div id="clientDetailModal" class="fixed inset-0 bg-black/95 z-[700] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
         <div class="card-bg p-6 md:p-8 max-w-2xl w-full shadow-2xl relative border-indigo-500/30 my-4 max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between mb-5 flex-shrink-0">
@@ -2336,6 +2369,11 @@
             window.loadBodyData();
             const bodyDateInput = document.getElementById('bodyDate'); if(bodyDateInput) bodyDateInput.valueAsDate = new Date();
             if(window.lucide) lucide.createIcons();
+            // KI-Buttons im Athleten-Modus zeigen
+            if(window.currentMode === 'personal') {
+                var bw = document.getElementById('btnWarmup'); if(bw) { bw.classList.remove('hidden'); bw.style.display = 'flex'; }
+                var br = document.getElementById('btnExerciseRec'); if(br) { br.classList.remove('hidden'); br.style.display = 'flex'; }
+            }
             // Progressive Disclosure: Form sofort zeigen wenn aktive Workouts vorhanden
             const hasActiveWorkouts = Array.isArray(window.workouts) && window.workouts.some(w => !w.archived);
             const fWrapper = document.getElementById('formRevealWrapper');

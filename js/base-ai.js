@@ -761,3 +761,150 @@ window.savePlanAsRoutines = function() {
     localStorage.setItem('beastmode_v2_routines', JSON.stringify(window.savedRoutines));
     window.showToast(`${saved} Vorlagen gespeichert! ✅`);
 };
+
+// ============================================================
+// KI AUFWÄRM-EMPFEHLUNG (nur Athleten-Modus)
+// ============================================================
+window.getWarmupRecommendation = async function() {
+    if(!window.checkOnlineForAI()) return;
+    if(typeof window.aiGate === 'function' && !window.aiGate()) return;
+    const ctx = window.buildAIContext();
+    const cat = window.currentCategory || 'strength';
+    const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Mobility', main:'Custom' }[cat] || cat;
+    const zns = window.currentReadinessScore || 100;
+    const lang = window.getPromptLang();
+
+    const modal = document.getElementById('warmupModal');
+    const list = document.getElementById('warmupList');
+    if(!modal || !list) return;
+    list.innerHTML = '<div class="text-center py-8"><i data-lucide="loader-2" class="w-6 h-6 text-amber-400 animate-spin mx-auto"></i><p class="text-zinc-500 text-xs mt-2">KI erstellt Aufwärmprogramm...</p></div>';
+    window.toggleModal('warmupModal');
+    if(window.lucide) lucide.createIcons();
+
+    const prompt = `Du bist ein Fitness-Coach. Erstelle ein 5-10 Minuten Aufwärmprogramm.
+Athlet: ${ctx.prof}. Verletzungen: ${ctx.injStr}.${ctx.medStr}
+Heutige Kategorie: ${catName}. ZNS Readiness: ${zns}%.
+Letzte Workouts:\n${ctx.recentWorkouts}
+Erstelle max 8 Aufwärmübungen. Antworte NUR als JSON Array (kein Markdown):
+[{"name":"Übungsname","nameEN":"English name","duration":"30s oder 10 Wdh","purpose":"Warum diese Übung","bodyPart":"chest/back/legs/shoulders/arms/core/cardio"}]
+Sprache für name und purpose: ${lang}`;
+
+    try {
+        const res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        let jsonStr = (data.reply || '[]').replace(/```json/gi,'').replace(/```/g,'').trim();
+        const arrMatch = jsonStr.match(/\[[\s\S]*\]/);
+        const exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr);
+        window._renderWarmupList(exercises);
+        if(typeof window._aiTrackCall === 'function') window._aiTrackCall();
+    } catch(e) {
+        console.error('Warmup KI Error:', e);
+        list.innerHTML = '<p class="text-rose-400 text-sm p-4">Fehler bei der KI-Antwort. Bitte erneut versuchen.</p>';
+    }
+};
+
+window._renderWarmupList = function(exercises) {
+    const list = document.getElementById('warmupList');
+    if(!list) return;
+    list.innerHTML = exercises.map(function(ex, i) {
+        var match = window.findExerciseMatch ? window.findExerciseMatch(ex.nameEN || ex.name) : null;
+        var imgHtml = match ? '<img src="' + match.img + '" loading="lazy" alt="" class="w-16 h-16 rounded-lg object-cover flex-shrink-0" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+            '<div class="w-16 h-16 rounded-lg bg-zinc-800 items-center justify-center flex-shrink-0 hidden"><i data-lucide="' + window.getBodyPartIcon(ex.bodyPart) + '" class="w-6 h-6 text-zinc-600"></i></div>' :
+            '<div class="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0"><i data-lucide="' + window.getBodyPartIcon(ex.bodyPart) + '" class="w-6 h-6 text-zinc-600"></i></div>';
+        return '<div class="flex items-center gap-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">' +
+            imgHtml +
+            '<div class="flex-1 min-w-0"><p class="text-white text-sm font-bold truncate">' + window._escapeHtml(ex.name) + '</p>' +
+            '<p class="text-amber-400 text-[10px] font-black uppercase tracking-widest">' + window._escapeHtml(ex.duration || '') + '</p>' +
+            '<p class="text-zinc-500 text-[10px] mt-0.5 truncate">' + window._escapeHtml(ex.purpose || '') + '</p></div>' +
+            '<label class="flex-shrink-0 cursor-pointer"><input type="checkbox" class="w-5 h-5 accent-amber-500 cursor-pointer pointer-events-auto"></label></div>';
+    }).join('');
+    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+};
+
+// ============================================================
+// KI ÜBUNGS-EMPFEHLUNG (nur Athleten-Modus)
+// ============================================================
+window.getExerciseRecommendation = async function() {
+    if(!window.checkOnlineForAI()) return;
+    if(typeof window.aiGate === 'function' && !window.aiGate()) return;
+    const ctx = window.buildAIContext();
+    const cat = window.currentCategory || 'strength';
+    const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Mobility', main:'Custom' }[cat] || cat;
+    const zns = window.currentReadinessScore || 100;
+    const lang = window.getPromptLang();
+    const goal = window.userProfile.goal || window.userProfile.experience || 'Allgemeine Fitness';
+
+    const modal = document.getElementById('exerciseRecModal');
+    const list = document.getElementById('exerciseRecList');
+    if(!modal || !list) return;
+    list.innerHTML = '<div class="text-center py-8"><i data-lucide="loader-2" class="w-6 h-6 text-cyan-400 animate-spin mx-auto"></i><p class="text-zinc-500 text-xs mt-2">KI analysiert dein Training...</p></div>';
+    window.toggleModal('exerciseRecModal');
+    if(window.lucide) lucide.createIcons();
+
+    const prompt = `Du bist ein erfahrener Kraft- und Fitness-Coach. Empfehle 4-6 Übungen für heute.
+Athlet: ${ctx.prof}. Ziel: ${goal}. Verletzungen: ${ctx.injStr}.${ctx.medStr}
+Kategorie: ${catName}. ZNS Readiness: ${zns}%.
+Trainingshistorie:\n${ctx.recentWorkouts}
+Berücksichtige progressive Overload und Erholung. Antworte NUR als JSON Array:
+[{"name":"Übungsname","nameEN":"English name","sets":4,"reps":8,"weight":"80kg oder Körpergewicht","reason":"Kurze Begründung","bodyPart":"chest/back/legs/shoulders/arms/core","category":"strength"}]
+Sprache für name und reason: ${lang}`;
+
+    try {
+        const res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        let jsonStr = (data.reply || '[]').replace(/```json/gi,'').replace(/```/g,'').trim();
+        const arrMatch = jsonStr.match(/\[[\s\S]*\]/);
+        const exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr);
+        window._renderExerciseRecs(exercises);
+        if(typeof window._aiTrackCall === 'function') window._aiTrackCall();
+    } catch(e) {
+        console.error('Exercise Rec KI Error:', e);
+        list.innerHTML = '<p class="text-rose-400 text-sm p-4">Fehler bei der KI-Antwort. Bitte erneut versuchen.</p>';
+    }
+};
+
+window._renderExerciseRecs = function(exercises) {
+    const list = document.getElementById('exerciseRecList');
+    if(!list) return;
+    list.innerHTML = exercises.map(function(ex, i) {
+        var match = window.findExerciseMatch ? window.findExerciseMatch(ex.nameEN || ex.name) : null;
+        var imgHtml = match ? '<img src="' + match.img + '" loading="lazy" alt="" class="w-20 h-20 rounded-xl object-cover flex-shrink-0" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+            '<div class="w-20 h-20 rounded-xl bg-zinc-800 items-center justify-center flex-shrink-0 hidden"><i data-lucide="' + window.getBodyPartIcon(ex.bodyPart) + '" class="w-8 h-8 text-zinc-600"></i></div>' :
+            '<div class="w-20 h-20 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0"><i data-lucide="' + window.getBodyPartIcon(ex.bodyPart) + '" class="w-8 h-8 text-zinc-600"></i></div>';
+        var setsReps = (ex.sets || '?') + '×' + (ex.reps || '?') + (ex.weight ? ' @' + ex.weight : '');
+        return '<div class="flex gap-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">' +
+            imgHtml +
+            '<div class="flex-1 min-w-0"><p class="text-white text-sm font-bold">' + window._escapeHtml(ex.name) + '</p>' +
+            '<p class="text-primary text-xs font-black mt-0.5">' + window._escapeHtml(setsReps) + '</p>' +
+            '<p class="text-zinc-500 text-[10px] mt-1 line-clamp-2">' + window._escapeHtml(ex.reason || '') + '</p>' +
+            '<button onclick="window._addRecToWorkout(' + i + ')" class="mt-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);color:#06b6d4">Übernehmen</button>' +
+            '</div></div>';
+    }).join('');
+    window._exerciseRecs = exercises;
+    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+};
+
+window._exerciseRecs = [];
+window._addRecToWorkout = function(idx) {
+    var ex = window._exerciseRecs[idx];
+    if(!ex) return;
+    var input = document.getElementById('exerciseInput');
+    if(input) { input.value = ex.name; input.dispatchEvent(new Event('input')); }
+    window.showToast(ex.name + ' übernommen ✅');
+};
+
+window._addAllRecsToWorkout = function() {
+    if(!window._exerciseRecs || window._exerciseRecs.length === 0) return;
+    window._exerciseRecs.forEach(function(ex) {
+        var input = document.getElementById('exerciseInput');
+        if(input) input.value = ex.name;
+    });
+    window.toggleModal('exerciseRecModal');
+    window.showToast(window._exerciseRecs.length + ' Übungen übernommen ✅');
+};
