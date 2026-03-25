@@ -258,6 +258,20 @@ window.showModal('Kunde löschen?', `"${window._escapeHtml(c.name)}" wirklich l�
 });
 };
 
+window.shareClientPortal = function() {
+    if(!_activeClientDetailId) return;
+    const clientId = _activeClientDetailId;
+    const token = Array.from(clientId).reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0).toString(36);
+    const url = `${window.location.origin}/app.html?client_view=${clientId}&token=${token}`;
+    if(navigator.share) {
+        navigator.share({ title: 'Dein Training – BASE', url: url }).catch(() => {});
+    } else if(navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => window.showToast('Link kopiert! 📋'));
+    } else {
+        window.showToast('Link: ' + url);
+    }
+};
+
 window.editClientProfile = function() {
     if(!_activeClientDetailId) return;
     const c = window.clients.find(c => c.id === _activeClientDetailId);

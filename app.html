@@ -232,6 +232,19 @@
             localStorage.removeItem('beastmode_v2_theme');
             location.reload();
         };
+
+        // --- CLIENT PORTAL DETECTION ---
+        window._isClientView = false;
+        (function() {
+            const p = new URLSearchParams(window.location.search);
+            const clientId = p.get('client_view');
+            const token = p.get('token');
+            if(clientId && token) {
+                window._isClientView = true;
+                window._clientViewId = clientId;
+                window._clientViewToken = token;
+            }
+        })();
     </script>
 
     <!-- Resource hints -->
@@ -1451,6 +1464,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button aria-label="Kunden-Link teilen" onclick="window.shareClientPortal()" class="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.1);color:#06b6d4" title="Kunden-Portal teilen"><i data-lucide="share-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
                     <button aria-label="Bearbeiten" onclick="window.editClientProfile()" class="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="background:rgba(99,102,241,0.1);color:#6366f1"><i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i></button>
                     <button aria-label="Löschen" onclick="window.deleteClient()" class="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="background:rgba(239,68,68,0.1);color:#ef4444"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
                     <button aria-label="Schließen" onclick="window.toggleModal('clientDetailModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
@@ -6255,6 +6269,125 @@
                 } catch(e) { console.error('SW Fehler:', e); }
             });
         }
+    </script>
+
+    <!-- CLIENT PORTAL (read-only Kunden-Ansicht) -->
+    <div id="clientPortalOverlay" class="fixed inset-0 z-[999] hidden" style="background:var(--bg-hex)">
+        <div class="max-w-lg mx-auto px-4 py-6 h-full overflow-y-auto hide-scrollbar">
+            <div class="text-center mb-6">
+                <div id="cpAvatar" class="w-16 h-16 rounded-2xl bg-indigo-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-3">?</div>
+                <h1 id="cpName" class="text-2xl font-black text-white uppercase tracking-tight">Kunde</h1>
+                <p id="cpMotivation" class="text-sm text-indigo-400 font-bold mt-1 italic"></p>
+            </div>
+            <!-- Stats -->
+            <div id="cpStats" class="grid grid-cols-3 gap-3 mb-6"></div>
+            <!-- Streak -->
+            <div id="cpStreak" class="mb-6"></div>
+            <!-- Kalender -->
+            <div class="mb-6">
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Trainingskalender</p>
+                <div id="cpCalendar" class="grid grid-cols-7 gap-1"></div>
+            </div>
+            <!-- Kommende Sessions -->
+            <div class="mb-6">
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Kommende Sessions</p>
+                <div id="cpSessions" class="space-y-2"></div>
+            </div>
+            <!-- PRs -->
+            <div>
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Personal Records</p>
+                <div id="cpPRs" class="space-y-2"></div>
+            </div>
+            <p class="text-center text-[9px] text-zinc-700 font-bold uppercase tracking-widest mt-8">Powered by BASE</p>
+        </div>
+    </div>
+
+    <script>
+    // Client Portal Rendering
+    if(window._isClientView) {
+        window.addEventListener('load', function() {
+            const clientId = window._clientViewId;
+            const token = window._clientViewToken;
+            // Token-Validierung: einfacher Hash aus clientId
+            const expectedToken = Array.from(clientId).reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0).toString(36);
+            if(token !== expectedToken) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:sans-serif"><p>Ungültiger Link</p></div>'; return; }
+
+            // Alle App-Elemente verstecken, Portal zeigen
+            document.getElementById('bottomNav')?.classList.add('hidden');
+            document.getElementById('ptBottomNav')?.classList.add('hidden');
+            document.querySelector('.max-w-4xl')?.classList.add('hidden');
+            const portal = document.getElementById('clientPortalOverlay');
+            if(portal) { portal.classList.remove('hidden'); portal.classList.add('block'); }
+
+            // Daten laden
+            const raw = localStorage.getItem('beastmode_v2_cache_' + clientId);
+            const workouts = raw ? JSON.parse(raw) : [];
+            const clients = JSON.parse(localStorage.getItem('beastmode_v2_clients') || '[]');
+            const client = clients.find(c => c.id === clientId);
+            const profile = JSON.parse(localStorage.getItem('base_client_profile_' + clientId) || '{}');
+
+            // Header
+            const cpName = document.getElementById('cpName');
+            const cpAvatar = document.getElementById('cpAvatar');
+            const cpMotivation = document.getElementById('cpMotivation');
+            if(cpName && client) cpName.textContent = client.name;
+            if(cpAvatar && client) cpAvatar.textContent = client.name.charAt(0).toUpperCase();
+            if(cpMotivation && profile.motivation) cpMotivation.textContent = profile.motivation;
+
+            // Stats
+            const total = workouts.length;
+            const weekAgo = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
+            const week = workouts.filter(w => w.date >= weekAgo).length;
+            const cpStats = document.getElementById('cpStats');
+            if(cpStats) cpStats.innerHTML = `
+                <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Gesamt</p><p class="text-2xl font-black text-white">${total}</p></div>
+                <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Woche</p><p class="text-2xl font-black text-white">${week}</p></div>
+                <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Streak</p><p class="text-2xl font-black text-white">${week > 0 ? '🔥' : '—'}</p></div>`;
+
+            // Kalender (letzte 28 Tage)
+            const cpCal = document.getElementById('cpCalendar');
+            if(cpCal) {
+                const days = [];
+                for(let i = 27; i >= 0; i--) {
+                    const d = new Date(Date.now() - i*86400000);
+                    const ds = d.toISOString().split('T')[0];
+                    const has = workouts.some(w => w.date === ds);
+                    days.push('<div class="aspect-square rounded-lg flex items-center justify-center text-[9px] font-bold" style="background:' + (has ? 'rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3);color:#818cf8' : 'var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)') + '">' + d.getDate() + '</div>');
+                }
+                cpCal.innerHTML = days.join('');
+            }
+
+            // Sessions (kommende, ohne Übungsdetails)
+            const sessions = JSON.parse(localStorage.getItem('base_pt_sessions') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            const upcoming = sessions.filter(s => s.clientId === clientId && s.date >= today && !s.completed).slice(0, 5);
+            const cpSess = document.getElementById('cpSessions');
+            if(cpSess) {
+                cpSess.innerHTML = upcoming.length === 0 ? '<p class="text-zinc-600 text-sm">Keine kommenden Sessions</p>' :
+                    upcoming.map(s => {
+                        const typeLabel = { kraft:'Kraft', ausdauer:'Ausdauer', mobility:'Mobility' }[s.type] || s.type;
+                        return '<div class="flex items-center justify-between px-3 py-2.5 rounded-lg" style="background:var(--surface-hex);border:1px solid var(--border-hex)"><div><p class="text-white text-sm font-bold">' + typeLabel + ' · ' + (s.duration||60) + ' min</p><p class="text-[10px] text-zinc-500 font-bold">' + s.date + ' · ' + (s.time||'') + '</p></div></div>';
+                    }).join('');
+            }
+
+            // PRs
+            const prMap = {};
+            workouts.filter(w => w.category === 'strength' && w.setDetails?.length > 0).forEach(w => {
+                w.setDetails.forEach(s => {
+                    if(s.weight > 0 && (!prMap[w.exercise] || s.weight > prMap[w.exercise])) prMap[w.exercise] = s.weight;
+                });
+            });
+            const prs = Object.entries(prMap).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            const cpPRs = document.getElementById('cpPRs');
+            if(cpPRs) {
+                cpPRs.innerHTML = prs.length === 0 ? '<p class="text-zinc-600 text-sm">Noch keine PRs</p>' :
+                    prs.map((p, i) => {
+                        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+                        return '<div class="flex items-center justify-between px-3 py-2.5 rounded-lg" style="background:var(--surface-hex);border:1px solid var(--border-hex)"><span class="text-white text-sm font-bold">' + medal + ' ' + p[0] + '</span><span class="text-primary font-black">' + p[1] + 'kg</span></div>';
+                    }).join('');
+            }
+        });
+    }
     </script>
 </body>
 </html>
