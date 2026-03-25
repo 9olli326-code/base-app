@@ -1,4 +1,4 @@
-const CACHE_NAME = 'base-v2-cache-v12';
+const CACHE_NAME = 'base-v2-cache-v13';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -10,6 +10,7 @@ const PRECACHE_URLS = [
     '/js/base-ai.min.js',
     '/js/base-settings.min.js',
     '/js/base-pt.min.js',
+    '/js/exercise-db.min.js',
     'https://unpkg.com/lucide@0.383.0',
     'https://js-de.sentry-cdn.com/287b90e183061df57c7f18944815186e.min.js',
     'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js',
