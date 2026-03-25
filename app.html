@@ -1607,6 +1607,66 @@
         </div>
     </div>
 
+    <!-- ✅ CLIENT PROFILE EDIT MODAL -->
+    <div id="clientProfileEditModal" class="fixed inset-0 bg-black/95 z-[750] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-6 md:p-8 max-w-md w-full shadow-2xl relative border-indigo-500/30 my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30"><i data-lucide="user-pen" class="w-5 h-5"></i></div>
+                    <h3 class="text-xl font-black text-white uppercase tracking-tighter">Profil bearbeiten</h3>
+                </div>
+                <button aria-label="Schließen" onclick="window.toggleModal('clientProfileEditModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Name</p>
+                    <input type="text" id="cpEditName" maxlength="60" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Alter</p>
+                        <input type="number" id="cpEditAge" min="10" max="99" placeholder="—" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Gewicht (kg)</p>
+                        <input type="number" id="cpEditWeight" min="20" max="300" step="0.1" placeholder="—" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Ziel</p>
+                    <select id="cpEditGoal" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-pointer pointer-events-auto appearance-none">
+                        <option value="">— Auswählen —</option>
+                        <option value="Muskelaufbau">Muskelaufbau</option>
+                        <option value="Abnehmen">Abnehmen</option>
+                        <option value="Ausdauer">Ausdauer</option>
+                        <option value="Rehabilitation">Rehabilitation</option>
+                        <option value="Allgemeine Fitness">Allgemeine Fitness</option>
+                    </select>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Erfahrung</p>
+                    <select id="cpEditExp" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-pointer pointer-events-auto appearance-none">
+                        <option value="">— Auswählen —</option>
+                        <option value="Anfänger">Anfänger</option>
+                        <option value="Fortgeschritten">Fortgeschritten</option>
+                        <option value="Profi">Profi</option>
+                    </select>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Verletzungen / Einschränkungen</p>
+                    <textarea id="cpEditInjuries" rows="2" maxlength="200" placeholder="Keine bekannt" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 resize-none cursor-text pointer-events-auto"></textarea>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Notizen</p>
+                    <textarea id="cpEditNotes" rows="2" maxlength="500" placeholder="Freitext..." class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm font-bold outline-none focus:border-indigo-500 resize-none cursor-text pointer-events-auto"></textarea>
+                </div>
+            </div>
+            <button onclick="window.saveClientProfileFromModal()" class="w-full mt-6 bg-indigo-500 hover:bg-indigo-400 text-black font-black py-3.5 rounded-xl transition-all uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(99,102,241,0.2)] active:scale-95 cursor-pointer pointer-events-auto">
+                Speichern
+            </button>
+        </div>
+    </div>
+
     <!-- ✅ SESSION PLANNER MODAL -->
     <div id="sessionPlannerModal" class="fixed inset-0 bg-black/95 z-[700] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
         <div class="card-bg p-6 md:p-8 max-w-lg w-full shadow-2xl relative border-indigo-500/30 my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">

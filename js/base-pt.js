@@ -259,29 +259,44 @@ window.showModal('Kunde löschen?', `"${window._escapeHtml(c.name)}" wirklich l�
 };
 
 window.editClientProfile = function() {
-if(!_activeClientDetailId) return;
-const c = window.clients.find(c => c.id === _activeClientDetailId);
-if(!c) return;
-const profile = window.getClientProfile(_activeClientDetailId);
+    if(!_activeClientDetailId) return;
+    const c = window.clients.find(c => c.id === _activeClientDetailId);
+    if(!c) return;
+    const profile = window.getClientProfile(_activeClientDetailId);
+    // Felder im Modal vorausfüllen
+    const el = (id) => document.getElementById(id);
+    if(el('cpEditName')) el('cpEditName').value = c.name || '';
+    if(el('cpEditAge')) el('cpEditAge').value = profile.age || '';
+    if(el('cpEditWeight')) el('cpEditWeight').value = profile.weight || '';
+    if(el('cpEditGoal')) el('cpEditGoal').value = profile.goal || '';
+    if(el('cpEditExp')) el('cpEditExp').value = profile.experience || '';
+    if(el('cpEditInjuries')) el('cpEditInjuries').value = profile.injuries || '';
+    if(el('cpEditNotes')) el('cpEditNotes').value = profile.notes || '';
+    window.toggleModal('clientProfileEditModal');
+    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+};
 
-const newName = prompt('Name:', c.name);
-if(newName === null) return;
-if(newName.trim()) {
-    c.name = newName.trim().substring(0, 60);
-    localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
-}
-const goal = prompt('Ziel (z.B. Muskelaufbau, Abnehmen, Ausdauer):', profile.goal || '');
-if(goal !== null) profile.goal = goal.trim().substring(0, 100);
-const exp = prompt('Erfahrungslevel (Anfänger / Fortgeschritten / Profi):', profile.experience || '');
-if(exp !== null) profile.experience = exp.trim().substring(0, 50);
-const injuries = prompt('Verletzungen / Einschränkungen:', profile.injuries || '');
-if(injuries !== null) profile.injuries = injuries.trim().substring(0, 200);
-const notes = prompt('Notizen:', profile.notes || '');
-if(notes !== null) profile.notes = notes.trim().substring(0, 500);
-
-window.saveClientProfile(_activeClientDetailId, profile);
-window.openClientDetail(_activeClientDetailId);
-window.showToast('Profil aktualisiert ✅');
+window.saveClientProfileFromModal = function() {
+    if(!_activeClientDetailId) return;
+    const c = window.clients.find(c => c.id === _activeClientDetailId);
+    if(!c) return;
+    const profile = window.getClientProfile(_activeClientDetailId);
+    const el = (id) => document.getElementById(id);
+    const newName = (el('cpEditName')?.value || '').trim().substring(0, 60);
+    if(newName) {
+        c.name = newName;
+        localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+    }
+    profile.age = el('cpEditAge')?.value || '';
+    profile.weight = el('cpEditWeight')?.value || '';
+    profile.goal = (el('cpEditGoal')?.value || '').substring(0, 100);
+    profile.experience = (el('cpEditExp')?.value || '').substring(0, 50);
+    profile.injuries = (el('cpEditInjuries')?.value || '').trim().substring(0, 200);
+    profile.notes = (el('cpEditNotes')?.value || '').trim().substring(0, 500);
+    window.saveClientProfile(_activeClientDetailId, profile);
+    window.toggleModal('clientProfileEditModal');
+    window.openClientDetail(_activeClientDetailId);
+    window.showToast('Profil aktualisiert ✅');
 };
 
 // ── CLIENT DETAIL (refactored) ─────────────────────────────
