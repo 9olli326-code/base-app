@@ -238,6 +238,33 @@ if(mode === 'pt') {
     window.renderTable(); window.calculateReadiness();
     if(window.listenToWorkouts) window.listenToWorkouts();
 }
+window._updateModeSwitchPill();
+};
+
+// ── MODE SWITCH PILL ──────────────────────────────────────
+window._updateModeSwitchPill = function() {
+    const pill = document.getElementById('modeSwitchPill');
+    if(!pill) return;
+    const hasPT = window.userProfile && window.userProfile.widgets && window.userProfile.widgets.ptMode;
+    if(!hasPT) { pill.classList.add('hidden'); pill.classList.remove('inline-flex'); return; }
+    pill.classList.remove('hidden'); pill.classList.add('inline-flex');
+    if(window.currentMode === 'pt') {
+        pill.textContent = 'ICH';
+        pill.style.cssText = 'background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);color:#06b6d4;font-family:DM Sans,sans-serif;-webkit-tap-highlight-color:transparent';
+    } else {
+        pill.textContent = 'PT';
+        pill.style.cssText = 'background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:#6366f1;font-family:DM Sans,sans-serif;-webkit-tap-highlight-color:transparent';
+    }
+};
+
+window.togglePTAthleteMode = function() {
+    if(window.currentMode === 'pt') {
+        window.deactivatePTMode();
+        window.switchMode('personal');
+    } else {
+        window.switchMode('pt');
+        window.activatePTMode();
+    }
 };
 
 // ── CLIENT CRUD ────────────────────────────────────────────

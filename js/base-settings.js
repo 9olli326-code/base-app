@@ -33,6 +33,7 @@ window.applyModules = function() {
     } else {
         window.deactivatePTMode();
     }
+    if(window._updateModeSwitchPill) window._updateModeSwitchPill();
     // Render the default form
     window.switchCategory(window.currentCategory);
 };

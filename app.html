@@ -429,7 +429,8 @@
                     <h1 class="text-[26px] leading-none tracking-wide uppercase gradient-text" style="font-family:'Barlow Condensed',sans-serif;font-weight:900" data-i18n="appTitle">BASE</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span id="cloudStatus" class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-600" style="font-family:'DM Sans',sans-serif"><i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> <span data-i18n="sync">Sync</span></span>
-                        <span id="streakBadge" class="hidden items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-orange-400 px-2 py-0.5 rounded-full" style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);font-family:'DM Sans',sans-serif"><i data-lucide="flame" class="w-2.5 h-2.5"></i> <span id="streakCount">0</span> <span data-i18n="weeks">Tage</span></span>
+                        <span id="streakBadge" class="hidden items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-orange-400 px-2 py-0.5 rounded-full" style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);font-family:'DM Sans',sans-serif"><i data-lucide="flame" class="w-2.5 h-2.5"></i> <span id="streakWeekCount">0</span> <span data-i18n="weeks">Tage</span></span>
+                        <button id="modeSwitchPill" onclick="window.togglePTAthleteMode()" class="hidden items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="font-family:'DM Sans',sans-serif"></button>
                     </div>
                 </div>
             </div>
@@ -535,9 +536,6 @@
                                 <span id="ptDayMobility" class="text-[10px] font-bold uppercase tracking-widest" style="color:#10b981">0 Mobility</span>
                             </div>
                         </div>
-                        <button onclick="window.openSessionModalForDay()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#6366f1">
-                            <i data-lucide="plus" class="w-3 h-3 pointer-events-none"></i> Hinzufügen
-                        </button>
                     </div>
                     <div id="ptDaySessions" class="space-y-3"></div>
                     <div id="ptDayEmpty" class="hidden text-center py-6">
@@ -547,9 +545,9 @@
 
                 <!-- Year Overview Toggle -->
                 <div class="mt-4 pt-4" style="border-top:1px solid var(--border-hex)">
-                    <button onclick="window.toggleYearView()" id="ptYearToggleBtn" class="w-full flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all pointer-events-auto" style="background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.15)">
+                    <button type="button" onclick="window.toggleYearView()" id="ptYearToggleBtn" class="w-full flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all pointer-events-auto" style="background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.15);-webkit-tap-highlight-color:transparent">
                         <i data-lucide="calendar-range" class="w-4 h-4 pointer-events-none" style="color:#6366f1"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest" style="color:rgba(99,102,241,0.8)">Jahresübersicht anzeigen</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest pointer-events-none" style="color:rgba(99,102,241,0.8)">Jahresübersicht anzeigen</span>
                     </button>
                     <div id="ptYearView" class="hidden mt-4 grid grid-cols-3 gap-3"></div>
                 </div>
@@ -2132,14 +2130,14 @@
             <div class="mb-5">
                 <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Typ</p>
                 <div class="grid grid-cols-3 gap-2" id="sessionTypeBtns">
-                    <button onclick="window.setSessionType('kraft')" class="session-type-btn px-3 py-3 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto flex flex-col items-center gap-1.5" style="border-color:rgba(6,182,212,0.3);background:rgba(6,182,212,0.08);color:#06b6d4">
-                        <i data-lucide="dumbbell" class="w-4 h-4 pointer-events-none"></i>Kraft
+                    <button type="button" onclick="window.setSessionType('kraft')" class="session-type-btn px-3 py-3 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto flex flex-col items-center gap-1.5" style="border-color:rgba(6,182,212,0.3);background:rgba(6,182,212,0.08);color:#06b6d4;-webkit-tap-highlight-color:transparent">
+                        <i data-lucide="dumbbell" class="w-4 h-4 pointer-events-none"></i><span class="pointer-events-none">Kraft</span>
                     </button>
-                    <button onclick="window.setSessionType('ausdauer')" class="session-type-btn px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto flex flex-col items-center gap-1.5">
-                        <i data-lucide="heart-pulse" class="w-4 h-4 pointer-events-none"></i>Ausdauer
+                    <button type="button" onclick="window.setSessionType('ausdauer')" class="session-type-btn px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto flex flex-col items-center gap-1.5" style="-webkit-tap-highlight-color:transparent">
+                        <i data-lucide="heart-pulse" class="w-4 h-4 pointer-events-none"></i><span class="pointer-events-none">Ausdauer</span>
                     </button>
-                    <button onclick="window.setSessionType('mobility')" class="session-type-btn px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto flex flex-col items-center gap-1.5">
-                        <i data-lucide="stretch-horizontal" class="w-4 h-4 pointer-events-none"></i>Mobility
+                    <button type="button" onclick="window.setSessionType('mobility')" class="session-type-btn px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto flex flex-col items-center gap-1.5" style="-webkit-tap-highlight-color:transparent">
+                        <i data-lucide="stretch-horizontal" class="w-4 h-4 pointer-events-none"></i><span class="pointer-events-none">Mobility</span>
                     </button>
                 </div>
             </div>
