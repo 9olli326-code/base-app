@@ -1170,11 +1170,11 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 border-t border-indigo-500/20">
-                        <button id="mainAiButton" onclick="window.analyzeWithAI()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-indigo-500/10 transition-all cursor-pointer border-r border-indigo-500/20">
+                        <button id="mainAiButton" onclick="window.analyzeWithAI()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-indigo-500/10 transition-all cursor-pointer pointer-events-auto border-r border-indigo-500/20">
                             <i data-lucide="trending-up" class="w-3.5 h-3.5 text-indigo-400 pointer-events-none"></i>
                             <span class="text-[10px] font-black text-indigo-300 uppercase tracking-widest" data-i18n="aiProg">Progression</span>
                         </button>
-                        <button onclick="window.triggerCopilot()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-indigo-500/10 transition-all cursor-pointer">
+                        <button onclick="window.triggerCopilot()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-indigo-500/10 transition-all cursor-pointer pointer-events-auto">
                             <i data-lucide="bot" class="w-3.5 h-3.5 text-indigo-400 pointer-events-none"></i>
                             <span class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Co-Pilot</span>
                         </button>
@@ -1182,14 +1182,14 @@
                 </div>
 
                 <!-- 1RM Rechner -->
-                <button onclick="window.openOneRMModal()" class="w-full bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
+                <button onclick="window.openOneRMModal()" class="w-full bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="target" class="w-6 h-6 text-orange-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
                     <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">1RM Rechner</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Maximalkraft berechnen & verwalten</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
 
                 <!-- KI Trainingsplan -->
-                <button onclick="window.openTrainingPlanModal()" class="w-full bg-violet-500/5 hover:bg-violet-500/10 border border-violet-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
+                <button onclick="window.openTrainingPlanModal()" class="w-full bg-violet-500/5 hover:bg-violet-500/10 border border-violet-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-days" class="w-6 h-6 text-violet-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
                     <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">KI Trainingsplan</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Periodisierter Plan per KI generieren</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
@@ -1222,7 +1222,7 @@
                 </div>
 
                 <!-- Challenges -->
-                <button onclick="window.openChallenges()" class="w-full bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
+                <button onclick="window.openChallenges()" class="w-full bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="trophy" class="w-6 h-6 text-amber-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
                     <div class="text-left flex-1"><p class="text-sm font-black text-white uppercase tracking-tight">Challenges</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Fordere Freunde heraus</p></div>
                     <span id="activeChallengesBadge" class="hidden bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full"></span>
@@ -1230,14 +1230,14 @@
                 </button>
 
                 <!-- Pre-Hab -->
-                <button onclick="window.generatePreHab()" class="w-full bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
+                <button onclick="window.generatePreHab()" class="w-full bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="shield-plus" class="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
                     <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Pre-Hab Coach</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Verletzungsprävention & Aktivierung</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
 
                 <!-- Trainer finden -->
-                <button onclick="window.openTrainerDirectory()" class="w-full bg-cyan-500/5 hover:bg-cyan-500/10 border border-cyan-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group">
+                <button onclick="window.openTrainerDirectory()" class="w-full bg-cyan-500/5 hover:bg-cyan-500/10 border border-cyan-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="user-search" class="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
                     <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Trainer finden</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Finde Personal Trainer in deiner Nähe</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
@@ -3035,22 +3035,22 @@
         // ============================================================
         // SOCIAL PROOF
         // ============================================================
-        window.showSocialProof = function() {
+        window.showSocialProof = async function() {
             const bar = document.getElementById('socialProofBar');
             const text = document.getElementById('socialProofText');
             if(!bar || !text) return;
-            const hour = new Date().getHours();
-            const baseCount = 127 + (hour * 3) + Math.floor(Math.random() * 20);
-            text.textContent = baseCount + ' Workouts heute weltweit getrackt';
-            bar.classList.remove('hidden'); bar.classList.add('flex');
+            try {
+                if(!window._fbDb || !window._fbGetDoc || !window._fbDoc) { bar.classList.add('hidden'); return; }
+                const statsRef = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'public', 'stats');
+                const snap = await window._fbGetDoc(statsRef);
+                if(snap.exists() && snap.data().userCount) {
+                    text.textContent = snap.data().userCount + ' Athleten trainieren mit BASE';
+                    bar.classList.remove('hidden'); bar.classList.add('flex');
+                } else { bar.classList.add('hidden'); }
+            } catch(e) { bar.classList.add('hidden'); }
         };
         window.showPostWorkoutSocialProof = function() {
-            if(!Array.isArray(window.workouts)) return;
-            const archived = window.workouts.filter(w => w.archived);
-            const avgPerDay = 2.3;
-            const myToday = window.workouts.filter(w => w.archived && w.date === new Date().toISOString().split('T')[0]).length;
-            const percentile = Math.min(95, 50 + (myToday * 15) + Math.floor(Math.random() * 8));
-            setTimeout(() => window.showToast('Du hast heute mehr trainiert als ' + percentile + '% der BASE User!'), 2000);
+            // Keine Fake-Zahlen mehr — nur echter Social Proof
         };
 
         // ============================================================
