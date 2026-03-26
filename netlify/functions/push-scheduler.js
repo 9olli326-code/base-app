@@ -5,7 +5,7 @@ const { schedule } = require('@netlify/functions');
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:support.base-app@proton.me';
-const FS_KEY = 'AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y';
+const FS_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y';
 const FS_PROJECT = 'beastmode-17f0d';
 
 function fsGet(path) {

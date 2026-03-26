@@ -258,9 +258,9 @@ window.renderRoutinesList = function() {
             <div class="flex items-center gap-3 flex-1 min-w-0">
                 <div class="w-9 h-9 rounded-xl flex-shrink-0 ${ui.bg} border ${ui.border} flex items-center justify-center ${ui.color}"><i data-lucide="${ui.icon}" class="w-4 h-4"></i></div>
                 <div class="min-w-0">
-                    <p class="text-white font-black text-sm truncate">${r.name}</p>
-                    <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">${r.exercises.length} Übung${r.exercises.length !== 1 ? 'en' : ''} · ${r.createdAt}</p>
-                    <p class="text-zinc-600 text-[10px] truncate mt-0.5">${exNames}</p>
+                    <p class="text-white font-black text-sm truncate">${window._escapeHtml(r.name)}</p>
+                    <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">${r.exercises.length} Übung${r.exercises.length !== 1 ? 'en' : ''} · ${window._escapeHtml(r.createdAt)}</p>
+                    <p class="text-zinc-600 text-[10px] truncate mt-0.5">${window._escapeHtml(exNames)}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">

@@ -14,6 +14,14 @@ d.textContent = str;
 return d.innerHTML;
 };
 
+// Sichere Photo-URL: nur data:image/ oder https:// erlauben
+window._safePhotoUrl = function(url) {
+if(!url) return '';
+if(url.startsWith('data:image/')) return url;
+if(url.startsWith('https://')) return url;
+return '';
+};
+
 window.getClientWorkouts = function(clientId) {
 if(_clientWorkoutCache[clientId]) return _clientWorkoutCache[clientId];
 const key = `beastmode_v2_cache_${clientId}`;
@@ -381,7 +389,12 @@ window.showModal('Kunde löschen?', `"${window._escapeHtml(c.name)}" wirklich l�
 window.shareClientPortal = function() {
     if(!_activeClientDetailId) return;
     const clientId = _activeClientDetailId;
-    const token = Array.from(clientId).reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0).toString(36);
+    // Kryptographisch sicheres Token generieren und persistent speichern
+    let token = localStorage.getItem('base_portal_token_' + clientId);
+    if(!token) {
+        token = (crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).substring(2,10) + Math.random().toString(36).substring(2,10)));
+        localStorage.setItem('base_portal_token_' + clientId, token);
+    }
     const url = `${window.location.origin}/app.html?client_view=${clientId}&token=${token}`;
     if(navigator.share) {
         navigator.share({ title: 'Dein Training – BASE', url: url }).catch(() => {});
@@ -1795,7 +1808,7 @@ window.openTrainerProfileEditor = function() {
         }
         if(p.photo) {
             const preview = el('tpPhotoPreview');
-            if(preview) preview.innerHTML = `<img src="${p.photo}" class="w-full h-full object-cover" alt="Foto">`;
+            if(preview && window._safePhotoUrl(p.photo)) preview.innerHTML = `<img src="${window._safePhotoUrl(p.photo)}" class="w-full h-full object-cover" alt="Foto">`;
         }
         if(el('tpFreeConsult')) el('tpFreeConsult').checked = !!p.freeConsultation;
     } else {
@@ -2069,7 +2082,8 @@ window._renderTrainerCards = function(trainers) {
     list.innerHTML = trainers.map(t => {
         const specs = (t.specializations || []).slice(0, 3).map(s => `<span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-1.5 py-0.5 rounded">${esc(s)}</span>`).join(' ');
         const stars = t.reviewCount > 0 ? (t.rating || 0).toFixed(1) + ' ★ <span class="text-zinc-500">(' + t.reviewCount + ')</span>' : '<span class="text-zinc-500">Neu</span>';
-        const photo = t.photo ? `<img src="${t.photo}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" alt="">` : `<div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 text-sm font-black">${esc((t.name || '??').substring(0,2).toUpperCase())}</div>`;
+        const safePhoto = window._safePhotoUrl(t.photo);
+        const photo = safePhoto ? `<img src="${safePhoto}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" alt="">` : `<div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 text-sm font-black">${esc((t.name || '??').substring(0,2).toUpperCase())}</div>`;
         return `<div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 hover:border-cyan-500/30 transition-all">
             <div class="flex items-center gap-3 mb-3">
                 ${photo}
@@ -2148,7 +2162,8 @@ window._renderTrainerDetail = function(t, reviews) {
     if(!content) return;
     const esc = window._escapeHtml;
 
-    const photo = t.photo ? `<img src="${t.photo}" class="w-full h-48 object-cover rounded-2xl mb-4" alt="${esc(t.name)}">` : '';
+    const safeDetailPhoto = window._safePhotoUrl(t.photo);
+    const photo = safeDetailPhoto ? `<img src="${safeDetailPhoto}" class="w-full h-48 object-cover rounded-2xl mb-4" alt="${esc(t.name)}">` : '';
     const specs = (t.specializations || []).map(s => `<span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-2 py-1 rounded-lg">${esc(s)}</span>`).join(' ');
     const stars = t.reviewCount > 0 ? `<span class="text-amber-400 font-black">${(t.rating || 0).toFixed(1)} ★</span> <span class="text-zinc-500 text-xs">(${t.reviewCount} Bewertungen)</span>` : '<span class="text-zinc-500 text-xs">Noch keine Bewertungen</span>';
 

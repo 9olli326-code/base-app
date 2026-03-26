@@ -4,7 +4,7 @@
 const https = require('https');
 
 const PROJECT_ID = 'beastmode-17f0d';
-const API_KEY = 'AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y';
+const API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y';
 
 function httpsGet(url) {
     return new Promise((resolve, reject) => {

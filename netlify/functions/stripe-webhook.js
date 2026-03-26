@@ -5,10 +5,12 @@ const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const FIREBASE_PROJECT_ID = 'beastmode-17f0d';
 
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y';
+
 // Firestore REST API Helper
 function firestoreRequest(method, path, data) {
     return new Promise((resolve, reject) => {
-        const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${path}${path.includes('?') ? '&' : '?'}key=AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y`;
+        const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${path}${path.includes('?') ? '&' : '?'}key=${FIREBASE_API_KEY}`;
         const parsed = new URL(url);
         const options = {
             hostname: parsed.hostname,
@@ -50,7 +52,7 @@ async function setSubscriptionStatus(userId, plan, stripeCustomerId, stripeSubsc
 
 exports.handler = async function(event) {
     const headers = {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://base-app.tech',
         'Content-Type': 'application/json'
     };
 
@@ -65,22 +67,17 @@ exports.handler = async function(event) {
     const stripe = new Stripe(STRIPE_SECRET_KEY);
     let stripeEvent;
 
-    // Webhook-Signatur verifizieren wenn Secret vorhanden
-    if (STRIPE_WEBHOOK_SECRET) {
-        const sig = event.headers['stripe-signature'];
-        try {
-            stripeEvent = stripe.webhooks.constructEvent(event.body, sig, STRIPE_WEBHOOK_SECRET);
-        } catch (e) {
-            console.error('Webhook Signatur ungültig:', e.message);
-            return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ungültige Signatur' }) };
-        }
-    } else {
-        // Ohne Webhook Secret: Event direkt parsen (nur für Entwicklung)
-        try {
-            stripeEvent = JSON.parse(event.body);
-        } catch (e) {
-            return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ungültiges JSON' }) };
-        }
+    // Webhook-Signatur IMMER verifizieren
+    if (!STRIPE_WEBHOOK_SECRET) {
+        console.error('STRIPE_WEBHOOK_SECRET nicht konfiguriert!');
+        return { statusCode: 500, headers, body: JSON.stringify({ error: 'Webhook Secret nicht konfiguriert' }) };
+    }
+    const sig = event.headers['stripe-signature'];
+    try {
+        stripeEvent = stripe.webhooks.constructEvent(event.body, sig, STRIPE_WEBHOOK_SECRET);
+    } catch (e) {
+        console.error('Webhook Signatur ungültig:', e.message);
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ungültige Signatur' }) };
     }
 
     try {

@@ -697,28 +697,29 @@ window.renderTrainingPlan = function(plan) {
 
     const weekColors = ['border-violet-500/30', 'border-indigo-500/30', 'border-cyan-500/30', 'border-emerald-500/30', 'border-amber-500/30', 'border-rose-500/30', 'border-orange-500/30', 'border-pink-500/30'];
 
+    const esc = window._escapeHtml || function(s){return s||'';};
     content.innerHTML = (plan.weeks || []).map((week, wi) => `
         <div class="bg-zinc-950/60 border ${weekColors[wi % weekColors.length]} rounded-2xl p-4">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-white font-black text-sm uppercase tracking-tight">Woche ${week.week}</p>
-                <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">${week.focus || ''}</span>
+                <p class="text-white font-black text-sm uppercase tracking-tight">Woche ${esc(String(week.week))}</p>
+                <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">${esc(week.focus || '')}</span>
             </div>
             <div class="space-y-2">
                 ${(week.sessions || []).map(session => `
                     <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
                         <div class="flex items-center justify-between mb-2">
-                            <p class="text-zinc-300 font-black text-[11px] uppercase tracking-widest">${session.day} — ${session.name}</p>
+                            <p class="text-zinc-300 font-black text-[11px] uppercase tracking-widest">${esc(session.day)} — ${esc(session.name)}</p>
                         </div>
                         <div class="space-y-1.5">
                             ${(session.exercises || []).map(ex => `
                                 <div class="flex items-start justify-between gap-2">
                                     <div class="flex-1">
-                                        <p class="text-white text-xs font-bold">${ex.name}</p>
-                                        ${ex.notes ? `<p class="text-zinc-600 text-[10px]">${ex.notes}</p>` : ''}
+                                        <p class="text-white text-xs font-bold">${esc(ex.name)}</p>
+                                        ${ex.notes ? `<p class="text-zinc-600 text-[10px]">${esc(ex.notes)}</p>` : ''}
                                     </div>
                                     <div class="text-right flex-shrink-0">
-                                        <p class="text-primary text-[11px] font-black">${ex.sets}×${ex.reps}</p>
-                                        <p class="text-zinc-500 text-[10px] font-bold">${ex.intensity || ''}</p>
+                                        <p class="text-primary text-[11px] font-black">${esc(String(ex.sets))}×${esc(String(ex.reps))}</p>
+                                        <p class="text-zinc-500 text-[10px] font-bold">${esc(ex.intensity || '')}</p>
                                     </div>
                                 </div>`).join('')}
                         </div>
@@ -727,7 +728,7 @@ window.renderTrainingPlan = function(plan) {
         </div>`).join('') + (plan.progressionNotes ? `
         <div class="bg-violet-500/5 border border-violet-500/20 rounded-2xl p-4">
             <p class="text-[10px] font-black text-violet-400 uppercase tracking-widest mb-2">Progressions-Strategie</p>
-            <p class="text-zinc-400 text-sm">${plan.progressionNotes}</p>
+            <p class="text-zinc-400 text-sm">${esc(plan.progressionNotes)}</p>
         </div>` : '');
 
     document.getElementById('planConfig')?.classList.add('hidden');

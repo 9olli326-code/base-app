@@ -45,7 +45,7 @@ function callGemini(prompt,temperature,jsonMode){return new Promise((resolve,rej
             let t='';
             for(const part of parts){if(part.text)t=part.text;}
             if(!t&&parts.length>0)t=parts[0]?.text||'';if(!t)console.error('Gemini empty response:',d.substring(0,500));resolve(t);}catch(e){reject(new Error('Parse Error: '+e.message+' Raw: '+d.substring(0,200)));}});});req.on('error',reject);req.write(pd);req.end();});}
-exports.handler=async function(event){const h={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Content-Type':'application/json'};
+exports.handler=async function(event){const h={'Access-Control-Allow-Origin':'https://base-app.tech','Access-Control-Allow-Headers':'Content-Type','Content-Type':'application/json'};
 if(event.httpMethod==='OPTIONS')return{statusCode:200,headers:h,body:''};
 if(event.httpMethod!=='POST')return{statusCode:405,headers:h,body:JSON.stringify({error:'Method Not Allowed'})};
 if(!GEMINI_API_KEY)return{statusCode:500,headers:h,body:JSON.stringify({error:'API Key fehlt'})};

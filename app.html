@@ -2864,7 +2864,7 @@
                 if (!exEl.value.trim()) { window.showToast("Bitte eine Aktivität eingeben!"); exEl.focus(); return; }
                 if (!dtEl.value) { window.showToast("Bitte ein Datum wählen!"); return; }
                 
-                let entry = { id: window.editingWorkoutId || Date.now().toString(), category: window.currentCategory, date: dtEl.value, exercise: exEl.value.trim(), archived: window.editingWorkoutId ? (window.workouts.find(w => w.id === window.editingWorkoutId)?.archived || false) : false, data: {}, setDetails: [], volume: 0, maxWeight: 0 };
+                let entry = { id: window.editingWorkoutId || Date.now().toString(), category: window.currentCategory, date: dtEl.value, exercise: exEl.value.trim().substring(0, 200), archived: window.editingWorkoutId ? (window.workouts.find(w => w.id === window.editingWorkoutId)?.archived || false) : false, data: {}, setDetails: [], volume: 0, maxWeight: 0 };
                 let isPR = false; let prType = ''; let prSubText = ''; let prValue = ''; let prUnit = ''; let prDiffText = '';
                 const exName = exEl.value.trim().toLowerCase(); 
                 const pastWorkouts = window.workouts.filter(w => w.category === window.currentCategory && w.exercise.toLowerCase() === exName && w.id !== window.editingWorkoutId);
@@ -5014,13 +5014,9 @@
             const textInput = document.getElementById('modalTextInput');
             const confirmBtn = document.getElementById('modalBtnConfirm');
             if (titleEl) titleEl.textContent = title;
-            // HTML-Support: wenn msg HTML-Tags enthält, als innerHTML setzen
+            // Sicher: immer textContent — kein innerHTML für User-Daten
             if (msgEl) {
-                if (msg && (msg.includes('<') || msg.includes('&'))) {
-                    msgEl.innerHTML = msg;
-                } else {
-                    msgEl.textContent = msg;
-                }
+                msgEl.textContent = msg || '';
             }
             if (textInput) {
                 if (hasTextInput) { textInput.classList.remove('hidden'); } 
