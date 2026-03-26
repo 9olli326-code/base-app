@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BJJ Training tracken | BASE Fitness App</title>
+    <link rel="icon" type="image/png" href="../../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+    <meta name="description" content="Tracke dein BJJ (Brazilian Jiu-Jitsu) Training mit BASE. Trainingsdauer, Rolls, Submissions, Technik-Fokus. KI-Coach, Offline-Modus, kostenlos.">
+    <link rel="canonical" href="https://base-app.tech/sport/bjj/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/bjj/">
+    <meta property="og:title" content="BJJ Training tracken | BASE Fitness App">
+    <meta property="og:description" content="Tracke dein BJJ (Brazilian Jiu-Jitsu) Training mit BASE. Trainingsdauer, Rolls, Submissions, Technik-Fokus. KI-Coach, Offline-Modus, kostenlos.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BASE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "description": "BJJ (Brazilian Jiu-Jitsu) tracken mit BASE — Trainingsdauer, Rolls, Submissions und Technik-Fokus.",
+      "url": "https://base-app.tech/sport/bjj/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kann BASE mein BJJ-Training tracken?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE erfasst Trainingsdauer, Anzahl der Rolls, Submissions und deinen Technik-Fokus (z.B. Guard Passing, Sweeps, Back Control). So dokumentierst du deinen Fortschritt auf der Matte." }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie hilft BJJ-Tracking meinem Fortschritt?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Durch systematisches Tracking erkennst du, welche Techniken du am meisten übst, wie oft du rollst und ob du genug Varianz in deinem Training hast. Der KI-Coach gibt dir Empfehlungen basierend auf deinen Daten." }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert BASE offline in der BJJ-Academy?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE ist eine PWA und funktioniert ohne Internet. Du loggst dein Training direkt nach dem Rollen und die Daten synchronisieren sich automatisch, sobald du wieder online bist." }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich BJJ und Krafttraining zusammen tracken?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. Viele BJJ-Athleten ergänzen ihr Training mit Krafttraining, Yoga oder Laufen. BASE trackt alles in einer App — perfekt für Kampfsportler, die ganzheitlich trainieren." }
+        }
+      ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="../../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        .text-gradient-cyan { background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .field-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 12px; padding: 20px; }
+        .advantage-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 16px; padding: 24px; }
+        .advantage-card:hover { border-color: rgba(6,182,212,0.3); }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="9" fill="#09090b"/>
+                        <rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#0f0f12" stroke="#1f1f24" stroke-width="0.5"/>
+                        <rect x="7" y="10" width="1.5" height="21" rx="0.75" fill="#06b6d4"/>
+                        <circle cx="32" cy="11" r="1.5" fill="#06b6d4"/>
+                        <text x="11" y="29" font-family="'Arial Black',Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="-0.5">B</text>
+                    </svg>
+                </div>
+                <span style="font-family:'Bebas Neue',sans-serif;" class="text-xl tracking-wide text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden md:flex items-center gap-8 text-sm text-zinc-400">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-semibold px-5 py-2 rounded-lg transition-colors">App öffnen</a>
+        </div>
+    </nav>
+
+    <!-- Breadcrumbs -->
+    <div class="pt-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <nav class="flex items-center gap-2 text-sm text-zinc-500">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <span>/</span>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <span>/</span>
+                <span class="text-zinc-300">BJJ</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="pt-8 pb-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-block bg-zinc-900 border border-zinc-800 rounded-full px-4 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-6">Kampfsport</div>
+            <h1 class="text-4xl md:text-6xl text-white mb-6">BJJ (Brazilian Jiu-Jitsu) Training tracken mit BASE</h1>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed">
+                Brazilian Jiu-Jitsu ist ein Sport, in dem Fortschritt oft subtil ist. Du wirst nicht plötzlich doppelt so stark — stattdessen verbesserst du deine Technik, dein Timing und dein Game über Hunderte von Trainings-Sessions. Genau deshalb ist Tracking so wertvoll: BASE dokumentiert jede Session mit Trainingsdauer, Anzahl der Rolls, Submissions und deinem Technik-Fokus. Über Monate entsteht ein klares Bild deiner Entwicklung.
+            </p>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed mt-4">
+                Trainierst du genug? Rollst du zu viel oder zu wenig? Arbeitest du an deinen Schwächen oder bleibst du in deiner Komfortzone? Diese Fragen beantwortet BASE mit Daten. Du siehst auf einen Blick, wie oft du pro Woche trainierst, welche Techniken du am meisten übst und wie sich dein Submission-Rate über die Zeit verändert. Der KI-Coach erkennt Muster und gibt dir konkrete Empfehlungen.
+            </p>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed mt-4">
+                Viele BJJ-Athleten ergänzen ihr Training mit Krafttraining, Yoga für Mobilität oder Laufen für die Grundlagenausdauer. BASE trackt all das in einer einzigen App. Kein separates Logbuch, keine Tabelle — alles an einem Ort, offline verfügbar und sicher in der Cloud gespeichert. So hast du den kompletten Überblick über dein Training als Kampfsportler.
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-4xl mx-auto"></div>
+
+    <!-- Fields -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Diese Felder trackt BASE für BJJ:</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Training</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Zahl (min)</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 90 min</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Rolls</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Zahl</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 6 Rolls</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Submissions</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Zahl</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 3</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Technik-Fokus</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Text</div>
+                    <div class="text-sm text-cyan-400">Beispiel: Guard Passing, Sweeps, Chokes</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Warum BASE für BJJ?</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">KI-Coach</h3>
+                    <p class="text-sm text-zinc-400">Der KI-Coach analysiert dein Trainingsvolumen, deine Technik-Verteilung und Roll-Frequenz. Er erkennt, wenn du bestimmte Bereiche vernachlässigst.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="wifi-off" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">Offline in der Academy</h3>
+                    <p class="text-sm text-zinc-400">BJJ-Academies haben oft keinen Empfang. BASE speichert alles lokal — logge dein Training direkt nach dem Rollen und synchronisiere später.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="layers" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">Multi-Sport</h3>
+                    <p class="text-sm text-zinc-400">BJJ plus Krafttraining, Yoga für Mobilität und Laufen für Ausdauer — alles in einer App. Perfekt für Grappler, die ganzheitlich trainieren.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KI Builder -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-8">
+                <h2 class="text-3xl text-white mb-4">Eigene Felder hinzufügen</h2>
+                <p class="text-zinc-400 leading-relaxed">Du willst mehr tracken — zum Beispiel Gi vs. No-Gi, Trainingspartner, spezifische Submission-Typen oder Positional Sparring? Der KI-Builder erstellt dir individuelle Felder in Sekunden. Beschreib einfach, was du brauchst, und BASE baut das passende Schema für dein BJJ-Training.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <a href="/app.html" class="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-8 py-4 rounded-xl text-lg transition-colors">
+                <i data-lucide="swords" class="w-5 h-5"></i>
+                Jetzt BJJ tracken — Kostenlos
+            </a>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-4xl mx-auto"></div>
+
+    <!-- Related Sports -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl text-white mb-6">Andere Sportarten:</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Judo</a>
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">MMA</a>
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Wrestling</a>
+                <a href="/sport/boxen/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Boxen</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog -->
+    <section class="pb-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <a href="/blog/multi-sport-tracking/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 hover:border-cyan-500/30 transition-colors">
+                <div class="text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-2">Blog</div>
+                <div class="text-white font-semibold">Multi-Sport-Tracking: Warum eine App für alles besser ist</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Häufige Fragen</h2>
+            <div class="space-y-4">
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann BASE mein BJJ-Training tracken?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE erfasst Trainingsdauer, Anzahl der Rolls, Submissions und deinen Technik-Fokus (z.B. Guard Passing, Sweeps, Back Control). So dokumentierst du deinen Fortschritt auf der Matte.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Wie hilft BJJ-Tracking meinem Fortschritt?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Durch systematisches Tracking erkennst du, welche Techniken du am meisten übst, wie oft du rollst und ob du genug Varianz in deinem Training hast. Der KI-Coach gibt dir Empfehlungen basierend auf deinen Daten.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Funktioniert BASE offline in der BJJ-Academy?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE ist eine PWA und funktioniert ohne Internet. Du loggst dein Training direkt nach dem Rollen und die Daten synchronisieren sich automatisch, sobald du wieder online bist.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann ich BJJ und Krafttraining zusammen tracken?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. Viele BJJ-Athleten ergänzen ihr Training mit Krafttraining, Yoga oder Laufen. BASE trackt alles in einer App — perfekt für Kampfsportler, die ganzheitlich trainieren.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800/50 py-12 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500">
+            <div class="flex items-center gap-6">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p>&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

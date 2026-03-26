@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrossFit Training tracken | BASE Fitness App</title>
+    <meta name="description" content="Tracke dein CrossFit-Training mit BASE: WOD Name, Zeit/Score, Runden und Gewicht. Kostenlose Fitness-App für CrossFitter.">
+
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="apple-touch-icon" href="../../icon.png">
+    <link rel="icon" type="image/png" href="../../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/crossfit/">
+    <meta property="og:title" content="CrossFit Training tracken | BASE Fitness App">
+    <meta property="og:description" content="Tracke dein CrossFit-Training mit BASE: WOD Name, Zeit/Score, Runden und Gewicht. Kostenlos starten.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CrossFit Training tracken | BASE Fitness App">
+    <meta name="twitter:description" content="Tracke dein CrossFit-Training mit BASE: WOD Name, Zeit/Score, Runden und Gewicht. Kostenlos starten.">
+    <meta name="twitter:image" content="https://base-app.tech/og-image.png">
+
+    <link rel="canonical" href="https://base-app.tech/sport/crossfit/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BASE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "description": "KI-Fitness-Tracker für CrossFit. Tracke WODs, Zeiten, Runden und Gewichte.",
+      "url": "https://base-app.tech"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kann ich CrossFit WODs mit BASE tracken?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE hat ein spezielles CrossFit-Schema mit Feldern für WOD-Name, Zeit/Score, Runden und Gewicht. Du kannst Benchmark-WODs wie Fran, Murph oder Grace tracken und deine Fortschritte vergleichen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Erkennt BASE meine CrossFit Personal Records?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE erkennt automatisch neue Bestleistungen bei wiederkehrenden WODs. Wenn du Fran schneller absolvierst als beim letzten Mal, wird das als PR markiert und in deiner Statistik hervorgehoben."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich eigene WOD-Felder hinzufügen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolut. Mit dem Schema-Editor kannst du eigene Felder ergänzen — z.B. Herzfrequenz, RPE oder spezifische Bewegungen. BASE passt sich deinem CrossFit-Training an."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert BASE offline im Box?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE ist eine PWA und funktioniert auch ohne Internetverbindung. Du kannst dein WOD direkt nach dem Workout eingeben — die Daten werden synchronisiert, sobald du wieder online bist."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="../../tailwind-production.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <style>
+        body { background: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; margin: 0; }
+        h1, h2, h3, h4 { font-family: 'Bebas Neue', sans-serif; color: white; letter-spacing: -0.03em; }
+        a { color: #06b6d4; }
+    </style>
+</head>
+<body>
+
+<nav class="fixed w-full z-50 top-0" id="navbar" style="background:rgba(9,9,11,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05)">
+    <div class="mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
+        <a href="/" class="flex items-center gap-3 no-underline">
+            <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:-0.05em;color:white;text-transform:uppercase">BASE</span>
+        </a>
+        <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
+            <a href="/#features" class="hover:text-white transition-colors no-underline" style="color:inherit">Features</a>
+            <a href="/sport/" class="hover:text-white transition-colors no-underline" style="color:inherit">Sportarten</a>
+            <a href="/blog/" class="hover:text-white transition-colors no-underline" style="color:inherit">Blog</a>
+            <a href="/#pt" class="hover:text-white transition-colors no-underline" style="color:inherit">Für Trainer</a>
+            <a href="/#pricing" class="hover:text-white transition-colors no-underline" style="color:inherit">Pricing</a>
+        </div>
+        <a href="/app.html" style="background:#06b6d4;color:#000;font-weight:900;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:10px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 0 20px rgba(6,182,212,0.3)">
+            App öffnen <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+    </div>
+</nav>
+
+<main style="max-width:52rem;margin:0 auto;padding:7rem 1.5rem 4rem">
+
+    <nav style="font-size:0.8rem;margin-bottom:2rem;color:#52525b">
+        <a href="/" style="color:#52525b;text-decoration:none">Home</a>
+        <span style="margin:0 0.5rem">›</span>
+        <a href="/sport/" style="color:#52525b;text-decoration:none">Sportarten</a>
+        <span style="margin:0 0.5rem">›</span>
+        <span style="color:#a1a1aa">CrossFit</span>
+    </nav>
+
+    <div style="margin-bottom:3rem">
+        <span style="display:inline-block;font-size:0.65rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:#06b6d4;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);padding:4px 12px;border-radius:6px;margin-bottom:1rem">Functional</span>
+        <h1 style="font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;margin:0 0 1.5rem">CrossFit Training tracken mit BASE</h1>
+        <p style="font-size:1.05rem;line-height:1.7;color:#a1a1aa;max-width:40rem">
+            CrossFit lebt von Intensität, Variation und messbarem Fortschritt. Jedes WOD ist eine Chance, sich zu verbessern — aber nur, wenn du deine Ergebnisse festhältst und vergleichen kannst. BASE gibt dir genau das: ein schnelles, unkompliziertes Tracking für jedes Workout of the Day. Egal ob AMRAP, For Time, EMOM oder ein Hero-WOD — trage dein Ergebnis ein und sieh sofort, wie du dich im Vergleich zu deinen vorherigen Versuchen entwickelst. So wird jedes WOD zur Benchmark für deinen Fortschritt.
+        </p>
+    </div>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Diese Felder trackt BASE:</h2>
+        <div style="display:grid;gap:0.75rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">WOD Name</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">text</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. Fran</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Zeit/Score</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">text</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 4:32</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Runden</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 8</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Gewicht</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">kg</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 60</span>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Warum BASE für CrossFit?</h2>
+        <div style="display:grid;gap:1rem">
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="repeat" style="width:18px;height:18px;color:#06b6d4"></i>
+                    WOD-Vergleich über Zeit
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Hast du Fran schon drei Mal gemacht? BASE zeigt dir sofort alle vorherigen Ergebnisse, wenn du den gleichen WOD-Namen eingibst. So erkennst du auf einen Blick, ob du schneller geworden bist oder mehr Runden geschafft hast. Der KI-Coach analysiert deine WOD-Historie und gibt dir Hinweise, wo du dich am meisten verbessert hast.
+                </p>
+            </div>
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="zap" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Schnelles Logging nach dem WOD
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Nach einem brutalen WOD willst du nicht minutenlang Daten eintippen. BASE ist darauf optimiert, dass du in unter 30 Sekunden dein Ergebnis einträgst. Öffne die App, wähle CrossFit, tippe dein Ergebnis ein — fertig. Die App funktioniert auch offline, falls deine Box kein WLAN hat.
+                </p>
+            </div>
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="brain" style="width:18px;height:18px;color:#06b6d4"></i>
+                    KI-Trainingsempfehlungen
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Der KI-Coach in BASE kennt dein CrossFit-Profil. Er erkennt, ob du dich einseitig belastest, ob deine Gewichte stagnieren oder ob du bestimmte Bewegungsmuster vernachlässigst. So bekommst du individuelle Empfehlungen, die auf deinen tatsächlichen WOD-Daten basieren — nicht auf generischen Plänen.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1rem">Eigene Felder hinzufügen</h2>
+        <p style="font-size:0.95rem;line-height:1.7;color:#a1a1aa">
+            Das CrossFit-Schema in BASE deckt die Kernmetriken ab: WOD-Name, Score, Runden und Gewicht. Aber CrossFit ist unendlich vielseitig. Vielleicht willst du auch den RPE (Rate of Perceived Exertion) tracken, die verwendeten Bewegungen dokumentieren oder deine Herzfrequenz nach dem WOD notieren. Mit dem Schema-Editor fügst du diese Felder in Sekunden hinzu. Jedes Feld erscheint dann automatisch in deinen Charts und wird vom KI-Coach berücksichtigt.
+        </p>
+    </section>
+
+    <section style="text-align:center;margin-bottom:3.5rem;padding:3rem 1.5rem;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:16px">
+        <h2 style="font-size:2rem;margin:0 0 1rem">Jetzt CrossFit tracken — Kostenlos</h2>
+        <p style="color:#71717a;margin:0 0 1.5rem;font-size:0.95rem">Keine Installation, kein Abo. Einfach im Browser öffnen und loslegen.</p>
+        <a href="/app.html" style="background:#06b6d4;color:#000;font-weight:900;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;padding:14px 32px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 0 30px rgba(6,182,212,0.3)">
+            Kostenlos starten <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Andere Sportarten:</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem">
+            <a href="/sport/krafttraining/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Krafttraining</a>
+            <a href="/sport/calisthenics/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Calisthenics</a>
+            <a href="/sport/laufen/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Laufen</a>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.4rem;margin:0 0 1rem">Weiterlesen</h2>
+        <a href="/blog/ki-trainingsplan-generator/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem;display:block;text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+            <span style="color:white;font-weight:700;font-size:0.95rem">KI-Trainingsplan Generator</span>
+            <span style="display:block;color:#52525b;font-size:0.8rem;margin-top:0.25rem">So erstellt BASE deinen individuellen Plan →</span>
+        </a>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Häufige Fragen</h2>
+        <div style="display:grid;gap:1rem">
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Kann ich CrossFit WODs mit BASE tracken?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE hat ein spezielles CrossFit-Schema mit Feldern für WOD-Name, Zeit/Score, Runden und Gewicht. Du kannst Benchmark-WODs wie Fran, Murph oder Grace tracken und deine Fortschritte vergleichen.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Erkennt BASE meine CrossFit Personal Records?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE erkennt automatisch neue Bestleistungen bei wiederkehrenden WODs. Wenn du Fran schneller absolvierst als beim letzten Mal, wird das als PR markiert und in deiner Statistik hervorgehoben.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Kann ich eigene WOD-Felder hinzufügen?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Absolut. Mit dem Schema-Editor kannst du eigene Felder ergänzen — z.B. Herzfrequenz, RPE oder spezifische Bewegungen. BASE passt sich deinem CrossFit-Training an.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Funktioniert BASE offline im Box?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE ist eine PWA und funktioniert auch ohne Internetverbindung. Du kannst dein WOD direkt nach dem Workout eingeben — die Daten werden synchronisiert, sobald du wieder online bist.
+                </p>
+            </details>
+        </div>
+    </section>
+
+</main>
+
+<footer style="background:#000;border-top:1px solid rgba(255,255,255,0.05);padding:4rem 1.5rem">
+    <div style="max-width:80rem;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2rem">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+            <i data-lucide="activity" style="color:rgba(255,255,255,0.2);width:20px;height:20px"></i>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:-0.05em;color:rgba(255,255,255,0.3);text-transform:uppercase">BASE</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:1.5rem;font-size:9px;font-weight:900;color:rgba(255,255,255,0.2);text-transform:uppercase;letter-spacing:0.2em">
+            <a href="/sport/" style="color:inherit;text-decoration:none">86 Sportarten</a>
+            <a href="/blog/" style="color:inherit;text-decoration:none">Blog</a>
+            <a href="/impressum.html" style="color:inherit;text-decoration:none">Impressum</a>
+            <a href="/datenschutz.html" style="color:inherit;text-decoration:none">Datenschutz</a>
+        </div>
+        <p style="font-size:9px;font-weight:900;color:rgba(255,255,255,0.1);text-transform:uppercase;letter-spacing:0.2em">© 2026 BASE Systems</p>
+    </div>
+</footer>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

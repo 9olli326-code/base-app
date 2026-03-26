@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness App ohne App Store — Was ist eine PWA und warum ist sie besser?</title>
+    <meta name="description" content="Kein Download, kein App Store, kein Speicherplatz-Problem. Erfahre warum PWA Fitness Apps die Zukunft sind.">
+    <meta name="keywords" content="fitness app ohne app store, pwa fitness app">
+    <link rel="canonical" href="https://base-app.tech/blog/fitness-app-ohne-app-store/">
+
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://base-app.tech/blog/fitness-app-ohne-app-store/">
+    <meta property="og:title" content="Fitness App ohne App Store — Was ist eine PWA und warum ist sie besser?">
+    <meta property="og:description" content="Kein Download, kein App Store, kein Speicherplatz-Problem. Erfahre warum PWA Fitness Apps die Zukunft sind.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Fitness App ohne App Store — Was ist eine PWA und warum ist sie besser?">
+    <meta name="twitter:description" content="Kein Download, kein App Store, kein Speicherplatz-Problem. Erfahre warum PWA Fitness Apps die Zukunft sind.">
+    <meta name="twitter:image" content="https://base-app.tech/og-image.png">
+
+    <link rel="icon" type="image/png" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <meta name="theme-color" content="#06b6d4">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Fitness App ohne App Store — Was ist eine PWA und warum ist sie besser?",
+        "description": "Kein Download, kein App Store, kein Speicherplatz-Problem. Erfahre warum PWA Fitness Apps die Zukunft sind.",
+        "author": { "@type": "Organization", "name": "BASE Team" },
+        "publisher": { "@type": "Organization", "name": "BASE", "url": "https://base-app.tech" },
+        "datePublished": "2026-03-26",
+        "dateModified": "2026-03-26",
+        "mainEntityOfPage": "https://base-app.tech/blog/fitness-app-ohne-app-store/",
+        "url": "https://base-app.tech/blog/fitness-app-ohne-app-store/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Was ist eine PWA?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Eine Progressive Web App (PWA) ist eine Website, die sich wie eine native App verhält. Du kannst sie auf deinem Homescreen installieren, offline nutzen und Push-Benachrichtigungen empfangen — ohne den App Store oder Google Play Store."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Funktioniert eine PWA offline?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ja, PWAs nutzen Service Workers, um Daten lokal zu speichern. Du kannst dein Training auch ohne Internet tracken. Sobald du wieder online bist, werden die Daten automatisch synchronisiert."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Warum ist BASE nicht im App Store?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "BASE ist bewusst als PWA gebaut. Das bedeutet: kein Download, sofortige Updates, kein Speicherplatz-Verbrauch, und die App funktioniert auf jedem Gerät mit einem Browser — egal ob iPhone, Android, Tablet oder Desktop."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="../../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1; opacity: 0.4; }
+        .btn-cta { background: var(--cyan); color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; padding: 16px 36px; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 30px rgba(6,182,212,0.3); }
+        .btn-cta:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 50px rgba(6,182,212,0.5); }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .tag { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+        .card { background: rgba(18, 18, 22, 0.7); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(16px); transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        .card:hover { border-color: rgba(6,182,212,0.25); background: rgba(22, 22, 28, 0.9); transform: translateY(-2px); }
+        .article-body { max-width: 680px; margin: 0 auto; font-size: 18px; line-height: 1.8; }
+        .article-body h2 { color: white; font-size: 2rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+        .article-body p { margin-bottom: 1.25rem; }
+        .article-body a { color: #06b6d4; text-decoration: underline; text-underline-offset: 3px; }
+        .article-body a:hover { color: white; }
+        .article-body ul, .article-body ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+        .article-body li { margin-bottom: 0.5rem; }
+        .toc a { color: #a1a1aa; text-decoration: none; transition: color 0.2s; }
+        .toc a:hover { color: #06b6d4; }
+    </style>
+</head>
+<body class="relative">
+
+    <nav class="fixed w-full z-50 top-0" style="background:rgba(7,7,10,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.04)">
+        <div class="mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
+            <a href="/" class="flex items-center gap-3 no-underline">
+                <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+                </div>
+                <span class="font-display text-xl tracking-tighter text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="btn-cta py-2.5 px-6 text-[10px]">
+                App öffnen <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+    </nav>
+
+    <main class="relative z-10 pt-32 pb-24 px-6">
+        <div class="max-w-7xl mx-auto">
+
+            <nav class="mb-8 text-xs text-zinc-600" style="font-family:'DM Sans',sans-serif;letter-spacing:0.08em;text-transform:uppercase;font-weight:500">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <span class="mx-2">/</span>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <span class="mx-2">/</span>
+                <span class="text-zinc-400">Fitness App ohne App Store</span>
+            </nav>
+
+            <div class="max-w-3xl mx-auto mb-12">
+                <span class="tag text-emerald-400 mb-4"><i data-lucide="smartphone" class="w-3 h-3"></i> Technologie</span>
+                <h1 class="text-4xl md:text-6xl text-white mb-6">Fitness App ohne App Store — Was ist eine PWA und warum ist sie besser?</h1>
+                <div class="glow-line max-w-xs mb-6"></div>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-zinc-500">
+                    <span>26. März 2026</span>
+                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <span>8 Min. Lesezeit</span>
+                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <span>BASE Team</span>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto mb-12">
+                <div class="card rounded-2xl p-6 toc">
+                    <h3 class="text-white text-lg mb-4">Inhalt</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-sm">
+                        <li><a href="#was-ist-pwa">Was ist eine PWA?</a></li>
+                        <li><a href="#vorteile">Die Vorteile einer PWA gegenüber nativen Apps</a></li>
+                        <li><a href="#offline">Offline-Modus: Training ohne Internet</a></li>
+                        <li><a href="#installation">Installation ohne App Store</a></li>
+                        <li><a href="#sprachen">7 Sprachen, ein Code</a></li>
+                        <li><a href="#nachteile">Ehrliche Nachteile: Was eine PWA (noch) nicht kann</a></li>
+                        <li><a href="#base-pwa">BASE als PWA: Ein Praxisbeispiel</a></li>
+                        <li><a href="#faq">Häufige Fragen</a></li>
+                    </ol>
+                </div>
+            </div>
+
+            <article class="article-body">
+
+                <p>Dein Smartphone-Speicher ist voll. Schon wieder. 47 Apps, davon drei Fitness-Apps, zwei Social Media und ein Haufen Zeug, das du seit Monaten nicht geöffnet hast. Jede App will Updates, jede will Benachrichtigungen, jede frisst Speicherplatz. Was wäre, wenn deine Fitness-App keinen Speicherplatz bräuchte? Wenn du sie nie updaten müsstest? Wenn sie auf jedem Gerät identisch funktioniert — ohne Download, ohne App Store, ohne 30-Prozent-Apple-Steuer?</p>
+
+                <h2 id="was-ist-pwa">Was ist eine PWA?</h2>
+
+                <p>PWA steht für Progressive Web App. Klingt technisch, ist aber simpel: Eine PWA ist eine Website, die sich wie eine native App verhält. Du öffnest sie im Browser, und sie sieht aus und fühlt sich an wie eine normale App. Du kannst sie auf deinem Homescreen installieren, offline nutzen, Push-Benachrichtigungen empfangen — alles, was du von einer "echten" App erwartest.</p>
+
+                <p>Der Unterschied: Eine PWA wird nicht über den App Store oder Google Play Store installiert. Du besuchst einfach die Website, tippst auf "Zum Homescreen hinzufügen" — fertig. Kein Download, kein 200-MB-Update, kein "Diese App benötigt iOS 17 oder höher". Die PWA läuft im Browser, nutzt moderne Web-Technologien und braucht minimalen Speicherplatz.</p>
+
+                <p>Große Unternehmen setzen längst auf PWAs. Twitter Lite, Starbucks, Pinterest — sie alle haben PWA-Versionen, die schneller laden und weniger Speicher brauchen als ihre nativen Pendants. Und jetzt kommt diese Technologie auch im Fitness-Bereich an.</p>
+
+                <h2 id="vorteile">Die Vorteile einer PWA gegenüber nativen Apps</h2>
+
+                <p>Der offensichtlichste Vorteil: kein App Store. Du brauchst kein Apple-Konto, kein Google-Konto, keine Kreditkarte hinterlegt. Du öffnest eine URL und hast die App. Das klingt trivial, ist aber in der Praxis ein gewaltiger Vorteil. Kein "Diese App ist in deinem Land nicht verfügbar". Kein "Dein Gerät wird nicht unterstützt". Kein Warten auf App-Review durch Apple.</p>
+
+                <p>Zweiter Vorteil: sofortige Updates. Bei einer nativen App musst du warten, bis der Entwickler ein Update in den Store hochlädt, Apple es prüft (das dauert ein bis sieben Tage), und du es dann manuell oder automatisch installierst. Bei einer PWA ist das Update sofort live. Du öffnest die App und hast automatisch die neueste Version. Kein "Bitte App aktualisieren" Dialog.</p>
+
+                <p>Dritter Vorteil: plattformübergreifend. Eine PWA funktioniert auf iPhone, Android, iPad, Desktop, Linux — auf jedem Gerät mit einem modernen Browser. Der Entwickler muss nicht zwei separate Apps (iOS + Android) pflegen. Das spart Entwicklungszeit und bedeutet, dass neue Features schneller bei allen Nutzern ankommen.</p>
+
+                <p>Vierter Vorteil: Speicherplatz. Eine typische Fitness-App im App Store belegt 100 bis 300 MB. Eine PWA? Unter 5 MB. Das ist besonders auf älteren Geräten oder Geräten mit wenig Speicher ein entscheidender Vorteil.</p>
+
+                <h2 id="offline">Offline-Modus: Training ohne Internet</h2>
+
+                <p>Eines der größten Vorurteile gegen PWAs: "Aber das funktioniert doch nur mit Internet." Falsch. Moderne PWAs nutzen sogenannte Service Workers — kleine Programme, die im Hintergrund laufen und Daten lokal auf deinem Gerät speichern. Das bedeutet: Du kannst dein Training auch im Flugmodus tracken, im Keller des Gyms ohne WLAN oder auf dem Wanderweg ohne Mobilfunk.</p>
+
+                <p>Die Daten werden lokal gespeichert und automatisch synchronisiert, sobald du wieder online bist. Du merkst keinen Unterschied — die App funktioniert offline genauso wie online. Erst wenn du Cloud-Features brauchst (zum Beispiel den <a href="/blog/ki-trainingsplan-generator/">KI-Coach</a> oder Strava-Import), brauchst du eine Internetverbindung.</p>
+
+                <p>BASE speichert alle Workouts im localStorage deines Browsers. Selbst wenn du nie einen Account erstellst und nie Cloud-Sync nutzt, bleiben deine Daten auf deinem Gerät. Firebase ist optional — für alle, die ihre Daten geräteübergreifend synchronisieren wollen.</p>
+
+                <h2 id="installation">Installation ohne App Store</h2>
+
+                <p>Die Installation einer PWA ist bewusst einfach. Auf Android erscheint meistens ein Banner: "App zum Homescreen hinzufügen". Ein Tipp, und die PWA liegt als Icon auf deinem Homescreen — nicht unterscheidbar von einer nativen App. Sie öffnet sich im Vollbildmodus, ohne Browser-Leiste, und fühlt sich an wie eine normale App.</p>
+
+                <p>Auf iPhone ist der Prozess einen Schritt länger: Safari öffnen, Teilen-Button antippen, "Zum Home-Bildschirm" wählen. Drei Taps, fertig. Kein Apple-ID, kein Passwort, kein Download. Und wenn du die PWA nicht mehr willst? Lösch das Icon, wie bei jeder anderen App. Keine Deinstallation, keine Restdateien.</p>
+
+                <p>Für <a href="/blog/multi-sport-tracking/">Multi-Sport Tracker</a> ist das besonders praktisch: Du installierst eine App und hast sofort Zugang zu 86 Sportarten. Kein 300-MB-Download, kein "Bitte verbinde dich mit WLAN".</p>
+
+                <h2 id="sprachen">7 Sprachen, ein Code</h2>
+
+                <p>Ein weiterer Vorteil, den Nutzer oft unterschätzen: Mehrsprachigkeit. BASE unterstützt sieben Sprachen — Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch und Arabisch. Bei einer nativen App müsstest du die Sprache in den Systemeinstellungen ändern und hoffen, dass die App das erkennt. Bei BASE wählst du die Sprache direkt in der App.</p>
+
+                <p>Das ist auch für Personal Trainer relevant, die internationale Kunden betreuen. Dein Client in Barcelona sieht die gleiche App auf Spanisch, dein Client in Amsterdam auf Niederländisch — ohne dass jemand etwas installieren oder konfigurieren muss. Ein Link, eine App, sieben Sprachen.</p>
+
+                <h2 id="nachteile">Ehrliche Nachteile: Was eine PWA (noch) nicht kann</h2>
+
+                <p>Transparenz ist wichtig, deshalb hier die ehrlichen Nachteile. PWAs haben keinen Zugriff auf Apple Watch oder Wear OS. Wenn du deine Herzfrequenz direkt von der Smartwatch in die App streamen willst, geht das mit einer PWA nicht. Für GPS-Tracking nutzt du am besten weiterhin spezialisierte Apps wie Strava und importierst die Daten.</p>
+
+                <p>Auch Apple beschränkt PWAs in einigen Bereichen: Push-Benachrichtigungen auf dem iPhone funktionieren erst seit iOS 16.4 und erfordern, dass die PWA zum Homescreen hinzugefügt wurde. Die Kamera-API hat Einschränkungen. Und Apple tut wenig, um PWAs zu bewerben — aus naheliegenden Gründen, denn jede PWA ist eine App, die nicht über den App Store läuft und Apple keine 30 Prozent Provision einbringt.</p>
+
+                <p>Für Fitness-Tracking sind diese Einschränkungen aber in der Praxis kaum relevant. Du brauchst keine Kamera zum Trainieren, GPS-Tracking delegierst du an Strava, und Push-Benachrichtigungen funktionieren inzwischen zuverlässig.</p>
+
+                <h2 id="base-pwa">BASE als PWA: Ein Praxisbeispiel</h2>
+
+                <p>BASE ist von Grund auf als PWA gebaut. Die gesamte App — 86 Sportarten, KI-Coach, Trainingsplan-Generator, PT-Modus, <a href="/sport/krafttraining/">Krafttraining</a>-Tracker — läuft als Progressive Web App. Kein Native Wrapper, kein Hybrid-Framework. Reines HTML, CSS und JavaScript.</p>
+
+                <p>Das Ergebnis: Die App lädt in unter zwei Sekunden, funktioniert offline, braucht weniger als 5 MB Speicherplatz und ist auf jedem Gerät identisch. Ob du auf einem iPhone SE, einem Samsung Galaxy, einem iPad oder deinem Desktop-PC trainierst — die Erfahrung ist die gleiche.</p>
+
+                <p>Updates kommen sofort an. Wenn wir heute Abend ein neues Feature deployen, hast du es morgen früh beim Öffnen der App. Kein Store-Review, kein "Bitte aktualisieren". Einfach die App öffnen und die neueste Version nutzen.</p>
+
+                <p>Für die Zukunft des Fitness-Trackings bedeutet das: weniger Reibung, weniger Speicherverbrauch, mehr Zugänglichkeit. Eine App, die jeder nutzen kann — egal welches Gerät, welches Betriebssystem, welches Land.</p>
+
+                <div class="card rounded-2xl p-8 my-12 text-center">
+                    <h3 class="text-white text-2xl mb-3">Jetzt BASE kostenlos testen</h3>
+                    <p class="text-zinc-400 text-base mb-6">Kein Download. Kein App Store. Einfach loslegen.</p>
+                    <a href="/app.html" class="btn-cta">
+                        Kostenlos starten <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <h2 id="faq">Häufige Fragen</h2>
+
+                <p><strong style="color:white">Was ist eine PWA?</strong><br>
+                Eine Progressive Web App (PWA) ist eine Website, die sich wie eine native App verhält. Du kannst sie auf deinem Homescreen installieren, offline nutzen und Push-Benachrichtigungen empfangen — ohne den App Store oder Google Play Store.</p>
+
+                <p><strong style="color:white">Funktioniert eine PWA offline?</strong><br>
+                Ja, PWAs nutzen Service Workers, um Daten lokal zu speichern. Du kannst dein Training auch ohne Internet tracken. Sobald du wieder online bist, werden die Daten automatisch synchronisiert.</p>
+
+                <p><strong style="color:white">Warum ist BASE nicht im App Store?</strong><br>
+                BASE ist bewusst als PWA gebaut. Das bedeutet: kein Download, sofortige Updates, kein Speicherplatz-Verbrauch, und die App funktioniert auf jedem Gerät mit einem Browser — egal ob iPhone, Android, Tablet oder Desktop.</p>
+
+            </article>
+
+            <div class="max-w-3xl mx-auto mt-20">
+                <div class="glow-line mb-12"></div>
+                <h2 class="text-3xl text-white mb-8">Weiterlesen</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <a href="/blog/multi-sport-tracking/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-cyan-400 mb-2"><i data-lucide="layers" class="w-3 h-3"></i> Feature</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">Multi-Sport Tracking</h3>
+                    </a>
+                    <a href="/blog/ki-trainingsplan-generator/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-indigo-400 mb-2"><i data-lucide="brain" class="w-3 h-3"></i> KI</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">KI Trainingsplan Generator</h3>
+                    </a>
+                    <a href="/blog/strava-und-krafttraining/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-orange-400 mb-2"><i data-lucide="link" class="w-3 h-3"></i> Integration</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">Strava und Krafttraining</h3>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-black border-t border-zinc-900 py-16 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex items-center gap-3">
+                <i data-lucide="activity" class="text-zinc-700 w-5 h-5"></i>
+                <span class="font-display text-lg tracking-tighter text-zinc-600 uppercase">BASE</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p class="text-[9px] font-black text-zinc-800 uppercase tracking-widest">&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

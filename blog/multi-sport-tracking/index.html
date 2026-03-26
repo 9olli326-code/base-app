@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Sport Tracking — Warum eine App für alle Sportarten besser ist als drei einzelne</title>
+    <meta name="description" content="Du trackst Laufen mit Strava, Krafttraining mit Strong und den Rest mit Excel? Erfahre warum ein Multi-Sport Tracker besser ist.">
+    <meta name="keywords" content="multi sport tracker app, fitness app mehrere sportarten">
+    <link rel="canonical" href="https://base-app.tech/blog/multi-sport-tracking/">
+
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://base-app.tech/blog/multi-sport-tracking/">
+    <meta property="og:title" content="Multi-Sport Tracking — Warum eine App für alle Sportarten besser ist als drei einzelne">
+    <meta property="og:description" content="Du trackst Laufen mit Strava, Krafttraining mit Strong und den Rest mit Excel? Erfahre warum ein Multi-Sport Tracker besser ist.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Multi-Sport Tracking — Warum eine App für alle Sportarten besser ist als drei einzelne">
+    <meta name="twitter:description" content="Du trackst Laufen mit Strava, Krafttraining mit Strong und den Rest mit Excel? Erfahre warum ein Multi-Sport Tracker besser ist.">
+    <meta name="twitter:image" content="https://base-app.tech/og-image.png">
+
+    <link rel="icon" type="image/png" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <meta name="theme-color" content="#06b6d4">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Multi-Sport Tracking — Warum eine App für alle Sportarten besser ist als drei einzelne",
+        "description": "Du trackst Laufen mit Strava, Krafttraining mit Strong und den Rest mit Excel? Erfahre warum ein Multi-Sport Tracker besser ist.",
+        "author": { "@type": "Organization", "name": "BASE Team" },
+        "publisher": { "@type": "Organization", "name": "BASE", "url": "https://base-app.tech" },
+        "datePublished": "2026-03-26",
+        "dateModified": "2026-03-26",
+        "mainEntityOfPage": "https://base-app.tech/blog/multi-sport-tracking/",
+        "url": "https://base-app.tech/blog/multi-sport-tracking/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Was ist ein Multi-Sport Tracker?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ein Multi-Sport Tracker ist eine App, die mehrere Sportarten in einer einzigen Plattform vereint. Statt separate Apps für Laufen, Krafttraining, Schwimmen oder Yoga zu nutzen, trackst du alles zentral — mit gemeinsamer Statistik und KI-Analyse."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Wie viele Sportarten unterstützt BASE?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "BASE unterstützt 86 Sportarten — von Krafttraining über Laufen, Schwimmen, Yoga, Kampfsport, Klettern bis hin zu Nischensportarten wie Bouldern, Slacklinen oder Pole Dance."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Kann ich Strava-Daten in BASE importieren?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ja, BASE bietet eine direkte Strava-Integration. Deine Lauf-, Rad- und Schwimmdaten werden automatisch importiert und mit deinen Krafttraining-Daten kombiniert — für eine ganzheitliche Analyse."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="../../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1; opacity: 0.4; }
+        .btn-cta { background: var(--cyan); color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; padding: 16px 36px; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 30px rgba(6,182,212,0.3); }
+        .btn-cta:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 50px rgba(6,182,212,0.5); }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .tag { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+        .card { background: rgba(18, 18, 22, 0.7); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(16px); transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        .card:hover { border-color: rgba(6,182,212,0.25); background: rgba(22, 22, 28, 0.9); transform: translateY(-2px); }
+        .article-body { max-width: 680px; margin: 0 auto; font-size: 18px; line-height: 1.8; }
+        .article-body h2 { color: white; font-size: 2rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+        .article-body p { margin-bottom: 1.25rem; }
+        .article-body a { color: #06b6d4; text-decoration: underline; text-underline-offset: 3px; }
+        .article-body a:hover { color: white; }
+        .article-body ul, .article-body ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+        .article-body li { margin-bottom: 0.5rem; }
+        .toc a { color: #a1a1aa; text-decoration: none; transition: color 0.2s; }
+        .toc a:hover { color: #06b6d4; }
+    </style>
+</head>
+<body class="relative">
+
+    <nav class="fixed w-full z-50 top-0" style="background:rgba(7,7,10,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.04)">
+        <div class="mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
+            <a href="/" class="flex items-center gap-3 no-underline">
+                <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+                </div>
+                <span class="font-display text-xl tracking-tighter text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="btn-cta py-2.5 px-6 text-[10px]">
+                App öffnen <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+    </nav>
+
+    <main class="relative z-10 pt-32 pb-24 px-6">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Breadcrumbs -->
+            <nav class="mb-8 text-xs text-zinc-600" style="font-family:'DM Sans',sans-serif;letter-spacing:0.08em;text-transform:uppercase;font-weight:500">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <span class="mx-2">/</span>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <span class="mx-2">/</span>
+                <span class="text-zinc-400">Multi-Sport Tracking</span>
+            </nav>
+
+            <!-- Article Header -->
+            <div class="max-w-3xl mx-auto mb-12">
+                <span class="tag text-cyan-400 mb-4"><i data-lucide="layers" class="w-3 h-3"></i> Feature</span>
+                <h1 class="text-4xl md:text-6xl text-white mb-6">Multi-Sport Tracking — Warum eine App für alle Sportarten besser ist als drei einzelne</h1>
+                <div class="glow-line max-w-xs mb-6"></div>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-zinc-500">
+                    <span>26. März 2026</span>
+                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <span>8 Min. Lesezeit</span>
+                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <span>BASE Team</span>
+                </div>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="max-w-3xl mx-auto mb-12">
+                <div class="card rounded-2xl p-6 toc">
+                    <h3 class="text-white text-lg mb-4">Inhalt</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-sm">
+                        <li><a href="#problem">Das Problem: Drei Apps, null Überblick</a></li>
+                        <li><a href="#warum-eine-app">Warum eine App für alle Sportarten besser ist</a></li>
+                        <li><a href="#86-sportarten">86 Sportarten in einer einzigen Plattform</a></li>
+                        <li><a href="#ki-vorteil">Der KI-Vorteil: Dein Coach sieht alles</a></li>
+                        <li><a href="#praxis">So funktioniert Multi-Sport Tracking in der Praxis</a></li>
+                        <li><a href="#vergleich">Vergleich: Einzelne Apps vs. Multi-Sport Tracker</a></li>
+                        <li><a href="#faq">Häufige Fragen</a></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Article Body -->
+            <article class="article-body">
+
+                <p>Montag: Krafttraining mit Strong tracken. Dienstag: Laufen über Strava aufzeichnen. Mittwoch: Yoga — das trägst du dann halt nirgends ein. Donnerstag: Schwimmbad — Excel-Tabelle? Kommt dir das bekannt vor? Du bist nicht allein. Die meisten Athleten, die mehr als eine Sportart betreiben, nutzen mindestens zwei bis drei verschiedene Apps. Und genau da liegt das Problem.</p>
+
+                <h2 id="problem">Das Problem: Drei Apps, null Überblick</h2>
+
+                <p>Die Fitness-App-Landschaft ist fragmentiert. Strava ist fantastisch für Ausdauersport — <a href="/sport/laufen/">Laufen</a>, Radfahren, Schwimmen. Aber versuch mal, deine Kniebeuge-Progression dort zu tracken. Strong und Hevy sind perfekt für <a href="/sport/krafttraining/">Krafttraining</a> — aber dein Sonntagslauf interessiert sie nicht. Und Yoga, Kampfsport, Klettern oder Tanzen? Dafür gibt es entweder Nischen-Apps oder gar nichts.</p>
+
+                <p>Das Ergebnis: Deine Trainingsdaten sind über drei, vier oder fünf Plattformen verstreut. Keine dieser Apps kennt das Gesamtbild. Strava weiß nicht, dass du gestern schon schwere Kniebeugen gemacht hast, wenn es dir heute einen harten Lauf vorschlägt. Strong weiß nicht, dass du drei Tage in Folge trainiert hast, weil die Läufe woanders gespeichert sind.</p>
+
+                <p>Du bekommst fragmentierte Einblicke statt ganzheitlicher Analyse. Und du verschwendest Zeit damit, zwischen Apps hin und her zu wechseln, Daten manuell zu übertragen oder dir den Gesamtüberblick selbst zusammenzubauen.</p>
+
+                <h2 id="warum-eine-app">Warum eine App für alle Sportarten besser ist</h2>
+
+                <p>Stell dir vor, jedes Training — egal ob Bankdrücken, 10-km-Lauf, Yoga-Session oder Bouldern — landet automatisch in einer einzigen Timeline. Ein Dashboard, das dir zeigt: wie oft du diese Woche trainiert hast, wie dein Volumen sich über Monate verändert, welche Muskelgruppen du vernachlässigst, wann du eine Pause brauchst.</p>
+
+                <p>Das ist der Kerngedanke hinter Multi-Sport Tracking. Nicht jede Sportart über einen Kamm scheren, sondern jede Sportart mit den richtigen Feldern und Metriken tracken — aber alles in einem System zusammenführen. Krafttraining braucht Sets, Reps und Gewicht. Laufen braucht Distanz, Pace und Herzfrequenz. <a href="/sport/schwimmen/">Schwimmen</a> braucht Bahnen und Schwimmstil. Und Yoga braucht vielleicht nur Dauer und Intensität.</p>
+
+                <p>Der Punkt ist: Eine gute Multi-Sport App passt sich dem Sport an — nicht umgekehrt. Sie zwingt dich nicht, dein Klettertraining in ein Krafttraining-Schema zu pressen.</p>
+
+                <h2 id="86-sportarten">86 Sportarten in einer einzigen Plattform</h2>
+
+                <p>BASE wurde genau für dieses Problem gebaut. Mit 86 unterstützten Sportarten deckst du praktisch alles ab, was du tun kannst. Von den Klassikern wie Krafttraining, Laufen und Radfahren bis hin zu Sportarten, die andere Apps komplett ignorieren: Bouldern, Pole Dance, Kampfsport, Slacklinen, Reiten, Rudern, Skifahren.</p>
+
+                <p>Jede Sportart hat ihr eigenes Tracking-Schema. Beim Krafttraining loggst du Übungen mit Sets, Wiederholungen und Gewicht. Beim Laufen trägst du Distanz und Zeit ein — oder importierst die Daten direkt aus Strava. Beim Yoga wählst du den Stil, die Dauer und wie du dich danach fühlst.</p>
+
+                <p>Und das Beste: Du kannst sogar eigene Sport-Schemas erstellen. Wenn dein Nischen-Sport nicht dabei ist — definiere einfach die Felder, die du tracken willst, und BASE erstellt dir eine maßgeschneiderte Tracking-Oberfläche.</p>
+
+                <h2 id="ki-vorteil">Der KI-Vorteil: Dein Coach sieht alles</h2>
+
+                <p>Hier wird es richtig interessant. BASE hat einen integrierten KI-Coach, der auf deine gesamten Trainingsdaten zugreifen kann — sportübergreifend. Das bedeutet: Die KI sieht nicht nur dein Krafttraining oder nur deine Läufe. Sie sieht alles.</p>
+
+                <p>Warum ist das wichtig? Weil intelligente Trainingsempfehlungen nur dann möglich sind, wenn die KI das vollständige Bild hat. Ein KI-Coach, der nur dein Lauftraining kennt, kann dir nicht sagen, dass deine Knieprobleme vielleicht von den schweren Kniebeugen zwei Tage vorher kommen. Ein Coach, der alles sieht, kann das.</p>
+
+                <p>Die KI in BASE analysiert deine Trainingsfrequenz über alle Sportarten hinweg, erkennt Muster in deiner Regeneration, identifiziert muskuläre Dysbalancen und gibt dir Empfehlungen, die wirklich zu deinem gesamten Trainingsalltag passen — nicht nur zu einem Bruchteil davon.</p>
+
+                <h2 id="praxis">So funktioniert Multi-Sport Tracking in der Praxis</h2>
+
+                <p>Der Alltag mit BASE sieht so aus: Du öffnest die App, wählst deine Sportart und trackst dein Training. Fertig. Morgens Krafttraining? Wähle Krafttraining, logge deine Übungen. Abends eine Runde joggen? Wähle Laufen, trage Distanz und Zeit ein — oder lass den Strava-Import das für dich erledigen.</p>
+
+                <p>Am Ende der Woche hast du eine vollständige Übersicht: fünf Trainingseinheiten, verteilt über drei Sportarten, mit allen relevanten Metriken. Dein Wochenvolumen, deine Trainingsverteilung, dein Fortschritt in jeder einzelnen Disziplin. Alles auf einen Blick, ohne manuelles Zusammenrechnen.</p>
+
+                <p>Und wenn du willst, fragst du den KI-Coach: "Wie war meine Woche?" — und bekommst eine fundierte Analyse, die alle Sportarten berücksichtigt.</p>
+
+                <h2 id="vergleich">Vergleich: Einzelne Apps vs. Multi-Sport Tracker</h2>
+
+                <p>Einzelne spezialisierte Apps haben natürlich ihre Stärken. Strava hat die größte Lauf-Community. Strong hat eine riesige Übungsdatenbank. Aber der Preis für die Spezialisierung ist die Fragmentierung. Du zahlst für mehrere Premium-Abos, du loggst dich in mehrere Apps ein, und am Ende hat keine App den vollen Überblick.</p>
+
+                <p>Ein Multi-Sport Tracker wie BASE löst dieses Problem an der Wurzel. Eine App, ein Account, ein Dashboard, ein KI-Coach. Keine Datensilos, keine blinden Flecken. Dafür ein vollständiges Bild deiner athletischen Leistung — egal welchen Sport du betreibst.</p>
+
+                <p>Und das Beste: BASE ist kostenlos. Kein Premium-Abo für Basis-Funktionen. Kein Paywall vor deinen eigenen Daten. Einfach registrieren und loslegen.</p>
+
+                <!-- CTA Box -->
+                <div class="card rounded-2xl p-8 my-12 text-center">
+                    <h3 class="text-white text-2xl mb-3">Jetzt BASE kostenlos testen</h3>
+                    <p class="text-zinc-400 text-base mb-6">86 Sportarten. KI-Coach. Kein App Store nötig.</p>
+                    <a href="/app.html" class="btn-cta">
+                        Kostenlos starten <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- FAQ -->
+                <h2 id="faq">Häufige Fragen</h2>
+
+                <p><strong style="color:white">Was ist ein Multi-Sport Tracker?</strong><br>
+                Ein Multi-Sport Tracker ist eine App, die mehrere Sportarten in einer einzigen Plattform vereint. Statt separate Apps für Laufen, Krafttraining, Schwimmen oder Yoga zu nutzen, trackst du alles zentral — mit gemeinsamer Statistik und KI-Analyse.</p>
+
+                <p><strong style="color:white">Wie viele Sportarten unterstützt BASE?</strong><br>
+                BASE unterstützt 86 Sportarten — von Krafttraining über Laufen, Schwimmen, Yoga, Kampfsport, Klettern bis hin zu Nischensportarten wie Bouldern, Slacklinen oder Pole Dance.</p>
+
+                <p><strong style="color:white">Kann ich Strava-Daten in BASE importieren?</strong><br>
+                Ja, BASE bietet eine direkte Strava-Integration. Deine Lauf-, Rad- und Schwimmdaten werden automatisch importiert und mit deinen Krafttraining-Daten kombiniert — für eine ganzheitliche Analyse.</p>
+
+            </article>
+
+            <!-- Related Articles -->
+            <div class="max-w-3xl mx-auto mt-20">
+                <div class="glow-line mb-12"></div>
+                <h2 class="text-3xl text-white mb-8">Weiterlesen</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <a href="/blog/ki-trainingsplan-generator/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-indigo-400 mb-2"><i data-lucide="brain" class="w-3 h-3"></i> KI</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">KI Trainingsplan Generator</h3>
+                    </a>
+                    <a href="/blog/strava-und-krafttraining/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-orange-400 mb-2"><i data-lucide="link" class="w-3 h-3"></i> Integration</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">Strava und Krafttraining</h3>
+                    </a>
+                    <a href="/blog/fitness-app-ohne-app-store/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-emerald-400 mb-2"><i data-lucide="smartphone" class="w-3 h-3"></i> Technologie</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">Fitness App ohne App Store</h3>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-black border-t border-zinc-900 py-16 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex items-center gap-3">
+                <i data-lucide="activity" class="text-zinc-700 w-5 h-5"></i>
+                <span class="font-display text-lg tracking-tighter text-zinc-600 uppercase">BASE</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p class="text-[9px] font-black text-zinc-800 uppercase tracking-widest">&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

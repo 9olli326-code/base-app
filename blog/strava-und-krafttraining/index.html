@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava und Krafttraining in einer App — So trackst du Cardio und Gym zusammen</title>
+    <meta name="description" content="Strava für Läufe, Zettel fürs Gym? So kombinierst du Ausdauer und Krafttraining in einer App mit KI-Analyse.">
+    <meta name="keywords" content="strava krafttraining, strava alternative krafttraining">
+    <link rel="canonical" href="https://base-app.tech/blog/strava-und-krafttraining/">
+
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://base-app.tech/blog/strava-und-krafttraining/">
+    <meta property="og:title" content="Strava und Krafttraining in einer App — So trackst du Cardio und Gym zusammen">
+    <meta property="og:description" content="Strava für Läufe, Zettel fürs Gym? So kombinierst du Ausdauer und Krafttraining in einer App mit KI-Analyse.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Strava und Krafttraining in einer App — So trackst du Cardio und Gym zusammen">
+    <meta name="twitter:description" content="Strava für Läufe, Zettel fürs Gym? So kombinierst du Ausdauer und Krafttraining in einer App mit KI-Analyse.">
+    <meta name="twitter:image" content="https://base-app.tech/og-image.png">
+
+    <link rel="icon" type="image/png" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <meta name="theme-color" content="#06b6d4">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Strava und Krafttraining in einer App — So trackst du Cardio und Gym zusammen",
+        "description": "Strava für Läufe, Zettel fürs Gym? So kombinierst du Ausdauer und Krafttraining in einer App mit KI-Analyse.",
+        "author": { "@type": "Organization", "name": "BASE Team" },
+        "publisher": { "@type": "Organization", "name": "BASE", "url": "https://base-app.tech" },
+        "datePublished": "2026-03-26",
+        "dateModified": "2026-03-26",
+        "mainEntityOfPage": "https://base-app.tech/blog/strava-und-krafttraining/",
+        "url": "https://base-app.tech/blog/strava-und-krafttraining/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Kann Strava Krafttraining tracken?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Strava bietet eine grundlegende Funktion für Krafttraining (Weight Training), aber ohne detailliertes Übungs-Tracking mit Sets, Reps und Gewichten. Für ernsthaftes Krafttraining-Tracking benötigst du eine spezialisierte App oder einen Multi-Sport Tracker wie BASE."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Kann ich Strava-Daten mit Krafttraining kombinieren?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Mit BASE importierst du deine Strava-Aktivitäten automatisch und trackst Krafttraining in der gleichen App. So hast du Cardio und Gym in einem Dashboard — mit KI-Analyse über beide Bereiche hinweg."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Ist BASE eine Strava-Alternative?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "BASE ist keine direkte Strava-Alternative, sondern eine Ergänzung. Du kannst Strava weiterhin für GPS-Tracking nutzen und die Daten automatisch in BASE importieren. BASE fügt dann Krafttraining, KI-Analyse und 86 Sportarten hinzu."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="../../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1; opacity: 0.4; }
+        .btn-cta { background: var(--cyan); color: #000; font-weight: 900; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; padding: 16px 36px; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 30px rgba(6,182,212,0.3); }
+        .btn-cta:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 50px rgba(6,182,212,0.5); }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .tag { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+        .card { background: rgba(18, 18, 22, 0.7); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(16px); transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        .card:hover { border-color: rgba(6,182,212,0.25); background: rgba(22, 22, 28, 0.9); transform: translateY(-2px); }
+        .article-body { max-width: 680px; margin: 0 auto; font-size: 18px; line-height: 1.8; }
+        .article-body h2 { color: white; font-size: 2rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+        .article-body p { margin-bottom: 1.25rem; }
+        .article-body a { color: #06b6d4; text-decoration: underline; text-underline-offset: 3px; }
+        .article-body a:hover { color: white; }
+        .article-body ul, .article-body ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+        .article-body li { margin-bottom: 0.5rem; }
+        .toc a { color: #a1a1aa; text-decoration: none; transition: color 0.2s; }
+        .toc a:hover { color: #06b6d4; }
+    </style>
+</head>
+<body class="relative">
+
+    <nav class="fixed w-full z-50 top-0" style="background:rgba(7,7,10,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.04)">
+        <div class="mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
+            <a href="/" class="flex items-center gap-3 no-underline">
+                <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+                </div>
+                <span class="font-display text-xl tracking-tighter text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="btn-cta py-2.5 px-6 text-[10px]">
+                App öffnen <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+    </nav>
+
+    <main class="relative z-10 pt-32 pb-24 px-6">
+        <div class="max-w-7xl mx-auto">
+
+            <nav class="mb-8 text-xs text-zinc-600" style="font-family:'DM Sans',sans-serif;letter-spacing:0.08em;text-transform:uppercase;font-weight:500">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <span class="mx-2">/</span>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <span class="mx-2">/</span>
+                <span class="text-zinc-400">Strava und Krafttraining</span>
+            </nav>
+
+            <div class="max-w-3xl mx-auto mb-12">
+                <span class="tag text-orange-400 mb-4"><i data-lucide="link" class="w-3 h-3"></i> Integration</span>
+                <h1 class="text-4xl md:text-6xl text-white mb-6">Strava und Krafttraining in einer App — So trackst du Cardio und Gym zusammen</h1>
+                <div class="glow-line max-w-xs mb-6"></div>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-zinc-500">
+                    <span>26. März 2026</span>
+                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <span>7 Min. Lesezeit</span>
+                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                    <span>BASE Team</span>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto mb-12">
+                <div class="card rounded-2xl p-6 toc">
+                    <h3 class="text-white text-lg mb-4">Inhalt</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-sm">
+                        <li><a href="#problem">Das Problem: Strava kann kein Krafttraining</a></li>
+                        <li><a href="#warum-beides">Warum du Cardio und Krafttraining zusammen tracken solltest</a></li>
+                        <li><a href="#strava-import">Strava-Import: So funktioniert die Integration</a></li>
+                        <li><a href="#krafttraining">Krafttraining richtig tracken</a></li>
+                        <li><a href="#ki-analyse">KI-Analyse: Wenn Cardio und Kraft sich treffen</a></li>
+                        <li><a href="#workflow">Der ideale Workflow für Hybrid-Athleten</a></li>
+                        <li><a href="#faq">Häufige Fragen</a></li>
+                    </ol>
+                </div>
+            </div>
+
+            <article class="article-body">
+
+                <p>Du bist Hybrid-Athlet. Montag und Donnerstag Gym, Dienstag und Samstag Laufen, Mittwoch vielleicht noch eine Runde auf dem <a href="/sport/radfahren/">Rad</a>. Strava ist dein treuer Begleiter für alles, was GPS braucht. Aber sobald du die Langhantel in die Hand nimmst, lässt dich Strava im Stich. Der Workout-Typ "Weight Training" in Strava ist kaum mehr als ein Timer mit einem Label. Keine Übungen, keine Sets, keine Gewichte, keine Progression. Und damit fehlt dir die Hälfte deiner Trainingshistorie.</p>
+
+                <h2 id="problem">Das Problem: Strava kann kein Krafttraining</h2>
+
+                <p>Strava wurde für Ausdauersport gebaut. GPS-Tracking, Segmente, Geschwindigkeit, Höhenmeter — das macht Strava brillant. Aber Krafttraining funktioniert fundamental anders. Hier zählen nicht Kilometer und Pace, sondern Übungen, Sätze, Wiederholungen und Gewichte. Du willst wissen: Habe ich diese Woche mehr Bankdrücken bewegt als letzte Woche? Wie entwickelt sich meine Kniebeuge über Monate?</p>
+
+                <p>Strava kann diese Fragen nicht beantworten. Du kannst zwar "Weight Training" als Aktivität loggen, aber du siehst nur Dauer und geschätzte Kalorien. Keine Übungshistorie, keine Volumen-Analyse, keine Personal Records. Für jeden, der ernsthaft Kraft trainiert, ist das unbrauchbar.</p>
+
+                <p>Die Konsequenz: Du brauchst eine zweite App. Strong, Hevy, FitNotes — eine der vielen Krafttraining-Apps. Und plötzlich hast du zwei getrennte Welten. Deine Läufe leben in Strava, dein Krafttraining lebt woanders. Keine App hat den vollen Überblick.</p>
+
+                <h2 id="warum-beides">Warum du Cardio und Krafttraining zusammen tracken solltest</h2>
+
+                <p>Die Wissenschaft ist sich einig: Die Kombination aus Kraft- und Ausdauertraining — sogenanntes Concurrent Training — ist der effektivste Ansatz für langfristige Gesundheit und Fitness. Aber genau diese Kombination macht das Tracking kompliziert, wenn Cardio und Kraft in verschiedenen Apps leben.</p>
+
+                <p>Stell dir vor, du analysierst dein Trainingsvolumen. In Strava siehst du drei Läufe pro Woche und denkst: "Ganz ordentlich." Aber du vergisst, dass du zusätzlich vier Krafttrainingseinheiten hattest. Dein tatsächliches Trainingsvolumen ist doppelt so hoch, wie Strava dir zeigt. Kein Wunder, dass du müde bist.</p>
+
+                <p>Ein <a href="/blog/multi-sport-tracking/">Multi-Sport Tracker</a> wie BASE löst dieses Problem, indem er alles an einem Ort zusammenführt. Deine Gesamtbelastung, deine Trainingsverteilung, deine Regenerationszeiten — alles basierend auf dem vollständigen Bild.</p>
+
+                <h2 id="strava-import">Strava-Import: So funktioniert die Integration</h2>
+
+                <p>BASE ersetzt Strava nicht — BASE ergänzt es. Die Integration funktioniert über die offizielle Strava-API. Du verbindest deinen Strava-Account einmalig mit BASE, und ab dann werden deine Strava-Aktivitäten automatisch importiert. <a href="/sport/laufen/">Laufen</a>, Radfahren, Schwimmen — alles, was du in Strava trackst, erscheint automatisch in deiner BASE-Timeline.</p>
+
+                <p>Die importierten Daten behalten ihre Details: Distanz, Dauer, Pace, Höhenmeter, Herzfrequenz. Du verlierst nichts. Aber du gewinnst etwas: Diese Daten werden jetzt mit deinem Krafttraining kombiniert. In einem einzigen Dashboard, mit einer einzigen Statistik, analysiert von einer einzigen KI.</p>
+
+                <p>Du musst nichts doppelt eingeben. Strava macht weiterhin das, was Strava am besten kann — GPS-Tracking für Ausdauersport. BASE macht den Rest: Krafttraining, Yoga, Kampfsport und die ganzheitliche Analyse.</p>
+
+                <h2 id="krafttraining">Krafttraining richtig tracken</h2>
+
+                <p>Für deine Krafttrainings-Sessions nutzt du direkt BASE. Die App bietet eine Übungsdatenbank mit über 80 Übungen — von Grundübungen wie Kniebeugen, Kreuzheben und Bankdrücken bis zu Isolationsübungen und Maschinen-Training. Für jede Übung loggst du Sets, Wiederholungen und Gewicht.</p>
+
+                <p>BASE erkennt automatisch Personal Records, trackt dein Gesamtvolumen pro Session und pro Woche, und zeigt dir die Progression über Wochen und Monate. Hast du bei der Kniebeuge letzte Woche 100 kg für 5 Wiederholungen geschafft und diese Woche 102,5 kg? BASE sieht das und feiert den Fortschritt mit dir.</p>
+
+                <p>Es gibt außerdem einen Rest-Timer zwischen den Sätzen, einen Workout-Timer für die Gesamtdauer und die Möglichkeit, Notizen zu einzelnen Übungen hinzuzufügen — zum Beispiel "Rechte Schulter hat gezwickt" oder "Letzte Rep war Grind".</p>
+
+                <h2 id="ki-analyse">KI-Analyse: Wenn Cardio und Kraft sich treffen</h2>
+
+                <p>Hier wird es magisch. Die KI in BASE sieht sowohl deine Strava-Läufe als auch dein Krafttraining. Das ermöglicht Analysen, die keine einzelne App liefern kann. Zum Beispiel: "Deine Laufleistung sinkt in Wochen mit hohem Beintraining-Volumen." Oder: "Dein Oberkörper-Training hat sich in den letzten 4 Wochen verbessert, aber dein Laufvolumen ist um 20 Prozent zurückgegangen — ist das beabsichtigt?"</p>
+
+                <p>Der KI-Coach kann dir auch Empfehlungen geben, wie du Kraft und Ausdauer optimal kombinierst. Solltest du am gleichen Tag Laufen und Beine trainieren? Wie viel Erholung brauchst du zwischen einem Intervall-Lauf und schwerem Kreuzheben? Diese Fragen kann eine KI nur beantworten, wenn sie das Gesamtbild kennt.</p>
+
+                <p>Und genau das ist der Punkt, warum die Kombination von Strava-Import und Krafttraining-Tracking so wertvoll ist. Nicht weil eine App besser ist als die andere, sondern weil erst die Kombination beider Datenquellen echte Insights ermöglicht.</p>
+
+                <h2 id="workflow">Der ideale Workflow für Hybrid-Athleten</h2>
+
+                <p>So sieht der optimale Workflow aus: Für Läufe, Radtouren und Schwimmen nutzt du weiterhin Strava mit deiner GPS-Uhr oder deinem Handy. Die Daten fließen automatisch nach BASE. Für Krafttraining öffnest du BASE direkt im Gym, wählst deine Übungen und loggst deine Sets.</p>
+
+                <p>Am Ende der Woche hast du eine vollständige Übersicht: drei Läufe aus Strava plus drei Krafttrainingseinheiten direkt in BASE. Ein Dashboard, ein Kalender, ein KI-Coach der alles zusammen analysiert. Du fragst den Coach: "Wie soll ich nächste Woche trainieren?" — und er berücksichtigt sowohl dein Laufvolumen als auch dein Krafttraining.</p>
+
+                <p>Kein App-Wechsel, kein manuelles Kopieren von Daten, kein Excel-Frankenstein. Einfach trainieren und alles in einem System haben. Genau so sollte Fitness-Tracking in 2026 funktionieren.</p>
+
+                <div class="card rounded-2xl p-8 my-12 text-center">
+                    <h3 class="text-white text-2xl mb-3">Jetzt BASE kostenlos testen</h3>
+                    <p class="text-zinc-400 text-base mb-6">Strava-Import + Krafttraining + KI-Coach. Alles in einer App.</p>
+                    <a href="/app.html" class="btn-cta">
+                        Kostenlos starten <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <h2 id="faq">Häufige Fragen</h2>
+
+                <p><strong style="color:white">Kann Strava Krafttraining tracken?</strong><br>
+                Strava bietet eine grundlegende Funktion für Krafttraining (Weight Training), aber ohne detailliertes Übungs-Tracking mit Sets, Reps und Gewichten. Für ernsthaftes Krafttraining-Tracking benötigst du eine spezialisierte App oder einen Multi-Sport Tracker wie BASE.</p>
+
+                <p><strong style="color:white">Kann ich Strava-Daten mit Krafttraining kombinieren?</strong><br>
+                Mit BASE importierst du deine Strava-Aktivitäten automatisch und trackst Krafttraining in der gleichen App. So hast du Cardio und Gym in einem Dashboard — mit KI-Analyse über beide Bereiche hinweg.</p>
+
+                <p><strong style="color:white">Ist BASE eine Strava-Alternative?</strong><br>
+                BASE ist keine direkte Strava-Alternative, sondern eine Ergänzung. Du kannst Strava weiterhin für GPS-Tracking nutzen und die Daten automatisch in BASE importieren. BASE fügt dann Krafttraining, KI-Analyse und 86 Sportarten hinzu.</p>
+
+            </article>
+
+            <div class="max-w-3xl mx-auto mt-20">
+                <div class="glow-line mb-12"></div>
+                <h2 class="text-3xl text-white mb-8">Weiterlesen</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <a href="/blog/multi-sport-tracking/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-cyan-400 mb-2"><i data-lucide="layers" class="w-3 h-3"></i> Feature</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">Multi-Sport Tracking</h3>
+                    </a>
+                    <a href="/blog/ki-trainingsplan-generator/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-indigo-400 mb-2"><i data-lucide="brain" class="w-3 h-3"></i> KI</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">KI Trainingsplan Generator</h3>
+                    </a>
+                    <a href="/blog/personal-trainer-software/" class="card rounded-xl p-5 no-underline group">
+                        <span class="tag text-violet-400 mb-2"><i data-lucide="users" class="w-3 h-3"></i> PT Business</span>
+                        <h3 class="text-white text-lg group-hover:text-cyan-400 transition-colors">Personal Trainer Software</h3>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-black border-t border-zinc-900 py-16 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex items-center gap-3">
+                <i data-lucide="activity" class="text-zinc-700 w-5 h-5"></i>
+                <span class="font-display text-lg tracking-tighter text-zinc-600 uppercase">BASE</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p class="text-[9px] font-black text-zinc-800 uppercase tracking-widest">&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

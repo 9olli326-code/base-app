@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bogenschießen Training tracken | BASE Fitness App</title>
+    <meta name="description" content="Tracke dein Bogenschießen-Training mit BASE: Distanz, Pfeile, Punktzahl und Innen-10. Kostenlose Tracking-App für Bogenschützen.">
+
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="apple-touch-icon" href="../../icon.png">
+    <link rel="icon" type="image/png" href="../../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/bogenschiessen/">
+    <meta property="og:title" content="Bogenschießen Training tracken | BASE Fitness App">
+    <meta property="og:description" content="Tracke dein Bogenschießen-Training mit BASE: Distanz, Pfeile, Punktzahl und Innen-10. Kostenlos starten.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bogenschießen Training tracken | BASE Fitness App">
+    <meta name="twitter:description" content="Tracke dein Bogenschießen-Training mit BASE: Distanz, Pfeile, Punktzahl und Innen-10. Kostenlos starten.">
+    <meta name="twitter:image" content="https://base-app.tech/og-image.png">
+
+    <link rel="canonical" href="https://base-app.tech/sport/bogenschiessen/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BASE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "description": "KI-Fitness-Tracker für Bogenschießen. Tracke Distanz, Pfeile, Punktzahl und Innen-10.",
+      "url": "https://base-app.tech"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kann ich Bogenschießen mit BASE tracken?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE bietet ein spezielles Schema für Bogenschießen mit Feldern für Distanz, Anzahl der Pfeile, Punktzahl und Innen-10. So kannst du jede Trainingseinheit und jeden Wettkampf präzise dokumentieren."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich meine Trefferquote über die Zeit verfolgen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE zeigt dir in Charts, wie sich deine Punktzahl und deine Innen-10-Quote über Wochen und Monate entwickeln. So erkennst du Trends und siehst, ob dein Training Wirkung zeigt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Unterstützt BASE verschiedene Distanzen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, du trägst die Schießdistanz bei jeder Einheit ein. So kannst du deine Performance auf verschiedenen Distanzen vergleichen — ob 18m Indoor oder 70m Outdoor."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist BASE kostenlos für Bogenschützen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE ist komplett kostenlos. Du kannst unbegrenzt Trainingseinheiten tracken, deine Statistiken analysieren und den KI-Coach nutzen. Ohne Abo, ohne versteckte Kosten."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="../../tailwind-production.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <style>
+        body { background: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; margin: 0; }
+        h1, h2, h3, h4 { font-family: 'Bebas Neue', sans-serif; color: white; letter-spacing: -0.03em; }
+        a { color: #06b6d4; }
+    </style>
+</head>
+<body>
+
+<nav class="fixed w-full z-50 top-0" id="navbar" style="background:rgba(9,9,11,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05)">
+    <div class="mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
+        <a href="/" class="flex items-center gap-3 no-underline">
+            <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:-0.05em;color:white;text-transform:uppercase">BASE</span>
+        </a>
+        <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
+            <a href="/#features" class="hover:text-white transition-colors no-underline" style="color:inherit">Features</a>
+            <a href="/sport/" class="hover:text-white transition-colors no-underline" style="color:inherit">Sportarten</a>
+            <a href="/blog/" class="hover:text-white transition-colors no-underline" style="color:inherit">Blog</a>
+            <a href="/#pt" class="hover:text-white transition-colors no-underline" style="color:inherit">Für Trainer</a>
+            <a href="/#pricing" class="hover:text-white transition-colors no-underline" style="color:inherit">Pricing</a>
+        </div>
+        <a href="/app.html" style="background:#06b6d4;color:#000;font-weight:900;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:10px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 0 20px rgba(6,182,212,0.3)">
+            App öffnen <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+    </div>
+</nav>
+
+<main style="max-width:52rem;margin:0 auto;padding:7rem 1.5rem 4rem">
+
+    <nav style="font-size:0.8rem;margin-bottom:2rem;color:#52525b">
+        <a href="/" style="color:#52525b;text-decoration:none">Home</a>
+        <span style="margin:0 0.5rem">›</span>
+        <a href="/sport/" style="color:#52525b;text-decoration:none">Sportarten</a>
+        <span style="margin:0 0.5rem">›</span>
+        <span style="color:#a1a1aa">Bogenschießen</span>
+    </nav>
+
+    <div style="margin-bottom:3rem">
+        <span style="display:inline-block;font-size:0.65rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:#06b6d4;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);padding:4px 12px;border-radius:6px;margin-bottom:1rem">Golf & Präzision</span>
+        <h1 style="font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;margin:0 0 1.5rem">Bogenschießen Training tracken mit BASE</h1>
+        <p style="font-size:1.05rem;line-height:1.7;color:#a1a1aa;max-width:40rem">
+            Bogenschießen ist ein Sport, in dem Präzision, Konzentration und Wiederholbarkeit den Unterschied machen. Jeder Pfeil, jede Passe, jedes Training bringt dich einen Schritt näher an konstante Spitzenleistungen. Aber nur, wenn du deine Ergebnisse systematisch festhältst und analysierst. BASE gibt dir genau das: ein schnelles, unkompliziertes Tracking für jede Trainingseinheit. Trage deine Distanz, die Anzahl geschossener Pfeile, deine Gesamtpunktzahl und die Innen-10 ein — und erkenne über die Zeit, wie sich deine Präzision entwickelt. Vom Anfänger bis zum Wettkampfschützen.
+        </p>
+    </div>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Diese Felder trackt BASE:</h2>
+        <div style="display:grid;gap:0.75rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Distanz</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">m</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 18</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Pfeile</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 60</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Punktzahl</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 548</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Innen-10</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 22</span>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Warum BASE für Bogenschießen?</h2>
+        <div style="display:grid;gap:1rem">
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="crosshair" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Präzision messen und steigern
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Die Innen-10-Quote ist eine der wichtigsten Kennzahlen im Bogenschießen. BASE trackt sie für jede Einheit und zeigt dir in Charts, wie sich deine Präzision über die Zeit entwickelt. So erkennst du, ob dein Formtraining, deine Materialanpassungen oder dein mentales Training Wirkung zeigen. Der KI-Coach kann zusätzlich Muster erkennen — etwa ob du auf bestimmten Distanzen besser schießt.
+                </p>
+            </div>
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="ruler" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Distanz-Vergleich
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Bogenschützen trainieren auf verschiedenen Distanzen — 18m Indoor, 30m, 50m, 70m Outdoor. Mit BASE trägst du die Distanz bei jeder Einheit ein und kannst deine Performance gezielt vergleichen. So weißt du genau, auf welchen Distanzen du stark bist und wo du noch Trainingszeit investieren solltest.
+                </p>
+            </div>
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="trophy" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Wettkampf-Vorbereitung
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Vor einem Wettkampf willst du wissen, wo du stehst. BASE zeigt dir deine aktuellen Durchschnittswerte, deine Bestleistungen und deine Formkurve. So kannst du realistisch einschätzen, welche Ergebnisse möglich sind, und dein Training in den letzten Wochen vor dem Wettkampf gezielt ausrichten.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1rem">Eigene Felder hinzufügen</h2>
+        <p style="font-size:0.95rem;line-height:1.7;color:#a1a1aa">
+            Das Bogenschießen-Schema deckt die Kernmetriken ab. Aber vielleicht willst du auch die Wetterbedingungen notieren, den Bogentyp festhalten, die Visiereinstellung dokumentieren oder dein subjektives Formgefühl bewerten. Mit dem Schema-Editor in BASE ergänzt du solche Felder in Sekunden. Jedes neue Feld erscheint automatisch in deinen Charts und wird vom KI-Coach in die Analyse einbezogen. So wird BASE zum perfekten Begleiter für dein Bogensport-Training.
+        </p>
+    </section>
+
+    <section style="text-align:center;margin-bottom:3.5rem;padding:3rem 1.5rem;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:16px">
+        <h2 style="font-size:2rem;margin:0 0 1rem">Jetzt Bogenschießen tracken — Kostenlos</h2>
+        <p style="color:#71717a;margin:0 0 1.5rem;font-size:0.95rem">Keine Installation, kein Abo. Einfach im Browser öffnen und loslegen.</p>
+        <a href="/app.html" style="background:#06b6d4;color:#000;font-weight:900;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;padding:14px 32px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 0 30px rgba(6,182,212,0.3)">
+            Kostenlos starten <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Andere Sportarten:</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem">
+            <a href="/sport/golf/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Golf</a>
+            <a href="/sport/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Darts</a>
+            <a href="/sport/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Schießsport</a>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.4rem;margin:0 0 1rem">Weiterlesen</h2>
+        <a href="/blog/multi-sport-tracking/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem;display:block;text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+            <span style="color:white;font-weight:700;font-size:0.95rem">Multi-Sport Tracking</span>
+            <span style="display:block;color:#52525b;font-size:0.8rem;margin-top:0.25rem">Warum eine App für alle Sportarten? →</span>
+        </a>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Häufige Fragen</h2>
+        <div style="display:grid;gap:1rem">
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Kann ich Bogenschießen mit BASE tracken?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE bietet ein spezielles Schema für Bogenschießen mit Feldern für Distanz, Anzahl der Pfeile, Punktzahl und Innen-10. So kannst du jede Trainingseinheit und jeden Wettkampf präzise dokumentieren.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Kann ich meine Trefferquote über die Zeit verfolgen?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE zeigt dir in Charts, wie sich deine Punktzahl und deine Innen-10-Quote über Wochen und Monate entwickeln. So erkennst du Trends und siehst, ob dein Training Wirkung zeigt.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Unterstützt BASE verschiedene Distanzen?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, du trägst die Schießdistanz bei jeder Einheit ein. So kannst du deine Performance auf verschiedenen Distanzen vergleichen — ob 18m Indoor oder 70m Outdoor.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Ist BASE kostenlos für Bogenschützen?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE ist komplett kostenlos. Du kannst unbegrenzt Trainingseinheiten tracken, deine Statistiken analysieren und den KI-Coach nutzen. Ohne Abo, ohne versteckte Kosten.
+                </p>
+            </details>
+        </div>
+    </section>
+
+</main>
+
+<footer style="background:#000;border-top:1px solid rgba(255,255,255,0.05);padding:4rem 1.5rem">
+    <div style="max-width:80rem;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2rem">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+            <i data-lucide="activity" style="color:rgba(255,255,255,0.2);width:20px;height:20px"></i>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:-0.05em;color:rgba(255,255,255,0.3);text-transform:uppercase">BASE</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:1.5rem;font-size:9px;font-weight:900;color:rgba(255,255,255,0.2);text-transform:uppercase;letter-spacing:0.2em">
+            <a href="/sport/" style="color:inherit;text-decoration:none">86 Sportarten</a>
+            <a href="/blog/" style="color:inherit;text-decoration:none">Blog</a>
+            <a href="/impressum.html" style="color:inherit;text-decoration:none">Impressum</a>
+            <a href="/datenschutz.html" style="color:inherit;text-decoration:none">Datenschutz</a>
+        </div>
+        <p style="font-size:9px;font-weight:900;color:rgba(255,255,255,0.1);text-transform:uppercase;letter-spacing:0.2em">© 2026 BASE Systems</p>
+    </div>
+</footer>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

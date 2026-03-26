@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krafttraining tracken | BASE Fitness App</title>
+    <link rel="icon" type="image/png" href="../../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+    <meta name="description" content="Tracke dein Krafttraining mit BASE. Sätze, Wiederholungen, Gewicht, Equipment, Volume-Berechnung. KI-Coach, Offline-Modus, kostenlos.">
+    <link rel="canonical" href="https://base-app.tech/sport/krafttraining/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/krafttraining/">
+    <meta property="og:title" content="Krafttraining tracken | BASE Fitness App">
+    <meta property="og:description" content="Tracke dein Krafttraining mit BASE. Sätze, Wiederholungen, Gewicht, Equipment, Volume-Berechnung. KI-Coach, Offline-Modus, kostenlos.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BASE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "description": "Krafttraining tracken mit BASE — Sätze, Wiederholungen, Gewicht, Equipment und Volume-Berechnung.",
+      "url": "https://base-app.tech/sport/krafttraining/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kann ich mit BASE mein Krafttraining tracken?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE hat ein spezielles Krafttraining-Formular mit Sätzen, Wiederholungen und Gewicht. Du kannst jede Übung detailliert erfassen und dein Volume automatisch berechnen lassen." }
+        },
+        {
+          "@type": "Question",
+          "name": "Berechnet BASE mein Trainingsvolume automatisch?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE multipliziert automatisch Sätze × Wiederholungen × Gewicht und zeigt dir dein Gesamt-Volume pro Workout und über die Zeit in Charts an." }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich verschiedene Equipment-Typen auswählen?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE unterstützt Langhantel, Kurzhantel, Maschine, Kabel und Bodyweight. Du wählst für jeden Satz das passende Equipment aus." }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert BASE auch offline im Gym?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE ist eine PWA und speichert alle Daten lokal. Du kannst im Gym ohne Internet trainieren — deine Daten werden synchronisiert, sobald du wieder online bist." }
+        }
+      ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="../../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        .text-gradient-cyan { background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .field-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 12px; padding: 20px; }
+        .advantage-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 16px; padding: 24px; }
+        .advantage-card:hover { border-color: rgba(6,182,212,0.3); }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="9" fill="#09090b"/>
+                        <rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#0f0f12" stroke="#1f1f24" stroke-width="0.5"/>
+                        <rect x="7" y="10" width="1.5" height="21" rx="0.75" fill="#06b6d4"/>
+                        <circle cx="32" cy="11" r="1.5" fill="#06b6d4"/>
+                        <text x="11" y="29" font-family="'Arial Black',Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="-0.5">B</text>
+                    </svg>
+                </div>
+                <span style="font-family:'Bebas Neue',sans-serif;" class="text-xl tracking-wide text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden md:flex items-center gap-8 text-sm text-zinc-400">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-semibold px-5 py-2 rounded-lg transition-colors">App öffnen</a>
+        </div>
+    </nav>
+
+    <!-- Breadcrumbs -->
+    <div class="pt-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <nav class="flex items-center gap-2 text-sm text-zinc-500">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <span>/</span>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <span>/</span>
+                <span class="text-zinc-300">Krafttraining</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="pt-8 pb-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-block bg-zinc-900 border border-zinc-800 rounded-full px-4 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-6">Kraft</div>
+            <h1 class="text-4xl md:text-6xl text-white mb-6">Krafttraining tracken mit BASE</h1>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed">
+                Krafttraining ist die Grundlage jeder athletischen Leistung. Ob Hypertrophie, Maximalkraft oder Kraft-Ausdauer — um Fortschritte zu machen, musst du dein Training dokumentieren. BASE wurde genau dafür entwickelt: Ein spezialisiertes Tracking-Formular erfasst jeden Satz mit Wiederholungen, Gewicht und Equipment-Typ. So weißt du bei jedem Workout exakt, was du beim letzten Mal geschafft hast.
+            </p>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed mt-4">
+                Das automatische Volume-Tracking berechnet dein Gesamtvolumen pro Session und zeigt dir über Wochen und Monate, ob du progressive Overload einhältst. Der KI-Coach analysiert deine Trainingshistorie, erkennt Plateaus und gibt dir konkrete Empfehlungen — zum Beispiel mehr Volume auf schwachen Muskelgruppen oder Deload-Wochen, wenn dein Zentralnervensystem überlastet ist.
+            </p>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed mt-4">
+                BASE funktioniert offline im Gym, synchronisiert automatisch in die Cloud und lässt dich dein Training auch mit Strava verbinden. Du brauchst keine separate App für Krafttraining — BASE trackt alles in einer Plattform, egal ob du zusätzlich läufst, schwimmst oder Yoga machst.
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-4xl mx-auto"></div>
+
+    <!-- Fields -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Diese Felder trackt BASE für Krafttraining:</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Sätze (Sets)</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Wiederholungen &times; Gewicht</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 4 &times; 8 @ 80 kg</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Equipment</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Auswahl</div>
+                    <div class="text-sm text-cyan-400">Beispiel: Langhantel, Kurzhantel, Maschine, Kabel</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Volume</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Automatische Berechnung</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 2.560 kg (4 &times; 8 &times; 80)</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">RPE / Intensität</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Skala 1–10</div>
+                    <div class="text-sm text-cyan-400">Beispiel: RPE 8</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Warum BASE für Krafttraining?</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">KI-Coach</h3>
+                    <p class="text-sm text-zinc-400">Der KI-Coach analysiert dein Volume, erkennt Plateaus und empfiehlt Anpassungen. Progressive Overload wird messbar und planbar.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="wifi-off" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">Offline im Gym</h3>
+                    <p class="text-sm text-zinc-400">BASE funktioniert ohne Internet. Tracke dein Workout im Gym-Keller ohne WLAN — die Daten synchronisieren sich später automatisch.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="layers" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">Multi-Sport</h3>
+                    <p class="text-sm text-zinc-400">Krafttraining plus Laufen, Schwimmen oder Yoga — alles in einer App. Kein Wechsel zwischen verschiedenen Tracking-Tools mehr.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KI Builder -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-8">
+                <h2 class="text-3xl text-white mb-4">Eigene Felder hinzufügen</h2>
+                <p class="text-zinc-400 leading-relaxed">Du willst zusätzliche Felder tracken — zum Beispiel Griffart, Tempo oder spezifische Muskelgruppen? Der KI-Builder in BASE erstellt dir in Sekunden ein individuelles Schema. Beschreib einfach auf Deutsch, was du brauchst, und die KI generiert die passenden Felder mit den richtigen Datentypen. Dein Schema wird lokal gespeichert und steht dir sofort zur Verfügung.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <a href="/app.html" class="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-8 py-4 rounded-xl text-lg transition-colors">
+                <i data-lucide="dumbbell" class="w-5 h-5"></i>
+                Jetzt Krafttraining tracken — Kostenlos
+            </a>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-4xl mx-auto"></div>
+
+    <!-- Related Sports -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl text-white mb-6">Andere Sportarten:</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">CrossFit</a>
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Calisthenics</a>
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Bodybuilding</a>
+                <a href="/sport/laufen/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Laufen</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog -->
+    <section class="pb-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <a href="/blog/ki-trainingsplan-generator/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 hover:border-cyan-500/30 transition-colors">
+                <div class="text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-2">Blog</div>
+                <div class="text-white font-semibold">KI-Trainingsplan-Generator: So erstellt BASE deinen individuellen Plan</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Häufige Fragen</h2>
+            <div class="space-y-4">
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann ich mit BASE mein Krafttraining tracken?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE hat ein spezielles Krafttraining-Formular mit Sätzen, Wiederholungen und Gewicht. Du kannst jede Übung detailliert erfassen und dein Volume automatisch berechnen lassen.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Berechnet BASE mein Trainingsvolume automatisch?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE multipliziert automatisch Sätze x Wiederholungen x Gewicht und zeigt dir dein Gesamt-Volume pro Workout und über die Zeit in Charts an.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann ich verschiedene Equipment-Typen auswählen?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE unterstützt Langhantel, Kurzhantel, Maschine, Kabel und Bodyweight. Du wählst für jeden Satz das passende Equipment aus.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Funktioniert BASE auch offline im Gym?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE ist eine PWA und speichert alle Daten lokal. Du kannst im Gym ohne Internet trainieren — deine Daten werden synchronisiert, sobald du wieder online bist.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800/50 py-12 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500">
+            <div class="flex items-center gap-6">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p>&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

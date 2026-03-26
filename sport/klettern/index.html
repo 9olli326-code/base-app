@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klettern Training tracken | BASE Fitness App</title>
+    <link rel="icon" type="image/png" href="../../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+    <meta name="description" content="Tracke dein Klettern Training mit BASE. Routen, Schwierigkeitsgrad, Kletterart, Projektversuche. KI-Coach, Offline-Modus, kostenlos.">
+    <link rel="canonical" href="https://base-app.tech/sport/klettern/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/klettern/">
+    <meta property="og:title" content="Klettern Training tracken | BASE Fitness App">
+    <meta property="og:description" content="Tracke dein Klettern Training mit BASE. Routen, Schwierigkeitsgrad, Kletterart, Projektversuche. KI-Coach, Offline-Modus, kostenlos.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BASE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "description": "Klettern tracken mit BASE — Routen, Schwierigkeitsgrad, Kletterart und Projektversuche.",
+      "url": "https://base-app.tech/sport/klettern/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kann BASE mein Klettertraining tracken?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE erfasst die Anzahl der Routen, den maximalen Schwierigkeitsgrad, die Kletterart (Lead, Top Rope, Outdoor) und deine Projektversuche. So dokumentierst du deinen Fortschritt am Fels und in der Halle." }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich verschiedene Kletterarten unterscheiden?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. Du kannst bei jeder Session angeben, ob du Lead, Top Rope oder Outdoor geklettert bist. So siehst du, wie sich dein Level in verschiedenen Disziplinen entwickelt." }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert BASE offline in der Kletterhalle?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. BASE ist eine PWA und funktioniert komplett ohne Internet. Du loggst deine Routen direkt in der Halle und die Daten synchronisieren sich automatisch, sobald du wieder online bist." }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich Klettern und Krafttraining zusammen tracken?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Ja. Viele Kletterer ergänzen ihr Training mit Krafttraining, Yoga oder Laufen. BASE trackt alles in einer App — so siehst du dein gesamtes Trainingspensum auf einen Blick." }
+        }
+      ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="../../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        .text-gradient-cyan { background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .field-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 12px; padding: 20px; }
+        .advantage-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 16px; padding: 24px; }
+        .advantage-card:hover { border-color: rgba(6,182,212,0.3); }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="9" fill="#09090b"/>
+                        <rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#0f0f12" stroke="#1f1f24" stroke-width="0.5"/>
+                        <rect x="7" y="10" width="1.5" height="21" rx="0.75" fill="#06b6d4"/>
+                        <circle cx="32" cy="11" r="1.5" fill="#06b6d4"/>
+                        <text x="11" y="29" font-family="'Arial Black',Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="-0.5">B</text>
+                    </svg>
+                </div>
+                <span style="font-family:'Bebas Neue',sans-serif;" class="text-xl tracking-wide text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden md:flex items-center gap-8 text-sm text-zinc-400">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-semibold px-5 py-2 rounded-lg transition-colors">App öffnen</a>
+        </div>
+    </nav>
+
+    <!-- Breadcrumbs -->
+    <div class="pt-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <nav class="flex items-center gap-2 text-sm text-zinc-500">
+                <a href="/" class="hover:text-white transition-colors">Home</a>
+                <span>/</span>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <span>/</span>
+                <span class="text-zinc-300">Klettern</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="pt-8 pb-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-block bg-zinc-900 border border-zinc-800 rounded-full px-4 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-6">Outdoor & Berg</div>
+            <h1 class="text-4xl md:text-6xl text-white mb-6">Klettern Training tracken mit BASE</h1>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed">
+                Klettern ist ein Sport, in dem Fortschritt oft schwer zu messen ist. Anders als beim Krafttraining, wo du einfach mehr Gewicht auflegst, hängt dein Niveau am Fels von vielen Faktoren ab: Routenlesen, Griffkraft, Technik, mentale Stärke. Genau deshalb ist systematisches Tracking so wertvoll. BASE erfasst die wichtigsten Kennzahlen deiner Kletter-Sessions — wie viele Routen du geklettert bist, den maximalen Grad, die Art (Lead, Top Rope, Outdoor) und deine Projektversuche.
+            </p>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed mt-4">
+                So erkennst du über Wochen und Monate, ob du dich steigerst. Wie oft kletterst du in der Woche? Kletterst du mehr Lead oder Top Rope? Wie viele Versuche brauchst du für dein Projekt? Diese Daten helfen dir, dein Training gezielter zu gestalten. Der KI-Coach in BASE analysiert deine Kletter-Historie und gibt dir Hinweise — zum Beispiel, ob du mehr Volumen brauchst oder ob ein Deload sinnvoll wäre.
+            </p>
+            <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed mt-4">
+                Viele Kletterer ergänzen ihr Training mit Krafttraining, Yoga oder Laufen. BASE trackt all das in einer einzigen App. Du brauchst kein separates Kletterlogbuch, keine Tabelle, keine zweite App — alles ist an einem Ort, offline verfügbar und mit Cloud-Sync gesichert.
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-4xl mx-auto"></div>
+
+    <!-- Fields -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Diese Felder trackt BASE für Klettern:</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Routen geklettert</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Zahl</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 12 Routen</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Max. Grad</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Text</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 7a, 6c+, V5</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Kletterart</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Auswahl</div>
+                    <div class="text-sm text-cyan-400">Beispiel: Lead, Top Rope, Outdoor</div>
+                </div>
+                <div class="field-card">
+                    <div class="text-white font-semibold mb-1">Versuche Projekt</div>
+                    <div class="text-sm text-zinc-500 mb-2">Typ: Zahl</div>
+                    <div class="text-sm text-cyan-400">Beispiel: 4 Versuche</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Warum BASE für Klettern?</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">KI-Coach</h3>
+                    <p class="text-sm text-zinc-400">Der KI-Coach erkennt Muster in deinem Klettertraining — Volumen, Schwierigkeitsverteilung und Frequenz. Er hilft dir, Plateaus zu durchbrechen.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="wifi-off" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">Offline in der Halle</h3>
+                    <p class="text-sm text-zinc-400">Kletterhallen haben oft schlechten Empfang. BASE speichert alles lokal — du loggst deine Routen ohne Internet und synchronisierst später.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <i data-lucide="layers" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">Multi-Sport</h3>
+                    <p class="text-sm text-zinc-400">Klettern plus Krafttraining, Yoga oder Bouldern — alles in einer App. Dein gesamtes Training an einem Ort, ohne App-Wechsel.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KI Builder -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-8">
+                <h2 class="text-3xl text-white mb-4">Eigene Felder hinzufügen</h2>
+                <p class="text-zinc-400 leading-relaxed">Du willst noch mehr tracken — zum Beispiel Wandneigung, Griffarten, Seil-Meter oder spezifische Routen-Namen? Der KI-Builder erstellt dir in Sekunden individuelle Tracking-Felder. Sag einfach auf Deutsch, was du brauchst, und BASE baut das Schema für dich.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <a href="/app.html" class="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-8 py-4 rounded-xl text-lg transition-colors">
+                <i data-lucide="mountain" class="w-5 h-5"></i>
+                Jetzt Klettern tracken — Kostenlos
+            </a>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-4xl mx-auto"></div>
+
+    <!-- Related Sports -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl text-white mb-6">Andere Sportarten:</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Bouldern</a>
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Klettersteig</a>
+                <a href="/sport/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Wandern</a>
+                <a href="/sport/krafttraining/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-white hover:border-cyan-500/40 transition-colors text-center">Krafttraining</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog -->
+    <section class="pb-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <a href="/blog/multi-sport-tracking/" class="block bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 hover:border-cyan-500/30 transition-colors">
+                <div class="text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-2">Blog</div>
+                <div class="text-white font-semibold">Multi-Sport-Tracking: Warum eine App für alles besser ist</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl text-white mb-8">Häufige Fragen</h2>
+            <div class="space-y-4">
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann BASE mein Klettertraining tracken?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE erfasst die Anzahl der Routen, den maximalen Schwierigkeitsgrad, die Kletterart (Lead, Top Rope, Outdoor) und deine Projektversuche.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann ich verschiedene Kletterarten unterscheiden?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. Du kannst bei jeder Session angeben, ob du Lead, Top Rope oder Outdoor geklettert bist. So siehst du, wie sich dein Level in verschiedenen Disziplinen entwickelt.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Funktioniert BASE offline in der Kletterhalle?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. BASE ist eine PWA und funktioniert komplett ohne Internet. Du loggst deine Routen direkt in der Halle und die Daten synchronisieren sich automatisch, sobald du wieder online bist.</p>
+                </details>
+                <details class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 group">
+                    <summary class="text-white font-semibold cursor-pointer list-none flex items-center justify-between">
+                        Kann ich Klettern und Krafttraining zusammen tracken?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-zinc-400 text-sm leading-relaxed">Ja. Viele Kletterer ergänzen ihr Training mit Krafttraining, Yoga oder Laufen. BASE trackt alles in einer App — so siehst du dein gesamtes Trainingspensum auf einen Blick.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800/50 py-12 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500">
+            <div class="flex items-center gap-6">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p>&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

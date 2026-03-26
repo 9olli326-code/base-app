@@ -63,8 +63,8 @@
       gtag('config', 'G-GFQQD87CXQ');
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -105,7 +105,7 @@
             inset: 0;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
             pointer-events: none;
-            z-index: 1000;
+            z-index: 1;
             opacity: 0.4;
         }
 
@@ -396,6 +396,8 @@
             <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
                 <a href="#features" class="hover:text-white transition-colors">Features</a>
                 <a href="#demo" class="hover:text-white transition-colors">Demo</a>
+                <a href="/sport/" class="hover:text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
                 <a href="#pt" class="hover:text-white transition-colors">Für Trainer</a>
                 <a href="#pricing" class="hover:text-white transition-colors">Pricing</a>
             </div>
@@ -1378,7 +1380,9 @@
                 <i data-lucide="activity" class="text-zinc-700 w-5 h-5"></i>
                 <span class="font-display text-lg tracking-tighter text-zinc-600 uppercase">BASE</span>
             </div>
-            <div class="flex gap-8 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
                 <a href="impressum.html" class="hover:text-white transition-colors">Impressum</a>
                 <a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
                 <a href="/cdn-cgi/l/email-protection#10636560607f626450727163753d7160603e7475" class="hover:text-white transition-colors">Support</a>

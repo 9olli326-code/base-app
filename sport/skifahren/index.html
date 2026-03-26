@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skifahren Training tracken | BASE Fitness App</title>
+    <meta name="description" content="Tracke dein Skifahren mit BASE: Abfahrten, Höhenmeter, Stunden auf Piste und Skigebiet. Kostenlose Ski-Tracking-App.">
+
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="apple-touch-icon" href="../../icon.png">
+    <link rel="icon" type="image/png" href="../../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/skifahren/">
+    <meta property="og:title" content="Skifahren Training tracken | BASE Fitness App">
+    <meta property="og:description" content="Tracke dein Skifahren mit BASE: Abfahrten, Höhenmeter, Stunden auf Piste und Skigebiet. Kostenlos starten.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Skifahren Training tracken | BASE Fitness App">
+    <meta name="twitter:description" content="Tracke dein Skifahren mit BASE: Abfahrten, Höhenmeter, Stunden auf Piste und Skigebiet. Kostenlos starten.">
+    <meta name="twitter:image" content="https://base-app.tech/og-image.png">
+
+    <link rel="canonical" href="https://base-app.tech/sport/skifahren/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "BASE",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "description": "KI-Fitness-Tracker für Skifahren. Tracke Abfahrten, Höhenmeter, Pistenzeit und Skigebiete.",
+      "url": "https://base-app.tech"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Kann ich meine Skitage mit BASE tracken?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE bietet ein Skifahren-Schema mit Feldern für Abfahrten, Höhenmeter, Stunden auf der Piste und Skigebiet. So hast du am Ende der Saison eine komplette Übersicht über alle deine Skitage."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Zeigt BASE eine Saison-Übersicht?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, in der Analytik-Sektion siehst du deine gesamten Ski-Statistiken über die Saison: Gesamte Abfahrten, Gesamthöhenmeter und Stunden auf der Piste. Der KI-Coach kann dir am Saisonende eine Zusammenfassung geben."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Funktioniert BASE offline im Skigebiet?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, BASE ist eine PWA und funktioniert auch ohne Internetverbindung. Du kannst deinen Skitag direkt auf der Hütte oder im Tal eintragen — die Daten werden synchronisiert, sobald du wieder WLAN hast."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich verschiedene Skigebiete vergleichen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, über das Skigebiet-Feld hältst du fest, wo du gefahren bist. In der Workout-Tabelle kannst du nach Skigebieten filtern und vergleichen, wie viele Abfahrten und Höhenmeter du in verschiedenen Gebieten gemacht hast."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="../../tailwind-production.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <style>
+        body { background: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; margin: 0; }
+        h1, h2, h3, h4 { font-family: 'Bebas Neue', sans-serif; color: white; letter-spacing: -0.03em; }
+        a { color: #06b6d4; }
+    </style>
+</head>
+<body>
+
+<nav class="fixed w-full z-50 top-0" id="navbar" style="background:rgba(9,9,11,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05)">
+    <div class="mx-auto px-6 py-4 flex justify-between items-center max-w-7xl">
+        <a href="/" class="flex items-center gap-3 no-underline">
+            <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:-0.05em;color:white;text-transform:uppercase">BASE</span>
+        </a>
+        <div class="hidden lg:flex items-center gap-8 text-zinc-500" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">
+            <a href="/#features" class="hover:text-white transition-colors no-underline" style="color:inherit">Features</a>
+            <a href="/sport/" class="hover:text-white transition-colors no-underline" style="color:inherit">Sportarten</a>
+            <a href="/blog/" class="hover:text-white transition-colors no-underline" style="color:inherit">Blog</a>
+            <a href="/#pt" class="hover:text-white transition-colors no-underline" style="color:inherit">Für Trainer</a>
+            <a href="/#pricing" class="hover:text-white transition-colors no-underline" style="color:inherit">Pricing</a>
+        </div>
+        <a href="/app.html" style="background:#06b6d4;color:#000;font-weight:900;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:10px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 0 20px rgba(6,182,212,0.3)">
+            App öffnen <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+    </div>
+</nav>
+
+<main style="max-width:52rem;margin:0 auto;padding:7rem 1.5rem 4rem">
+
+    <nav style="font-size:0.8rem;margin-bottom:2rem;color:#52525b">
+        <a href="/" style="color:#52525b;text-decoration:none">Home</a>
+        <span style="margin:0 0.5rem">›</span>
+        <a href="/sport/" style="color:#52525b;text-decoration:none">Sportarten</a>
+        <span style="margin:0 0.5rem">›</span>
+        <span style="color:#a1a1aa">Skifahren</span>
+    </nav>
+
+    <div style="margin-bottom:3rem">
+        <span style="display:inline-block;font-size:0.65rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:#06b6d4;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);padding:4px 12px;border-radius:6px;margin-bottom:1rem">Outdoor & Berg</span>
+        <h1 style="font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;margin:0 0 1.5rem">Skifahren Training tracken mit BASE</h1>
+        <p style="font-size:1.05rem;line-height:1.7;color:#a1a1aa;max-width:40rem">
+            Skifahren ist mehr als nur ein Wintersport — es ist Leidenschaft, Adrenalin und Naturerlebnis in einem. Ob Carving auf der Piste, Tiefschneefahren im Gelände oder gemütliche Familientage im Skigebiet — mit BASE hältst du jeden Skitag fest. Tracke deine Abfahrten, die bewältigten Höhenmeter und die Zeit auf der Piste. Am Ende der Saison hast du eine beeindruckende Statistik, die zeigt, was du auf den Bergen geleistet hast. Von der ersten bis zur letzten Abfahrt — jeder Tag zählt.
+        </p>
+    </div>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Diese Felder trackt BASE:</h2>
+        <div style="display:grid;gap:0.75rem">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Abfahrten</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 15</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Höhenmeter</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 8500</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Stunden auf Piste</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">number</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. 5</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <span style="color:white;font-weight:700;font-size:0.95rem">Skigebiet</span>
+                    <span style="color:#52525b;font-size:0.8rem;margin-left:0.5rem">text</span>
+                </div>
+                <span style="color:#3f3f46;font-size:0.8rem">z.B. Ischgl</span>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Warum BASE für Skifahren?</h2>
+        <div style="display:grid;gap:1rem">
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="mountain" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Saison-Statistiken auf einen Blick
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Wie viele Skitage hattest du diese Saison? Wie viele Höhenmeter hast du insgesamt gesammelt? BASE summiert alles automatisch und zeigt dir deine Saison-Highlights in übersichtlichen Charts. Am Ende des Winters hast du einen kompletten Überblick über deine Ski-Saison — perfekt zum Angeben oder zur Motivation für die nächste Saison.
+                </p>
+            </div>
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="map" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Skigebiete dokumentieren
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Jedes Skigebiet hat seinen eigenen Charakter. Mit BASE dokumentierst du, wo du gefahren bist, und kannst deine Erlebnisse verschiedener Gebiete vergleichen. So entsteht über die Jahre ein persönliches Ski-Tagebuch, das zeigt, welche Gebiete du erkundet hast und wo du die meisten Abfahrten gemacht hast.
+                </p>
+            </div>
+            <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:12px;padding:1.25rem 1.5rem">
+                <h3 style="font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem">
+                    <i data-lucide="wifi-off" style="width:18px;height:18px;color:#06b6d4"></i>
+                    Offline-Tracking im Gebirge
+                </h3>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Im Skigebiet ist die Netzabdeckung oft schlecht. BASE funktioniert als PWA komplett offline. Trage deine Daten auf der Hütte ein, in der Gondel oder abends im Hotel — sobald du wieder online bist, synchronisiert BASE alles automatisch in die Cloud. So geht kein Skitag verloren.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1rem">Eigene Felder hinzufügen</h2>
+        <p style="font-size:0.95rem;line-height:1.7;color:#a1a1aa">
+            Das Skifahren-Schema in BASE erfasst die wichtigsten Kennzahlen. Aber vielleicht willst du auch die Schneebedingungen notieren, die Temperatur festhalten, deine Maximalgeschwindigkeit eintragen oder die Pistenkilometer tracken. Mit dem Schema-Editor ergänzt du beliebige Felder — als Zahl, Text oder Auswahl. Alle eigenen Felder erscheinen in deiner Trainingshistorie und werden in Charts und Analysen einbezogen.
+        </p>
+    </section>
+
+    <section style="text-align:center;margin-bottom:3.5rem;padding:3rem 1.5rem;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:16px">
+        <h2 style="font-size:2rem;margin:0 0 1rem">Jetzt Skifahren tracken — Kostenlos</h2>
+        <p style="color:#71717a;margin:0 0 1.5rem;font-size:0.95rem">Keine Installation, kein Abo. Einfach im Browser öffnen und loslegen.</p>
+        <a href="/app.html" style="background:#06b6d4;color:#000;font-weight:900;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;padding:14px 32px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 0 30px rgba(6,182,212,0.3)">
+            Kostenlos starten <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Andere Sportarten:</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem">
+            <a href="/sport/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Snowboard</a>
+            <a href="/sport/klettern/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Klettern</a>
+            <a href="/sport/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:white;font-weight:700;font-size:0.9rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">Langlauf</a>
+        </div>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.4rem;margin:0 0 1rem">Weiterlesen</h2>
+        <a href="/blog/multi-sport-tracking/" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem;display:block;text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(6,182,212,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+            <span style="color:white;font-weight:700;font-size:0.95rem">Multi-Sport Tracking</span>
+            <span style="display:block;color:#52525b;font-size:0.8rem;margin-top:0.25rem">Warum eine App für alle Sportarten? →</span>
+        </a>
+    </section>
+
+    <section style="margin-bottom:3.5rem">
+        <h2 style="font-size:1.8rem;margin:0 0 1.5rem">Häufige Fragen</h2>
+        <div style="display:grid;gap:1rem">
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Kann ich meine Skitage mit BASE tracken?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE bietet ein Skifahren-Schema mit Feldern für Abfahrten, Höhenmeter, Stunden auf der Piste und Skigebiet. So hast du am Ende der Saison eine komplette Übersicht über alle deine Skitage.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Zeigt BASE eine Saison-Übersicht?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, in der Analytik-Sektion siehst du deine gesamten Ski-Statistiken über die Saison: Gesamte Abfahrten, Gesamthöhenmeter und Stunden auf der Piste. Der KI-Coach kann dir am Saisonende eine Zusammenfassung geben.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Funktioniert BASE offline im Skigebiet?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, BASE ist eine PWA und funktioniert auch ohne Internetverbindung. Du kannst deinen Skitag direkt auf der Hütte oder im Tal eintragen — die Daten werden synchronisiert, sobald du wieder WLAN hast.
+                </p>
+            </details>
+            <details style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem 1.5rem">
+                <summary style="color:white;font-weight:700;font-size:0.95rem;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Kann ich verschiedene Skigebiete vergleichen?
+                </summary>
+                <p style="margin:1rem 0 0;font-size:0.9rem;line-height:1.6;color:#71717a">
+                    Ja, über das Skigebiet-Feld hältst du fest, wo du gefahren bist. In der Workout-Tabelle kannst du nach Skigebieten filtern und vergleichen, wie viele Abfahrten und Höhenmeter du in verschiedenen Gebieten gemacht hast.
+                </p>
+            </details>
+        </div>
+    </section>
+
+</main>
+
+<footer style="background:#000;border-top:1px solid rgba(255,255,255,0.05);padding:4rem 1.5rem">
+    <div style="max-width:80rem;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2rem">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+            <i data-lucide="activity" style="color:rgba(255,255,255,0.2);width:20px;height:20px"></i>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:-0.05em;color:rgba(255,255,255,0.3);text-transform:uppercase">BASE</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:1.5rem;font-size:9px;font-weight:900;color:rgba(255,255,255,0.2);text-transform:uppercase;letter-spacing:0.2em">
+            <a href="/sport/" style="color:inherit;text-decoration:none">86 Sportarten</a>
+            <a href="/blog/" style="color:inherit;text-decoration:none">Blog</a>
+            <a href="/impressum.html" style="color:inherit;text-decoration:none">Impressum</a>
+            <a href="/datenschutz.html" style="color:inherit;text-decoration:none">Datenschutz</a>
+        </div>
+        <p style="font-size:9px;font-weight:900;color:rgba(255,255,255,0.1);text-transform:uppercase;letter-spacing:0.2em">© 2026 BASE Systems</p>
+    </div>
+</footer>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>86 Sportarten tracken | BASE Fitness App</title>
+    <link rel="icon" type="image/png" href="../icon.png">
+    <meta name="theme-color" content="#06b6d4">
+    <meta name="description" content="BASE trackt 86 Sportarten — von Kraftsport über Schwimmen bis Bogenschießen. Finde deine Sportart und starte kostenlos.">
+    <link rel="canonical" href="https://base-app.tech/sport/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://base-app.tech/sport/">
+    <meta property="og:title" content="86 Sportarten tracken | BASE Fitness App">
+    <meta property="og:description" content="BASE trackt 86 Sportarten — von Kraftsport über Schwimmen bis Bogenschießen. Finde deine Sportart und starte kostenlos.">
+    <meta property="og:image" content="https://base-app.tech/og-image.png">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:site_name" content="BASE">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="stylesheet" href="../tailwind-production.css">
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --cyan: #06b6d4; --indigo: #6366f1; }
+        * { box-sizing: border-box; }
+        body { background-color: #07070a; color: #a1a1aa; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Bebas Neue', sans-serif; font-weight: 400; letter-spacing: 0.02em; }
+        .text-gradient-cyan { background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), transparent); }
+        .sport-card { background: rgba(24,24,27,0.6); border: 1px solid rgba(63,63,70,0.4); border-radius: 12px; padding: 16px; transition: all 0.2s; }
+        .sport-card:hover { border-color: rgba(6,182,212,0.4); background: rgba(24,24,27,0.9); }
+        .sport-card a { color: white; text-decoration: none; }
+        .category-tag { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
+                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="9" fill="#09090b"/>
+                        <rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#0f0f12" stroke="#1f1f24" stroke-width="0.5"/>
+                        <rect x="7" y="10" width="1.5" height="21" rx="0.75" fill="#06b6d4"/>
+                        <circle cx="32" cy="11" r="1.5" fill="#06b6d4"/>
+                        <text x="11" y="29" font-family="'Arial Black',Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="-0.5">B</text>
+                    </svg>
+                </div>
+                <span style="font-family:'Bebas Neue',sans-serif;" class="text-xl tracking-wide text-white uppercase">BASE</span>
+            </a>
+            <div class="hidden md:flex items-center gap-8 text-sm text-zinc-400">
+                <a href="/#features" class="hover:text-white transition-colors">Features</a>
+                <a href="/sport/" class="text-white transition-colors">Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/#pt" class="hover:text-white transition-colors">Für Trainer</a>
+                <a href="/#pricing" class="hover:text-white transition-colors">Pricing</a>
+            </div>
+            <a href="/app.html" class="bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-semibold px-5 py-2 rounded-lg transition-colors">App öffnen</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-16 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-5xl md:text-7xl text-white mb-4">86 Sportarten tracken mit BASE</h1>
+            <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-8">Von Kraftsport über Schwimmen bis Bogenschießen — BASE hat für jede Sportart die passenden Felder. Und wenn nicht, baut der KI-Builder dein Schema in Sekunden.</p>
+            <div class="max-w-md mx-auto mb-12">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
+                    <input type="text" id="sportSearch" placeholder="Sportart suchen…" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-12 pr-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 transition-colors">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-line max-w-6xl mx-auto"></div>
+
+    <!-- Sport Grid -->
+    <section class="py-16 px-6">
+        <div class="max-w-6xl mx-auto" id="sportGrid">
+
+            <!-- Kraft -->
+            <div class="mb-12 sport-category" data-category="kraft">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="dumbbell" class="w-5 h-5 text-cyan-400"></i> Kraft</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/krafttraining/">Krafttraining</a></div>
+                    <div class="sport-card">Bodybuilding</div>
+                    <div class="sport-card">Powerlifting</div>
+                    <div class="sport-card">Olympic Lifting</div>
+                    <div class="sport-card">Strongman</div>
+                    <div class="sport-card">Kettlebell</div>
+                </div>
+            </div>
+
+            <!-- Ausdauer -->
+            <div class="mb-12 sport-category" data-category="ausdauer">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="heart-pulse" class="w-5 h-5 text-cyan-400"></i> Ausdauer</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/laufen/">Laufen</a></div>
+                    <div class="sport-card">Radfahren</div>
+                    <div class="sport-card">Trailrunning</div>
+                    <div class="sport-card">Triathlon</div>
+                    <div class="sport-card">Rudern (Ergometer)</div>
+                    <div class="sport-card">Crosstrainer</div>
+                    <div class="sport-card">Walking</div>
+                    <div class="sport-card">Spinning</div>
+                    <div class="sport-card">Seilspringen</div>
+                </div>
+            </div>
+
+            <!-- Wasser -->
+            <div class="mb-12 sport-category" data-category="wasser">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="waves" class="w-5 h-5 text-cyan-400"></i> Wasser</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/schwimmen/">Schwimmen</a></div>
+                    <div class="sport-card">Freiwasserschwimmen</div>
+                    <div class="sport-card">SUP</div>
+                    <div class="sport-card">Kajak</div>
+                    <div class="sport-card">Surfen</div>
+                    <div class="sport-card">Segeln</div>
+                    <div class="sport-card">Tauchen</div>
+                    <div class="sport-card">Wasserball</div>
+                </div>
+            </div>
+
+            <!-- Kampfsport -->
+            <div class="mb-12 sport-category" data-category="kampfsport">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="swords" class="w-5 h-5 text-cyan-400"></i> Kampfsport</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/boxen/">Boxen</a></div>
+                    <div class="sport-card"><a href="/sport/bjj/">BJJ</a></div>
+                    <div class="sport-card">MMA</div>
+                    <div class="sport-card">Muay Thai</div>
+                    <div class="sport-card">Kickboxen</div>
+                    <div class="sport-card">Judo</div>
+                    <div class="sport-card">Karate</div>
+                    <div class="sport-card">Taekwondo</div>
+                    <div class="sport-card">Wrestling</div>
+                    <div class="sport-card">Fechten</div>
+                    <div class="sport-card">Krav Maga</div>
+                </div>
+            </div>
+
+            <!-- Outdoor & Berg -->
+            <div class="mb-12 sport-category" data-category="outdoor">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="mountain" class="w-5 h-5 text-cyan-400"></i> Outdoor & Berg</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/klettern/">Klettern</a></div>
+                    <div class="sport-card">Bouldern</div>
+                    <div class="sport-card">Wandern</div>
+                    <div class="sport-card">Klettersteig</div>
+                    <div class="sport-card">Mountainbiken</div>
+                    <div class="sport-card">Reiten</div>
+                </div>
+            </div>
+
+            <!-- Rückschlag -->
+            <div class="mb-12 sport-category" data-category="rueckschlag">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="circle-dot" class="w-5 h-5 text-cyan-400"></i> Rückschlag</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/tennis/">Tennis</a></div>
+                    <div class="sport-card">Padel</div>
+                    <div class="sport-card">Badminton</div>
+                    <div class="sport-card">Squash</div>
+                    <div class="sport-card">Tischtennis</div>
+                </div>
+            </div>
+
+            <!-- Golf & Präzision -->
+            <div class="mb-12 sport-category" data-category="praezision">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="target" class="w-5 h-5 text-cyan-400"></i> Golf & Präzision</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card">Golf</div>
+                    <div class="sport-card">Bogenschießen</div>
+                    <div class="sport-card">Dart</div>
+                    <div class="sport-card">Sportschießen</div>
+                </div>
+            </div>
+
+            <!-- Teamsport -->
+            <div class="mb-12 sport-category" data-category="teamsport">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="users" class="w-5 h-5 text-cyan-400"></i> Teamsport</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card">Fußball</div>
+                    <div class="sport-card">Basketball</div>
+                    <div class="sport-card">Volleyball</div>
+                    <div class="sport-card">Handball</div>
+                    <div class="sport-card">Rugby</div>
+                    <div class="sport-card">Hockey</div>
+                    <div class="sport-card">American Football</div>
+                    <div class="sport-card">Lacrosse</div>
+                    <div class="sport-card">Cricket</div>
+                    <div class="sport-card">Baseball</div>
+                </div>
+            </div>
+
+            <!-- Wintersport -->
+            <div class="mb-12 sport-category" data-category="wintersport">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="snowflake" class="w-5 h-5 text-cyan-400"></i> Wintersport</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card">Skifahren</div>
+                    <div class="sport-card">Snowboarden</div>
+                    <div class="sport-card">Langlauf</div>
+                    <div class="sport-card">Eislaufen</div>
+                    <div class="sport-card">Eishockey</div>
+                    <div class="sport-card">Biathlon</div>
+                    <div class="sport-card">Skitourengehen</div>
+                </div>
+            </div>
+
+            <!-- Flex & Balance -->
+            <div class="mb-12 sport-category" data-category="flex">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="leaf" class="w-5 h-5 text-cyan-400"></i> Flex & Balance</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card"><a href="/sport/yoga/">Yoga</a></div>
+                    <div class="sport-card">Pilates</div>
+                    <div class="sport-card">Stretching</div>
+                    <div class="sport-card">Meditation</div>
+                    <div class="sport-card">Tai Chi</div>
+                    <div class="sport-card">Turnen</div>
+                </div>
+            </div>
+
+            <!-- Functional -->
+            <div class="mb-12 sport-category" data-category="functional">
+                <h2 class="text-2xl text-white mb-6 flex items-center gap-3"><i data-lucide="flame" class="w-5 h-5 text-cyan-400"></i> Functional</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="sport-card">CrossFit</div>
+                    <div class="sport-card">Calisthenics</div>
+                    <div class="sport-card">HIIT</div>
+                    <div class="sport-card">Freeletics</div>
+                    <div class="sport-card">Bootcamp</div>
+                    <div class="sport-card">TRX</div>
+                    <div class="sport-card">Parkour</div>
+                    <div class="sport-card">Obstacle Course Racing</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6">
+        <div class="max-w-3xl mx-auto text-center">
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-10">
+                <h2 class="text-3xl md:text-4xl text-white mb-4">Deine Sportart ist nicht dabei?</h2>
+                <p class="text-zinc-400 mb-8 max-w-lg mx-auto">Der KI-Builder erstellt dein individuelles Tracking-Schema in Sekunden. Beschreib einfach, welche Felder du brauchst — die KI baut es für dich.</p>
+                <a href="/app.html" class="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-8 py-3 rounded-xl transition-colors">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    Jetzt starten — Kostenlos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800/50 py-12 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500">
+            <div class="flex items-center gap-6">
+                <a href="/sport/" class="hover:text-white transition-colors">86 Sportarten</a>
+                <a href="/blog/" class="hover:text-white transition-colors">Blog</a>
+                <a href="/impressum.html" class="hover:text-white transition-colors">Impressum</a>
+                <a href="/datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+            </div>
+            <p>&copy; 2026 BASE Systems</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const searchInput = document.getElementById('sportSearch');
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            document.querySelectorAll('.sport-card').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? '' : 'none';
+            });
+            document.querySelectorAll('.sport-category').forEach(cat => {
+                const visibleCards = cat.querySelectorAll('.sport-card:not([style*="display: none"])');
+                cat.style.display = visibleCards.length === 0 ? 'none' : '';
+            });
+        });
+    </script>
+
+</body>
+</html>
