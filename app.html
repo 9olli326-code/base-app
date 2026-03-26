@@ -733,6 +733,15 @@
                 </div>
             </div>
 
+            <!-- Auth Skipped Banner -->
+            <div id="authSkippedBanner" class="hidden mb-3 rounded-xl p-3" style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.15)">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400 flex-shrink-0 pointer-events-none"></i>
+                    <p class="text-rose-400 text-xs font-bold flex-1">Deine <span id="authSkipWorkoutCount">0</span> Workouts sind nicht gesichert.</p>
+                    <button onclick="window.toggleModal('authModal')" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-rose-500/20 transition-all flex-shrink-0">Sichern</button>
+                </div>
+            </div>
+
             <!-- PT Dashboard (nur im PT Modus) -->
             <div id="ptDashboard" class="hidden card-bg p-5 mb-5 shadow-xl relative animate-in fade-in duration-300 border-indigo-500/30 interactive-z">
                 <div class="flex items-center justify-between mb-4 pb-4 border-b border-zinc-800">
@@ -2381,16 +2390,37 @@
     </div>
 
     <!-- ✅ ONBOARDING MODAL -->
-    <div id="onboardingModal" class="fixed inset-0 bg-black/95 z-[900] hidden items-center justify-center backdrop-blur-xl px-4">
-        <div class="card-bg p-8 md:p-10 max-w-md w-full shadow-2xl relative border-zinc-700/50 max-h-[90vh] overflow-y-auto hide-scrollbar">
-            <div id="ob-step-1">
-                <div class="text-center mb-8">
-                    <div class="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6"><i data-lucide="activity" class="w-10 h-10 text-primary"></i></div>
-                    <h1 class="text-3xl font-black text-white uppercase tracking-tighter gradient-text mb-2">Willkommen bei BASE</h1>
-                    <p class="text-zinc-400 text-sm font-bold">Dein intelligenter Fitness-Tracker. Lass uns kurz einrichten.</p>
+    <div id="onboardingModal" class="fixed inset-0 bg-black/95 z-[900] hidden items-center justify-center backdrop-blur-xl px-4 overflow-y-auto">
+        <div class="card-bg p-8 md:p-10 max-w-md w-full shadow-2xl relative border-zinc-700/50 my-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <!-- Progress Dots -->
+            <div class="flex justify-center gap-2 mb-6" id="obDotsRow"></div>
+
+            <!-- Step 1: Willkommen -->
+            <div id="ob-step-1" class="text-center">
+                <div class="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6" style="box-shadow:0 0 40px rgba(6,182,212,0.3)"><i data-lucide="activity" class="w-10 h-10 text-primary"></i></div>
+                <h1 class="text-3xl font-black text-white uppercase tracking-tighter gradient-text mb-2">BASE</h1>
+                <p class="text-zinc-400 text-sm font-bold mb-8">Das KI-Betriebssystem für dein Training</p>
+                <div class="space-y-3 mb-8 text-left">
+                    <div class="ob-feature flex items-center gap-3 p-3 rounded-xl" style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12);opacity:0;transform:translateY(10px);transition:opacity 0.5s ease, transform 0.5s ease">
+                        <span class="text-lg flex-shrink-0">&#129302;</span><p class="text-zinc-300 text-sm font-bold">5 KI-Systeme analysieren dein Training</p>
+                    </div>
+                    <div class="ob-feature flex items-center gap-3 p-3 rounded-xl" style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.12);opacity:0;transform:translateY(10px);transition:opacity 0.5s ease, transform 0.5s ease;transition-delay:0.5s">
+                        <span class="text-lg flex-shrink-0">&#127942;</span><p class="text-zinc-300 text-sm font-bold">Challenges gegen Freunde</p>
+                    </div>
+                    <div class="ob-feature flex items-center gap-3 p-3 rounded-xl" style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.12);opacity:0;transform:translateY(10px);transition:opacity 0.5s ease, transform 0.5s ease;transition-delay:1s">
+                        <span class="text-lg flex-shrink-0">&#128200;</span><p class="text-zinc-300 text-sm font-bold">86 Sportarten tracken</p>
+                    </div>
                 </div>
-                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Wer bist du?</p>
-                <div class="grid grid-cols-2 gap-3 mb-8">
+                <button onclick="window.obNext(2)" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto shadow-[0_0_20px_rgba(6,182,212,0.3)]">Los geht's</button>
+            </div>
+
+            <!-- Step 2: Wer bist du? -->
+            <div id="ob-step-2" class="hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <button aria-label="Zurück" onclick="window.obNext(1)" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="arrow-left" class="w-5 h-5 pointer-events-none"></i></button>
+                    <div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schritt 2 / 5</p><h2 class="text-xl font-black text-white uppercase tracking-tighter">Wer bist du?</h2></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-6">
                     <button onclick="window.obSetRole('athlete')" id="ob-role-athlete" class="ob-role-btn flex flex-col items-center gap-3 p-5 rounded-2xl border border-zinc-800 bg-zinc-900 hover:border-primary/50 transition-all cursor-pointer pointer-events-auto">
                         <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center"><i data-lucide="dumbbell" class="w-6 h-6 text-cyan-400"></i></div>
                         <div class="text-center"><p class="text-white font-black text-sm">Athlet</p><p class="text-zinc-500 text-[10px] font-bold">Ich trainiere für mich</p></div>
@@ -2400,41 +2430,53 @@
                         <div class="text-center"><p class="text-white font-black text-sm">Trainer / PT</p><p class="text-zinc-500 text-[10px] font-bold">Ich manage Klienten</p></div>
                     </button>
                 </div>
-                <button onclick="window.obNext(2)" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto">Weiter →</button>
+                <button onclick="window.obNext(3)" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto">Weiter</button>
             </div>
-            <div id="ob-step-2" class="hidden">
-                <div class="flex items-center gap-3 mb-8">
-                    <button aria-label="Arrow Left" onclick="window.obNext(1)" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                    <div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schritt 2 / 3</p><h2 class="text-xl font-black text-white uppercase tracking-tighter">Dein Fokus</h2></div>
-                </div>
-                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Was trackst du hauptsächlich?</p>
-                <div class="space-y-3 mb-8">
-                    <label class="flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 p-4 rounded-2xl cursor-pointer transition-all border border-zinc-800"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center"><i data-lucide="dumbbell" class="w-4 h-4 text-cyan-400"></i></div><div><p class="text-sm font-black text-white">Krafttraining</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Sätze, Wdh, Gewicht</p></div></div><input type="checkbox" id="ob_mod_strength" checked class="w-5 h-5 accent-cyan-400 cursor-pointer pointer-events-auto"></label>
-                    <label class="flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 p-4 rounded-2xl cursor-pointer transition-all border border-zinc-800"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center"><i data-lucide="heart-pulse" class="w-4 h-4 text-rose-400"></i></div><div><p class="text-sm font-black text-white">Ausdauer</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Laufen, Radfahren, Schwimmen</p></div></div><input type="checkbox" id="ob_mod_cardio" class="w-5 h-5 accent-rose-400 cursor-pointer pointer-events-auto"></label>
-                    <label class="flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 p-4 rounded-2xl cursor-pointer transition-all border border-zinc-800"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center"><i data-lucide="moon" class="w-4 h-4 text-emerald-400"></i></div><div><p class="text-sm font-black text-white">Regeneration</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Schlaf & Recovery</p></div></div><input type="checkbox" id="ob_mod_recovery" class="w-5 h-5 accent-emerald-400 cursor-pointer pointer-events-auto"></label>
-                    <label class="flex items-center justify-between bg-zinc-900 hover:bg-zinc-800 p-4 rounded-2xl cursor-pointer transition-all border border-zinc-800"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center"><i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i></div><div><p class="text-sm font-black text-white">Mein Sport</p><p class="text-[10px] text-zinc-500 font-bold uppercase">KI baut individuelles Formular</p></div></div><input type="checkbox" id="ob_mod_main" class="w-5 h-5 accent-amber-400 cursor-pointer pointer-events-auto"></label>
-                </div>
-                <button onclick="window.obNext(3)" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto">Weiter →</button>
-            </div>
+
+            <!-- Step 3: Dein Fokus -->
             <div id="ob-step-3" class="hidden">
-                <div class="flex items-center gap-3 mb-8">
-                    <button aria-label="Arrow Left" onclick="window.obNext(2)" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                    <div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schritt 3 / 3</p><h2 class="text-xl font-black text-white uppercase tracking-tighter">Dein Profil</h2></div>
+                <div class="flex items-center gap-3 mb-6">
+                    <button aria-label="Zurück" onclick="window.obNext(2)" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="arrow-left" class="w-5 h-5 pointer-events-none"></i></button>
+                    <div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schritt 3 / 5</p><h2 class="text-xl font-black text-white uppercase tracking-tighter">Dein Fokus</h2></div>
                 </div>
-                <div class="space-y-4 mb-8">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Alter</label><input type="number" id="ob_age" aria-label="Alter" placeholder="z.B. 28" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary pointer-events-auto cursor-text"></div>
-                        <div><label class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Gewicht (kg)</label><input type="number" id="ob_weight" aria-label="Gewicht in kg" placeholder="z.B. 80" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary pointer-events-auto cursor-text"></div>
-                    </div>
-                    <div><label class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Erfahrungslevel</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="window.obSetExp('Anfänger')" class="ob-exp-btn px-3 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer pointer-events-auto hover:border-primary/50">Anfänger</button>
-                            <button onclick="window.obSetExp('Fortgeschritten')" class="ob-exp-btn px-3 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer pointer-events-auto hover:border-primary/50">Fortgeschritten</button>
-                            <button onclick="window.obSetExp('Elite')" class="ob-exp-btn px-3 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer pointer-events-auto hover:border-primary/50">Elite</button>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-2 gap-3 mb-6" id="obFocusCards"></div>
+                <button onclick="window.obNext(4)" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto">Weiter</button>
+            </div>
+
+            <!-- Step 4: Erstes Workout -->
+            <div id="ob-step-4" class="hidden">
+                <div class="flex items-center gap-3 mb-4">
+                    <button aria-label="Zurück" onclick="window.obNext(3)" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="arrow-left" class="w-5 h-5 pointer-events-none"></i></button>
+                    <div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schritt 4 / 5</p><h2 class="text-xl font-black text-white uppercase tracking-tighter">Erstes Workout</h2></div>
                 </div>
-                <button onclick="window.obFinish()" class="w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto shadow-[0_0_20px_rgba(6,182,212,0.3)]"><i data-lucide="zap" class="w-4 h-4 inline-block mr-2 fill-black/20"></i> BASE starten!</button>
+                <p class="text-zinc-400 text-sm mb-4">Tracke dein erstes Workout — dauert 10 Sekunden.</p>
+                <div id="obWorkoutCards" class="space-y-3 mb-4"></div>
+                <div id="obWorkoutForm" class="hidden bg-zinc-900/80 border border-primary/20 rounded-xl p-4 mb-4">
+                    <p id="obWorkoutExName" class="text-white font-black text-sm mb-3"></p>
+                    <div id="obWorkoutFields" class="grid grid-cols-2 gap-3 mb-3"></div>
+                    <button onclick="window.obSaveQuickWorkout()" class="w-full bg-primary text-black font-black py-3 rounded-xl uppercase tracking-widest text-xs cursor-pointer pointer-events-auto">Speichern</button>
+                </div>
+                <div id="obWorkoutDone" class="hidden text-center py-4">
+                    <p class="text-2xl mb-2">&#127881;</p>
+                    <p class="text-white font-black text-lg">Erstes Workout getrackt!</p>
+                    <p class="text-zinc-500 text-xs mt-1">Du findest es im Archiv.</p>
+                </div>
+                <button id="obStep4Next" onclick="window.obNext(5)" class="hidden w-full bg-primary text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto mt-2">Weiter</button>
+            </div>
+
+            <!-- Step 5: Account sichern -->
+            <div id="ob-step-5" class="hidden">
+                <div class="flex items-center gap-3 mb-6">
+                    <button aria-label="Zurück" onclick="window.obNext(4)" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="arrow-left" class="w-5 h-5 pointer-events-none"></i></button>
+                    <div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schritt 5 / 5</p><h2 class="text-xl font-black text-white uppercase tracking-tighter">Sichere deine Daten</h2></div>
+                </div>
+                <p class="text-zinc-400 text-sm mb-6">Erstelle einen Account damit deine Workouts nie verloren gehen.</p>
+                <div class="space-y-3 mb-6">
+                    <input type="email" id="obAuthEmail" placeholder="E-Mail" aria-label="E-Mail" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                    <input type="password" id="obAuthPassword" placeholder="Passwort (min. 6 Zeichen)" aria-label="Passwort" minlength="6" class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
+                </div>
+                <button id="obAuthBtn" onclick="window.obCreateAccount()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto shadow-[0_0_20px_rgba(99,102,241,0.2)] mb-3">Account erstellen</button>
+                <button onclick="window.obSkipAuth()" class="w-full text-zinc-600 hover:text-zinc-400 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-colors">Später</button>
             </div>
         </div>
     </div>
@@ -2944,10 +2986,8 @@
                 if(document.getElementById('prDashboardSection') && !document.getElementById('prDashboardSection').classList.contains('hidden')) { window.renderPRDashboard(); } 
                 window.cancelEdit();
                 if(window.syncToCloud) window.syncToCloud(entry);
-                const totalArchived = window.workouts.filter(w => w.archived).length;
-                if (totalArchived === 1 && !localStorage.getItem('base_push_subscribed') && typeof Notification !== 'undefined' && Notification.permission === 'default') {
-                    setTimeout(() => window.requestPushPermission(false), 2000);
-                }
+                // Auth-Skipped Nachfass prüfen
+                window._checkAuthSkippedBanner();
             } catch (err) { 
                 console.error("Speicher-Fehler:", err); 
                 window.showToast("Fehler beim Speichern: " + err.message); 
