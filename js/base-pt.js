@@ -233,15 +233,130 @@ if(mode === 'pt') {
 };
 
 // ── CLIENT CRUD ────────────────────────────────────────────
+// ── CLIENT ONBOARDING WIZARD ─────────────────────────────
+let _onboardStep = 1;
+let _onboardData = {};
+const _OB_GOALS = ['Muskelaufbau','Abnehmen','Ausdauer','Rehabilitation','Allgemeine Fitness','Wettkampf'];
+const _OB_EXP = [{k:'Anfänger',icon:'star'},{k:'Fortgeschritten',icon:'zap'},{k:'Profi',icon:'crown'}];
+const _OB_DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+const _OB_TIMES = [{k:'Morgens',l:'06-12'},{k:'Mittags',l:'12-17'},{k:'Abends',l:'17-22'}];
+
 window.addNewClient = function() {
-const name = prompt("Kundenname:");
-if(!name || !name.trim()) return;
-const trimmed = name.trim().substring(0, 60);
-const client = { id: 'client_' + Date.now(), name: trimmed };
+_onboardStep = 1;
+_onboardData = { goal:'', experience:'', injuries:'', days:[], time:'', age:'', weight:'' };
+const el = (id) => document.getElementById(id);
+if(el('obName')) el('obName').value = '';
+if(el('obAge')) el('obAge').value = '';
+if(el('obWeight')) el('obWeight').value = '';
+if(el('obInjuries')) el('obInjuries').value = '';
+window._renderOnboardStep();
+window.toggleModal('clientOnboardModal');
+window._refreshLucide();
+};
+
+window._renderOnboardStep = function() {
+const el = (id) => document.getElementById(id);
+[1,2,3].forEach(i => {
+    const step = el('obStep' + i);
+    const dot = el('obDot' + i);
+    if(step) { step.classList.toggle('hidden', i !== _onboardStep); }
+    if(dot) { dot.className = 'w-2.5 h-2.5 rounded-full transition-colors ' + (i === _onboardStep ? 'bg-indigo-500' : (i < _onboardStep ? 'bg-indigo-500/40' : 'bg-zinc-700')); }
+});
+const back = el('obBtnBack');
+const next = el('obBtnNext');
+if(back) back.classList.toggle('hidden', _onboardStep === 1);
+if(next) next.textContent = _onboardStep === 3 ? 'Kunde anlegen' : 'Weiter';
+// Render dynamic UI
+if(_onboardStep === 2) { window._renderObGoals(); window._renderObExp(); }
+if(_onboardStep === 3) { window._renderObDays(); window._renderObTimes(); }
+};
+
+window._renderObGoals = function() {
+const c = document.getElementById('obGoalChips');
+if(!c) return;
+c.innerHTML = _OB_GOALS.map(g => {
+    const active = _onboardData.goal === g;
+    return `<button onclick="window._setObGoal('${g}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${window._escapeHtml(g)}</button>`;
+}).join('');
+};
+window._setObGoal = function(g) { _onboardData.goal = g; window._renderObGoals(); };
+
+window._renderObExp = function() {
+const c = document.getElementById('obExpCards');
+if(!c) return;
+c.innerHTML = _OB_EXP.map(e => {
+    const active = _onboardData.experience === e.k;
+    return `<button onclick="window._setObExp('${e.k}')" class="flex flex-col items-center gap-2 p-3 rounded-xl cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/15 border border-indigo-500/30' : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-700'}"><i data-lucide="${e.icon}" class="w-5 h-5 ${active ? 'text-indigo-400' : 'text-zinc-600'} pointer-events-none"></i><span class="text-[10px] font-black uppercase tracking-widest ${active ? 'text-indigo-400' : 'text-zinc-500'}">${window._escapeHtml(e.k)}</span></button>`;
+}).join('');
+window._refreshLucide();
+};
+window._setObExp = function(e) { _onboardData.experience = e; window._renderObExp(); };
+
+window._renderObDays = function() {
+const c = document.getElementById('obDaysRow');
+if(!c) return;
+c.innerHTML = _OB_DAYS.map(d => {
+    const active = _onboardData.days.includes(d);
+    return `<button onclick="window._toggleObDay('${d}')" class="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-black cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500 text-black' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${d}</button>`;
+}).join('');
+};
+window._toggleObDay = function(d) {
+const idx = _onboardData.days.indexOf(d);
+if(idx >= 0) _onboardData.days.splice(idx, 1);
+else _onboardData.days.push(d);
+window._renderObDays();
+};
+
+window._renderObTimes = function() {
+const c = document.getElementById('obTimeSlots');
+if(!c) return;
+c.innerHTML = _OB_TIMES.map(t => {
+    const active = _onboardData.time === t.k;
+    return `<button onclick="window._setObTime('${t.k}')" class="py-2.5 rounded-xl text-center cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:border-zinc-700'}"><p class="text-[10px] font-black uppercase tracking-widest">${t.k}</p><p class="text-[9px] mt-0.5 opacity-60">${t.l}</p></button>`;
+}).join('');
+};
+window._setObTime = function(t) { _onboardData.time = t; window._renderObTimes(); };
+
+window.nextOnboardStep = function() {
+if(_onboardStep === 1) {
+    const name = (document.getElementById('obName')?.value || '').trim();
+    if(!name) { window.showToast('Name ist Pflichtfeld!'); return; }
+    _onboardData.name = name.substring(0, 60);
+    _onboardData.age = document.getElementById('obAge')?.value || '';
+    _onboardData.weight = document.getElementById('obWeight')?.value || '';
+    _onboardStep = 2;
+} else if(_onboardStep === 2) {
+    _onboardData.injuries = (document.getElementById('obInjuries')?.value || '').trim().substring(0, 200);
+    _onboardStep = 3;
+} else if(_onboardStep === 3) {
+    window.saveOnboardClient();
+    return;
+}
+window._renderOnboardStep();
+};
+window.prevOnboardStep = function() {
+if(_onboardStep > 1) { _onboardStep--; window._renderOnboardStep(); }
+};
+
+window.saveOnboardClient = function() {
+const client = { id: 'client_' + Date.now(), name: _onboardData.name };
 window.clients.push(client);
 localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+// Save profile
+const profile = {
+    goal: _onboardData.goal || '',
+    experience: _onboardData.experience || '',
+    injuries: _onboardData.injuries || '',
+    notes: '',
+    age: _onboardData.age || '',
+    weight: _onboardData.weight || '',
+    availableDays: _onboardData.days || [],
+    preferredTime: _onboardData.time || ''
+};
+window.saveClientProfile(client.id, profile);
+window.toggleModal('clientOnboardModal');
 window.renderPTClientsDashboard();
-window.showToast(`${window._escapeHtml(client.name)} hinzugefügt! ✅`);
+window.showToast(`${window._escapeHtml(client.name)} hinzugefügt!`);
 };
 
 window.deleteClient = function() {
@@ -382,6 +497,9 @@ _clientCalMonth = new Date().getMonth();
 _clientCalYear = new Date().getFullYear();
 _clientCalSelectedDate = new Date().toISOString().split('T')[0];
 window._renderClientSessionsList(id);
+
+// Compliance Rings
+window._renderComplianceRings(id);
 
 // Show profile tab by default
 window.switchClientTab('profile');
@@ -1679,6 +1797,7 @@ window.openTrainerProfileEditor = function() {
             const preview = el('tpPhotoPreview');
             if(preview) preview.innerHTML = `<img src="${p.photo}" class="w-full h-full object-cover" alt="Foto">`;
         }
+        if(el('tpFreeConsult')) el('tpFreeConsult').checked = !!p.freeConsultation;
     } else {
         // Branding-Daten vorausfüllen
         const branding = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
@@ -1790,6 +1909,7 @@ window.saveTrainerProfile = async function() {
             tiktok: (el('tpTiktok')?.value || '').trim().substring(0, 60)
         },
         certifications: (el('tpCerts')?.value || '').trim().substring(0, 200),
+        freeConsultation: !!el('tpFreeConsult')?.checked,
         rating: _trainerProfileCache?.rating || 0,
         reviewCount: _trainerProfileCache?.reviewCount || 0,
         active: true,
@@ -1959,7 +2079,7 @@ window._renderTrainerCards = function(trainers) {
                     <p class="text-[10px] font-bold text-amber-400 mt-0.5">${stars}</p>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-1 mb-3">${specs}</div>
+            <div class="flex flex-wrap gap-1 mb-3">${specs}${t.freeConsultation ? '<span class="bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/20">Gratis Erstgespräch</span>' : ''}</div>
             <div class="flex items-center justify-between">
                 ${t.pricePerSession ? `<span class="text-white font-black text-sm">${t.pricePerSession}€<span class="text-zinc-500 text-[10px] font-bold">/Session</span></span>` : '<span class="text-zinc-500 text-[10px] font-bold">Preis n.V.</span>'}
                 <button onclick="window.openTrainerDetail('${t.uid}')" class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-cyan-500/20 transition-all">Profil</button>
@@ -2076,6 +2196,7 @@ window._renderTrainerDetail = function(t, reviews) {
     const reviewBtn = canReview ? `<button onclick="window.openTrainerReview('${t.uid}')" class="w-full mt-4 bg-amber-500/10 text-amber-400 border border-amber-500/20 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-amber-500/20 transition-all">Bewertung abgeben</button>` : '';
 
     content.innerHTML = `
+        ${t.freeConsultation ? '<div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-4 flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 text-emerald-400 pointer-events-none"></i><span class="text-emerald-400 text-xs font-black uppercase tracking-widest">Gratis Erstgespräch verfügbar</span></div>' : ''}
         ${photo}
         <h3 class="text-xl font-black text-white">${esc(t.name)}</h3>
         <p class="text-sm text-zinc-400 mt-1">${esc(t.city || '')}</p>
@@ -2166,6 +2287,161 @@ window.submitTrainerReview = async function() {
         console.error('Review Fehler:', err);
         window.showToast('Fehler: ' + err.message);
     }
+};
+
+// ============================================================
+// COMPLIANCE TRACKING (SVG Progress-Ringe)
+// ============================================================
+window.computeCompliance = function(clientId) {
+    const sessions = window.getSessions().filter(s => s.clientId === clientId);
+    const now = new Date(); now.setHours(23,59,59,999);
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(now); monthAgo.setDate(monthAgo.getDate() - 30);
+
+    let weekPlanned = 0, weekDone = 0, monthPlanned = 0, monthDone = 0, totalPlanned = 0, totalDone = 0;
+    sessions.forEach(s => {
+        const d = new Date(s.date);
+        if(d > now) return; // Zukünftige ignorieren
+        totalPlanned++;
+        if(s.completed) totalDone++;
+        if(d >= weekAgo) { weekPlanned++; if(s.completed) weekDone++; }
+        if(d >= monthAgo) { monthPlanned++; if(s.completed) monthDone++; }
+    });
+    return {
+        week: { done: weekDone, planned: weekPlanned, pct: weekPlanned > 0 ? Math.round((weekDone / weekPlanned) * 100) : -1 },
+        month: { done: monthDone, planned: monthPlanned, pct: monthPlanned > 0 ? Math.round((monthDone / monthPlanned) * 100) : -1 },
+        total: { done: totalDone, planned: totalPlanned, pct: totalPlanned > 0 ? Math.round((totalDone / totalPlanned) * 100) : -1 }
+    };
+};
+
+window._renderComplianceRings = function(clientId) {
+    const row = document.getElementById('complianceRingsRow');
+    if(!row) return;
+    const c = window.computeCompliance(clientId);
+    const rings = [
+        { label: 'Woche', color: '#06b6d4', data: c.week },
+        { label: 'Monat', color: '#f59e0b', data: c.month },
+        { label: 'Gesamt', color: '#10b981', data: c.total }
+    ];
+    const circumference = 2 * Math.PI * 28; // 175.93
+    row.innerHTML = rings.map(r => {
+        const pct = r.data.pct;
+        const offset = pct >= 0 ? circumference - (circumference * pct / 100) : circumference;
+        const label = pct >= 0 ? pct + '%' : '—';
+        const sub = pct >= 0 ? r.data.done + '/' + r.data.planned : 'Keine';
+        return `<div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 flex flex-col items-center">
+            <svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/><circle cx="32" cy="32" r="28" fill="none" stroke="${r.color}" stroke-width="4" stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round" transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 0.8s ease"/><text x="32" y="36" text-anchor="middle" fill="white" font-size="13" font-weight="900" font-family="DM Sans,sans-serif">${label}</text></svg>
+            <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">${r.label}</p>
+            <p class="text-[9px] text-zinc-600">${sub}</p>
+        </div>`;
+    }).join('');
+    row.classList.remove('hidden');
+    row.classList.add('grid');
+};
+
+// ============================================================
+// KI CHECK-IN
+// ============================================================
+let _lastCheckInText = '';
+
+window.generateKiCheckIn = async function() {
+    if(!window.checkOnlineForAI()) return;
+    if(window.aiGate && !(await window.aiGate())) return;
+    if(!_activeClientDetailId) return;
+    const btn = document.getElementById('btnKiCheckIn');
+    if(btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin pointer-events-none"></i> Generiere...';
+
+    const c = window.clients.find(c => c.id === _activeClientDetailId);
+    const clientName = c ? c.name : 'Kunde';
+    const profile = window.getClientProfile(_activeClientDetailId);
+    const compliance = window.computeCompliance(_activeClientDetailId);
+    const cw = window.getClientWorkouts(_activeClientDetailId);
+    const recent = cw.slice(0, 10).map(w => {
+        let d = w.setDetails ? w.setDetails.map(s => s.reps + '×' + s.weight + 'kg').join(', ') : '';
+        if(w.data) d += ' ' + Object.entries(w.data).slice(0, 3).map(([k,v]) => k + ':' + v).join(' | ');
+        return w.date + ' ' + w.exercise + ': ' + d;
+    }).join('\n');
+
+    const lang = window.currentLang === 'de' ? 'Deutsch' : (window.currentLang === 'en' ? 'Englisch' : window.currentLang || 'Deutsch');
+    const prompt = `Du bist ein Personal Trainer und schreibst einen kurzen motivierenden Check-In für deinen Kunden. Sei persönlich, nenne konkrete Übungen und Fortschritte. Kurz und knackig. Max 80 Wörter.
+
+Kunde: ${clientName}
+Ziel: ${profile.goal || 'k.A.'}
+Verletzungen: ${profile.injuries || 'keine'}
+Compliance diese Woche: ${compliance.week.pct >= 0 ? compliance.week.pct + '%' : 'k.A.'}
+Letzte Workouts:
+${recent || 'Keine Daten'}
+
+Antworte auf ${lang}.`;
+
+    try {
+        const res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        _lastCheckInText = data.result || data.text || 'Keine Antwort erhalten.';
+        const textEl = document.getElementById('kiCheckInText');
+        if(textEl) textEl.textContent = _lastCheckInText;
+        window.toggleModal('kiCheckInModal');
+        window._refreshLucide();
+    } catch(err) {
+        window.showToast('Fehler: ' + err.message);
+    }
+    if(btn) btn.innerHTML = '<i data-lucide="message-circle" class="w-3.5 h-3.5 pointer-events-none"></i> KI Check-In';
+    window._refreshLucide();
+};
+
+window._sendCheckInWhatsApp = function() {
+    if(!_lastCheckInText) return;
+    const text = encodeURIComponent(_lastCheckInText + '\n\n— Dein Trainer via BASE');
+    window.open('https://wa.me/?text=' + text, '_blank');
+};
+
+window._copyCheckInText = function() {
+    if(!_lastCheckInText) return;
+    navigator.clipboard.writeText(_lastCheckInText).then(() => window.showToast('Kopiert!'));
+};
+
+// ============================================================
+// BRANDED TRAINER-LINK
+// ============================================================
+window.shareTrainerBrandLink = function() {
+    const auth = window._fbAuth;
+    if(!auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
+    const url = 'https://base-app.tech/app.html?brand=' + auth.currentUser.uid;
+    if(navigator.share) {
+        navigator.share({ title: 'BASE Fitness', text: 'Tracke dein Training mit meiner personalisierten App:', url: url });
+    } else {
+        navigator.clipboard.writeText(url).then(() => window.showToast('Link kopiert!'));
+    }
+};
+
+window.previewTrainerBrand = function() {
+    const auth = window._fbAuth;
+    if(!auth || !auth.currentUser) return;
+    if(window.openTrainerDetail) window.openTrainerDetail(auth.currentUser.uid);
+};
+
+window.applyTrainerBranding = function() {
+    const raw = localStorage.getItem('base_brand_override');
+    if(!raw) return;
+    try {
+        const brand = JSON.parse(raw);
+        if(brand.name) {
+            const subEl = document.querySelector('#profileHeader .text-zinc-500, [data-trainer-brand-name]');
+            if(subEl) { subEl.textContent = brand.name; subEl.setAttribute('data-trainer-brand-name', '1'); }
+        }
+        if(brand.color) {
+            document.documentElement.style.setProperty('--primary-hex', brand.color);
+        }
+    } catch(e) { /* ignore */ }
+};
+
+window.clearTrainerBranding = function() {
+    localStorage.removeItem('base_brand_override');
+    location.reload();
 };
 
 // ── INIT: Trainer-Profil beim PT-Tab-Switch laden ──────────
