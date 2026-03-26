@@ -110,15 +110,15 @@ window.addEventListener('load', () => {
 const _origRenderTable = window.renderTable;
 // 1RM wird über die History-Funktion im Modal angezeigt — kein Override nötig
 let obRole = 'athlete';
-let _obFocus = { strength: true, cardio: false, main: false, all: false };
+let _obFocus = { strength: true, cardio: false, recovery: false, main: false };
 let _obQuickWorkoutSaved = false;
 let _obSelectedExercise = null;
 
 const _OB_FOCUS_CARDS = [
     { key:'strength', icon:'dumbbell', name:'Krafttraining', color:'cyan', sub:'Sätze, Gewicht, 1RM' },
     { key:'cardio', icon:'heart-pulse', name:'Ausdauer', color:'rose', sub:'Laufen, Radfahren, Schwimmen' },
-    { key:'main', icon:'trophy', name:'Mein Sport', color:'amber', sub:'86 Sportarten tracken' },
-    { key:'all', icon:'layers', name:'Alles', color:'indigo', sub:'Kraft + Cardio + Sport' }
+    { key:'recovery', icon:'stretch-horizontal', name:'Mobility', color:'emerald', sub:'Stretching, Yoga, Foam Rolling' },
+    { key:'main', icon:'trophy', name:'Mein Sport', color:'amber', sub:'86 Sportarten tracken' }
 ];
 
 const _OB_QUICK_EXERCISES = {
@@ -179,13 +179,7 @@ window._renderObFocusCards = function() {
 };
 
 window._toggleObFocus = function(key) {
-    if(key === 'all') {
-        _obFocus = { strength: true, cardio: true, main: true, all: true };
-    } else {
-        _obFocus.all = false;
-        _obFocus[key] = !_obFocus[key];
-        if(_obFocus.strength && _obFocus.cardio && _obFocus.main) _obFocus.all = true;
-    }
+    _obFocus[key] = !_obFocus[key];
     window._renderObFocusCards();
 };
 
@@ -294,10 +288,10 @@ window.obSkipAuth = function() {
 
 window.obFinish = function() {
     window.userProfile.modules = {
-        strength: _obFocus.strength || _obFocus.all,
-        cardio: _obFocus.cardio || _obFocus.all,
-        recovery: false,
-        main: _obFocus.main || _obFocus.all,
+        strength: !!_obFocus.strength,
+        cardio: !!_obFocus.cardio,
+        recovery: !!_obFocus.recovery,
+        main: !!_obFocus.main,
     };
     window.userProfile.widgets = {
         readiness: false,
