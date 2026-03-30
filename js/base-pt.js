@@ -965,8 +965,8 @@ window._renderSessionQuickPicks = function() {
     var picks = _sessionQuickPicks[_sessionType] || _sessionQuickPicks.kraft;
     var existing = _sessionExercises.map(function(e) { return (typeof e === 'object' ? e.name : e).toLowerCase(); });
     var filtered = picks.filter(function(p) { return existing.indexOf(p.toLowerCase()) === -1; });
-    var color = _sessionType === 'kraft' ? '6,182,212' : _sessionType === 'ausdauer' ? '239,68,68' : '16,185,129';
-    var hex = _sessionType === 'kraft' ? '#06b6d4' : _sessionType === 'ausdauer' ? '#ef4444' : '#10b981';
+    var color = _sessionType === 'kraft' ? '163,201,168' : _sessionType === 'ausdauer' ? '232,138,138' : '138,175,232';
+    var hex = _sessionType === 'kraft' ? '#a3c9a8' : _sessionType === 'ausdauer' ? '#e88a8a' : '#8aafe8';
     container.innerHTML = filtered.slice(0, 6).map(function(pick) {
         return '<button type="button" onclick="window.addQuickPick(\'' + window._escapeHtml(pick).replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider cursor-pointer pointer-events-auto transition-all" style="background:rgba(' + color + ',0.08);border:1px solid rgba(' + color + ',0.2);color:' + hex + '">' + window._escapeHtml(pick) + '</button>';
     }).join('');
