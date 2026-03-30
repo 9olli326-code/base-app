@@ -951,6 +951,8 @@ if(radio) radio.checked = true;
 // QuickPicks und Übungen aktualisieren
 if(window._renderSessionQuickPicks) window._renderSessionQuickPicks();
 if(window._renderSessionExercises) window._renderSessionExercises();
+// Custom Schema-Felder rendern
+if(window._renderCustomSessionFields) window._renderCustomSessionFields();
 };
 
 var _sessionQuickPicks = {
@@ -1206,10 +1208,21 @@ const dateStr = targetDate.toISOString().split('T')[0];
 
 const sessions = window.getSessions();
 
+// Custom Schema-Felder sammeln
+var customFields = {};
+var _cstTypes = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+var _cstCurrent = _cstTypes.find(function(t) { return t.id === _sessionType; });
+if (_cstCurrent && _cstCurrent.schema) {
+    _cstCurrent.schema.forEach(function(field) {
+        var el = document.getElementById('cst_field_' + field.id);
+        if (el) customFields[field.label] = el.value;
+    });
+}
+
 if(_editingSessionId) {
     const idx = sessions.findIndex(s => s.id === _editingSessionId);
     if(idx !== -1) {
-        sessions[idx] = { ...sessions[idx], clientId: _sessionSelectedClient, type: _sessionType, time, duration, focus, exercises: [..._sessionExercises], date: sessions[idx].date };
+        sessions[idx] = { ...sessions[idx], clientId: _sessionSelectedClient, type: _sessionType, time, duration, focus, exercises: [..._sessionExercises], customFields: customFields, date: sessions[idx].date };
     }
 } else {
     sessions.push({
@@ -1220,6 +1233,7 @@ if(_editingSessionId) {
         duration,
         focus,
         exercises: [..._sessionExercises],
+        customFields: customFields,
         date: dateStr,
         createdAt: new Date().toISOString()
     });
@@ -3036,34 +3050,51 @@ window.saveCustomSessionType = async function() {
 
     var id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 12);
 
-    // Quick Picks: manuell oder per KI
+    // KI generiert Quick Picks UND Formular-Schema
     var quickPicks = [];
-    if (exercises) {
-        quickPicks = exercises.split(',').map(function(e) { return e.trim(); }).filter(function(e) { return e.length > 0; }).slice(0, 10);
-    } else {
-        // KI generiert Quick Picks
-        var btn = document.getElementById('btnSaveCST');
-        if (btn) btn.textContent = 'KI generiert...';
-        try {
-            var prompt = 'Gib mir 10 typische Übungen für die Trainingsart "' + name + '". ' +
-                'Antworte NUR mit den Übungsnamen, kommagetrennt, keine Nummerierung, keine Erklärung.';
-            var res = await fetch('/.netlify/functions/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            var data = await res.text();
-            var parsed = window._parseGeminiResponse ? window._parseGeminiResponse(data) : data;
-            quickPicks = parsed.split(',').map(function(e) { return e.trim(); }).filter(function(e) { return e.length > 0 && e.length < 40; }).slice(0, 10);
-        } catch(e) {
-            quickPicks = [name + ' Übung 1', name + ' Übung 2', name + ' Übung 3'];
-        }
-        if (btn) btn.textContent = 'Erstellen';
+    var schema = [];
+    var btn = document.getElementById('btnSaveCST');
+    if (btn) btn.textContent = 'KI generiert...';
+    try {
+        var prompt = 'Du bist Sportwissenschaftler. Erstelle ein Tracking-Formular für die Trainingsart "' + name + '". ' +
+            (exercises ? 'Der User möchte diese Felder: ' + exercises + '. ' : '') +
+            'Antworte NUR mit JSON (kein Markdown, keine Backticks): ' +
+            '{"quickPicks":["10 typische Übungen/Aktivitäten"],' +
+            '"schema":[{"id":"feldname","label":"Anzeige","type":"number|text|select|range",' +
+            '"placeholder":"Beispiel","options":["nur bei select"],"min":0,"max":10}]}. ' +
+            'Generiere 3-6 sinnvolle Felder die zu "' + name + '" passen. ' +
+            'Feld-Typen: number (für Zahlen), text (Freitext), select (Dropdown mit options Array), range (Slider mit min/max).';
+
+        var res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: 'application/json' }
+            })
+        });
+        var data = await res.text();
+        var parsed = window._parseGeminiResponse ? window._parseGeminiResponse(data) : data;
+        var result = JSON.parse(parsed);
+        quickPicks = (result.quickPicks || []).slice(0, 10);
+        schema = (result.schema || []).slice(0, 6);
+    } catch(e) {
+        quickPicks = [name + ' Übung 1', name + ' Übung 2', name + ' Übung 3'];
+        schema = [
+            { id: 'dauer', label: 'Dauer (min)', type: 'number', placeholder: 'z.B. 30' },
+            { id: 'intensitaet', label: 'Intensität', type: 'range', min: 1, max: 10 }
+        ];
     }
+    if (btn) btn.textContent = 'Erstellen';
 
     // Speichern
     var existing = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
-    existing.push({ id: id, name: name, icon: _cstSelectedIcon, quickPicks: quickPicks, createdAt: new Date().toISOString() });
+    existing.push({
+        id: id, name: name, icon: _cstSelectedIcon,
+        quickPicks: quickPicks,
+        schema: schema,
+        createdAt: new Date().toISOString()
+    });
     localStorage.setItem('base_pt_custom_session_types', JSON.stringify(existing));
 
     // Quick Picks registrieren
@@ -3105,6 +3136,56 @@ window._renderCustomSessionTypes = function() {
             _sessionQuickPicks[t.id] = t.quickPicks || [];
         }
     });
+
+    if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+};
+
+// Custom Schema-Felder rendern für Custom Session Types
+window._renderCustomSessionFields = function() {
+    var container = document.getElementById('sessionCustomFields');
+    if (!container) {
+        var quickPicks = document.getElementById('sessionQuickPicks');
+        if (quickPicks) {
+            container = document.createElement('div');
+            container.id = 'sessionCustomFields';
+            container.className = 'space-y-3 mb-4';
+            quickPicks.parentNode.insertBefore(container, quickPicks.nextSibling);
+        }
+    }
+    if (!container) return;
+
+    var types = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+    var currentType = types.find(function(t) { return t.id === _sessionType; });
+
+    if (!currentType || !currentType.schema || currentType.schema.length === 0) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    container.innerHTML = '<p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">' +
+        window._escapeHtml(currentType.name) + ' — Details</p>' +
+        currentType.schema.map(function(field) {
+            var inputHtml = '';
+            if (field.type === 'select' && field.options) {
+                inputHtml = '<select id="cst_field_' + field.id + '" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm outline-none cursor-pointer pointer-events-auto">' +
+                    '<option value="">Wählen...</option>' +
+                    field.options.map(function(o) { return '<option value="' + window._escapeHtml(o) + '">' + window._escapeHtml(o) + '</option>'; }).join('') +
+                    '</select>';
+            } else if (field.type === 'range') {
+                var min = field.min || 1;
+                var max = field.max || 10;
+                inputHtml = '<div class="flex items-center gap-3">' +
+                    '<input type="range" id="cst_field_' + field.id + '" min="' + min + '" max="' + max + '" value="' + Math.round((min+max)/2) + '" class="flex-1 accent-primary pointer-events-auto" oninput="document.getElementById(\'cst_val_' + field.id + '\').textContent=this.value">' +
+                    '<span id="cst_val_' + field.id + '" class="text-white font-bold text-sm min-w-[24px] text-center">' + Math.round((min+max)/2) + '</span>' +
+                    '</div>';
+            } else {
+                var inputType = field.type === 'number' ? 'number' : 'text';
+                inputHtml = '<input type="' + inputType + '" id="cst_field_' + field.id + '" placeholder="' + window._escapeHtml(field.placeholder || '') + '" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm outline-none focus:border-primary cursor-text pointer-events-auto">';
+            }
+            return '<div><label class="block text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">' + window._escapeHtml(field.label) + '</label>' + inputHtml + '</div>';
+        }).join('');
 
     if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
 };
