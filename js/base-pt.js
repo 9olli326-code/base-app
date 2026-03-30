@@ -2998,7 +2998,20 @@ window.switchPTTab = function(tab) {
 // CUSTOM SESSION TYPES für PT Session Planner (max 3)
 // ============================================================
 
-var _cstIcons = ['heart','moon','sun','wind','waves','mountain','swords','shield','target','music','brain','leaf'];
+var _cstIcons = [
+    { icon: 'heart', label: 'Herz' },
+    { icon: 'moon', label: 'Ruhe' },
+    { icon: 'sun', label: 'Energie' },
+    { icon: 'wind', label: 'Atem' },
+    { icon: 'waves', label: 'Wasser' },
+    { icon: 'mountain', label: 'Berg' },
+    { icon: 'swords', label: 'Kampf' },
+    { icon: 'shield', label: 'Schutz' },
+    { icon: 'target', label: 'Ziel' },
+    { icon: 'music', label: 'Musik' },
+    { icon: 'brain', label: 'Mental' },
+    { icon: 'leaf', label: 'Natur' }
+];
 var _cstSelectedIcon = 'heart';
 
 window.openCustomSessionTypeModal = function() {
@@ -3013,11 +3026,19 @@ window.openCustomSessionTypeModal = function() {
 
     var picker = document.getElementById('cstIconPicker');
     if (picker) {
-        picker.innerHTML = _cstIcons.map(function(icon) {
-            var active = icon === _cstSelectedIcon;
-            return '<button onclick="window._cstPickIcon(\'' + icon + '\')" class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="' +
-                (active ? 'background:color-mix(in srgb,var(--primary-hex),transparent 80%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex)' : 'background:#1a1a1a;border:1px solid #333;color:#71717a') +
-                '"><i data-lucide="' + icon + '" class="w-5 h-5 pointer-events-none"></i></button>';
+        picker.style.display = 'grid';
+        picker.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        picker.style.gap = '8px';
+        picker.innerHTML = _cstIcons.map(function(item) {
+            var active = item.icon === _cstSelectedIcon;
+            return '<button type="button" onclick="window._cstPickIcon(\'' + item.icon + '\')" ' +
+                'class="flex flex-col items-center gap-1 py-2 rounded-lg cursor-pointer pointer-events-auto transition-all" ' +
+                'style="' + (active
+                    ? 'background:color-mix(in srgb,var(--primary-hex),transparent 80%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 50%);color:var(--primary-hex)'
+                    : 'background:#1a1a1a;border:1px solid #333;color:#71717a') + '">' +
+                '<i data-lucide="' + item.icon + '" class="w-5 h-5 pointer-events-none"></i>' +
+                '<span class="text-[8px] font-bold uppercase tracking-wider pointer-events-none">' + item.label + '</span>' +
+            '</button>';
         }).join('');
         if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
     }
@@ -3027,14 +3048,21 @@ window.openCustomSessionTypeModal = function() {
 
 window._cstPickIcon = function(icon) {
     _cstSelectedIcon = icon;
-    // Re-render icon picker ohne Modal neu zu öffnen
     var picker = document.getElementById('cstIconPicker');
     if (picker) {
-        picker.innerHTML = _cstIcons.map(function(ic) {
-            var active = ic === _cstSelectedIcon;
-            return '<button onclick="window._cstPickIcon(\'' + ic + '\')" class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="' +
-                (active ? 'background:color-mix(in srgb,var(--primary-hex),transparent 80%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex)' : 'background:#1a1a1a;border:1px solid #333;color:#71717a') +
-                '"><i data-lucide="' + ic + '" class="w-5 h-5 pointer-events-none"></i></button>';
+        picker.style.display = 'grid';
+        picker.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        picker.style.gap = '8px';
+        picker.innerHTML = _cstIcons.map(function(item) {
+            var active = item.icon === _cstSelectedIcon;
+            return '<button type="button" onclick="window._cstPickIcon(\'' + item.icon + '\')" ' +
+                'class="flex flex-col items-center gap-1 py-2 rounded-lg cursor-pointer pointer-events-auto transition-all" ' +
+                'style="' + (active
+                    ? 'background:color-mix(in srgb,var(--primary-hex),transparent 80%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 50%);color:var(--primary-hex)'
+                    : 'background:#1a1a1a;border:1px solid #333;color:#71717a') + '">' +
+                '<i data-lucide="' + item.icon + '" class="w-5 h-5 pointer-events-none"></i>' +
+                '<span class="text-[8px] font-bold uppercase tracking-wider pointer-events-none">' + item.label + '</span>' +
+            '</button>';
         }).join('');
         if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
     }

@@ -1543,8 +1543,8 @@
         </div>
 
     <!-- Custom Session Type Modal -->
-    <div id="customSessionTypeModal" class="fixed inset-0 z-[800] hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.85)">
-        <div class="card-bg p-6 max-w-sm w-full shadow-2xl relative" style="border-radius:8px;background:#141414;border:1px solid #222">
+    <div id="customSessionTypeModal" class="fixed inset-0 z-[800] hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.92);z-index:800">
+        <div class="card-bg p-6 max-w-sm w-full shadow-2xl relative max-h-[90vh] overflow-y-auto" style="border-radius:8px;background:#141414;border:1px solid #222">
             <div class="flex items-center justify-between mb-5">
                 <h3 class="text-lg font-black text-white uppercase tracking-tight" style="font-family:'Sora',sans-serif">Neuer Session-Typ</h3>
                 <button onclick="window.toggleModal('customSessionTypeModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
@@ -1556,7 +1556,7 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Icon</label>
-                    <div id="cstIconPicker" class="grid grid-cols-6 gap-2"></div>
+                    <div id="cstIconPicker" class="mb-2"></div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Übungsvorschläge (kommagetrennt)</label>
@@ -7614,7 +7614,7 @@
     <script src="js/base-timers.min.js?v=17" defer></script>
     <script src="js/base-ai.min.js?v=17" defer></script>
     <script src="js/base-settings.min.js?v=17" defer></script>
-    <script src="js/base-pt.min.js?v=18" defer></script>
+    <script src="js/base-pt.min.js?v=19" defer></script>
 
 
     <script type="module">
