@@ -3044,26 +3044,29 @@ window.saveCustomSessionType = async function() {
     var nameEl = document.getElementById('cstName');
     var exEl = document.getElementById('cstExercises');
     var name = (nameEl && nameEl.value || '').trim();
-    var exercises = (exEl && exEl.value || '').trim();
+    var userFields = (exEl && exEl.value || '').trim();
 
     if (!name) return window.showToast('Bitte Name eingeben');
 
     var id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 12);
-
-    // KI generiert Quick Picks UND Formular-Schema
-    var quickPicks = [];
-    var schema = [];
     var btn = document.getElementById('btnSaveCST');
     if (btn) btn.textContent = 'KI generiert...';
+
+    var quickPicks = [];
+    var schema = [];
+
     try {
-        var prompt = 'Du bist Sportwissenschaftler. Erstelle ein Tracking-Formular für die Trainingsart "' + name + '". ' +
-            (exercises ? 'Der User möchte diese Felder: ' + exercises + '. ' : '') +
+        var prompt = 'Du bist Sportwissenschaftler. Erstelle ein Tracking-Formular fuer die Trainingsart "' + name + '". ' +
+            (userFields ? 'Der User moechte diese Felder: ' + userFields + '. Nutze diese als Basis und ergaenze sinnvoll. ' : '') +
             'Antworte NUR mit JSON (kein Markdown, keine Backticks): ' +
-            '{"quickPicks":["10 typische Übungen/Aktivitäten"],' +
-            '"schema":[{"id":"feldname","label":"Anzeige","type":"number|text|select|range",' +
-            '"placeholder":"Beispiel","options":["nur bei select"],"min":0,"max":10}]}. ' +
-            'Generiere 3-6 sinnvolle Felder die zu "' + name + '" passen. ' +
-            'Feld-Typen: number (für Zahlen), text (Freitext), select (Dropdown mit options Array), range (Slider mit min/max).';
+            '{"quickPicks":["10 typische Uebungen oder Aktivitaeten fuer ' + name + '"],' +
+            '"schema":[{"id":"feldname","label":"Anzeigename","type":"number oder text oder select oder range",' +
+            '"placeholder":"Beispielwert","options":["nur bei type select"]}]}. ' +
+            'Generiere 3-6 sinnvolle Tracking-Felder. ' +
+            'Feld-Typen: number (Zahlenwerte wie Dauer, Distanz), text (Freitext wie Notizen), ' +
+            'select (Dropdown, MUSS options Array haben), range (Slider, MUSS min und max haben). ' +
+            'Beispiel fuer Entspannung: Felder waeren Dauer, Technik (select), Intensitaet (range 1-10), Wohlbefinden (range 1-10). ' +
+            'Beispiel fuer Schwimmen: Felder waeren Distanz, Bahnen, Stil (select), Zeit, Tempo.';
 
         var res = await fetch('/.netlify/functions/gemini', {
             method: 'POST',
@@ -3073,40 +3076,45 @@ window.saveCustomSessionType = async function() {
                 generationConfig: { responseMimeType: 'application/json' }
             })
         });
-        var data = await res.text();
-        var parsed = window._parseGeminiResponse ? window._parseGeminiResponse(data) : data;
-        var result = JSON.parse(parsed);
-        quickPicks = (result.quickPicks || []).slice(0, 10);
-        schema = (result.schema || []).slice(0, 6);
+        var data = await res.json();
+        var replyText = data.reply || '';
+        var result;
+        try {
+            result = typeof replyText === 'string' ? JSON.parse(replyText) : replyText;
+        } catch(parseErr) {
+            var jsonMatch = replyText.match(/\{[\s\S]*\}/);
+            result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+        }
+        if (result) {
+            quickPicks = (result.quickPicks || []).filter(function(e) { return typeof e === 'string' && e.length > 0 && e.length < 50; }).slice(0, 10);
+            schema = (result.schema || []).filter(function(f) { return f.id && f.label && f.type; }).slice(0, 8);
+        }
     } catch(e) {
-        quickPicks = [name + ' Übung 1', name + ' Übung 2', name + ' Übung 3'];
+        console.error('KI Formular-Generierung fehlgeschlagen:', e);
+        quickPicks = [name + ' Uebung 1', name + ' Uebung 2', name + ' Uebung 3'];
         schema = [
             { id: 'dauer', label: 'Dauer (min)', type: 'number', placeholder: 'z.B. 30' },
-            { id: 'intensitaet', label: 'Intensität', type: 'range', min: 1, max: 10 }
+            { id: 'intensitaet', label: 'Intensitaet (1-10)', type: 'range', min: 1, max: 10 },
+            { id: 'notizen', label: 'Notizen', type: 'text', placeholder: 'Wie lief es?' }
         ];
     }
+
     if (btn) btn.textContent = 'Erstellen';
 
-    // Speichern
     var existing = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
     existing.push({
         id: id, name: name, icon: _cstSelectedIcon,
-        quickPicks: quickPicks,
-        schema: schema,
+        quickPicks: quickPicks, schema: schema,
         createdAt: new Date().toISOString()
     });
     localStorage.setItem('base_pt_custom_session_types', JSON.stringify(existing));
 
-    // Quick Picks registrieren
     if (typeof _sessionQuickPicks !== 'undefined') {
         _sessionQuickPicks[id] = quickPicks;
     }
 
-    // UI aktualisieren
     window._renderCustomSessionTypes();
     window.toggleModal('customSessionTypeModal');
-
-    // Direkt den neuen Typ auswählen
     setTimeout(function() { window.setSessionType(id); }, 100);
     window.showToast('"' + name + '" erstellt!');
 };
@@ -3145,7 +3153,7 @@ window._renderCustomSessionFields = function() {
     var container = document.getElementById('sessionCustomFields');
     if (!container) {
         var quickPicks = document.getElementById('sessionQuickPicks');
-        if (quickPicks) {
+        if (quickPicks && quickPicks.parentNode) {
             container = document.createElement('div');
             container.id = 'sessionCustomFields';
             container.className = 'space-y-3 mb-4';
@@ -3164,25 +3172,26 @@ window._renderCustomSessionFields = function() {
     }
 
     container.style.display = 'block';
-    container.innerHTML = '<p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">' +
+    container.innerHTML = '<p class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:var(--primary-hex)">' +
         window._escapeHtml(currentType.name) + ' — Details</p>' +
         currentType.schema.map(function(field) {
             var inputHtml = '';
             if (field.type === 'select' && field.options) {
                 inputHtml = '<select id="cst_field_' + field.id + '" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm outline-none cursor-pointer pointer-events-auto">' +
-                    '<option value="">Wählen...</option>' +
+                    '<option value="">Waehlen...</option>' +
                     field.options.map(function(o) { return '<option value="' + window._escapeHtml(o) + '">' + window._escapeHtml(o) + '</option>'; }).join('') +
                     '</select>';
             } else if (field.type === 'range') {
                 var min = field.min || 1;
                 var max = field.max || 10;
+                var mid = Math.round((min + max) / 2);
                 inputHtml = '<div class="flex items-center gap-3">' +
-                    '<input type="range" id="cst_field_' + field.id + '" min="' + min + '" max="' + max + '" value="' + Math.round((min+max)/2) + '" class="flex-1 accent-primary pointer-events-auto" oninput="document.getElementById(\'cst_val_' + field.id + '\').textContent=this.value">' +
-                    '<span id="cst_val_' + field.id + '" class="text-white font-bold text-sm min-w-[24px] text-center">' + Math.round((min+max)/2) + '</span>' +
+                    '<input type="range" id="cst_field_' + field.id + '" min="' + min + '" max="' + max + '" value="' + mid + '" class="flex-1 pointer-events-auto" style="accent-color:var(--primary-hex)" oninput="document.getElementById(\'cst_val_' + field.id + '\').textContent=this.value">' +
+                    '<span id="cst_val_' + field.id + '" class="text-white font-bold text-sm min-w-[24px] text-center">' + mid + '</span>' +
                     '</div>';
             } else {
                 var inputType = field.type === 'number' ? 'number' : 'text';
-                inputHtml = '<input type="' + inputType + '" id="cst_field_' + field.id + '" placeholder="' + window._escapeHtml(field.placeholder || '') + '" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm outline-none focus:border-primary cursor-text pointer-events-auto">';
+                inputHtml = '<input type="' + inputType + '" id="cst_field_' + field.id + '" placeholder="' + window._escapeHtml(field.placeholder || '') + '" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm outline-none cursor-text pointer-events-auto" style="--tw-ring-color:var(--primary-hex)">';
             }
             return '<div><label class="block text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">' + window._escapeHtml(field.label) + '</label>' + inputHtml + '</div>';
         }).join('');
