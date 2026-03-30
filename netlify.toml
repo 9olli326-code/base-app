@@ -1,13 +1,13 @@
-functionsDirectory = "/Users/oliverangermann/Desktop/Base App V2 Beta/netlify/functions"
+functionsDirectory = "netlify/functions"
 functionsDirectoryOrigin = "config-v1"
 headersOrigin = "config"
 redirectsOrigin = "config"
 plugins = []
 
 [build]
-publish = "/Users/oliverangermann/Desktop/Base App V2 Beta"
+publish = "."
 publishOrigin = "config"
-functions = "/Users/oliverangermann/Desktop/Base App V2 Beta/netlify/functions"
+functions = "netlify/functions"
 
   [build.environment]
 
