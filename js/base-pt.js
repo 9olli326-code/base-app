@@ -2980,3 +2980,209 @@ window.switchPTTab = function(tab) {
     }
 };
 
+// ============================================================
+// CUSTOM SESSION TYPES für PT Session Planner (max 3)
+// ============================================================
+
+var _cstIcons = ['heart','moon','sun','wind','waves','mountain','swords','shield','target','music','brain','leaf'];
+var _cstSelectedIcon = 'heart';
+
+window.openCustomSessionTypeModal = function() {
+    var existing = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+    if (existing.length >= 3) return window.showToast('Maximum 3 eigene Typen');
+
+    _cstSelectedIcon = 'heart';
+    var n = document.getElementById('cstName');
+    var e = document.getElementById('cstExercises');
+    if (n) n.value = '';
+    if (e) e.value = '';
+
+    var picker = document.getElementById('cstIconPicker');
+    if (picker) {
+        picker.innerHTML = _cstIcons.map(function(icon) {
+            var active = icon === _cstSelectedIcon;
+            return '<button onclick="window._cstPickIcon(\'' + icon + '\')" class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="' +
+                (active ? 'background:color-mix(in srgb,var(--primary-hex),transparent 80%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex)' : 'background:#1a1a1a;border:1px solid #333;color:#71717a') +
+                '"><i data-lucide="' + icon + '" class="w-5 h-5 pointer-events-none"></i></button>';
+        }).join('');
+        if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+    }
+
+    window.toggleModal('customSessionTypeModal');
+};
+
+window._cstPickIcon = function(icon) {
+    _cstSelectedIcon = icon;
+    // Re-render icon picker ohne Modal neu zu öffnen
+    var picker = document.getElementById('cstIconPicker');
+    if (picker) {
+        picker.innerHTML = _cstIcons.map(function(ic) {
+            var active = ic === _cstSelectedIcon;
+            return '<button onclick="window._cstPickIcon(\'' + ic + '\')" class="w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="' +
+                (active ? 'background:color-mix(in srgb,var(--primary-hex),transparent 80%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex)' : 'background:#1a1a1a;border:1px solid #333;color:#71717a') +
+                '"><i data-lucide="' + ic + '" class="w-5 h-5 pointer-events-none"></i></button>';
+        }).join('');
+        if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+    }
+};
+
+window.saveCustomSessionType = async function() {
+    var nameEl = document.getElementById('cstName');
+    var exEl = document.getElementById('cstExercises');
+    var name = (nameEl && nameEl.value || '').trim();
+    var exercises = (exEl && exEl.value || '').trim();
+
+    if (!name) return window.showToast('Bitte Name eingeben');
+
+    var id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 12);
+
+    // Quick Picks: manuell oder per KI
+    var quickPicks = [];
+    if (exercises) {
+        quickPicks = exercises.split(',').map(function(e) { return e.trim(); }).filter(function(e) { return e.length > 0; }).slice(0, 10);
+    } else {
+        // KI generiert Quick Picks
+        var btn = document.getElementById('btnSaveCST');
+        if (btn) btn.textContent = 'KI generiert...';
+        try {
+            var prompt = 'Gib mir 10 typische Übungen für die Trainingsart "' + name + '". ' +
+                'Antworte NUR mit den Übungsnamen, kommagetrennt, keine Nummerierung, keine Erklärung.';
+            var res = await fetch('/.netlify/functions/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            var data = await res.text();
+            var parsed = window._parseGeminiResponse ? window._parseGeminiResponse(data) : data;
+            quickPicks = parsed.split(',').map(function(e) { return e.trim(); }).filter(function(e) { return e.length > 0 && e.length < 40; }).slice(0, 10);
+        } catch(e) {
+            quickPicks = [name + ' Übung 1', name + ' Übung 2', name + ' Übung 3'];
+        }
+        if (btn) btn.textContent = 'Erstellen';
+    }
+
+    // Speichern
+    var existing = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+    existing.push({ id: id, name: name, icon: _cstSelectedIcon, quickPicks: quickPicks, createdAt: new Date().toISOString() });
+    localStorage.setItem('base_pt_custom_session_types', JSON.stringify(existing));
+
+    // Quick Picks registrieren
+    if (typeof _sessionQuickPicks !== 'undefined') {
+        _sessionQuickPicks[id] = quickPicks;
+    }
+
+    // UI aktualisieren
+    window._renderCustomSessionTypes();
+    window.toggleModal('customSessionTypeModal');
+
+    // Direkt den neuen Typ auswählen
+    setTimeout(function() { window.setSessionType(id); }, 100);
+    window.showToast('"' + name + '" erstellt!');
+};
+
+window._renderCustomSessionTypes = function() {
+    var container = document.getElementById('customSessionTypes');
+    var addBtn = document.getElementById('btnAddSessionType');
+    if (!container) return;
+
+    var types = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+
+    container.innerHTML = types.map(function(t) {
+        var radioId = 'sessionType_' + t.id;
+        return '<label for="' + radioId + '" class="session-type-label px-3 py-3 rounded-xl border border-zinc-800 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center gap-1.5 text-center pointer-events-auto" style="background:rgba(24,24,27,1);color:#a1a1aa;min-width:80px">' +
+            '<input type="radio" name="sessionTypeRadio" id="' + radioId + '" value="' + t.id + '" onchange="window.setSessionType(\'' + t.id + '\')" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">' +
+            '<i data-lucide="' + t.icon + '" class="w-4 h-4 pointer-events-none"></i>' +
+            '<span>' + window._escapeHtml(t.name) + '</span>' +
+        '</label>';
+    }).join('');
+
+    // + Button verstecken wenn 3 erreicht
+    if (addBtn) addBtn.style.display = types.length >= 3 ? 'none' : 'flex';
+
+    // Quick Picks registrieren
+    types.forEach(function(t) {
+        if (typeof _sessionQuickPicks !== 'undefined') {
+            _sessionQuickPicks[t.id] = t.quickPicks || [];
+        }
+    });
+
+    if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+};
+
+// CSS für Custom Session Type (aktiver Zustand)
+var _origSetSessionType2 = window.setSessionType;
+if (_origSetSessionType2) {
+    window.setSessionType = function(e) {
+        _origSetSessionType2(e);
+        // Custom Types: aktiven Style setzen
+        var customTypes = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+        customTypes.forEach(function(t) {
+            var label = document.querySelector('label[for="sessionType_' + t.id + '"]');
+            if (label) {
+                if (e === t.id) {
+                    label.style.borderColor = 'color-mix(in srgb, var(--primary-hex), transparent 60%)';
+                    label.style.background = 'color-mix(in srgb, var(--primary-hex), transparent 90%)';
+                    label.style.color = 'var(--primary-hex)';
+                } else {
+                    label.style.borderColor = '';
+                    label.style.background = 'rgba(24,24,27,1)';
+                    label.style.color = '#a1a1aa';
+                }
+            }
+        });
+    };
+}
+
+// Long Press zum Löschen
+window._initCSTLongPress = function() {
+    var types = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+    types.forEach(function(t) {
+        var label = document.querySelector('label[for="sessionType_' + t.id + '"]');
+        if (!label || label._cstLongPress) return;
+        label._cstLongPress = true;
+        var timer = null;
+        var start = function(ev) {
+            timer = setTimeout(function() {
+                window.showModal('"' + t.name + '" löschen?', 'Diesen Session-Typ entfernen?', true, function() {
+                    var arr = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+                    arr = arr.filter(function(x) { return x.id !== t.id; });
+                    localStorage.setItem('base_pt_custom_session_types', JSON.stringify(arr));
+                    if (typeof _sessionQuickPicks !== 'undefined') delete _sessionQuickPicks[t.id];
+                    window._renderCustomSessionTypes();
+                    window.setSessionType('kraft');
+                    window.showToast('Typ gelöscht');
+                });
+            }, 700);
+        };
+        var cancel = function() { if (timer) clearTimeout(timer); timer = null; };
+        label.addEventListener('touchstart', start, { passive: true });
+        label.addEventListener('touchend', cancel);
+        label.addEventListener('touchmove', cancel);
+        label.addEventListener('mousedown', start);
+        label.addEventListener('mouseup', cancel);
+        label.addEventListener('mouseleave', cancel);
+    });
+};
+
+// Beim Öffnen des Session Modals: Custom Types rendern
+var _origOpenSession2 = window.openSessionModal;
+if (_origOpenSession2) {
+    window.openSessionModal = function(e) {
+        _origOpenSession2(e);
+        setTimeout(function() {
+            window._renderCustomSessionTypes();
+            setTimeout(function() { window._initCSTLongPress(); }, 200);
+        }, 100);
+    };
+}
+
+// Beim App-Start: Quick Picks laden
+(function() {
+    var types = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
+    types.forEach(function(t) {
+        if (typeof _sessionQuickPicks !== 'undefined') {
+            _sessionQuickPicks[t.id] = t.quickPicks || [];
+        }
+    });
+})();
+
