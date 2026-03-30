@@ -84,3 +84,26 @@ firebaselogic.js    → Auth + Cloud Sync (bleibt)
 
 ## Sprache
 Der Entwickler spricht Deutsch. Code-Kommentare und Commit-Messages auf Deutsch.
+
+## Selbst-Verifikation (PFLICHT bei jeder Änderung)
+
+### Nach JEDER CSS-Änderung:
+1. Lies die geänderte CSS-Datei und prüfe: Werden die neuen Variablen/Werte tatsächlich in den Selektoren verwendet die du ändern wolltest?
+2. Suche mit grep nach dem alten Wert — er darf NICHT mehr vorkommen (außer in Fallbacks oder Kommentaren).
+3. Beispiel: `grep -n "rgba(163,201,168" design-override.css` → Wenn du die ersetzen solltest, darf hier nichts mehr stehen.
+
+### Nach JEDER JS-Änderung:
+1. Suche die geänderte Funktion und prüfe ob sie syntaktisch korrekt ist.
+2. Prüfe ob alle IDs die saveWorkout() liest noch im generierten HTML existieren.
+
+### Nach JEDER HTML-Änderung:
+1. Prüfe ob die geänderte Stelle keine kaputten Tags hat.
+
+### VOR jedem Deploy:
+1. Prüfe dass sw.js Cache-Version erhöht wurde: `grep "cache-v" sw.js | head -1`
+2. Wenn design-override.css geändert wurde: Zeige die relevanten Zeilen als Beweis dass die Änderung drin ist.
+3. Mache KEINEN Deploy bevor die Verifikation gezeigt wurde.
+
+### Debugging-Prinzip:
+- Bevor du rätst was falsch sein könnte: LIES die aktuelle Datei.
+- Immer ERST lesen, DANN ändern, DANN verifizieren.

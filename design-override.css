@@ -1,0 +1,512 @@
+/* ══════════════════════════════════════════════════════════
+   BASE Design Override — Zen Flow + Carbon Elite
+   Überschreibt Tailwind-Klassen und Inline-Styles
+   OHNE HTML zu verändern.
+   Entfernen: Lösche diese Datei + den <link> in app.html.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Tailwind Indigo Klassen → var(--primary-hex) ──────── */
+
+/* Backgrounds */
+.bg-indigo-500 { background-color: var(--primary-hex) !important; }
+.bg-indigo-400 { background-color: var(--primary-hex) !important; }
+[class*="bg-indigo-500\/5"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 95%) !important; }
+[class*="bg-indigo-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="bg-indigo-500\/15"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 85%) !important; }
+[class*="bg-indigo-500\/20"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="bg-indigo-500\/25"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 75%) !important; }
+
+/* Text */
+.text-indigo-400 { color: var(--primary-hex) !important; }
+.text-indigo-300 { color: var(--primary-hex) !important; }
+.text-indigo-500 { color: var(--primary-hex) !important; }
+[class*="text-indigo-400\/60"] { color: var(--primary-hex) !important; }
+
+/* Borders */
+[class*="border-indigo-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="border-indigo-500\/30"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 70%) !important; }
+[class*="border-indigo-400\/40"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 60%) !important; }
+[class*="border-indigo-400\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="border-indigo-400\/50"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 50%) !important; }
+[class*="border-indigo-500\/60"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 40%) !important; }
+
+/* Focus */
+[class*="focus\:border-indigo-500"]:focus { border-color: var(--primary-hex) !important; }
+.accent-indigo-500 { accent-color: var(--primary-hex) !important; }
+
+/* Hover */
+[class*="hover\:bg-indigo-500\/10"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="hover\:bg-indigo-500\/20"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="hover\:bg-indigo-500\/25"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 75%) !important; }
+[class*="hover\:bg-indigo-400"]:hover { background-color: var(--primary-hex) !important; opacity: 0.9; }
+[class*="hover\:text-indigo-300"]:hover { color: var(--primary-hex) !important; }
+[class*="hover\:border-indigo-500\/50"]:hover { border-color: color-mix(in srgb, var(--primary-hex), transparent 50%) !important; }
+[class*="hover\:border-indigo-500\/60"]:hover { border-color: color-mix(in srgb, var(--primary-hex), transparent 40%) !important; }
+[class*="hover\:border-indigo-400\/50"]:hover { border-color: color-mix(in srgb, var(--primary-hex), transparent 50%) !important; }
+
+
+/* Shadow overrides */
+[class*="shadow-indigo-500\/20"] { --tw-shadow-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+
+/* ── Inline Indigo Farben Override ──────────────────────── */
+[style*="color:#6366f1"] { color: var(--primary-hex) !important; }
+[style*="color: #6366f1"] { color: var(--primary-hex) !important; }
+[style*="background:#6366f1"] { background: var(--primary-hex) !important; }
+[style*="background-color:#6366f1"] { background-color: var(--primary-hex) !important; }
+
+
+/* ── Inline font-family Override ───────────────────────── */
+[style*="font-family:'Barlow Condensed'"],
+[style*="font-family:\"Barlow Condensed\""],
+[style*="font-family: 'Barlow Condensed'"] {
+    font-family: var(--ui-font-heading) !important;
+}
+[style*="font-family:'DM Sans'"],
+[style*="font-family:\"DM Sans\""],
+[style*="font-family: 'DM Sans'"],
+[style*="font-family:DM Sans"] {
+    font-family: var(--ui-font-body) !important;
+}
+[style*="font-family:'Bebas Neue'"] {
+    font-family: var(--ui-font-heading) !important;
+}
+
+/* ── Cyan → primary (als Akzentfarbe) ──────────────────── */
+[style*="color:#06b6d4"],
+[style*="color: #06b6d4"] {
+    color: var(--primary-hex) !important;
+}
+.text-cyan-400 { color: var(--primary-hex) !important; }
+.text-cyan-500 { color: var(--primary-hex) !important; }
+.bg-cyan-500 { background-color: var(--primary-hex) !important; }
+[class*="bg-cyan-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="bg-cyan-500\/15"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 85%) !important; }
+[class*="bg-cyan-500\/20"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="border-cyan-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="border-cyan-500\/30"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 70%) !important; }
+[class*="border-cyan-400\/30"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 70%) !important; }
+[class*="hover\:bg-cyan-500\/10"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="hover\:bg-cyan-500\/15"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 85%) !important; }
+[class*="hover\:bg-cyan-500\/20"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="hover\:bg-cyan-400"]:hover { background-color: var(--primary-hex) !important; }
+[class*="focus\:border-cyan-500"]:focus { border-color: var(--primary-hex) !important; }
+[class*="hover\:border-cyan-500\/30"]:hover { border-color: color-mix(in srgb, var(--primary-hex), transparent 70%) !important; }
+
+/* ── Orange/Amber → primary ────────────────────────────── */
+.text-orange-400 { color: var(--primary-hex) !important; }
+[class*="bg-orange-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="border-orange-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="focus\:border-orange-500\/50"]:focus { border-color: color-mix(in srgb, var(--primary-hex), transparent 50%) !important; }
+
+/* ── Violett/Purple → primary ──────────────────────────── */
+.text-violet-400 { color: var(--primary-hex) !important; }
+.text-purple-400 { color: var(--primary-hex) !important; }
+[class*="bg-purple-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="border-purple-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+
+/* ── Design Morph Token Defaults ───────────────────────── */
+:root {
+    --cat-accent: #a3c9a8;
+    --cat-glow: rgba(163,201,168,0.08);
+    --cat-glow-strong: rgba(163,201,168,0.15);
+    --cat-glow-3: rgba(163,201,168,0.03);
+    --cat-glow-5: rgba(163,201,168,0.05);
+    --cat-glow-8: rgba(163,201,168,0.08);
+    --cat-glow-10: rgba(163,201,168,0.10);
+    --cat-glow-15: rgba(163,201,168,0.15);
+    --cat-glow-20: rgba(163,201,168,0.20);
+    --cat-glow-25: rgba(163,201,168,0.25);
+    --cat-glow-30: rgba(163,201,168,0.30);
+    --cat-glow-40: rgba(163,201,168,0.40);
+}
+
+/* ── Legacy Zen Flow Overrides — consolidated into Stitch-6 section below ── */
+
+/* ══════════════════════════════════════════════════════════
+   ZEN FLOW — Screen 1: Training Tab
+   Stitch-6 Design Implementation
+   ══════════════════════════════════════════════════════════ */
+
+/* ── 1. Zen-Glow: Workout Form Card ──────────────────────── */
+#formRevealWrapper > .card-bg {
+    box-shadow: 0 0 30px var(--cat-glow), 0 0 60px var(--cat-glow-3) !important;
+    border: 1px solid var(--cat-glow-strong) !important;
+    transition: box-shadow 0.4s ease, border-color 0.4s ease !important;
+}
+#formRevealWrapper > .card-bg:hover {
+    box-shadow: 0 0 40px var(--cat-glow-strong), 0 0 80px var(--cat-glow-5) !important;
+    border-color: var(--cat-glow-25) !important;
+}
+
+/* ── 2. Set-Row: Große Zahlen (Sora Bold) ─────────────────── */
+#setsContainer .zen-set-row {
+    background: rgba(15,17,15,0.6);
+    border: 1px solid var(--cat-glow);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.3s ease;
+}
+#setsContainer .zen-set-row:focus-within {
+    border-color: var(--cat-glow-25);
+}
+#setsContainer .zen-set-label {
+    font-family: var(--ui-font-body), 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--cat-accent, #a3c9a8);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    min-width: 48px;
+}
+#setsContainer .zen-set-value-group {
+    display: flex;
+    gap: 32px;
+}
+#setsContainer .zen-set-value {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+#setsContainer .zen-set-input {
+    font-family: var(--ui-font-heading), 'Sora', sans-serif;
+    font-size: clamp(24px, 6vw, 36px);
+    font-weight: 800;
+    color: var(--text-main, #d4ddd6);
+    background: transparent;
+    border: none;
+    outline: none;
+    text-align: center;
+    width: 80px;
+    letter-spacing: -0.02em;
+    -moz-appearance: textfield;
+}
+#setsContainer .zen-set-input::-webkit-inner-spin-button,
+#setsContainer .zen-set-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#setsContainer .zen-set-input::placeholder {
+    font-size: 20px;
+    color: rgba(94,110,96,0.5);
+    font-weight: 600;
+}
+#setsContainer .zen-set-unit {
+    font-family: var(--ui-font-body), 'Outfit', sans-serif;
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(94,110,96,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+/* Leerer Satz (noch nicht ausgefüllt) */
+#setsContainer .zen-set-row.zen-empty {
+    opacity: 0.5;
+}
+
+/* ── 3. Speichern-Button Glow + Farbe ─────────────────────── */
+#btnSubmitWorkout {
+    background-color: var(--cat-accent, var(--primary-hex)) !important;
+    box-shadow: 0 4px 20px var(--cat-glow-25) !important;
+    transition: box-shadow 0.3s ease, transform 0.15s ease, background-color 0.3s ease !important;
+}
+#btnSubmitWorkout:hover {
+    box-shadow: 0 6px 28px var(--cat-glow-30) !important;
+}
+#btnSubmitWorkout:active {
+    box-shadow: 0 2px 12px var(--cat-glow-20) !important;
+}
+
+/* ── 4. Bottom Nav: Dot statt Bar ─────────────────────────── */
+#bottomNav [id^="navIndicator-"] {
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 6px var(--cat-glow-40) !important;
+}
+
+/* ── 5. Nav Labels: capitalize ────────────────────────────── */
+#bottomNav .nav-tab-btn span {
+    text-transform: capitalize !important;
+    font-family: var(--ui-font-body), 'Outfit', sans-serif !important;
+    letter-spacing: 0.08em !important;
+    font-family: var(--ui-font-body), 'Outfit', sans-serif !important;
+}
+
+/* ── 6. Category Pills: lowercase + pill shape ────────────── */
+.cat-pill {
+    text-transform: capitalize !important;
+    border-radius: 9999px !important;
+    padding: 8px 22px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    font-family: var(--ui-font-body), 'Outfit', sans-serif !important;
+    letter-spacing: 0.02em !important;
+}
+.cat-pill-active {
+    background-color: var(--cat-accent, var(--primary-hex)) !important;
+    border-color: var(--cat-accent, var(--primary-hex)) !important;
+    box-shadow: 0 0 15px var(--cat-glow-30) !important;
+}
+
+/* ── 7. Form Header: Overline + title ─────────────────────── */
+#formCatIcon {
+    color: var(--cat-accent, #a3c9a8) !important;
+    border-color: var(--cat-glow-30) !important;
+    background-color: var(--cat-glow-10) !important;
+}
+.zen-overline {
+    font-family: var(--ui-font-body), 'Outfit', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--cat-accent, rgba(94,110,96,0.6)) !important;
+    opacity: 0.6;
+    display: block;
+    margin-bottom: 2px;
+}
+/* Form title: Title Case statt ALL CAPS */
+#formSportTitle {
+    text-transform: capitalize !important;
+    letter-spacing: -0.01em !important;
+    font-family: var(--ui-font-heading), 'Sora', sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+}
+
+/* ── 8. Exercise Input: Underline Style ───────────────────── */
+.zen-exercise-input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 0 !important;
+    padding: 8px 0 !important;
+    font-family: var(--ui-font-heading), 'Sora', sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    font-style: italic;
+    color: var(--text-main) !important;
+}
+.zen-exercise-input:focus {
+    border-bottom-color: var(--cat-accent, #a3c9a8) !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+.zen-exercise-input::placeholder {
+    font-style: italic;
+    color: rgba(94,110,96,0.5);
+    font-weight: 600;
+}
+
+/* ── 9. Header: "base" lowercase ──────────────────────────── */
+/* Überschrieben per HTML-Änderung, aber Fallback via CSS */
+
+/* ── 10. ZNS Readiness Widget Glow ────────────────────────── */
+#readinessWidget {
+    box-shadow: 0 0 20px var(--cat-glow) !important;
+    border: 1px solid var(--cat-glow-10) !important;
+}
+
+/* ── 11. Collapsible Fields (Datum/Equipment/Sätze) ───────── */
+.zen-fields-collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.zen-fields-expanded {
+    max-height: 500px;
+    opacity: 1;
+}
+.zen-fields-toggle {
+    font-family: var(--ui-font-body), 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(94,110,96,0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    transition: color 0.2s ease;
+    background: none;
+    border: none;
+}
+.zen-fields-toggle:hover {
+    color: var(--cat-accent, #a3c9a8);
+}
+
+/* ══════════════════════════════════════════════════════════
+   Screen 3: KI Tools Tab — Fehlende Farb-Overrides
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Emerald → primary ────────────────────────────────────── */
+.text-emerald-400 { color: var(--primary-hex) !important; }
+[class*="bg-emerald-500\/5"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 95%) !important; }
+[class*="bg-emerald-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="hover\:bg-emerald-500\/10"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="border-emerald-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+
+/* ── Green-500 → primary ──────────────────────────────────── */
+.text-green-400 { color: var(--primary-hex) !important; }
+[class*="bg-green-500\/5"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 95%) !important; }
+[class*="bg-green-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="hover\:bg-green-500\/10"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="border-green-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+[class*="border-green-500\/15"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 85%) !important; }
+.bg-green-400 { background-color: var(--primary-hex) !important; }
+
+/* ── Amber → primary ──────────────────────────────────────── */
+.text-amber-400 { color: var(--primary-hex) !important; }
+[class*="bg-amber-500\/5"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 95%) !important; }
+[class*="bg-amber-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="hover\:bg-amber-500\/10"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="border-amber-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+.bg-amber-500 { background-color: var(--primary-hex) !important; }
+
+/* ── Violet (nur 1 Override existiert, Rest fehlt) ────────── */
+[class*="bg-violet-500\/5"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 95%) !important; }
+[class*="bg-violet-500\/10"] { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="hover\:bg-violet-500\/10"]:hover { background-color: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+[class*="border-violet-500\/20"] { border-color: color-mix(in srgb, var(--primary-hex), transparent 80%) !important; }
+.text-violet-400 { color: var(--primary-hex) !important; }
+
+/* ── AI Coach Gradient Fix ────────────────────────────────── */
+[class*="from-indigo-500\/10"] { background: color-mix(in srgb, var(--primary-hex), transparent 90%) !important; }
+
+/* ══════════════════════════════════════════════════════════
+   Carbon Elite — PT Business Mode Overrides
+   ══════════════════════════════════════════════════════════ */
+
+/* PT Nav Dots statt Bars */
+#ptBottomNav [id^="ptNavIndicator-"] {
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+}
+
+/* PT Cards: sharp radius (8px statt 18px) */
+#ptTabsContainer .rounded-2xl {
+    border-radius: 8px !important;
+}
+#ptTabsContainer .rounded-xl {
+    border-radius: 6px !important;
+}
+
+/* PT Font Override: Sora for headings */
+#ptTabsContainer h2,
+#ptTabsContainer h3 {
+    font-family: 'Sora', var(--ui-font-heading), sans-serif !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Screen 2: Analyse Tab — Stitch v8 Card Layout
+   ══════════════════════════════════════════════════════════ */
+
+#mobileCardList {
+    padding: 8px 16px !important;
+    gap: 8px !important;
+}
+
+/* Analyse Mode Tabs (Workouts/PRs/Muskeln) — pill style */
+#dashboardSection .overflow-x-auto button[onclick*="switchAnalyseMode"] {
+    border-radius: 9999px !important;
+    font-family: var(--ui-font-body), 'Outfit', sans-serif !important;
+}
+
+/* Action Grid Cards */
+#analyseActionGrid button {
+    border-radius: 18px !important;
+}
+#analyseActionGrid button:hover {
+    transform: translateY(-1px);
+}
+
+/* Filter pills — capitalize */
+#timelineFiltersContainer button {
+    text-transform: capitalize !important;
+    border-radius: 9999px !important;
+    font-family: var(--ui-font-body), 'Outfit', sans-serif !important;
+}
+
+/* Analyse Tabs + View Switcher: Capitalize statt Uppercase */
+#dashboardSection button[onclick*="switchAnalyseMode"],
+#dashboardSection button[onclick*="switchView"] {
+    text-transform: capitalize !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Screen 4: Menü Tab — Zen Flow
+   ══════════════════════════════════════════════════════════ */
+#tab-menu .rounded-2xl {
+    border-radius: 16px !important;
+    border-color: var(--border-hex) !important;
+}
+#tab-menu .bg-zinc-900\/80 {
+    background: var(--surface-hex) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Session Planner — Kategorie-Farben via :has()
+   ══════════════════════════════════════════════════════════ */
+
+/* KRAFT aktiv → Sage */
+#sessionPlannerModal:has(#sessionTypeKraft:checked) button[onclick="window.saveSession()"] {
+    background: #a3c9a8 !important; color: #000 !important;
+    box-shadow: 0 4px 20px rgba(163,201,168,0.3) !important;
+}
+#sessionPlannerModal:has(#sessionTypeKraft:checked) label[onclick*="addSessionExercise"] {
+    border-color: rgba(163,201,168,0.3) !important; color: #a3c9a8 !important;
+    background: rgba(163,201,168,0.15) !important;
+}
+#sessionPlannerModal:has(#sessionTypeKraft:checked) button[onclick*="saveSessionAsTemplate"] {
+    background: rgba(163,201,168,0.12) !important;
+    border-color: rgba(163,201,168,0.3) !important;
+    color: #a3c9a8 !important;
+}
+
+/* AUSDAUER aktiv → Coral */
+#sessionPlannerModal:has(#sessionTypeAusdauer:checked) button[onclick="window.saveSession()"] {
+    background: #e88a8a !important; color: #000 !important;
+    box-shadow: 0 4px 20px rgba(232,138,138,0.3) !important;
+}
+#sessionPlannerModal:has(#sessionTypeAusdauer:checked) label[onclick*="addSessionExercise"] {
+    border-color: rgba(232,138,138,0.3) !important; color: #e88a8a !important;
+    background: rgba(232,138,138,0.15) !important;
+}
+#sessionPlannerModal:has(#sessionTypeAusdauer:checked) button[onclick*="saveSessionAsTemplate"] {
+    background: rgba(232,138,138,0.12) !important;
+    border-color: rgba(232,138,138,0.3) !important;
+    color: #e88a8a !important;
+}
+
+/* MOBILITY aktiv → Blau */
+#sessionPlannerModal:has(#sessionTypeMobility:checked) button[onclick="window.saveSession()"] {
+    background: #8aafe8 !important; color: #000 !important;
+    box-shadow: 0 4px 20px rgba(138,175,232,0.3) !important;
+}
+#sessionPlannerModal:has(#sessionTypeMobility:checked) label[onclick*="addSessionExercise"] {
+    border-color: rgba(138,175,232,0.3) !important; color: #8aafe8 !important;
+    background: rgba(138,175,232,0.15) !important;
+}
+#sessionPlannerModal:has(#sessionTypeMobility:checked) button[onclick*="saveSessionAsTemplate"] {
+    background: rgba(138,175,232,0.12) !important;
+    border-color: rgba(138,175,232,0.3) !important;
+    color: #8aafe8 !important;
+}
+
+/* Session Speichern: mehr Platz */
+#sessionPlannerModal button[onclick="window.saveSession()"] {
+    padding: 16px 24px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+}
+

@@ -601,7 +601,7 @@ window.setPlanGoal = function(goal) {
 };
 
 window.setPlanDuration = function(weeks) {
-    planDuration = weeks;
+    planDuration = Math.min(weeks, 12);
     document.querySelectorAll('.plan-dur-btn').forEach(b => {
         const active = b.textContent.trim().startsWith(weeks+'');
         b.classList.toggle('border-violet-500', active);
@@ -645,42 +645,53 @@ window.generateTrainingPlan = async function() {
     var btn = document.getElementById('btnGenPlan');
     var btnText = document.getElementById('btnGenPlanText');
     if(btn) btn.disabled = true;
-
-    async function fetchWeek(weekNum, totalWeeks) {
-        var p = planGoal + ' Plan, Woche ' + weekNum + ' von ' + totalWeeks + '. ' + planDays + ' Sessions. ';
-        if(weekNum === 1) p += 'Startphase. ';
-        else if(weekNum === totalWeeks) p += 'Peak/Deload Woche. ';
-        else p += 'Progressive Steigerung. ';
-        p += 'Kurzes JSON: {"week":' + weekNum + ',"focus":"Fokus","sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Bench Press","sets":3,"reps":"8","intensity":"RPE 7","notes":""}]}]}';
-        var res = await fetch('/.netlify/functions/gemini', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:p}]}]})});
-        var raw = await res.text();
-        if(raw.charAt(0) === '<') throw new Error('Server Timeout');
-        var resp = JSON.parse(raw);
-        if(!resp.reply) throw new Error(resp.error || 'Keine Antwort');
-        var obj = null;
-        try { obj = JSON.parse(resp.reply); } catch(e) { console.error('Fehler beim Parsen der KI-Antwort:', e); }
-        if(!obj) {
-            var si = resp.reply.indexOf('{');
-            var ei = resp.reply.lastIndexOf('}');
-            if(si > -1 && ei > si) try { obj = JSON.parse(resp.reply.slice(si, ei+1)); } catch(e) { console.error('Fehler beim Fallback-Parsen der KI-Antwort:', e); }
-        }
-        return obj;
+    if(btnText) btnText.textContent = 'KI erstellt Plan...';
+    var profile = window.userProfile || {};
+    var workouts = (window.workouts || []).filter(function(w) { return w.archived; });
+    var recent = workouts.slice(-15).map(function(w) {
+        return w.date + ': ' + w.exercise + (w.setDetails ? ' (' + w.setDetails.length + 'S, max ' + Math.max.apply(null, w.setDetails.map(function(s) { return parseFloat(s.weight)||0; })) + 'kg)' : '');
+    }).join('; ');
+    var orms = '';
+    try { var od = JSON.parse(localStorage.getItem('base_1rm_data') || '{}'); if(Object.keys(od).length > 0) orms = Object.entries(od).map(function(e) { return e[0] + ': ' + e[1] + 'kg'; }).join(', '); } catch(e) {}
+    var totalWeeks = Math.min(planDuration || 6, 12);
+    function fetchSingleWeek(weekNum) {
+        var phase = '';
+        if(weekNum === 1) phase = 'Aufbauphase — moderate Intensitaet, Technik-Fokus.';
+        else if(weekNum === totalWeeks) phase = 'Deload-Woche — 50% Volumen, gleiche Intensitaet.';
+        else if(weekNum <= Math.ceil(totalWeeks * 0.4)) phase = 'Aufbauphase — Volumen steigern.';
+        else if(weekNum <= Math.ceil(totalWeeks * 0.8)) phase = 'Steigerung — progressive Overload, hoehere Intensitaet.';
+        else phase = 'Peak-Phase — maximale Intensitaet.';
+        var p = planGoal + ' Plan. Woche ' + weekNum + ' von ' + totalWeeks + '. ' + planDays + ' Trainingstage. ' + phase + ' ';
+        p += 'Athlet: ' + (profile.experience || 'Anfaenger') + ', ' + (profile.weight || '?') + 'kg. ';
+        if(orms) p += '1RMs: ' + orms + '. ';
+        if(profile.injuries && profile.injuries.length > 0) p += 'Verletzungen: ' + profile.injuries.join(', ') + '. ';
+        p += 'Letzte Workouts: ' + (recent || 'keine Daten') + '. ';
+        p += 'Antworte NUR mit kompaktem JSON: {"week":' + weekNum + ',"focus":"kurzer Fokus","sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Uebung","sets":3,"reps":"8-10","intensity":"RPE 7","notes":""}]}]}';
+        return fetch('/.netlify/functions/gemini', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
+        }).then(function(res) { return res.text(); }).then(function(raw) {
+            if(raw.charAt(0) === '<') return null;
+            var resp = JSON.parse(raw);
+            if(!resp.reply) return null;
+            var obj = null;
+            try { obj = JSON.parse(resp.reply); } catch(e) {
+                var si = resp.reply.indexOf('{'); var ei = resp.reply.lastIndexOf('}');
+                if(si > -1 && ei > si) try { obj = JSON.parse(resp.reply.slice(si, ei+1)); } catch(e2) {}
+            }
+            return obj;
+        }).catch(function() { return null; });
     }
-
     try {
-        var allWeeks = [];
-        for(var w = 1; w <= planDuration; w++) {
-            if(btnText) btnText.textContent = 'Woche ' + w + '/' + planDuration + '...';
-            var weekData = await fetchWeek(w, planDuration);
-            if(weekData) allWeeks.push(weekData);
-        }
-        if(allWeeks.length === 0) throw new Error('Keine Wochen generiert');
-        var plan = {
-            planName: planDuration + '-Wochen ' + planGoal,
-            goal: planGoal,
-            weeks: allWeeks,
-            progressionNotes: 'Progressive Steigerung ueber ' + planDuration + ' Wochen mit Deload in der letzten Woche.'
-        };
+        if(btnText) btnText.textContent = 'Generiere ' + totalWeeks + ' Wochen...';
+        var promises = [];
+        for(var w = 1; w <= totalWeeks; w++) promises.push(fetchSingleWeek(w));
+        var results = await Promise.all(promises);
+        var allWeeks = results.filter(function(w) { return w !== null; });
+        allWeeks.sort(function(a, b) { return (a.week || 0) - (b.week || 0); });
+        if(allWeeks.length === 0) throw new Error('Plan konnte nicht generiert werden. Bitte erneut versuchen.');
+        if(allWeeks.length < totalWeeks) window.showToast(allWeeks.length + ' von ' + totalWeeks + ' Wochen generiert');
+        var plan = { planName: totalWeeks + '-Wochen ' + planGoal, goal: planGoal, weeks: allWeeks, progressionNotes: 'Progressiver ' + totalWeeks + '-Wochen Plan mit Periodisierung und Deload.' };
         _generatedPlan = plan;
         window.renderTrainingPlan(plan);
     } catch(e) {
@@ -908,4 +919,101 @@ window._addAllRecsToWorkout = function() {
     });
     window.toggleModal('exerciseRecModal');
     window.showToast(window._exerciseRecs.length + ' Übungen übernommen ✅');
+};
+
+// ============================================================
+// SMART WORKOUT GENERATOR — Evidence-Based KI
+// ============================================================
+
+window._SMART_WORKOUT_SYSTEM_PROMPT = 'Du bist ein Sportwissenschaftler mit 15 Jahren Erfahrung in der Trainingsplanung.\n\nDEINE REGELN:\n\nVOLUMEN (Schoenfeld 2017): 10-20 Sätze/Muskelgruppe/Woche. Max 10 Sätze/Muskelgruppe/Session.\nFREQUENZ (Schoenfeld 2016): Jede Muskelgruppe 2x/Woche, 48-72h Pause.\nINTENSITÄT: Hypertrophie 65-80% 1RM RPE 7-9, Kraft 80-95% RPE 8-10.\nÜBUNGSAUSWAHL: 60-70% Compound, 30-40% Isolation. Schwerste Compound zuerst.\nPROGRESSIVE OVERLOAD: +2.5kg Oberkörper, +5kg Unterkörper wenn Ziel-Wdh erreicht.\nBALANCE: Push:Pull = 1:1, Ober:Unterkörper = 1:1/Woche.\n\nAUSGABE: NUR JSON Array, kein Text davor/danach.\nFormat: [{"exercise":"Bankdrücken","sets":4,"reps":"8-10","weight":80,"rest":"90s","note":"Coaching-Cue"}]\nGewichte MÜSSEN auf den echten Daten des Athleten basieren.';
+
+window.generateSmartWorkout = async function() {
+    if(window.checkOnlineForAI && !window.checkOnlineForAI()) return;
+    if(window.aiGate && !(await window.aiGate())) return;
+    var workouts = window.workouts || [];
+    var archived = workouts.filter(function(w) { return w.archived; });
+    if(archived.length < 3) { window.showToast('Tracke mindestens 3 Workouts damit die KI planen kann'); return; }
+    var profile = window.userProfile || {};
+    var recent = archived.slice(-30).map(function(w) {
+        var detail = '';
+        if(w.setDetails && w.setDetails.length > 0) {
+            var maxW = Math.max.apply(null, w.setDetails.map(function(s) { return parseFloat(s.weight) || 0; }));
+            var totalVol = w.setDetails.reduce(function(sum, s) { return sum + (parseFloat(s.reps)||0) * (parseFloat(s.weight)||0); }, 0);
+            detail = w.setDetails.length + ' Sets, max ' + maxW + 'kg, Vol ' + Math.round(totalVol) + 'kg';
+        }
+        return w.date + ' | ' + w.exercise + ' | ' + (w.category || 'strength') + ' | ' + detail;
+    }).join('\n');
+    var weekAgo = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
+    var thisWeek = archived.filter(function(w) { return w.date >= weekAgo; }).map(function(w) { return w.exercise; });
+    var twoDaysAgo = new Date(Date.now() - 2*86400000).toISOString().split('T')[0];
+    var last48h = archived.filter(function(w) { return w.date >= twoDaysAgo; }).map(function(w) { return w.exercise; });
+    var dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    var today = dayNames[new Date().getDay()];
+    var userPrompt = 'Erstelle mein Workout für heute (' + today + ').\n\nATHLETEN-PROFIL:\nAlter: ' + (profile.age || '?') + '\nGewicht: ' + (profile.weight || '?') + ' kg\nLevel: ' + (profile.experience || 'Anfänger') + '\n\nTRAININGSHISTORIE (letzte 30):\n' + recent + '\n\nDIESE WOCHE TRAINIERT:\n' + (thisWeek.length > 0 ? thisWeek.join(', ') : 'Noch nichts') + '\n\nLETZTE 48H:\n' + (last48h.length > 0 ? last48h.join(', ') : 'Nichts') + '\n\nErstelle 5-7 Übungen. JSON Array.';
+    window.showToast('Dein Workout wird geplant...');
+    var btn = document.getElementById('smartWorkoutBtn');
+    if(btn) btn.style.opacity = '0.5';
+    try {
+        var res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: userPrompt, systemPrompt: window._SMART_WORKOUT_SYSTEM_PROMPT })
+        });
+        var data = await res.json();
+        var text = '';
+        if(data.parts) { for(var i = data.parts.length - 1; i >= 0; i--) { if(data.parts[i].text) { text = data.parts[i].text; break; } } }
+        else if(data.reply) text = data.reply;
+        else if(data.text) text = data.text;
+        var jsonMatch = text.match(/\[[\s\S]*?\]/);
+        if(!jsonMatch) { window.showToast('Workout konnte nicht erstellt werden'); if(btn) btn.style.opacity = '1'; return; }
+        var exercises = JSON.parse(jsonMatch[0]);
+        if(btn) btn.style.opacity = '1';
+        window._showSmartWorkoutResult(exercises);
+    } catch(e) {
+        console.error('Smart Workout Error:', e);
+        window.showToast('Fehler: ' + e.message);
+        if(btn) btn.style.opacity = '1';
+    }
+};
+
+window._showSmartWorkoutResult = function(exercises) {
+    var html = '<div class="space-y-2 max-h-[60vh] overflow-y-auto" style="-webkit-overflow-scrolling:touch">';
+    exercises.forEach(function(ex, i) {
+        html += '<div class="p-3 rounded-xl" style="background:var(--surface-hex);border:1px solid var(--border-hex)">' +
+            '<div class="flex items-center justify-between">' +
+            '<p class="text-sm font-black text-white">' + (i+1) + '. ' + window._escapeHtml(ex.exercise || '') + '</p>' +
+            '<span class="text-[10px] font-bold" style="color:var(--primary-hex)">' + (ex.sets||3) + ' x ' + window._escapeHtml(String(ex.reps||'10')) + (ex.weight ? ' @ ' + ex.weight + 'kg' : '') + '</span>' +
+            '</div>' +
+            (ex.rest ? '<span class="text-[9px] text-zinc-600">Pause: ' + window._escapeHtml(ex.rest) + '</span>' : '') +
+            (ex.note ? '<p class="text-[10px] text-zinc-400 mt-1 italic">' + window._escapeHtml(ex.note) + '</p>' : '') +
+            '</div>';
+    });
+    html += '</div>';
+    window.showModal('Dein Workout', html, true, function() {
+        var today = new Date().toISOString().split('T')[0];
+        exercises.forEach(function(ex) {
+            var sets = [];
+            var numSets = parseInt(ex.sets) || 3;
+            var reps = String(ex.reps || '10');
+            var targetReps = parseInt(reps.split('-')[0]) || 10;
+            for(var s = 0; s < numSets; s++) sets.push({ reps: targetReps, weight: ex.weight || '' });
+            window.workouts.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2,5),
+                date: today, exercise: ex.exercise, category: 'strength',
+                setDetails: sets, archived: false
+            });
+        });
+        window.saveWorkoutsForCurrentClient();
+        window.renderTable();
+        window.showToast('Workout geladen — viel Erfolg!');
+    });
+};
+
+// Smart Workout Button Sichtbarkeit
+window._updateSmartWorkoutVisibility = function() {
+    var btn = document.getElementById('smartWorkoutBtn');
+    if(!btn) return;
+    var archived = (window.workouts || []).filter(function(w) { return w.archived; });
+    if(archived.length >= 3) btn.classList.remove('hidden');
+    else btn.classList.add('hidden');
 };

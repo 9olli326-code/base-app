@@ -1,65 +1,106 @@
+functionsDirectory = "/Users/oliverangermann/Desktop/Base App V2 Beta/netlify/functions"
+functionsDirectoryOrigin = "config-v1"
+headersOrigin = "config"
+redirectsOrigin = "config"
+plugins = []
+
 [build]
-  publish = "."
-  functions = "netlify/functions"
+publish = "/Users/oliverangermann/Desktop/Base App V2 Beta"
+publishOrigin = "config"
+functions = "/Users/oliverangermann/Desktop/Base App V2 Beta/netlify/functions"
+
+  [build.environment]
+
+  [build.processing]
+
+    [build.processing.css]
+
+    [build.processing.html]
+
+    [build.processing.images]
+
+    [build.processing.js]
+
+  [build.services]
 
 [functions]
+
+  [functions.gemini]
+  timeout = 26
+
+  [functions.strava-token]
+  timeout = 26
+
+  [functions.stripe-checkout]
+  timeout = 15
+
+  [functions.stripe-webhook]
+  timeout = 15
+
+  [functions."*"]
+  external_node_modules = [
+    "web-push",
+    "@netlify/functions",
+    "stripe"
+  ]
   node_bundler = "esbuild"
-  external_node_modules = ["web-push", "@netlify/functions", "stripe"]
 
-[functions."gemini"]
-  timeout = 26
+[[headers]]
+for = "/*.png"
 
-[functions."strava-token"]
-  timeout = 26
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+  Access-Control-Allow-Origin = "*"
 
-[functions."stripe-checkout"]
-  timeout = 15
+[[headers]]
+for = "/*.jpg"
 
-[functions."stripe-webhook"]
-  timeout = 15
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+  Access-Control-Allow-Origin = "*"
+
+[[headers]]
+for = "/*.woff2"
+
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/*.html"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+  X-Frame-Options = "DENY"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://js-de.sentry-cdn.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com https://*.googleapis.com blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://generativelanguage.googleapis.com https://www.strava.com https://js-de.sentry-cdn.com https://www.google-analytics.com wss://*.firebaseio.com; frame-src 'none'; object-src 'none'; base-uri 'self'"
+
+[[headers]]
+for = "/sw.js"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/manifest.json"
+
+  [headers.values]
+  Cache-Control = "public, max-age=3600"
+
+[[headers]]
+for = "/js/*.js"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
 
 [[redirects]]
-  from = "/"
-  to = "/index.html"
-  status = 200
+from = "/"
+to = "/index.html"
+status = 200
+force = false
 
-[[headers]]
-  for = "/*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Access-Control-Allow-Origin = "*"
+  [redirects.query]
 
-[[headers]]
-  for = "/*.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Access-Control-Allow-Origin = "*"
+  [redirects.conditions]
 
-[[headers]]
-  for = "/*.woff2"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://js-de.sentry-cdn.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com https://*.googleapis.com blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://generativelanguage.googleapis.com https://www.strava.com https://js-de.sentry-cdn.com https://www.google-analytics.com wss://*.firebaseio.com; frame-src 'none'; object-src 'none'; base-uri 'self'"
-
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-[[headers]]
-  for = "/manifest.json"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-
-[[headers]]
-  for = "/js/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+  [redirects.headers]

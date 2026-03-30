@@ -39,10 +39,10 @@ exports.handler = async function(event) {
         }
 
         // Fallback wenn noch kein Dokument existiert
-        return { statusCode: 200, headers, body: JSON.stringify({ count: 52 }) };
+        return { statusCode: 200, headers, body: JSON.stringify({ count: 0 }) };
 
     } catch(e) {
         console.error('usercount error:', e);
-        return { statusCode: 200, headers, body: JSON.stringify({ count: 52 }) };
+        return { statusCode: 200, headers, body: JSON.stringify({ count: 0 }) };
     }
 };

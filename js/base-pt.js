@@ -1,3 +1,184 @@
+// ══════════════════════════════════════════════════════════════
+// DESIGN MORPHING SYSTEM
+// Aktiviert durch window.DESIGN_MORPH_ACTIVE (app.html)
+// Bestehender Code wird NICHT verändert.
+// Rollback: DESIGN_MORPH_ACTIVE = false oder git checkout main
+// ══════════════════════════════════════════════════════════════
+
+window.MODE_THEMES = {
+    athlete: {
+        // "Zen Flow" — organisch, spacious, gedämpfte Sage-Töne
+        fontHeading: 'Sora',
+        fontBody: 'Outfit',
+        radius: '18px',
+        radiusInner: '12px',
+        radiusBtn: '16px',
+        shadow: '0 8px 32px -8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.02)',
+        cardPad: '20px',
+        gap: '10px',
+        labelSize: '9px',
+        labelSpacing: '0.18em',
+        inputPad: '13px 16px',
+        inputSize: '14px',
+        headingWeight: '700',
+        headingSpacing: '0.01em',
+        bodyWeight: '400',
+        btnPad: '16px',
+        // Farben: null = bestehende Farben beibehalten (User-Theme / Standard)
+        primary: null,
+        secondary: null,
+        bg: null,
+        surface: null,
+        innerBg: null,
+        border: null,
+        textMain: null,
+        textMuted: null
+    },
+    pt: {
+        // "Carbon Elite" — kompakt, premium, Gold-Akzent
+        fontHeading: 'Sora',
+        fontBody: 'Outfit',
+        radius: '8px',
+        radiusInner: '5px',
+        radiusBtn: '6px',
+        shadow: '0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
+        cardPad: '16px',
+        gap: '6px',
+        labelSize: '10px',
+        labelSpacing: '0.1em',
+        inputPad: '10px 12px',
+        inputSize: '13px',
+        headingWeight: '800',
+        headingSpacing: '-0.02em',
+        bodyWeight: '500',
+        btnPad: '13px',
+        // Farben: PT bekommt eigene Farbwelt
+        primary: '#d4af37',
+        secondary: '#b8941e',
+        bg: '#0a0a0a',
+        surface: '#141414',
+        innerBg: '#0e0e0e',
+        border: '#222222',
+        textMain: '#fafafa',
+        textMuted: '#555555'
+    }
+};
+
+// ── Helper: Primary-Farbe aus CSS-Variable ──
+window._getPrimaryHex = function() {
+    return getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-hex').trim() || '#a3c9a8';
+};
+
+// ── Gespeicherte User-Farben für Restore nach PT → Athlete ──
+window._savedMorphColors = null;
+
+window._applyModeTheme = function(modeKey) {
+    if (!window.DESIGN_MORPH_ACTIVE) return;
+    var theme = window.MODE_THEMES[modeKey];
+    if (!theme) return;
+    var root = document.documentElement;
+
+    // User-Theme sichern beim ersten Wechsel zu PT
+    if (modeKey === 'pt' && !window._savedMorphColors) {
+        var cs = getComputedStyle(root);
+        window._savedMorphColors = {
+            primary: cs.getPropertyValue('--primary-hex').trim(),
+            secondary: cs.getPropertyValue('--secondary-hex').trim(),
+            bg: cs.getPropertyValue('--bg-hex').trim(),
+            surface: cs.getPropertyValue('--surface-hex').trim(),
+            innerBg: cs.getPropertyValue('--inner-bg-hex').trim(),
+            border: cs.getPropertyValue('--border-hex').trim(),
+            textMain: cs.getPropertyValue('--text-main').trim(),
+            textMuted: cs.getPropertyValue('--text-muted').trim(),
+            radius: cs.getPropertyValue('--ui-radius').trim(),
+            shadow: cs.getPropertyValue('--ui-shadow').trim()
+        };
+    }
+
+    // Farben setzen (nur wenn theme einen Wert hat, sonst User-Theme beibehalten)
+    if (theme.primary) root.style.setProperty('--primary-hex', theme.primary);
+    if (theme.secondary) root.style.setProperty('--secondary-hex', theme.secondary);
+    if (theme.bg) root.style.setProperty('--bg-hex', theme.bg);
+    if (theme.surface) root.style.setProperty('--surface-hex', theme.surface);
+    if (theme.innerBg) root.style.setProperty('--inner-bg-hex', theme.innerBg);
+    if (theme.border) root.style.setProperty('--border-hex', theme.border);
+    if (theme.textMain) root.style.setProperty('--text-main', theme.textMain);
+    if (theme.textMuted) root.style.setProperty('--text-muted', theme.textMuted);
+
+    // Fonts (in beiden Modi gleich: Sora + Outfit)
+    root.style.setProperty('--ui-font-heading', '"' + theme.fontHeading + '", sans-serif');
+    root.style.setProperty('--ui-font-body', '"' + theme.fontBody + '", sans-serif');
+
+    // Layout-Token
+    root.style.setProperty('--ui-radius', theme.radius);
+    root.style.setProperty('--mode-radius', theme.radius);
+    root.style.setProperty('--mode-radius-inner', theme.radiusInner);
+    root.style.setProperty('--mode-radius-btn', theme.radiusBtn);
+    root.style.setProperty('--ui-shadow', theme.shadow);
+    root.style.setProperty('--mode-shadow', theme.shadow);
+    root.style.setProperty('--mode-card-pad', theme.cardPad);
+    root.style.setProperty('--mode-gap', theme.gap);
+    root.style.setProperty('--mode-label-size', theme.labelSize);
+    root.style.setProperty('--mode-label-spacing', theme.labelSpacing);
+    root.style.setProperty('--mode-input-pad', theme.inputPad);
+    root.style.setProperty('--mode-input-size', theme.inputSize);
+    root.style.setProperty('--mode-heading-weight', theme.headingWeight);
+    root.style.setProperty('--mode-heading-spacing', theme.headingSpacing);
+    root.style.setProperty('--mode-body-weight', theme.bodyWeight);
+    root.style.setProperty('--mode-btn-pad', theme.btnPad);
+};
+
+window._restoreMorphTheme = function() {
+    if (!window.DESIGN_MORPH_ACTIVE) return;
+    var root = document.documentElement;
+
+    // Gespeicherte User-Farben wiederherstellen
+    if (window._savedMorphColors) {
+        var s = window._savedMorphColors;
+        root.style.setProperty('--primary-hex', s.primary);
+        root.style.setProperty('--secondary-hex', s.secondary);
+        root.style.setProperty('--bg-hex', s.bg);
+        root.style.setProperty('--surface-hex', s.surface);
+        root.style.setProperty('--inner-bg-hex', s.innerBg);
+        root.style.setProperty('--border-hex', s.border);
+        root.style.setProperty('--text-main', s.textMain);
+        root.style.setProperty('--text-muted', s.textMuted);
+        root.style.setProperty('--ui-radius', s.radius);
+        root.style.setProperty('--ui-shadow', s.shadow);
+        window._savedMorphColors = null;
+    }
+
+    // Falls Design KI Theme in localStorage → drüber anwenden
+    var saved = localStorage.getItem('beastmode_v2_theme');
+    if (saved) {
+        try {
+            var th = JSON.parse(saved);
+            if (th.primary) root.style.setProperty('--primary-hex', th.primary);
+            if (th.secondary) root.style.setProperty('--secondary-hex', th.secondary);
+            if (th.bg) root.style.setProperty('--bg-hex', th.bg);
+            if (th.surface) root.style.setProperty('--surface-hex', th.surface);
+            if (th.innerBg) root.style.setProperty('--inner-bg-hex', th.innerBg);
+            if (th.border) root.style.setProperty('--border-hex', th.border);
+            if (th.textMain) root.style.setProperty('--text-main', th.textMain);
+            if (th.textMuted) root.style.setProperty('--text-muted', th.textMuted);
+            if (th.radius) root.style.setProperty('--ui-radius', th.radius);
+            if (th.shadow) root.style.setProperty('--ui-shadow', th.shadow);
+            if (th.blur) root.style.setProperty('--ui-blur', th.blur);
+            if (th.fontHeading || th.fontBody) {
+                var fontH = th.fontHeading || 'Sora';
+                var fontB = th.fontBody || 'Outfit';
+                root.style.setProperty('--ui-font-heading', '"' + fontH + '", sans-serif');
+                root.style.setProperty('--ui-font-body', '"' + fontB + '", sans-serif');
+            }
+        } catch (e) {
+            console.error('Design Morph restore error:', e);
+        }
+    }
+};
+
+// ══ Ende Design Morphing System ══════════════════════════════
+
 // --- PT MODUS V2 ---
 // ============================================================
 // PT BUSINESS MODE V2 — Data Layer, Session Planer, Tagesansicht
@@ -73,6 +254,9 @@ return { total: cw.length, today: sessionsToday, week: sessionsWeek };
 
 // ── PT MODE ACTIVATE / DEACTIVATE ──────────────────────────
 window.activatePTMode = function() {
+    // Design Morph: Carbon Elite Theme
+    if (window._applyModeTheme) window._applyModeTheme('pt');
+    if (window._applyCategoryTheme) window._applyCategoryTheme(window.currentCategory);
 const athleteNav = document.getElementById('bottomNav');
 const ptNav = document.getElementById('ptBottomNav');
 if(athleteNav) athleteNav.classList.add('hidden');
@@ -85,9 +269,29 @@ if(ptTabs) ptTabs.classList.remove('hidden');
 });
 window.switchPTTab('clients');
 window._refreshLucide();
+if(typeof window.updateFloatingModeBtn === 'function') window.updateFloatingModeBtn();
+// PT First-Use Onboarding
+if(!localStorage.getItem('base_pt_onboarded')) {
+    localStorage.setItem('base_pt_onboarded', '1');
+    setTimeout(function() {
+        window.showModal(
+            'Willkommen im PT Modus!',
+            'Lege deinen ersten Kunden an und plane die erste Session. ' +
+            'Nutze die KI Tools für Trainingspläne und Wochenberichte.',
+            true,
+            function() { window.addNewClient(); }
+        );
+        var btn = document.getElementById('modalBtnConfirm');
+        if(btn) btn.textContent = 'Ersten Kunden anlegen';
+    }, 500);
+}
 };
 
 window.deactivatePTMode = function() {
+    // Design Morph: Zen Flow + User-Farben wiederherstellen
+    if (window._applyModeTheme) window._applyModeTheme('athlete');
+    if (window._restoreMorphTheme) window._restoreMorphTheme();
+    if (window._applyCategoryTheme) window._applyCategoryTheme(window.currentCategory);
 const athleteNav = document.getElementById('bottomNav');
 const ptNav = document.getElementById('ptBottomNav');
 if(athleteNav) athleteNav.classList.remove('hidden');
@@ -95,11 +299,27 @@ if(ptNav) ptNav.classList.add('hidden');
 const ptTabs = document.getElementById('ptTabsContainer');
 if(ptTabs) ptTabs.classList.add('hidden');
 window.switchTab('training');
+if(typeof window.updateFloatingModeBtn === 'function') window.updateFloatingModeBtn();
+};
+
+// ── DAUER FORMATIERUNG ──────────
+window._formatDuration = function(val) {
+    if(!val && val !== 0) return '?';
+    var totalSec = parseInt(val) || 0;
+    if(totalSec < 300) totalSec = totalSec * 60; // Abwärtskompatibilität
+    var m = Math.floor(totalSec / 60);
+    var s = totalSec % 60;
+    return s > 0 ? m + ':' + String(s).padStart(2,'0') + ' min' : m + ' min';
 };
 
 // ── LUCIDE REFRESH (DRY — called from one place) ──────────
+var _lucideTimer = null;
 window._refreshLucide = function() {
-if(window.lucide) setTimeout(() => lucide.createIcons(), 40);
+    if(_lucideTimer) clearTimeout(_lucideTimer);
+    _lucideTimer = setTimeout(function() {
+        if(window.lucide) window.lucide.createIcons();
+        _lucideTimer = null;
+    }, 50);
 };
 
 // ── PT TAB SWITCHING ───────────────────────────────────────
@@ -117,10 +337,11 @@ const panel = document.getElementById('pt-tab-' + tab);
 if(panel) panel.classList.remove('hidden');
 const activeBtn = document.getElementById('ptNavBtn-' + tab);
 const activeIndicator = document.getElementById('ptNavIndicator-' + tab);
-if(activeBtn) activeBtn.style.color = '#6366f1';
+var _a = window._getPrimaryHex();
+if(activeBtn) activeBtn.style.color = _a;
 if(activeIndicator) activeIndicator.style.opacity = '1';
 const activeIcon = activeBtn?.querySelector('div');
-if(activeIcon) activeIcon.style.background = 'rgba(99,102,241,0.15)';
+if(activeIcon) activeIcon.style.background = _a + '26';
 if(tab === 'clients') window.renderPTClientsDashboard();
 if(tab === 'plans') window.renderDayView();
 if(tab === 'mytraining') window.renderPTMyTraining();
@@ -164,13 +385,13 @@ listEl.innerHTML = window.clients.map(c => {
     const initials = window._escapeHtml(c.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2));
     const safeName = window._escapeHtml(c.name);
     const profile = window.getClientProfile(c.id);
-    const goalTag = profile.goal ? `<span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase" style="background:rgba(99,102,241,0.1);color:rgba(99,102,241,0.7)">${window._escapeHtml(profile.goal)}</span>` : '';
+    const goalTag = profile.goal ? `<span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase" style="background:color-mix(in srgb,var(--primary-hex),transparent 90%);color:var(--primary-hex)">${window._escapeHtml(profile.goal)}</span>` : '';
 
     return `<div role="button" tabindex="0" aria-label="${window._escapeHtml(c.name)} Details öffnen" onclick="window.openClientDetail('${c.id}')"
         class="p-4 rounded-2xl cursor-pointer transition-all hover:opacity-90 active:scale-[0.98] pointer-events-auto"
         style="background:var(--surface-hex);border:1px solid var(--border-hex)">
         <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0 text-white" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">${initials}</div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0 text-white" style="background:var(--primary-hex)">${initials}</div>
             <div class="flex-1 min-w-0">
                 <p class="font-black text-white text-sm truncate">${safeName}</p>
                 <p class="text-[10px] font-bold uppercase tracking-widest truncate" style="color:var(--text-muted)">${lastStr}</p>
@@ -205,7 +426,7 @@ window.renderDayView();
 window.renderPTMyTraining = function() {
 window.switchMode('personal');
 const inner = document.getElementById('ptMyTrainingInner');
-if(inner) inner.innerHTML = '<p class="text-center text-[10px] font-bold uppercase tracking-widest py-4" style="color:rgba(99,102,241,0.6)">Persönlicher Training-Modus aktiv</p>';
+if(inner) inner.innerHTML = '<p class="text-center text-[10px] font-bold uppercase tracking-widest py-4" style="color:var(--primary-hex)">Persönlicher Training-Modus aktiv</p>';
 window.switchTab('training');
 window.deactivatePTMode();
 window.showToast('💪 Persönlicher Modus — tippe auf KI Tools um zurückzukehren');
@@ -239,6 +460,7 @@ if(mode === 'pt') {
     if(window.listenToWorkouts) window.listenToWorkouts();
 }
 window._updateModeSwitchPill();
+if(typeof window.updateFloatingModeBtn === 'function') window.updateFloatingModeBtn();
 };
 
 // ── MODE SWITCH PILL ──────────────────────────────────────
@@ -250,10 +472,12 @@ window._updateModeSwitchPill = function() {
     pill.classList.remove('hidden'); pill.classList.add('inline-flex');
     if(window.currentMode === 'pt') {
         pill.textContent = 'ICH';
-        pill.style.cssText = 'background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);color:#06b6d4;font-family:DM Sans,sans-serif;-webkit-tap-highlight-color:transparent';
+        var _pc = window._getPrimaryHex();
+        pill.style.cssText = 'background:' + _pc + '1a;border:1px solid ' + _pc + '33;color:' + _pc + ';font-family:var(--ui-font-body);-webkit-tap-highlight-color:transparent';
     } else {
         pill.textContent = 'PT';
-        pill.style.cssText = 'background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:#6366f1;font-family:DM Sans,sans-serif;-webkit-tap-highlight-color:transparent';
+        var _pc2 = window._getPrimaryHex();
+        pill.style.cssText = 'background:' + _pc2 + '1a;border:1px solid ' + _pc2 + '33;color:' + _pc2 + ';font-family:var(--ui-font-body);-webkit-tap-highlight-color:transparent';
     }
 };
 
@@ -622,8 +846,9 @@ for(let d = 1; d <= daysInMonth; d++) {
     let bg = 'transparent';
     let border = 'transparent';
     let textColor = 'var(--text-muted)';
-    if(isSelected) { bg = 'rgba(99,102,241,0.2)'; border = 'rgba(99,102,241,0.5)'; textColor = '#6366f1'; }
-    else if(isToday) { bg = 'rgba(99,102,241,0.08)'; border = 'rgba(99,102,241,0.2)'; textColor = '#fff'; }
+    var _cc = window._getPrimaryHex();
+    if(isSelected) { bg = _cc + '33'; border = _cc + '80'; textColor = _cc; }
+    else if(isToday) { bg = _cc + '14'; border = _cc + '33'; textColor = '#fff'; }
     else if(daySessions.length > 0) { textColor = '#fff'; }
 
     const dots = (hasKraft ? '<span style="width:3px;height:3px;border-radius:50%;background:#06b6d4;display:inline-block"></span>' : '')
@@ -671,7 +896,7 @@ listEl.innerHTML = daySessions.map(s => {
         <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${t.bg};border:1px solid ${t.border}"><i data-lucide="${t.icon}" class="w-3.5 h-3.5 pointer-events-none" style="color:${t.color}"></i></div>
         <div class="flex-1 min-w-0">
             <p class="text-white font-black text-sm truncate">${window._escapeHtml(s.focus || s.type)}</p>
-            <p class="text-[10px] font-bold" style="color:var(--text-muted)">${s.time} · ${s.duration}min${s.exercises?.length ? ' · ' + s.exercises.length + ' Übungen' : ''}</p>
+            <p class="text-[10px] font-bold" style="color:var(--text-muted)">${s.time} · ${window._formatDuration(s.duration)}${s.exercises?.length ? ' · ' + s.exercises.length + ' Übungen' : ''}</p>
         </div>
     </div>`;
 }).join('');
@@ -686,8 +911,9 @@ window.switchClientTab = function(tab) {
     if(panel) panel.classList.toggle('hidden', t !== tab);
     if(btn) {
         if(t === tab) {
-            btn.style.background = 'rgba(99,102,241,0.15)';
-            btn.style.color = '#6366f1';
+            var _tc = window._getPrimaryHex();
+            btn.style.background = _tc + '26';
+            btn.style.color = _tc;
         } else {
             btn.style.background = 'transparent';
             btn.style.color = 'var(--text-muted)';
@@ -712,20 +938,49 @@ let _ptDayOffset = 0;
 
 window.setSessionType = function(type) {
 _sessionType = type;
-const typeColors = { kraft: {bg:'rgba(6,182,212,0.08)',border:'rgba(6,182,212,0.3)',color:'#06b6d4'}, ausdauer: {bg:'rgba(239,68,68,0.08)',border:'rgba(239,68,68,0.3)',color:'#ef4444'}, mobility: {bg:'rgba(16,185,129,0.08)',border:'rgba(16,185,129,0.3)',color:'#10b981'} };
-document.querySelectorAll('.session-type-btn').forEach(btn => {
-    btn.style.borderColor = 'rgba(63,63,70,1)';
-    btn.style.background = 'rgba(24,24,27,1)';
-    btn.style.color = '#a1a1aa';
+var typeColors = { kraft: {bg:'rgba(6,182,212,0.08)',border:'rgba(6,182,212,0.3)',color:'#06b6d4'}, ausdauer: {bg:'rgba(239,68,68,0.08)',border:'rgba(239,68,68,0.3)',color:'#ef4444'}, mobility: {bg:'rgba(16,185,129,0.08)',border:'rgba(16,185,129,0.3)',color:'#10b981'} };
+// JS Fallback für visuelle Hervorhebung (CSS :has() übernimmt primär)
+var labels = document.querySelectorAll('#sessionTypeBtns label');
+labels.forEach(function(label) {
+    label.style.borderColor = '';
+    label.style.background = '';
+    label.style.color = '';
 });
-const btns = document.querySelectorAll('.session-type-btn');
-const idx = { kraft:0, ausdauer:1, mobility:2 }[type];
-if(btns[idx]) {
-    const c = typeColors[type];
-    btns[idx].style.borderColor = c.border;
-    btns[idx].style.background = c.bg;
-    btns[idx].style.color = c.color;
-}
+var radio = document.getElementById('sessionType' + type.charAt(0).toUpperCase() + type.slice(1));
+if(radio) radio.checked = true;
+// QuickPicks und Übungen aktualisieren
+if(window._renderSessionQuickPicks) window._renderSessionQuickPicks();
+if(window._renderSessionExercises) window._renderSessionExercises();
+};
+
+var _sessionQuickPicks = {
+    kraft: ['Bankdrücken', 'Kniebeuge', 'Kreuzheben', 'Schulterdrücken', 'Rudern', 'Klimmzüge', 'Dips', 'Bizeps Curls', 'Trizeps', 'Beinpresse'],
+    ausdauer: ['Laufen', 'Radfahren', 'Schwimmen', 'Rudergerät', 'HIIT Intervalle', 'Seilspringen', 'Burpees', 'Mountain Climbers', 'Box Jumps', 'Kettlebell Swings'],
+    mobility: ['Hip Opener', 'Thoracic Rotation', 'Hamstring Stretch', 'Foam Rolling', 'Cat-Cow', 'Pigeon Pose', 'Shoulder Dislocates', 'Ankle Mobilisation', 'Yoga Flow', 'Lacrosse Ball']
+};
+
+window._renderSessionQuickPicks = function() {
+    var container = document.getElementById('sessionQuickPicks');
+    if(!container) return;
+    var picks = _sessionQuickPicks[_sessionType] || _sessionQuickPicks.kraft;
+    var existing = _sessionExercises.map(function(e) { return (typeof e === 'object' ? e.name : e).toLowerCase(); });
+    var filtered = picks.filter(function(p) { return existing.indexOf(p.toLowerCase()) === -1; });
+    var color = _sessionType === 'kraft' ? '6,182,212' : _sessionType === 'ausdauer' ? '239,68,68' : '16,185,129';
+    var hex = _sessionType === 'kraft' ? '#06b6d4' : _sessionType === 'ausdauer' ? '#ef4444' : '#10b981';
+    container.innerHTML = filtered.slice(0, 6).map(function(pick) {
+        return '<button type="button" onclick="window.addQuickPick(\'' + window._escapeHtml(pick).replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider cursor-pointer pointer-events-auto transition-all" style="background:rgba(' + color + ',0.08);border:1px solid rgba(' + color + ',0.2);color:' + hex + '">' + window._escapeHtml(pick) + '</button>';
+    }).join('');
+    window._refreshLucide();
+};
+
+window.addQuickPick = function(name) {
+    _sessionExercises.push({
+        name: name,
+        type: _sessionType,
+        sets: '', reps: '', weight: '', duration: '', distance: '', intensity: '', notes: ''
+    });
+    window._renderSessionQuickPicks();
+    window._renderSessionExercises();
 };
 
 window.addSessionExercise = function() {
@@ -776,7 +1031,8 @@ window._renderSessionExercises = function() {
             </div>`;
         } else if(isMobility) {
             detailHtml = `<div class="flex gap-2 mt-2">
-                <input type="number" placeholder="Min" value="${esc(obj.duration||'')}" onchange="window.updateSessionExField(${i},'duration',this.value)" class="w-16 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto">
+                <div class="flex items-center gap-1"><input type="number" placeholder="Min" value="${esc(obj.duration||'')}" onchange="window.updateSessionExField(${i},'duration',this.value)" class="w-14 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto"><span class="text-zinc-600 text-[9px]">min</span></div>
+                <div class="flex items-center gap-1"><input type="number" placeholder="Sek" value="${esc(obj.durationSec||'')}" onchange="window.updateSessionExField(${i},'durationSec',this.value)" class="w-14 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto"><span class="text-zinc-600 text-[9px]">sek</span></div>
                 <input type="text" placeholder="Notizen" value="${esc(obj.notes||'')}" onchange="window.updateSessionExField(${i},'notes',this.value)" class="flex-1 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 cursor-text pointer-events-auto">
             </div>`;
         } else {
@@ -786,8 +1042,9 @@ window._renderSessionExercises = function() {
                 <div class="flex items-center gap-1"><span class="text-zinc-600 text-[10px] font-black">@</span><input type="number" placeholder="kg" value="${esc(obj.weight||'')}" onchange="window.updateSessionExField(${i},'weight',this.value)" class="w-14 px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded text-white text-[10px] font-bold outline-none focus:border-indigo-500 text-center cursor-text pointer-events-auto"></div>
             </div>`;
         }
-        return `<div class="px-3 py-2.5 rounded-lg" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
+        return `<div data-ex-idx="${i}" class="px-3 py-2.5 rounded-lg transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
             <div class="flex items-center gap-2">
+                <span class="drag-handle cursor-grab active:cursor-grabbing text-zinc-600 hover:text-zinc-400 pointer-events-auto flex-shrink-0" style="touch-action:none"><i data-lucide="grip-vertical" class="w-4 h-4 pointer-events-none"></i></span>
                 <span class="flex-1 text-white text-sm font-bold truncate">${esc(name)}</span>
                 <button onclick="window.removeSessionExercise(${i})" class="text-zinc-500 hover:text-rose-400 cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i></button>
             </div>
@@ -795,6 +1052,65 @@ window._renderSessionExercises = function() {
         </div>`;
     }).join('');
     window._refreshLucide();
+    window._initSessionDragDrop();
+};
+
+window._initSessionDragDrop = function() {
+    var container = document.getElementById('sessionExercisesList');
+    if(!container || container._dragInit) return;
+    container._dragInit = true;
+    var dragIdx = null;
+
+    function getIdxFromY(clientY) {
+        var els = container.querySelectorAll('[data-ex-idx]');
+        for(var i = 0; i < els.length; i++) {
+            var rect = els[i].getBoundingClientRect();
+            if(clientY >= rect.top && clientY <= rect.bottom) return parseInt(els[i].dataset.exIdx);
+        }
+        return null;
+    }
+    function doSwap(targetIdx) {
+        if(targetIdx === null || targetIdx === dragIdx) return;
+        var item = _sessionExercises.splice(dragIdx, 1)[0];
+        _sessionExercises.splice(targetIdx, 0, item);
+        dragIdx = targetIdx;
+        container._dragInit = false;
+        window._renderSessionExercises();
+    }
+
+    // Touch
+    container.addEventListener('touchstart', function(e) {
+        var h = e.target.closest('.drag-handle');
+        if(!h) return;
+        var item = h.closest('[data-ex-idx]');
+        if(!item) return;
+        dragIdx = parseInt(item.dataset.exIdx);
+        item.style.opacity = '0.5';
+    }, { passive: true });
+    container.addEventListener('touchmove', function(e) {
+        if(dragIdx === null) return;
+        e.preventDefault();
+        var targetIdx = getIdxFromY(e.touches[0].clientY);
+        doSwap(targetIdx);
+    }, { passive: false });
+    container.addEventListener('touchend', function() { dragIdx = null; });
+
+    // Mouse
+    container.addEventListener('mousedown', function(e) {
+        var h = e.target.closest('.drag-handle');
+        if(!h) return;
+        var item = h.closest('[data-ex-idx]');
+        if(!item) return;
+        e.preventDefault();
+        dragIdx = parseInt(item.dataset.exIdx);
+        item.style.opacity = '0.5';
+    });
+    document.addEventListener('mousemove', function(e) {
+        if(dragIdx === null) return;
+        var targetIdx = getIdxFromY(e.clientY);
+        doSwap(targetIdx);
+    });
+    document.addEventListener('mouseup', function() { dragIdx = null; });
 };
 
 window.openSessionModal = function(preselectedClientId) {
@@ -811,6 +1127,7 @@ if(focusEl) focusEl.value = '';
 if(deleteBtn) deleteBtn.classList.add('hidden');
 window.setSessionType('kraft');
 window._renderSessionExercises();
+window._renderSessionQuickPicks();
 window._renderSessionClientPills(preselectedClientId);
 window.toggleModal('sessionPlannerModal');
 window._refreshLucide();
@@ -835,11 +1152,16 @@ const durEl = document.getElementById('sessionDuration');
 const focusEl = document.getElementById('sessionFocus');
 const deleteBtn = document.getElementById('sessionDeleteBtn');
 if(timeEl) timeEl.value = s.time || '09:00';
-if(durEl) durEl.value = s.duration || 60;
+var totalSec = s.duration || 3600;
+if(totalSec < 300) totalSec = totalSec * 60; // Abwärtskompatibilität: alte Werte waren Minuten
+if(durEl) durEl.value = Math.floor(totalSec / 60);
+var durSecEl = document.getElementById('sessionDurationSec');
+if(durSecEl) durSecEl.value = totalSec % 60;
 if(focusEl) focusEl.value = s.focus || '';
 if(deleteBtn) deleteBtn.classList.remove('hidden');
 window.setSessionType(s.type || 'kraft');
 window._renderSessionExercises();
+window._renderSessionQuickPicks();
 window._renderSessionClientPills(s.clientId);
 window.toggleModal('sessionPlannerModal');
 window._refreshLucide();
@@ -857,9 +1179,9 @@ if(window.clients.length === 0) {
 }
 el.innerHTML = window.clients.map(c => {
     const active = c.id === _sessionSelectedClient;
-    const style = active ? 'background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.4);color:#6366f1' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
+    const style = active ? 'background:color-mix(in srgb,var(--primary-hex),transparent 85%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex)' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
     return `<button onclick="window._selectSessionClient('${c.id}')" class="flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest cursor-pointer transition-all pointer-events-auto" style="${style}">
-        <div class="w-5 h-5 rounded-full flex items-center justify-center text-white font-black text-[10px]" style="background:#6366f1">${c.name.charAt(0).toUpperCase()}</div>
+        <div class="w-5 h-5 rounded-full flex items-center justify-center text-white font-black text-[10px]" style="background:var(--primary-hex)">${c.name.charAt(0).toUpperCase()}</div>
         ${window._escapeHtml(c.name)}
     </button>`;
 }).join('');
@@ -873,7 +1195,9 @@ window._renderSessionClientPills(clientId);
 window.saveSession = function() {
 if(!_sessionSelectedClient) { window.showToast('Bitte Kunden wählen'); return; }
 const time = document.getElementById('sessionTime')?.value || '09:00';
-const duration = parseInt(document.getElementById('sessionDuration')?.value) || 60;
+const durMin = parseInt(document.getElementById('sessionDuration')?.value) || 0;
+const durSec = parseInt(document.getElementById('sessionDurationSec')?.value) || 0;
+const duration = durMin * 60 + durSec;
 const focus = (document.getElementById('sessionFocus')?.value || '').trim().substring(0, 200);
 
 const targetDate = new Date();
@@ -939,7 +1263,7 @@ window.showSessionTemplates = function() {
         return `<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer pointer-events-auto hover:bg-white/5 transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" onclick="window.loadSessionTemplate(${i})">
             <div class="flex-1 min-w-0">
                 <p class="text-white text-sm font-bold truncate">${window._escapeHtml(t.name)}</p>
-                <p class="text-[10px] text-zinc-500 font-bold">${typeLabel} · ${exCount} Übungen · ${t.duration}min</p>
+                <p class="text-[10px] text-zinc-500 font-bold">${typeLabel} · ${exCount} Übungen · ${window._formatDuration(t.duration)}</p>
             </div>
             <button onclick="event.stopPropagation();window.deleteSessionTemplate(${i})" class="text-zinc-600 hover:text-rose-400 cursor-pointer pointer-events-auto p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
         </div>`;
@@ -1045,8 +1369,9 @@ for(let d = 1; d <= daysInMonth; d++) {
     let bg = 'transparent';
     let border = 'transparent';
     let textColor = 'var(--text-muted)';
-    if(isSelected) { bg = 'rgba(99,102,241,0.2)'; border = 'rgba(99,102,241,0.5)'; textColor = '#6366f1'; }
-    else if(isToday) { bg = 'rgba(99,102,241,0.08)'; border = 'rgba(99,102,241,0.2)'; textColor = '#fff'; }
+    var _cc = window._getPrimaryHex();
+    if(isSelected) { bg = _cc + '33'; border = _cc + '80'; textColor = _cc; }
+    else if(isToday) { bg = _cc + '14'; border = _cc + '33'; textColor = '#fff'; }
     else if(daySessions.length > 0) { textColor = '#fff'; }
 
     const dots = (hasKraft ? '<span style="width:4px;height:4px;border-radius:50%;background:#06b6d4;display:inline-block"></span>' : '')
@@ -1120,7 +1445,7 @@ if(listEl) listEl.innerHTML = sorted.map(s => {
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:${t.pill}"><i data-lucide="${t.icon}" class="w-4 h-4 pointer-events-none" style="color:${t.color}"></i></div>
                 <div>
                     <p class="text-white font-black text-sm">${clientName}</p>
-                    <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">${s.time} · ${s.duration} min</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">${s.time} · ${window._formatDuration(s.duration)}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -1135,45 +1460,6 @@ if(listEl) listEl.innerHTML = sorted.map(s => {
     </div>`;
 }).join('');
 window._refreshLucide();
-};
-
-// ── YEAR OVERVIEW ──────────────────────────────────────────
-window.toggleYearView = function() {
-const el = document.getElementById('ptYearView');
-if(!el) return;
-const isHidden = el.classList.contains('hidden');
-el.classList.toggle('hidden');
-if(isHidden) window.renderYearView();
-};
-
-window.renderYearView = function() {
-const el = document.getElementById('ptYearView');
-if(!el) return;
-const allSessions = window.getSessions();
-const year = _ptCalYear;
-const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-
-el.innerHTML = monthNames.map((name, mi) => {
-    const daysInMonth = new Date(year, mi + 1, 0).getDate();
-    let sessionCount = 0;
-    for(let d = 1; d <= daysInMonth; d++) {
-        const ds = `${year}-${String(mi+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        if(allSessions.some(s => s.date === ds)) sessionCount++;
-    }
-    const intensity = Math.min(sessionCount / 10, 1);
-    const bg = sessionCount > 0 ? `rgba(99,102,241,${0.08 + intensity * 0.2})` : 'var(--inner-bg-hex)';
-    const border = sessionCount > 0 ? `rgba(99,102,241,${0.15 + intensity * 0.3})` : 'var(--border-hex)';
-    return `<button onclick="window._goToMonth(${mi})" class="p-3 rounded-xl text-center cursor-pointer pointer-events-auto transition-all hover:opacity-80" style="background:${bg};border:1px solid ${border}">
-        <p class="text-xs font-black text-white">${name}</p>
-        <p class="text-[10px] font-bold" style="color:${sessionCount > 0 ? '#6366f1' : 'var(--text-muted)'}">${sessionCount} Tage</p>
-    </button>`;
-}).join('');
-};
-
-window._goToMonth = function(month) {
-_ptCalMonth = month;
-window.renderPTCalendar();
-document.getElementById('ptYearView')?.classList.add('hidden');
 };
 
 // ── SELECT CLIENT (for workout tracking) ──────────────────
@@ -1201,6 +1487,7 @@ let _qtSessionId = null;
 let _qtExercises = [];
 let _qtTimerInterval = null;
 let _qtStartTime = null;
+let _qtSessionType = 'kraft';
 
 window.startQuickTrack = function(sessionId) {
 const sessions = window.getSessions();
@@ -1210,10 +1497,13 @@ const client = window.clients.find(c => c.id === s.clientId);
 if(!client) return;
 
 _qtSessionId = sessionId;
+_qtSessionType = s.type || 'kraft';
 _qtStartTime = Date.now();
+var defaultMetric = _qtSessionType === 'kraft' ? 'setsRepsWeight' : _qtSessionType === 'ausdauer' ? 'distanceDuration' : 'holdRounds';
 _qtExercises = (s.exercises || []).map((ex, i) => {
     const isObj = typeof ex === 'object' && ex !== null;
     const name = isObj ? ex.name : ex;
+    const metric = (isObj && ex.metric) ? ex.metric : defaultMetric;
     // Pre-fill sets from planned data
     const preSets = [];
     if(isObj && ex.sets && ex.reps) {
@@ -1222,16 +1512,30 @@ _qtExercises = (s.exercises || []).map((ex, i) => {
         const weight = parseFloat(ex.weight) || 0;
         for(let s = 0; s < numSets; s++) preSets.push({ reps, weight });
     }
-    return { id: 'ex_' + i, name, sets: preSets, done: false, notes: isObj ? (ex.notes || '') : '' };
+    return { id: 'ex_' + i, name, metric: metric, sets: preSets, done: false, notes: isObj ? (ex.notes || '') : '', distance: 0, duration: 0, pace: 0, holdTime: 0, rounds: 0 };
 });
 
-// If session has no exercises, add 3 empty slots
+// If session has no exercises, add type-specific defaults
 if(_qtExercises.length === 0) {
-    _qtExercises = [
-        { id: 'ex_0', name: 'Übung 1', sets: [], done: false, notes: '' },
-        { id: 'ex_1', name: 'Übung 2', sets: [], done: false, notes: '' },
-        { id: 'ex_2', name: 'Übung 3', sets: [], done: false, notes: '' }
-    ];
+    if(_qtSessionType === 'ausdauer') {
+        _qtExercises = [
+            { id:'ex_0', name:'Laufen', metric:'distanceDuration', sets:[], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 },
+            { id:'ex_1', name:'Intervalle', metric:'roundsDuration', sets:[{reps:'',weight:''}], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 },
+            { id:'ex_2', name:'Burpees', metric:'setsReps', sets:[{reps:'',weight:''}], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 }
+        ];
+    } else if(_qtSessionType === 'mobility') {
+        _qtExercises = [
+            { id:'ex_0', name:'Hip Opener', metric:'holdRounds', sets:[], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 },
+            { id:'ex_1', name:'Cat-Cow', metric:'setsReps', sets:[{reps:'',weight:''}], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 },
+            { id:'ex_2', name:'Foam Rolling', metric:'durationOnly', sets:[], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 }
+        ];
+    } else {
+        _qtExercises = [
+            { id:'ex_0', name:'Bankdrücken', metric:'setsRepsWeight', sets:[{reps:'',weight:''}], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 },
+            { id:'ex_1', name:'Kniebeuge', metric:'setsRepsWeight', sets:[{reps:'',weight:''}], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 },
+            { id:'ex_2', name:'Rudern', metric:'setsRepsWeight', sets:[{reps:'',weight:''}], done:false, notes:'', distance:0, duration:0, pace:0, holdTime:0, rounds:0 }
+        ];
+    }
 }
 
 // Populate header
@@ -1241,7 +1545,7 @@ const infoEl = document.getElementById('qtSessionInfo');
 if(avatarEl) avatarEl.textContent = client.name.charAt(0).toUpperCase();
 if(nameEl) nameEl.textContent = client.name;
 const typeLabels = { kraft:'Kraft', ausdauer:'Ausdauer', mobility:'Mobility' };
-if(infoEl) infoEl.textContent = `${typeLabels[s.type] || s.type} · ${s.duration || 60} min${s.focus ? ' · ' + s.focus : ''}`;
+if(infoEl) infoEl.textContent = `${typeLabels[s.type] || s.type} · ${window._formatDuration(s.duration)}${s.focus ? ' · ' + s.focus : ''}`;
 
 // Start timer
 if(_qtTimerInterval) clearInterval(_qtTimerInterval);
@@ -1261,48 +1565,165 @@ const el = document.getElementById('qtTimer');
 if(el) el.textContent = `${m}:${s}`;
 };
 
+// Sperrbildschirm-Fix: QT Timer sofort aktualisieren bei App-Focus
+document.addEventListener('visibilitychange', function() {
+    if(!document.hidden && _qtStartTime) window._updateQtTimer();
+});
+
+window._getLastTimeForClient = function(clientId, exerciseName) {
+    if(!exerciseName) return null;
+    var cw = window.getClientWorkouts(clientId);
+    var archived = cw.filter(function(w) { return w.archived; });
+    var nameLower = exerciseName.toLowerCase();
+    var matches = archived.filter(function(w) { return w.exercise && w.exercise.toLowerCase() === nameLower; });
+    if(matches.length === 0) return null;
+    matches.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    var last = matches[0];
+    if(!last.setDetails || last.setDetails.length === 0) return null;
+    var maxWeight = Math.max.apply(null, last.setDetails.map(function(s) { return parseFloat(s.weight) || 0; }));
+    return { weight: maxWeight, sets: last.setDetails.length, reps: last.setDetails[0].reps || '?', date: last.date };
+};
+
 window._renderQtExercises = function() {
-const listEl = document.getElementById('qtExerciseList');
+var listEl = document.getElementById('qtExerciseList');
 if(!listEl) return;
 
-const doneCount = _qtExercises.filter(e => e.done).length;
-const total = _qtExercises.length;
-const pctEl = document.getElementById('qtProgressBar');
-const pctText = document.getElementById('qtProgressText');
+var doneCount = _qtExercises.filter(function(e) { return e.done; }).length;
+var total = _qtExercises.length;
+var pctEl = document.getElementById('qtProgressBar');
+var pctText = document.getElementById('qtProgressText');
 if(pctEl) pctEl.style.width = (total > 0 ? Math.round(doneCount/total*100) : 0) + '%';
-if(pctText) pctText.textContent = `${doneCount}/${total}`;
+if(pctText) pctText.textContent = doneCount + '/' + total;
 
-listEl.innerHTML = _qtExercises.map((ex, idx) => {
-    const setRows = ex.sets.map((s, si) => `
-        <div class="flex items-center gap-2 mt-1.5">
-            <span class="text-[10px] font-bold w-5 text-center" style="color:var(--text-muted)">S${si+1}</span>
-            <input type="number" placeholder="Wdh" value="${s.reps||''}" onchange="window._qtUpdateSet(${idx},${si},'reps',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">
-            <span class="text-zinc-600 text-xs">×</span>
-            <input type="number" placeholder="kg" value="${s.weight||''}" onchange="window._qtUpdateSet(${idx},${si},'weight',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">
-            <button onclick="window._qtRemoveSet(${idx},${si})" class="text-zinc-600 hover:text-rose-400 cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>
-        </div>
-    `).join('');
+listEl.innerHTML = _qtExercises.map(function(ex, idx) {
+    var metric = ex.metric || (_qtSessionType === 'kraft' ? 'setsRepsWeight' : _qtSessionType === 'ausdauer' ? 'distanceDuration' : 'holdRounds');
 
-    const doneStyle = ex.done ? 'opacity:0.5;' : '';
-    const checkColor = ex.done ? 'background:#10b981;border-color:#10b981;color:#000' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
+    // Metric selector pills
+    var metricOptions = [];
+    if(_qtSessionType === 'kraft') {
+        metricOptions = [{id:'setsRepsWeight',label:'Sets\u00d7Wdh\u00d7kg'},{id:'setsReps',label:'Sets\u00d7Wdh'}];
+    } else if(_qtSessionType === 'ausdauer') {
+        metricOptions = [{id:'distanceDuration',label:'km / min'},{id:'roundsDuration',label:'Runden\u00d7Sek'},{id:'setsRepsWeight',label:'Sets\u00d7Wdh\u00d7kg'}];
+    } else {
+        metricOptions = [{id:'holdRounds',label:'Sek \u00d7 Runden'},{id:'setsReps',label:'Sets \u00d7 Wdh'},{id:'durationOnly',label:'Dauer (min)'}];
+    }
 
-    return `<div class="p-3 rounded-xl transition-all" style="background:var(--surface-hex);border:1px solid var(--border-hex);${doneStyle}">
-        <div class="flex items-center gap-3 mb-1">
-            <button onclick="window._qtToggleDone(${idx})" class="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all flex-shrink-0 text-xs font-black" style="${checkColor}">
-                ${ex.done ? '✓' : (idx+1)}
-            </button>
-            <input type="text" value="${window._escapeHtml(ex.name)}" onchange="window._qtRenameEx(${idx},this.value)" class="flex-1 bg-transparent text-white font-black text-sm outline-none pointer-events-auto cursor-text truncate" ${ex.done ? 'disabled' : ''}>
-        </div>
-        ${!ex.done ? `
-            ${setRows}
-            <div class="flex items-center gap-2 mt-2">
-                <button onclick="window._qtAddSet(${idx})" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4">
-                    <i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set
-                </button>
-                <input type="text" placeholder="Notiz..." value="${window._escapeHtml(ex.notes||'')}" onchange="window._qtNoteEx(${idx},this.value)" class="flex-1 px-2 py-1 bg-zinc-900/50 border border-zinc-800/50 rounded text-zinc-400 text-[10px] outline-none pointer-events-auto cursor-text">
-            </div>
-        ` : `<p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-10">${ex.sets.length} Sets abgeschlossen${ex.notes ? ' · ' + window._escapeHtml(ex.notes) : ''}</p>`}
-    </div>`;
+    var metricPills = '<div class="flex flex-wrap gap-1 mt-1.5 mb-1.5">';
+    metricOptions.forEach(function(opt) {
+        var isActive = metric === opt.id;
+        metricPills += '<button ontouchstart="" onclick="window._qtSetMetric(' + idx + ',\'' + opt.id + '\')" class="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider pointer-events-auto cursor-pointer transition-all' +
+            (isActive ? '" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4"' : '" style="background:rgba(39,39,42,0.5);border:1px solid rgba(63,63,70,0.5);color:#71717a"') +
+            '>' + opt.label + '</button>';
+    });
+    metricPills += '</div>';
+
+    // Input fields based on metric
+    var inputFields = '';
+    var addSetBtn = '';
+
+    if(metric === 'setsRepsWeight') {
+        inputFields = (ex.sets || []).map(function(s, si) {
+            return '<div class="flex items-center gap-2 mt-1.5">' +
+                '<span class="text-[10px] font-bold w-5 text-center" style="color:var(--text-muted)">S' + (si+1) + '</span>' +
+                '<input type="number" placeholder="Wdh" value="' + (s.reps||'') + '" onchange="window._qtUpdateSet(' + idx + ',' + si + ',\'reps\',this.value)" class="w-14 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+                '<span class="text-zinc-600 text-[9px]">\u00d7</span>' +
+                '<input type="number" placeholder="kg" value="' + (s.weight||'') + '" onchange="window._qtUpdateSet(' + idx + ',' + si + ',\'weight\',this.value)" class="w-14 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text" step="0.5">' +
+                '<span class="text-zinc-600 text-[9px]">kg</span>' +
+                '<button ontouchstart="" onclick="window._qtRemoveSet('+ idx + ',' + si + ')" class="text-zinc-700 hover:text-rose-400 cursor-pointer pointer-events-auto ml-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>' +
+                '</div>';
+        }).join('');
+        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set</button>';
+
+    } else if(metric === 'setsReps') {
+        inputFields = (ex.sets || []).map(function(s, si) {
+            return '<div class="flex items-center gap-2 mt-1.5">' +
+                '<span class="text-[10px] font-bold w-5 text-center" style="color:var(--text-muted)">S' + (si+1) + '</span>' +
+                '<input type="number" placeholder="Wdh" value="' + (s.reps||'') + '" onchange="window._qtUpdateSet(' + idx + ',' + si + ',\'reps\',this.value)" class="w-20 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+                '<span class="text-zinc-600 text-[9px]">Wdh</span>' +
+                '<button ontouchstart="" onclick="window._qtRemoveSet('+ idx + ',' + si + ')" class="text-zinc-700 hover:text-rose-400 cursor-pointer pointer-events-auto ml-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>' +
+                '</div>';
+        }).join('');
+        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set</button>';
+
+    } else if(metric === 'distanceDuration') {
+        inputFields = '<div class="flex items-center gap-2 mt-1.5">' +
+            '<input type="number" placeholder="0.0" value="' + (ex.distance||'') + '" onchange="window._qtUpdateField(' + idx + ',\'distance\',this.value)" class="w-20 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text" step="0.1">' +
+            '<span class="text-zinc-600 text-[9px] font-bold">KM</span>' +
+            '<input type="number" placeholder="0" value="' + (ex.duration||'') + '" onchange="window._qtUpdateField(' + idx + ',\'duration\',this.value)" class="w-20 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+            '<span class="text-zinc-600 text-[9px] font-bold">MIN</span>' +
+            '<input type="number" placeholder="0" value="' + (ex.pace||'') + '" onchange="window._qtUpdateField(' + idx + ',\'pace\',this.value)" class="w-20 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text" step="0.1">' +
+            '<span class="text-zinc-600 text-[9px] font-bold">MIN/KM</span>' +
+            '</div>';
+
+    } else if(metric === 'roundsDuration') {
+        inputFields = (ex.sets || []).map(function(s, si) {
+            return '<div class="flex items-center gap-2 mt-1.5">' +
+                '<span class="text-[10px] font-bold w-5 text-center" style="color:var(--text-muted)">R' + (si+1) + '</span>' +
+                '<input type="number" placeholder="Sek" value="' + (s.reps||'') + '" onchange="window._qtUpdateSet(' + idx + ',' + si + ',\'reps\',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+                '<span class="text-zinc-600 text-[9px]">Sek</span>' +
+                '<input type="number" placeholder="Pause" value="' + (s.weight||'') + '" onchange="window._qtUpdateSet(' + idx + ',' + si + ',\'weight\',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+                '<span class="text-zinc-600 text-[9px]">Pause</span>' +
+                '<button ontouchstart="" onclick="window._qtRemoveSet('+ idx + ',' + si + ')" class="text-zinc-700 hover:text-rose-400 cursor-pointer pointer-events-auto ml-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>' +
+                '</div>';
+        }).join('');
+        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Runde</button>';
+
+    } else if(metric === 'holdRounds') {
+        inputFields = '<div class="flex items-center gap-2 mt-1.5">' +
+            '<input type="number" placeholder="30" value="' + (ex.holdTime||'') + '" onchange="window._qtUpdateField(' + idx + ',\'holdTime\',this.value)" class="w-20 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+            '<span class="text-zinc-600 text-[9px] font-bold">SEK</span>' +
+            '<span class="text-zinc-700 text-xs">\u00d7</span>' +
+            '<input type="number" placeholder="3" value="' + (ex.rounds||'') + '" onchange="window._qtUpdateField(' + idx + ',\'rounds\',this.value)" class="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+            '<span class="text-zinc-600 text-[9px] font-bold">RUNDEN</span>' +
+            '</div>';
+
+    } else if(metric === 'durationOnly') {
+        inputFields = '<div class="flex items-center gap-2 mt-1.5">' +
+            '<input type="number" placeholder="10" value="' + (ex.duration||'') + '" onchange="window._qtUpdateField(' + idx + ',\'duration\',this.value)" class="w-24 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-white text-xs font-bold text-center outline-none pointer-events-auto cursor-text">' +
+            '<span class="text-zinc-600 text-[9px] font-bold">MINUTEN</span>' +
+            '</div>';
+    }
+
+    // Done label based on metric
+    var doneLabel = '';
+    if(metric === 'setsRepsWeight' || metric === 'setsReps') doneLabel = (ex.sets||[]).length + ' Sets abgeschlossen';
+    else if(metric === 'distanceDuration') doneLabel = (ex.distance||0) + ' km \u00b7 ' + (ex.duration||0) + ' min';
+    else if(metric === 'roundsDuration') doneLabel = (ex.sets||[]).length + ' Runden';
+    else if(metric === 'holdRounds') doneLabel = (ex.holdTime||0) + ' Sek \u00d7 ' + (ex.rounds||0) + ' Runden';
+    else if(metric === 'durationOnly') doneLabel = (ex.duration||0) + ' min';
+
+    var doneStyle = ex.done ? 'opacity:0.5;' : '';
+    var checkColor = ex.done ? 'background:#10b981;border-color:#10b981;color:#000' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
+
+    // Letztes Mal Badge für PT Quick Track
+    var lastTimeBadge = '';
+    if(!ex.done && _qtSessionId && window._getLastTimeForClient) {
+        var sessions = window.getSessions();
+        var sess = sessions.find(function(s) { return s.id === _qtSessionId; });
+        if(sess && sess.clientId) {
+            var lt = window._getLastTimeForClient(sess.clientId, ex.name);
+            if(lt && lt.weight > 0) {
+                var lbKw = ['squat','kniebeuge','beinpresse','leg','bein','deadlift','kreuzheben','hip thrust','lunge','ausfallschritt','wadenheben','calf'];
+                var isLb = lbKw.some(function(kw) { return ex.name.toLowerCase().includes(kw); });
+                var incr = isLb ? 5 : 2.5;
+                lastTimeBadge = '<div class="flex items-center gap-2 ml-10 mb-1"><span class="text-[9px] text-zinc-500">Zuletzt: <span class="text-zinc-300 font-bold">' + lt.weight + 'kg \u00d7 ' + lt.sets + ' \u00d7 ' + lt.reps + '</span></span><span class="text-[9px] font-bold text-cyan-400">\u2192 ' + (lt.weight + incr) + 'kg</span></div>';
+            }
+        }
+    }
+
+    return '<div class="p-3 rounded-xl transition-all" style="background:var(--surface-hex);border:1px solid var(--border-hex);' + doneStyle + '">' +
+        '<div class="flex items-center gap-3 mb-1">' +
+            '<button ontouchstart="" onclick="window._qtToggleDone(' + idx + ')" class="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-all flex-shrink-0 text-xs font-black" style="' + checkColor + '">' +
+                (ex.done ? '\u2713' : (idx+1)) +
+            '</button>' +
+            '<input type="text" value="' + window._escapeHtml(ex.name) + '" onchange="window._qtRenameEx(' + idx + ',this.value)" class="flex-1 bg-transparent text-white font-black text-sm outline-none pointer-events-auto cursor-text truncate"' + (ex.done ? ' disabled' : '') + '>' +
+        '</div>' +
+        (!ex.done ? (lastTimeBadge + metricPills + inputFields +
+            '<div class="flex items-center gap-2 mt-2">' + addSetBtn +
+                '<input type="text" placeholder="Notiz..." value="' + window._escapeHtml(ex.notes||'') + '" onchange="window._qtNoteEx(' + idx + ',this.value)" class="flex-1 px-2 py-1 bg-zinc-900/50 border border-zinc-800/50 rounded text-zinc-400 text-[10px] outline-none pointer-events-auto cursor-text">' +
+            '</div>')
+        : '<p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-10">' + doneLabel + (ex.notes ? ' \u00b7 ' + window._escapeHtml(ex.notes) : '') + '</p>') +
+    '</div>';
 }).join('');
 
 window._refreshLucide();
@@ -1331,6 +1752,20 @@ if(!_qtExercises[exIdx] || !_qtExercises[exIdx].sets[setIdx]) return;
 _qtExercises[exIdx].sets[setIdx][field] = parseFloat(val) || 0;
 };
 
+window._qtSetMetric = function(idx, metricId) {
+if(!_qtExercises[idx]) return;
+_qtExercises[idx].metric = metricId;
+if((metricId === 'setsRepsWeight' || metricId === 'setsReps' || metricId === 'roundsDuration') && (!_qtExercises[idx].sets || _qtExercises[idx].sets.length === 0)) {
+    _qtExercises[idx].sets = [{ reps: '', weight: '' }];
+}
+window._renderQtExercises();
+};
+
+window._qtUpdateField = function(idx, field, val) {
+if(!_qtExercises[idx]) return;
+_qtExercises[idx][field] = parseFloat(val) || 0;
+};
+
 window._qtRenameEx = function(idx, val) {
 if(!_qtExercises[idx]) return;
 _qtExercises[idx].name = val.trim().substring(0, 80) || _qtExercises[idx].name;
@@ -1342,9 +1777,11 @@ _qtExercises[idx].notes = val.trim().substring(0, 200);
 };
 
 window.qtAddExercise = function() {
-const input = document.getElementById('qtAddExInput');
+var input = document.getElementById('qtAddExInput');
 if(!input || !input.value.trim()) return;
-_qtExercises.push({ id: 'ex_' + Date.now(), name: input.value.trim().substring(0, 80), sets: [], done: false, notes: '' });
+var defaultMetric = _qtSessionType === 'kraft' ? 'setsRepsWeight' : _qtSessionType === 'ausdauer' ? 'distanceDuration' : 'holdRounds';
+var needsSets = (defaultMetric === 'setsRepsWeight' || defaultMetric === 'setsReps' || defaultMetric === 'roundsDuration');
+_qtExercises.push({ id: 'ex_' + Date.now(), name: input.value.trim().substring(0, 80), metric: defaultMetric, sets: needsSets ? [{reps:'',weight:''}] : [], done: false, notes: '', distance: 0, duration: 0, pace: 0, holdTime: 0, rounds: 0 });
 input.value = '';
 window._renderQtExercises();
 };
@@ -1400,19 +1837,30 @@ if(completedExercises.length > 0) {
 
     completedExercises.forEach(ex => {
         const category = s.type === 'ausdauer' ? 'cardio' : s.type === 'mobility' ? 'recovery' : 'strength';
+        const metric = ex.metric || 'setsRepsWeight';
         const entry = {
             id: Date.now() + '_' + Math.random().toString(36).substr(2,4),
             exercise: ex.name,
             date: today,
             category: category,
-            setDetails: ex.sets.filter(st => st.reps > 0 || st.weight > 0).map(st => ({ reps: st.reps || 0, weight: st.weight || 0 })),
+            metric: metric,
             sessionId: sessionId,
             sessionDuration: durationStr,
+            workoutDuration: elapsed,
             notes: ex.notes || '',
             archived: true
         };
-        if(entry.setDetails.length > 0) {
-            entry.volume = entry.setDetails.reduce((sum, st) => sum + (st.reps * st.weight), 0);
+        if(metric === 'setsRepsWeight' || metric === 'setsReps' || metric === 'roundsDuration') {
+            entry.setDetails = (ex.sets || []).filter(st => st.reps > 0 || st.weight > 0).map(st => ({ reps: st.reps || 0, weight: st.weight || 0 }));
+            if(entry.setDetails.length > 0 && metric === 'setsRepsWeight') {
+                entry.volume = entry.setDetails.reduce((sum, st) => sum + (st.reps * st.weight), 0);
+            }
+        } else if(metric === 'distanceDuration') {
+            entry.data = { 'Distanz (km)': ex.distance || 0, 'Dauer (min)': ex.duration || 0, 'Pace (min/km)': ex.pace || 0 };
+        } else if(metric === 'holdRounds') {
+            entry.data = { 'Haltezeit (sek)': ex.holdTime || 0, 'Runden': ex.rounds || 0 };
+        } else if(metric === 'durationOnly') {
+            entry.data = { 'Dauer (min)': ex.duration || 0 };
         }
         existingWorkouts.push(entry);
     });
@@ -1462,12 +1910,13 @@ window.setTrainerBranding = function() {
 const current = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
 const name = prompt('Dein Name / Studio-Name:', current.name || '');
 if(name === null) return;
-const color = prompt('Akzentfarbe (Hex, z.B. #6366f1):', current.color || '#6366f1');
+var _defColor = window._getPrimaryHex();
+const color = prompt('Akzentfarbe (Hex, z.B. ' + _defColor + '):', current.color || _defColor);
 if(color === null) return;
 const tagline = prompt('Slogan / Tagline (optional):', current.tagline || '');
 localStorage.setItem('base_trainer_branding', JSON.stringify({
     name: (name||'').trim().substring(0,60),
-    color: /^#[0-9a-fA-F]{6}$/.test(color) ? color : '#6366f1',
+    color: /^#[0-9a-fA-F]{6}$/.test(color) ? color : _defColor,
     tagline: (tagline||'').trim().substring(0,80)
 }));
 window.showToast('Branding gespeichert! ✅');
@@ -1520,7 +1969,7 @@ for(let i = 0; i <= steps; i++) {
 
 // Line
 ctx.beginPath();
-ctx.strokeStyle = '#6366f1';
+ctx.strokeStyle = window._getPrimaryHex();
 ctx.lineWidth = 2;
 ctx.lineJoin = 'round';
 ctx.lineCap = 'round';
@@ -1538,7 +1987,7 @@ dataPoints.forEach((d, i) => {
     const y = pad.top + chartH - (chartH * (d.value - minV) / range);
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = '#6366f1';
+    ctx.fillStyle = window._getPrimaryHex();
     ctx.fill();
     ctx.fillStyle = '#fff';
     ctx.beginPath();
@@ -1590,7 +2039,7 @@ const { jsPDF } = window.jspdf;
 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 const cw = window.getClientWorkouts(_activeClientDetailId);
 const branding = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
-const accentHex = branding.color || '#6366f1';
+const accentHex = branding.color || window._getPrimaryHex();
 const accentR = parseInt(accentHex.slice(1,3),16);
 const accentG = parseInt(accentHex.slice(3,5),16);
 const accentB = parseInt(accentHex.slice(5,7),16);
@@ -1717,7 +2166,14 @@ window.showToast('PDF heruntergeladen! 📄');
 window.generateClientWeeklyReport = async function() {
 if(!window.checkOnlineForAI()) return;
 if(window.aiGate && !(await window.aiGate())) return;
-if(!_activeClientDetailId) return;
+// Fallback: Wenn kein Client ausgewählt, nimm den ersten
+if (!_activeClientDetailId && window.clients && window.clients.length > 0) {
+    _activeClientDetailId = window.clients[0].id;
+}
+if (!_activeClientDetailId) {
+    window.showToast('Bitte erst einen Kunden anlegen oder auswählen');
+    return;
+}
 const btn = document.getElementById('btnGenClientReport');
 const resultEl = document.getElementById('clientReportResult');
 if(btn) btn.textContent = '⏳ Analysiere...';
@@ -1749,8 +2205,9 @@ Schreibe professionell aber motivierend. Max 200 Wörter. Antworte auf ${window.
 
 try {
     const res = await fetch('/.netlify/functions/gemini', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
-    const data = await res.json();
-    if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = data.reply || 'Keine Antwort.'; }
+    const raw = await res.text();
+    const parsed = window._parseGeminiResponse(raw);
+    if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = parsed || 'Keine Antwort.'; }
 } catch(e) {
     if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = 'Fehler: ' + e.message; }
 } finally {
@@ -2102,7 +2559,15 @@ window._renderTrainerCards = function(trainers) {
     const list = document.getElementById('trainerDirectoryList');
     if(!list) return;
     if(trainers.length === 0) {
-        list.innerHTML = '<p class="text-zinc-500 text-sm col-span-full text-center py-8">Keine Trainer gefunden</p>';
+        list.innerHTML = '<div class="text-center py-8 col-span-full">' +
+            '<div class="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4"><i data-lucide="search" class="w-8 h-8 text-cyan-400"></i></div>' +
+            '<h3 class="text-lg font-black text-white mb-2">Noch keine Trainer auf BASE</h3>' +
+            '<p class="text-zinc-500 text-sm mb-6">Wir bauen unser Trainer-Netzwerk auf. Finde jetzt einen Trainer in deiner Naehe.</p>' +
+            '<button onclick="window.searchTrainerGoogle()" class="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 py-3 rounded-xl text-sm font-black uppercase tracking-widest mb-3 pointer-events-auto cursor-pointer hover:bg-cyan-500/20 transition-all">Personal Trainer in meiner Naehe</button>' +
+            '<button onclick="window.searchTrainerGoogle(\'online\')" class="w-full bg-zinc-800 text-zinc-300 py-3 rounded-xl text-sm font-black uppercase tracking-widest pointer-events-auto cursor-pointer hover:bg-zinc-700 transition-all">Online Personal Trainer finden</button>' +
+            '<p class="text-zinc-600 text-[10px] mt-6 uppercase tracking-widest">Bist du Trainer? <button onclick="window.toggleModal(\'trainerDirectoryModal\'); setTimeout(function() { window.switchMode(\'pt\'); window.activatePTMode(); }, 300);" class="text-indigo-400 font-black pointer-events-auto cursor-pointer">Profil erstellen</button></p>' +
+            '</div>';
+        if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
         return;
     }
     const esc = window._escapeHtml;
@@ -2127,7 +2592,27 @@ window._renderTrainerCards = function(trainers) {
             </div>
         </div>`;
     }).join('');
+    list.innerHTML += '<div class="col-span-full mt-4"><button onclick="window.searchTrainerGoogle()" class="w-full bg-zinc-800 text-zinc-400 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest pointer-events-auto cursor-pointer hover:bg-zinc-700 hover:text-white transition-all">Mehr Trainer auf Google Maps finden</button></div>';
     if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+};
+
+window.searchTrainerGoogle = function(type) {
+    if(type === 'online') {
+        window.open('https://www.google.com/search?q=online+personal+trainer+buchen', '_blank');
+        return;
+    }
+    if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                window.open('https://www.google.com/maps/search/personal+trainer/@' + pos.coords.latitude + ',' + pos.coords.longitude + ',13z', '_blank');
+            },
+            function() {
+                window.open('https://www.google.com/maps/search/personal+trainer+in+meiner+naehe', '_blank');
+            }
+        );
+    } else {
+        window.open('https://www.google.com/maps/search/personal+trainer+in+meiner+naehe', '_blank');
+    }
 };
 
 // ── 8c: TRAINER-DETAILSEITE ────────────────────────────────
@@ -2372,7 +2857,7 @@ window._renderComplianceRings = function(clientId) {
         const label = pct >= 0 ? pct + '%' : '—';
         const sub = pct >= 0 ? r.data.done + '/' + r.data.planned : 'Keine';
         return `<div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 flex flex-col items-center">
-            <svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/><circle cx="32" cy="32" r="28" fill="none" stroke="${r.color}" stroke-width="4" stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round" transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 0.8s ease"/><text x="32" y="36" text-anchor="middle" fill="white" font-size="13" font-weight="900" font-family="DM Sans,sans-serif">${label}</text></svg>
+            <svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/><circle cx="32" cy="32" r="28" fill="none" stroke="${r.color}" stroke-width="4" stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round" transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 0.8s ease"/><text x="32" y="36" text-anchor="middle" fill="white" font-size="13" font-weight="900" font-family="Outfit,sans-serif">${label}</text></svg>
             <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">${r.label}</p>
             <p class="text-[9px] text-zinc-600">${sub}</p>
         </div>`;
@@ -2422,8 +2907,8 @@ Antworte auf ${lang}.`;
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt })
         });
-        const data = await res.json();
-        _lastCheckInText = data.result || data.text || 'Keine Antwort erhalten.';
+        const raw = await res.text();
+        _lastCheckInText = window._parseGeminiResponse(raw) || 'Keine Antwort erhalten.';
         const textEl = document.getElementById('kiCheckInText');
         if(textEl) textEl.textContent = _lastCheckInText;
         window.toggleModal('kiCheckInModal');
@@ -2494,3 +2979,4 @@ window.switchPTTab = function(tab) {
         window.loadOwnTrainerProfile();
     }
 };
+

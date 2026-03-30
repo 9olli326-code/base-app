@@ -1,16 +1,17 @@
-const CACHE_NAME = 'base-v2-cache-v14';
+const CACHE_NAME = 'base-v2-cache-v78';
 
 const PRECACHE_URLS = [
     '/app.html',
     '/tailwind-production.css',
+    '/design-override.css',
     '/manifest.json',
     '/icon-192.png',
     '/icon-48.png',
-    '/js/base-timers.min.js',
-    '/js/base-ai.min.js',
-    '/js/base-settings.min.js',
-    '/js/base-pt.min.js',
-    '/js/exercise-db.min.js',
+    '/js/base-timers.min.js?v=17',
+    '/js/base-ai.min.js?v=17',
+    '/js/base-settings.min.js?v=17',
+    '/js/base-pt.min.js?v=17',
+    '/js/exercise-db.min.js?v=17',
     'https://unpkg.com/lucide@0.383.0',
     'https://js-de.sentry-cdn.com/287b90e183061df57c7f18944815186e.min.js',
     'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js',
@@ -46,9 +47,11 @@ self.addEventListener('activate', function(event) {
         caches.keys().then(function(names) {
             return Promise.all(
                 names.map(function(name) {
-                    if (name !== CACHE_NAME) return caches.delete(name);
+                    return caches.delete(name);
                 })
             );
+        }).then(function() {
+            return caches.open(CACHE_NAME);
         })
     );
     self.clients.claim();

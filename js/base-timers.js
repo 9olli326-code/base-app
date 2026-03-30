@@ -97,9 +97,47 @@ window.resetHiit = function() {
 };
 
 
-// --- WORKOUT TIMER (Timestamp-basiert — Sperrbildschirm-fest) ---
+// --- WORKOUT TIMER (Timestamp-basiert — Sperrbildschirm-fest + localStorage) ---
 let _workoutStartedAt = null;
 let _workoutAccumulated = 0;
+
+// Beim Laden: Timer aus localStorage wiederherstellen
+(function() {
+    var saved = localStorage.getItem('base_workout_timer');
+    if(saved) {
+        try {
+            var t = JSON.parse(saved);
+            if(t.running && t.startedAt) {
+                _workoutStartedAt = t.startedAt;
+                _workoutAccumulated = t.accumulated || 0;
+                window.isWorkoutTimerRunning = true;
+                setTimeout(function() {
+                    _showFloatingTimer();
+                    window.workoutTimerInterval = setInterval(_updateWorkoutDisplay, 1000);
+                    _updateWorkoutDisplay();
+                    var icon = document.getElementById('workoutTimerIcon');
+                    if(icon) { icon.setAttribute('data-lucide', 'pause'); if(window.lucide) lucide.createIcons(); }
+                }, 500);
+            } else if(t.accumulated > 0) {
+                _workoutAccumulated = t.accumulated;
+                setTimeout(function() { _showFloatingTimer(); _updateWorkoutDisplay(); }, 500);
+            }
+        } catch(e) {}
+    }
+})();
+
+function _saveTimerState() {
+    if(window.isWorkoutTimerRunning || _workoutAccumulated > 0) {
+        localStorage.setItem('base_workout_timer', JSON.stringify({
+            running: window.isWorkoutTimerRunning,
+            startedAt: _workoutStartedAt,
+            accumulated: _workoutAccumulated
+        }));
+    } else {
+        localStorage.removeItem('base_workout_timer');
+    }
+}
+
 function _updateWorkoutDisplay() {
     let total = _workoutAccumulated;
     if (window.isWorkoutTimerRunning && _workoutStartedAt) total += Math.floor((Date.now() - _workoutStartedAt) / 1000);
@@ -148,6 +186,7 @@ window.toggleWorkoutTimer = function() {
         window.workoutTimerInterval = setInterval(_updateWorkoutDisplay, 1000);
         _updateWorkoutDisplay();
     }
+    _saveTimerState();
 };
 window.resetWorkoutTimer = function() {
     clearInterval(window.workoutTimerInterval); window.isWorkoutTimerRunning = false;
@@ -157,7 +196,15 @@ window.resetWorkoutTimer = function() {
     if (display) display.textContent = '00:00';
     if (icon) { icon.setAttribute('data-lucide', 'play'); if (window.lucide) lucide.createIcons(); }
     _hideFloatingTimer();
+    _saveTimerState();
 };
+
+// Sperrbildschirm-Fix: Timer sofort aktualisieren bei App-Focus
+document.addEventListener('visibilitychange', function() {
+    if(!document.hidden) {
+        if(window.isWorkoutTimerRunning && _workoutStartedAt) _updateWorkoutDisplay();
+    }
+});
 
 // --- REST TIMER (Timestamp-basiert — Sperrbildschirm-fest) ---
 let _restEndTime = null;

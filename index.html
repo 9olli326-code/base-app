@@ -467,19 +467,7 @@
             Kein generischer Plan. Keine Anmeldung. Keine App-Store-Gebühren.
         </p>
 
-        <!-- Live User Counter — Showstopper -->
-        <div class="mb-12 flex flex-col items-center relative">
-            <p class="tag text-zinc-700 mb-3">Athleten weltweit</p>
-            <div class="relative">
-                <div class="absolute inset-0 blur-[80px] bg-cyan-500/15 rounded-full pointer-events-none"></div>
-                <span id="liveCounter" class="stat-number relative text-[clamp(6rem,22vw,16rem)] text-gradient-cyan text-glow" style="min-width:2ch;display:block;text-align:center;">–</span>
-            </div>
-            <div class="glow-line w-48 mt-2 mb-4"></div>
-            <p class="tag text-zinc-600">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Live · Jetzt dabei sein
-            </p>
-        </div>
+        <p class="text-zinc-600 text-sm mb-12">Athleten aus 8 Ländern trainieren bereits mit BASE.</p>
 
         <p class="text-lg md:text-xl text-zinc-400 max-w-2xl mb-12 leading-relaxed font-medium">
             BASE kennt deine komplette Trainingshistorie — und gibt dir echte Empfehlungen. 
@@ -1451,50 +1439,5 @@
         window.addEventListener('load', () => { if(window.lucide) lucide.createIcons(); });
     </script>
 
-    <!-- Live Counter Script -->
-    <script>
-        async function loadLiveCounter() {
-            const el = document.getElementById('liveCounter');
-            if (!el) return;
-
-            let targetCount = 52; // Fallback
-            try {
-                const res = await fetch('/.netlify/functions/usercount');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.count && data.count > 0) targetCount = data.count;
-                }
-            } catch(e) {}
-
-            // Animiertes Hochzählen
-            animateCounter(el, 0, targetCount, 1800);
-        }
-
-        function animateCounter(el, from, to, duration) {
-            const start = performance.now();
-            const update = (now) => {
-                const elapsed = now - start;
-                const progress = Math.min(elapsed / duration, 1);
-                // Ease-out cubic
-                const eased = 1 - Math.pow(1 - progress, 3);
-                const current = Math.round(from + (to - from) * eased);
-                el.textContent = current;
-                if (progress < 1) requestAnimationFrame(update);
-            };
-            requestAnimationFrame(update);
-        }
-
-        // Counter starten wenn Element sichtbar ist
-        const counterEl = document.getElementById('liveCounter');
-        if (counterEl) {
-            const obs = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) {
-                    loadLiveCounter();
-                    obs.disconnect();
-                }
-            }, { threshold: 0.1 });
-            obs.observe(counterEl);
-        }
-    </script>
 </body>
 </html>

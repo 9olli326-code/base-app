@@ -114,6 +114,8 @@ let obRole = 'athlete';
 let _obFocus = { strength: true, cardio: false, recovery: false, main: false };
 let _obQuickWorkoutSaved = false;
 let _obSelectedExercise = null;
+let _obPtSpecs = [];
+const _OB_PT_SPECS = ['Krafttraining','Ausdauer','Gewichtsverlust','Rehabilitation','Bodybuilding','CrossFit','Yoga/Pilates','Kampfsport','Senioren-Fitness'];
 
 const _OB_FOCUS_CARDS = [
     { key:'strength', icon:'dumbbell', name:'Krafttraining', color:'cyan', sub:'Sätze, Gewicht, 1RM' },
@@ -149,20 +151,28 @@ window.obSetRole = function(role) {
 };
 
 window.obNext = function(step) {
-    [1,2,3,4,5].forEach(s => {
+    // Alle Steps verstecken (inkl. PT-Steps)
+    ['1','2','3','4','5','3pt','4pt'].forEach(s => {
         const el = document.getElementById('ob-step-'+s);
         if(el) el.classList.add('hidden');
     });
     const target = document.getElementById('ob-step-'+step);
     if(target) target.classList.remove('hidden');
+    // Flow bestimmen
+    var flow = obRole === 'pt' ? [1, 2, '3pt', '4pt', 5] : [1, 2, 3, 4, 5];
+    var dotIdx = flow.indexOf(step);
+    if(dotIdx === -1) dotIdx = flow.indexOf(Number(step));
+    var dotColor = obRole === 'pt' ? 'bg-indigo-500' : 'bg-primary';
+    var dotFade = obRole === 'pt' ? 'bg-indigo-500/40' : 'bg-primary/40';
     // Update dots
-    const dotsRow = document.getElementById('obDotsRow');
-    if(dotsRow) dotsRow.innerHTML = [1,2,3,4,5].map(i => `<span class="w-2 h-2 rounded-full transition-colors ${i === step ? 'bg-primary' : i < step ? 'bg-primary/40' : 'bg-zinc-700'}"></span>`).join('');
+    var dotsRow = document.getElementById('obDotsRow');
+    if(dotsRow) dotsRow.innerHTML = flow.map(function(s, i) { return '<span class="w-2 h-2 rounded-full transition-colors ' + (i === dotIdx ? dotColor : i < dotIdx ? dotFade : 'bg-zinc-700') + '"></span>'; }).join('');
     // Step-specific init
-    if(step === 1) setTimeout(() => { document.querySelectorAll('.ob-feature').forEach(f => { f.style.opacity = '1'; f.style.transform = 'translateY(0)'; }); }, 100);
+    if(step === 1) setTimeout(function() { document.querySelectorAll('.ob-feature').forEach(function(f) { f.style.opacity = '1'; f.style.transform = 'translateY(0)'; }); }, 100);
     if(step === 3) window._renderObFocusCards();
     if(step === 4) window._renderObWorkoutCards();
-    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    if(step === '4pt') window._renderObPtSpecChips();
+    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
 };
 
 window._renderObFocusCards = function() {
@@ -182,6 +192,26 @@ window._renderObFocusCards = function() {
 window._toggleObFocus = function(key) {
     _obFocus[key] = !_obFocus[key];
     window._renderObFocusCards();
+};
+
+// PT Onboarding: Spezialisierung Chips
+window._renderObPtSpecChips = function() {
+    var c = document.getElementById('obPtSpecChips');
+    if(!c) return;
+    c.innerHTML = _OB_PT_SPECS.map(function(spec) {
+        var active = _obPtSpecs.indexOf(spec) !== -1;
+        return '<button type="button" onclick="window._toggleObPtSpec(\'' + spec.replace(/'/g, "\\'") + '\')" class="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer pointer-events-auto transition-all ' +
+            (active ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700') +
+            ' border">' + window._escapeHtml(spec) + '</button>';
+    }).join('');
+    // Enable/disable Weiter
+    var btn = document.getElementById('obPtSpecNext');
+    if(btn) { btn.disabled = _obPtSpecs.length === 0; btn.style.opacity = _obPtSpecs.length === 0 ? '0.4' : '1'; }
+};
+window._toggleObPtSpec = function(spec) {
+    var idx = _obPtSpecs.indexOf(spec);
+    if(idx === -1) _obPtSpecs.push(spec); else _obPtSpecs.splice(idx, 1);
+    window._renderObPtSpecChips();
 };
 
 window._renderObWorkoutCards = function() {
@@ -288,16 +318,29 @@ window.obSkipAuth = function() {
 };
 
 window.obFinish = function() {
-    window.userProfile.modules = {
-        strength: !!_obFocus.strength,
-        cardio: !!_obFocus.cardio,
-        recovery: !!_obFocus.recovery,
-        main: !!_obFocus.main,
-    };
-    window.userProfile.widgets = {
-        readiness: false,
-        ptMode: obRole === 'pt'
-    };
+    if(obRole === 'pt') {
+        // PT: Module auf Allround setzen, Spezialisierung + Studio speichern
+        window.userProfile.modules = { strength: true, cardio: true, recovery: true, main: false };
+        window.userProfile.widgets = { readiness: false, ptMode: true };
+        // Studio-Name speichern
+        var ptName = (document.getElementById('obPtName')?.value || '').trim();
+        if(ptName) {
+            var branding = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
+            branding.name = ptName;
+            localStorage.setItem('base_trainer_branding', JSON.stringify(branding));
+        }
+        // Spezialisierungen speichern
+        if(_obPtSpecs.length > 0) localStorage.setItem('base_pt_onboard_specs', JSON.stringify(_obPtSpecs));
+    } else {
+        // Athlet: Module nach Fokus
+        window.userProfile.modules = {
+            strength: !!_obFocus.strength,
+            cardio: !!_obFocus.cardio,
+            recovery: !!_obFocus.recovery,
+            main: !!_obFocus.main,
+        };
+        window.userProfile.widgets = { readiness: false, ptMode: false };
+    }
     window.userProfile.onboardingDone = true;
     localStorage.setItem('beastmode_v2_profile', JSON.stringify(window.userProfile));
     window.toggleModal('onboardingModal');
@@ -306,7 +349,17 @@ window.obFinish = function() {
     if(typeof window.populateProfile === 'function') window.populateProfile();
     if(typeof window.renderTable === 'function') window.renderTable();
     if(window.lucide) lucide.createIcons();
-    window.showToast('Willkommen bei BASE!');
+    if(obRole === 'pt') {
+        // PT-Modus automatisch aktivieren
+        if(typeof window.activatePTMode === 'function') setTimeout(function() { window.switchMode('pt'); window.activatePTMode(); }, 300);
+        window.showToast('Willkommen, Trainer!');
+    } else {
+        window.showToast('Willkommen bei BASE!');
+        // Nach Onboarding: Kraft vorauswählen damit das Formular sofort sichtbar ist
+        setTimeout(function() {
+            if(typeof window.switchCategory === 'function') window.switchCategory('strength');
+        }, 200);
+    }
 };
 
 // Auth-Skipped Nachfass Banner
@@ -432,5 +485,69 @@ window.renderRoutinesList = function() {
             </div>
         </div>`;
     }).join('');
+    if(window.lucide) lucide.createIcons();
+};
+
+// ── MODE-SELECTOR & FLOATING MODE SWITCH ──────────────────
+
+window.selectStartMode = function(mode) {
+    var remember = document.getElementById('modeRememberCheck');
+    if(remember && !remember.checked) {
+        localStorage.setItem('base_default_mode', mode);
+        localStorage.setItem('base_show_mode_selector', 'false');
+    } else {
+        localStorage.setItem('base_show_mode_selector', 'true');
+    }
+    window.toggleModal('modeSelectorModal');
+    if(mode === 'pt') {
+        window.switchMode('pt');
+        window.activatePTMode();
+    } else {
+        window.switchMode('personal');
+        window.deactivatePTMode();
+    }
+};
+
+window.showModeSelector = function() {
+    if(!window.userProfile || !window.userProfile.widgets || !window.userProfile.widgets.ptMode) return;
+    var defaultMode = localStorage.getItem('base_default_mode');
+    var showSelector = localStorage.getItem('base_show_mode_selector');
+    if(showSelector === 'false' && defaultMode) {
+        if(defaultMode === 'pt') { window.switchMode('pt'); window.activatePTMode(); }
+        else { window.switchMode('personal'); window.deactivatePTMode(); }
+        return;
+    }
+    window.toggleModal('modeSelectorModal');
+    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+};
+
+window.toggleModeQuick = function() {
+    if(window.currentMode === 'pt') {
+        window.switchMode('personal');
+        window.deactivatePTMode();
+    } else {
+        window.switchMode('pt');
+        window.activatePTMode();
+    }
+    window.updateFloatingModeBtn();
+};
+
+window.updateFloatingModeBtn = function() {
+    var btn = document.getElementById('floatingModeSwitch');
+    if(!btn) return;
+    if(!window.userProfile || !window.userProfile.widgets || !window.userProfile.widgets.ptMode) {
+        btn.style.display = 'none';
+        return;
+    }
+    btn.style.display = 'flex';
+    if(window.currentMode === 'pt') {
+        btn.style.background = 'rgba(6,182,212,0.15)';
+        btn.style.border = '1px solid rgba(6,182,212,0.3)';
+        btn.innerHTML = '<i data-lucide="dumbbell" class="w-5 h-5 pointer-events-none" style="color:#06b6d4"></i>';
+    } else {
+        btn.style.background = 'rgba(99,102,241,0.15)';
+        btn.style.border = '1px solid rgba(99,102,241,0.3)';
+        btn.innerHTML = '<i data-lucide="users" class="w-5 h-5 pointer-events-none" style="color:#6366f1"></i>';
+    }
     if(window.lucide) lucide.createIcons();
 };
