@@ -267,6 +267,72 @@
         .confetti-piece { position: fixed; width: 6px; height: 6px; border-radius: 1px; pointer-events: none; z-index: 901; animation: confettiFall 3s ease-in forwards; }
         @keyframes celebScale { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .celeb-number { animation: celebScale 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+        /* KI Discovery Hints */
+        .ki-hint-card {
+            background: rgba(163,201,168,0.06);
+            border: 1px solid rgba(163,201,168,0.2);
+            border-radius: var(--ui-radius);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            animation: kiHintIn 0.5s ease-out;
+            position: relative;
+        }
+        .ki-hint-card .ki-hint-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            color: #a3c9a8;
+            margin-bottom: 4px;
+        }
+        .ki-hint-card .ki-hint-text {
+            font-size: 11px;
+            color: #71717a;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .ki-hint-card .ki-hint-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: rgba(163,201,168,0.12);
+            border: 1px solid rgba(163,201,168,0.25);
+            color: #a3c9a8;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ki-hint-card .ki-hint-cta:hover {
+            background: rgba(163,201,168,0.2);
+        }
+        .ki-hint-card .ki-hint-dismiss {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #52525b;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .ki-hint-card .ki-hint-dismiss:hover {
+            color: #a1a1aa;
+        }
+        @keyframes kiHintIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ki-hint-out {
+            animation: kiHintOut 0.3s ease-in forwards;
+        }
+        @keyframes kiHintOut {
+            to { opacity: 0; transform: translateY(-8px); height: 0; padding: 0; margin: 0; border: 0; overflow: hidden; }
+        }
     </style>
 
     <script>
@@ -3141,6 +3207,7 @@
             const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
             
             window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility();
+            if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('init'); }, 3000);
             // ── Design Morph: Initiales Theme setzen ──
             if (window.DESIGN_MORPH_ACTIVE && window._applyModeTheme) {
                 var _dmInitMode = 'athlete';
@@ -3360,6 +3427,7 @@
                 if(window.syncToCloud) window.syncToCloud(entry);
                 // Auth-Skipped Nachfass prüfen
                 window._checkAuthSkippedBanner();
+                if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-saved'); }, 2000);
             } catch (err) { 
                 console.error("Speicher-Fehler:", err); 
                 window.showToast("Fehler beim Speichern: " + err.message); 
@@ -3371,7 +3439,7 @@
         window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
         // --- DASHBOARD & TABELLE ---
-        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); }, true); };
+        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); }, true); };
         // ============================================================
         // ERSTES WORKOUT FLOW
         // ============================================================
@@ -5838,6 +5906,7 @@
             if(tab === 'tools') {
                 const el = document.getElementById('toolsZnsScore');
                 if(el) el.textContent = window.currentReadinessScore + '%';
+                if (window._checkKiDiscovery) window._checkKiDiscovery('tools-tab');
             }
             // Charts initialisieren wenn Analyse-Tab
             if(tab === 'analyse' && window.currentView === 'chart') window.initAnalytics();
@@ -7607,6 +7676,163 @@
             }
         });
 
+        // ============================================================
+        // KI DISCOVERY — Progressive Hint-Cards
+        // ============================================================
+
+        const _kiHints = [
+            {
+                threshold: 1,
+                flag: 'base_ki_hint_coach',
+                icon: 'sparkles',
+                title: 'Dein KI Coach ist bereit',
+                text: 'Du hast dein erstes Workout gespeichert! Der KI Coach analysiert deine Daten und gibt dir personalisierte Empfehlungen.',
+                ctaText: 'Coach starten',
+                ctaAction: function() {
+                    window.switchTab('tools');
+                    setTimeout(function() {
+                        var btn = document.querySelector('[onclick*="analyzeWithAI"]') || document.querySelector('[onclick*="openAICoach"]');
+                        if (btn) btn.click();
+                    }, 300);
+                }
+            },
+            {
+                threshold: 3,
+                flag: 'base_ki_hint_plan',
+                icon: 'calendar-check',
+                title: 'KI Trainingsplan verfuegbar',
+                text: 'Mit 3 Workouts hat die KI genug Daten fuer einen intelligenten Trainingsplan — auf dein Level zugeschnitten.',
+                ctaText: 'Plan erstellen',
+                ctaAction: function() {
+                    window.switchTab('tools');
+                    setTimeout(function() {
+                        var btn = document.querySelector('[onclick*="openTrainingPlanModal"]') || document.querySelector('[onclick*="generatePlan"]');
+                        if (btn) btn.click();
+                    }, 300);
+                }
+            },
+            {
+                threshold: 5,
+                flag: 'base_ki_hint_zns',
+                icon: 'activity',
+                title: 'ZNS Readiness freigeschaltet',
+                text: 'Dein Nervensystem-Score zeigt dir ob du heute voll belasten kannst oder besser leicht trainierst.',
+                ctaText: 'Recovery checken',
+                ctaAction: function() {
+                    window.switchTab('tools');
+                    setTimeout(function() {
+                        var btn = document.querySelector('[onclick*="analyzeReadiness"]');
+                        if (btn) btn.click();
+                    }, 300);
+                }
+            },
+            {
+                threshold: 7,
+                flag: 'base_ki_hint_prehab',
+                icon: 'shield-check',
+                title: 'Pre-Hab: Verletzungen vorbeugen',
+                text: 'Die KI erkennt einseitige Belastungen und schlaegt Aktivierungsuebungen vor — bevor Probleme entstehen.',
+                ctaText: 'Pre-Hab starten',
+                ctaAction: function() {
+                    window.switchTab('tools');
+                    setTimeout(function() {
+                        var btn = document.querySelector('[onclick*="generatePreHab"]');
+                        if (btn) btn.click();
+                    }, 300);
+                }
+            },
+            {
+                threshold: 10,
+                flag: 'base_ki_hint_copilot',
+                icon: 'cpu',
+                title: 'KI Co-Pilot freigeschaltet',
+                text: 'Der Co-Pilot schlaegt dir fuer jede Uebung Saetze, Gewicht und RPE vor — basierend auf deinem gesamten Verlauf.',
+                ctaText: 'Co-Pilot testen',
+                ctaAction: function() {
+                    window.switchTab('tools');
+                }
+            }
+        ];
+
+        const _kiOverviewHint = {
+            flag: 'base_ki_hint_overview',
+            icon: 'sparkles',
+            title: '5 KI-Werkzeuge fuer dein Training',
+            text: 'Coach, Trainingsplan, ZNS Readiness, Pre-Hab und Co-Pilot — alle arbeiten mit deinen echten Daten.',
+            ctaText: null
+        };
+
+        window._checkKiDiscovery = function(context) {
+            if (window.currentMode === 'pt') return;
+
+            var container = document.getElementById('kiDiscoveryContainer');
+            if (!container) {
+                var trackerMain = document.getElementById('trackerMain');
+                if (!trackerMain || !trackerMain.parentNode) return;
+                container = document.createElement('div');
+                container.id = 'kiDiscoveryContainer';
+                trackerMain.parentNode.insertBefore(container, trackerMain);
+            }
+
+            if (container.children.length > 0) return;
+
+            var archivedCount = 0;
+            if (Array.isArray(window.workouts)) {
+                archivedCount = window.workouts.filter(function(w) { return w.archived; }).length;
+            }
+
+            if (context === 'tools-tab') {
+                if (!localStorage.getItem(_kiOverviewHint.flag)) {
+                    _renderKiHint(container, _kiOverviewHint);
+                    return;
+                }
+            }
+
+            for (var i = _kiHints.length - 1; i >= 0; i--) {
+                var hint = _kiHints[i];
+                if (archivedCount >= hint.threshold && !localStorage.getItem(hint.flag)) {
+                    _renderKiHint(container, hint);
+                    return;
+                }
+            }
+        };
+
+        function _renderKiHint(container, hint) {
+            var hasAction = hint.ctaAction && hint.ctaText;
+            var hintId = 'kiHint_' + hint.flag;
+
+            container.innerHTML =
+                '<div class="ki-hint-card" id="' + hintId + '">' +
+                    '<button class="ki-hint-dismiss pointer-events-auto" onclick="window._dismissKiHint(\'' + hint.flag + '\', \'' + hintId + '\')" aria-label="Schliessen">' +
+                        '<i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>' +
+                    '</button>' +
+                    '<div class="flex items-start gap-3">' +
+                        '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(163,201,168,0.12);border:1px solid rgba(163,201,168,0.2)">' +
+                            '<i data-lucide="' + hint.icon + '" class="w-4 h-4" style="color:#a3c9a8"></i>' +
+                        '</div>' +
+                        '<div class="flex-1 min-w-0">' +
+                            '<p class="ki-hint-title">' + hint.title + '</p>' +
+                            '<p class="ki-hint-text">' + hint.text + '</p>' +
+                            (hasAction ? '<button class="ki-hint-cta pointer-events-auto" onclick="window._dismissKiHint(\'' + hint.flag + '\', \'' + hintId + '\'); (' + hint.ctaAction.toString() + ')()">' +
+                                '<i data-lucide="arrow-right" class="w-3 h-3 pointer-events-none"></i> ' + hint.ctaText +
+                            '</button>' : '') +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+        }
+
+        window._dismissKiHint = function(flag, elementId) {
+            localStorage.setItem(flag, '1');
+            var el = document.getElementById(elementId);
+            if (el) {
+                el.classList.add('ki-hint-out');
+                setTimeout(function() {
+                    if (el.parentNode) el.parentNode.removeChild(el);
+                }, 350);
+            }
+        };
 
     </script>
 
