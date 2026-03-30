@@ -2999,18 +2999,18 @@ window.switchPTTab = function(tab) {
 // ============================================================
 
 var _cstIcons = [
-    { icon: 'heart', label: 'Herz' },
-    { icon: 'moon', label: 'Ruhe' },
-    { icon: 'sun', label: 'Energie' },
-    { icon: 'wind', label: 'Atem' },
-    { icon: 'waves', label: 'Wasser' },
-    { icon: 'mountain', label: 'Berg' },
-    { icon: 'swords', label: 'Kampf' },
-    { icon: 'shield', label: 'Schutz' },
-    { icon: 'target', label: 'Ziel' },
-    { icon: 'music', label: 'Musik' },
+    { icon: 'heart-pulse', label: 'Cardio' },
     { icon: 'brain', label: 'Mental' },
-    { icon: 'leaf', label: 'Natur' }
+    { icon: 'wind', label: 'Atem' },
+    { icon: 'moon', label: 'Recovery' },
+    { icon: 'flame', label: 'HIIT' },
+    { icon: 'waves', label: 'Aqua' },
+    { icon: 'mountain', label: 'Outdoor' },
+    { icon: 'stretch-horizontal', label: 'Stretch' },
+    { icon: 'footprints', label: 'Laufen' },
+    { icon: 'bike', label: 'Rad' },
+    { icon: 'swords', label: 'Kampf' },
+    { icon: 'baby', label: 'Pre/Post' }
 ];
 var _cstSelectedIcon = 'heart';
 
