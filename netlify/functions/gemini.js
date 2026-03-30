@@ -45,6 +45,15 @@ plan:(c)=>`Du bist Strength & Conditioning Specialist.\n\n${SD}\n\nATHLETENPROFI
 report:(c)=>`Du bist Personal Trainer.\n\nKunde: ${c.clientName}\nWorkouts:\n${c.recentWorkouts||'Keine'}\n\n1) Zusammenfassung\n2) Fortschritte\n3) Empfehlung\n\nMax 200 Wörter. Antworte auf ${c.lang}.`,
 builder:(c)=>c.builderPrompt
 };
+function sanitizeForPrompt(str, maxLen) {
+    if (!str) return '';
+    maxLen = maxLen || 500;
+    return String(str)
+        .replace(/[\x00-\x1F\x7F]/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .substring(0, maxLen)
+        .trim();
+}
 function callGemini(prompt,temperature,jsonMode,systemPrompt){return new Promise((resolve,reject)=>{const url=`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;const b={contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:temperature||0.3}};if(jsonMode)b.generationConfig.responseMimeType='application/json';if(systemPrompt)b.system_instruction={parts:[{text:systemPrompt}]};const pd=JSON.stringify(b);const u=new URL(url);const req=https.request({hostname:u.hostname,path:u.pathname+u.search,method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(pd)}},(res)=>{let d='';res.on('data',ch=>d+=ch);res.on('end',()=>{try{const p=JSON.parse(d);if(p.error){console.error('Gemini API Error:',JSON.stringify(p.error));reject(new Error(p.error.message||'Gemini API Error'));return;}const parts=p?.candidates?.[0]?.content?.parts||[];
             // Thinking models haben mehrere parts — letzten Text nehmen
             let t='';
@@ -59,7 +68,22 @@ let body;try{body=JSON.parse(event.body);}catch(e){return{statusCode:400,headers
 if(body.contents&&Array.isArray(body.contents)){try{const pr=body.contents[0]?.parts?.[0]?.text||'';const tm=body.generationConfig?.temperature||0.3;const jm=body.generationConfig?.responseMimeType==='application/json';const sp=body.system_instruction?.parts?.[0]?.text||'';const reply=await callGemini(pr,tm,jm,sp);return{statusCode:200,headers:h,body:JSON.stringify({reply})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
 if(body.prompt&&!body.type){try{const sp=body.systemPrompt||'';const reply=await callGemini(body.prompt,0.3,false,sp);return{statusCode:200,headers:h,body:JSON.stringify({parts:[{text:reply}]})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
 const{type,context}=body;if(!type||!context)return{statusCode:400,headers:h,body:JSON.stringify({error:'type und context erforderlich'})};
-try{const as=buildAthleteSummary(context.workouts||[],context.profile||{});const ctx={profile:context.profileStr||'Keine',injuries:context.injuries||'keine',znsScore:context.znsScore||'?',recentWorkouts:context.recentWorkouts||'Keine',exercise:context.exercise||'',exerciseHistory:context.exerciseHistory||'',athleteSummary:as,lang:context.lang||'Deutsch',goal:context.goal||'',duration:context.duration||6,days:context.days||4,orms:context.orms||'',clientName:context.clientName||'',builderPrompt:context.builderPrompt||''};
+try{const as=buildAthleteSummary(context.workouts||[],context.profile||{});const ctx={
+    profile: sanitizeForPrompt(context.profileStr, 500) || 'Keine',
+    injuries: sanitizeForPrompt(context.injuries, 300) || 'keine',
+    znsScore: context.znsScore || '?',
+    recentWorkouts: sanitizeForPrompt(context.recentWorkouts, 3000) || 'Keine',
+    exercise: sanitizeForPrompt(context.exercise, 100) || '',
+    exerciseHistory: sanitizeForPrompt(context.exerciseHistory, 2000) || '',
+    athleteSummary: as,
+    lang: context.lang || 'Deutsch',
+    goal: sanitizeForPrompt(context.goal, 200) || '',
+    duration: context.duration || 6,
+    days: context.days || 4,
+    orms: sanitizeForPrompt(context.orms, 300) || '',
+    clientName: sanitizeForPrompt(context.clientName, 50) || '',
+    builderPrompt: sanitizeForPrompt(context.builderPrompt, 1000) || ''
+};
 const tf=PT[type];if(!tf)return{statusCode:400,headers:h,body:JSON.stringify({error:'Unbekannter Typ: '+type})};
 const prompt=tf(ctx);const temp=type==='plan'?0.4:type==='builder'?0.2:0.3;const jm=type==='builder'&&context.jsonMode;
 const reply=await callGemini(prompt,temp,jm);return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as})};}catch(e){console.error('AI Engine Error:',e);return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}};
