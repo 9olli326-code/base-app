@@ -4,66 +4,95 @@
 // Ausgelagert aus app.html für Modularisierung
 // ============================================================
 
-// --- 4. DESIGN KI WIEDERHERGESTELLT ---
+// --- 4. DESIGN KI (Design Studio) ---
 window.runDesignAI = async function() {
     if(!window.checkOnlineForAI()) return;
-    const prompt = document.getElementById('designPrompt').value.trim(); if (!prompt) { window.showToast("Bitte gib einen Wunsch ein!"); return; }
-    const btn = document.getElementById('btnRunDesignAi'); const origHTML = btn.innerHTML;
-    btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i>`; btn.disabled = true; if(window.lucide) lucide.createIcons();
-    const currentTheme = localStorage.getItem('beastmode_v2_theme') || "{}";
-    const sysPrompt = `Du bist ein weltklasse UI/UX Designer und Creative Director mit 15 Jahren Erfahrung in App-Design für Premium-Brands. Du designst für die Elite-Fitness-App BASE.
+    var prompt = document.getElementById('designPrompt').value.trim();
+    if (!prompt) { window.showToast("Bitte beschreibe dein Wunsch-Design!"); return; }
+    var btn = document.getElementById('btnRunDesignAi');
+    var origHTML = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> KI designt...';
+    btn.disabled = true;
+    if(window.lucide) lucide.createIcons();
 
-DEINE DESIGNPRINZIPIEN:
-- Jede Farbpalette muss ein kohärentes, professionelles System sein — keine zufälligen Farben
-- Kontrastverhältnisse müssen WCAG AA erfüllen (min. 4.5:1 für Text)
-- Primärfarbe definiert die gesamte Persönlichkeit der App
-- Hintergründe: immer dunkel und tief, nie flach
-- Typografie: Heading-Font prägt den Charakter, Body-Font maximiert Lesbarkeit
-- Border-Radius definiert ob die App "hart & angular" oder "weich & modern" wirkt
-- Shadows und Blur schaffen Tiefe und Hierarchie
+    var sysPrompt = 'Du bist ein weltklasse UI/UX Designer fuer die Fitness-App BASE.\n\n' +
+        'DESIGN-PRINZIPIEN:\n' +
+        '- Kohaerentes Farbsystem: Alle Farben muessen harmonisch zusammenpassen\n' +
+        '- WCAG AA Kontrast (min 4.5:1 fuer Text auf Hintergrund)\n' +
+        '- Die 4 Kategorie-Farben (Kraft, Ausdauer, Mobility, Sport) muessen zum Gesamtdesign passen\n' +
+        '  aber trotzdem UNTERSCHEIDBAR sein\n' +
+        '- Hintergrund: dunkel und tief, nie flach grau\n' +
+        '- Shadow und Blur erzeugen Tiefe\n\n' +
+        'VERFUEGBARE GOOGLE FONTS:\n' +
+        'Heading: Sora, Barlow Condensed, Bebas Neue, Montserrat, Oswald, Rajdhani, Orbitron, ' +
+        'Black Ops One, Exo 2, Oxanium, Russo One, Anton, Teko\n' +
+        'Body: Outfit, Inter, DM Sans, IBM Plex Sans, Nunito Sans, Plus Jakarta Sans\n\n' +
+        'WICHTIG zu catKraft/catAusdauer/catMobility/catSport:\n' +
+        '- Diese 4 Farben werden fuer Kategorie-Tabs und Akzente genutzt\n' +
+        '- Sie muessen sich DEUTLICH voneinander unterscheiden\n' +
+        '- Sie muessen zum primary und bg Farbschema passen\n' +
+        '- Kraft = Staerke/Power-Assoziation\n' +
+        '- Ausdauer = Energie/Herz-Assoziation\n' +
+        '- Mobility = Ruhe/Flow-Assoziation\n' +
+        '- Sport = Warm/Vielseitig-Assoziation\n\n' +
+        'Antworte NUR mit JSON (kein Markdown, keine Backticks):\n' +
+        '{\n' +
+        '  "theme": {\n' +
+        '    "primary": "#HEX",\n' +
+        '    "secondary": "#HEX",\n' +
+        '    "bg": "#HEX — sehr dunkler Hintergrund",\n' +
+        '    "surface": "#HEX — Kartenoberflaeche, etwas heller als bg",\n' +
+        '    "innerBg": "#HEX — innere Elemente, etwas dunkler als bg",\n' +
+        '    "border": "#HEX — subtile Raender",\n' +
+        '    "textMain": "#HEX — Haupttext",\n' +
+        '    "textMuted": "#HEX — gedaempfter Text",\n' +
+        '    "fontHeading": "Exakter Google Font Name",\n' +
+        '    "fontBody": "Exakter Google Font Name",\n' +
+        '    "radius": "z.B. 16px",\n' +
+        '    "shadow": "CSS box-shadow Wert",\n' +
+        '    "blur": "CSS backdrop-blur z.B. 12px",\n' +
+        '    "catKraft": "#HEX — Kraft-Kategorie Akzentfarbe",\n' +
+        '    "catAusdauer": "#HEX — Ausdauer-Kategorie Akzentfarbe",\n' +
+        '    "catMobility": "#HEX — Mobility-Kategorie Akzentfarbe",\n' +
+        '    "catSport": "#HEX — Mein Sport Kategorie Akzentfarbe"\n' +
+        '  },\n' +
+        '  "designName": "Kurzer Name",\n' +
+        '  "designDescription": "Ein Satz Beschreibung"\n' +
+        '}';
 
-VERFÜGBARE GOOGLE FONTS (Heading): Barlow Condensed, Bebas Neue, Montserrat, Oswald, Rajdhani, Orbitron, Black Ops One, Exo 2, Oxanium, Russo One, Anton, Teko
-VERFÜGBARE GOOGLE FONTS (Body): Inter, DM Sans, IBM Plex Sans, Outfit, Nunito Sans, Plus Jakarta Sans
-
-DESIGN-STILE DIE DU BEHERRSCHST:
-- Military/Tactical: Oliv, Khaki, harte Kanten, mono fonts
-- Cyberpunk/Neon: Electric Blue/Purple/Green auf tiefem Schwarz, Orbitron
-- Luxury/Premium: Gold/Champagne auf Midnight, elegante Fonts
-- Minimal/Clean: Reines Weiß/Grau System, viel Luft
-- Sports/Energy: Aggressive Rottöne/Orange, kondensierte Fonts
-- Nature/Wellness: Erdtöne, Grün, organische Formen
-- Ocean/Calm: Tiefes Blau/Türkis, smooth curves
-
-SCHEMA (antworte NUR mit diesem JSON, kein Text davor oder danach):
-{
-  "theme": {
-    "primary": "#HEX — Hauptakzentfarbe, satt und kräftig",
-    "secondary": "#HEX — Sekundärfarbe für Highlights",
-    "bg": "#HEX — Haupthintergrund, sehr dunkel",
-    "surface": "#HEX — Kartenoberfläche, minimal heller als bg",
-    "innerBg": "#HEX — Innere Elemente, minimal dunkler als bg",
-    "border": "#HEX — Subtile Grenzen, kaum sichtbar",
-    "textMain": "#HEX — Haupttext, fast weiß",
-    "textMuted": "#HEX — Gedämpfter Text, mittlere Helligkeit",
-    "fontHeading": "Exact Google Font Name",
-    "fontBody": "Exact Google Font Name",
-    "radius": "CSS border-radius z.B. 16px oder 8px oder 24px",
-    "shadow": "CSS box-shadow vollständiger Wert",
-    "blur": "CSS backdrop-blur Wert z.B. 12px"
-  },
-  "designName": "Kurzer einprägsamer Name des Stils",
-  "designDescription": "Ein Satz der den Stil beschreibt"
-}`;
     try {
-        const controller = new AbortController(); const timeoutId = setTimeout(() => controller.abort(), 12000);
-        const res = await fetch('/.netlify/functions/gemini?_cb=' + Date.now(), { method: 'POST', cache: 'no-store', signal: controller.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: sysPrompt + "\n\nKundenwunsch: " + prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } }) });
-        clearTimeout(timeoutId); if (!res.ok) throw new Error("Server Fehler");
-        const data = await res.json(); let jsonStr = data.reply || "{}"; jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        const result = JSON.parse(jsonStr); 
-        if(result.theme) {
-            localStorage.setItem('beastmode_v2_theme', JSON.stringify(result.theme)); window.showToast("Transformation läuft..."); setTimeout(() => window.location.reload(), 1000); 
-        } else { throw new Error("Kein Theme im JSON gefunden"); }
-    } catch(e) { window.showToast("KI Fehler beim Design: " + e.message); } finally { btn.innerHTML = origHTML; btn.disabled = false; if(window.lucide) lucide.createIcons(); }
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 30000);
+        var res = await fetch('/.netlify/functions/gemini?_cb=' + Date.now(), {
+            method: 'POST',
+            cache: 'no-store',
+            signal: controller.signal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: sysPrompt + '\n\nKundenwunsch: ' + prompt }] }],
+                generationConfig: { responseMimeType: 'application/json', temperature: 0.3 }
+            })
+        });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('Server Fehler');
+        var data = await res.json();
+        var jsonStr = (data.reply || '{}').replace(/```json/g, '').replace(/```/g, '').trim();
+        var result = JSON.parse(jsonStr);
+        if (result.theme) {
+            localStorage.setItem('beastmode_v2_theme', JSON.stringify(result.theme));
+            var name = result.designName || 'Custom';
+            window.showToast(name + ' wird geladen...');
+            setTimeout(function() { window.location.reload(); }, 800);
+        } else {
+            throw new Error('Kein Theme im JSON');
+        }
+    } catch(e) {
+        window.showToast('Design-KI Fehler: ' + e.message);
+    } finally {
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+        if(window.lucide) lucide.createIcons();
+    }
 };
 
 window.toggleBuilderSection = function() { const b = document.getElementById('builderSection'); if(b.classList.contains('hidden')) { b.classList.remove('hidden'); b.classList.add('block'); } else { b.classList.add('hidden'); b.classList.remove('block'); } };
