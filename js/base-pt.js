@@ -400,7 +400,7 @@ listEl.innerHTML = window.clients.map(c => {
         ${goalTag}
         <div class="flex items-center justify-between mt-2">
             <div class="flex items-center gap-1.5">
-                <div class="w-1.5 h-1.5 rounded-full" style="background:${weekCount > 0 ? '#10b981' : '#52525b'}"></div>
+                <div class="w-1.5 h-1.5 rounded-full" style="background:${weekCount > 0 ? '#8aafe8' : '#52525b'}"></div>
                 <p class="text-[10px] font-bold" style="color:var(--text-muted)">${weekCount}× diese Woche</p>
             </div>
             <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 pointer-events-none"></i>
@@ -851,9 +851,9 @@ for(let d = 1; d <= daysInMonth; d++) {
     else if(isToday) { bg = _cc + '14'; border = _cc + '33'; textColor = '#fff'; }
     else if(daySessions.length > 0) { textColor = '#fff'; }
 
-    const dots = (hasKraft ? '<span style="width:3px;height:3px;border-radius:50%;background:#06b6d4;display:inline-block"></span>' : '')
-        + (hasAusdauer ? '<span style="width:3px;height:3px;border-radius:50%;background:#ef4444;display:inline-block"></span>' : '')
-        + (hasMobility ? '<span style="width:3px;height:3px;border-radius:50%;background:#10b981;display:inline-block"></span>' : '');
+    const dots = (hasKraft ? '<span style="width:3px;height:3px;border-radius:50%;background:#a3c9a8;display:inline-block"></span>' : '')
+        + (hasAusdauer ? '<span style="width:3px;height:3px;border-radius:50%;background:#e88a8a;display:inline-block"></span>' : '')
+        + (hasMobility ? '<span style="width:3px;height:3px;border-radius:50%;background:#8aafe8;display:inline-block"></span>' : '');
 
     html += `<button onclick="window._selectClientCalDay('${dateStr}','${clientId}')" class="h-8 rounded flex flex-col items-center justify-center cursor-pointer pointer-events-auto transition-all hover:opacity-80" style="background:${bg};border:1px solid ${border}">
         <span class="text-[10px] font-black" style="color:${textColor}">${d}</span>
@@ -889,7 +889,7 @@ if(daySessions.length === 0) {
     window._refreshLucide();
     return;
 }
-const typeMap = { kraft: {icon:'dumbbell',color:'#06b6d4',bg:'rgba(6,182,212,0.1)',border:'rgba(6,182,212,0.2)'}, ausdauer: {icon:'heart-pulse',color:'#ef4444',bg:'rgba(239,68,68,0.1)',border:'rgba(239,68,68,0.2)'}, mobility: {icon:'stretch-horizontal',color:'#10b981',bg:'rgba(16,185,129,0.1)',border:'rgba(16,185,129,0.2)'} };
+const typeMap = { kraft: {icon:'dumbbell',color:'#a3c9a8',bg:'rgba(163,201,168,0.1)',border:'rgba(163,201,168,0.2)'}, ausdauer: {icon:'heart-pulse',color:'#e88a8a',bg:'rgba(232,138,138,0.1)',border:'rgba(232,138,138,0.2)'}, mobility: {icon:'stretch-horizontal',color:'#8aafe8',bg:'rgba(138,175,232,0.1)',border:'rgba(138,175,232,0.2)'} };
 listEl.innerHTML = daySessions.map(s => {
     const t = typeMap[s.type] || typeMap.kraft;
     return `<div onclick="window.openEditSession('${s.id}')" class="p-3 rounded-xl flex items-center gap-3 cursor-pointer pointer-events-auto transition-all hover:opacity-90" style="background:${t.bg};border:1px solid ${t.border}">
@@ -938,7 +938,7 @@ let _ptDayOffset = 0;
 
 window.setSessionType = function(type) {
 _sessionType = type;
-var typeColors = { kraft: {bg:'rgba(6,182,212,0.08)',border:'rgba(6,182,212,0.3)',color:'#06b6d4'}, ausdauer: {bg:'rgba(239,68,68,0.08)',border:'rgba(239,68,68,0.3)',color:'#ef4444'}, mobility: {bg:'rgba(16,185,129,0.08)',border:'rgba(16,185,129,0.3)',color:'#10b981'} };
+var typeColors = { kraft: {bg:'rgba(163,201,168,0.08)',border:'rgba(163,201,168,0.3)',color:'#a3c9a8'}, ausdauer: {bg:'rgba(232,138,138,0.08)',border:'rgba(232,138,138,0.3)',color:'#e88a8a'}, mobility: {bg:'rgba(138,175,232,0.08)',border:'rgba(138,175,232,0.3)',color:'#8aafe8'} };
 // JS Fallback für visuelle Hervorhebung (CSS :has() übernimmt primär)
 var labels = document.querySelectorAll('#sessionTypeBtns label');
 labels.forEach(function(label) {
@@ -1388,9 +1388,9 @@ for(let d = 1; d <= daysInMonth; d++) {
     else if(isToday) { bg = _cc + '14'; border = _cc + '33'; textColor = '#fff'; }
     else if(daySessions.length > 0) { textColor = '#fff'; }
 
-    const dots = (hasKraft ? '<span style="width:4px;height:4px;border-radius:50%;background:#06b6d4;display:inline-block"></span>' : '')
-        + (hasAusdauer ? '<span style="width:4px;height:4px;border-radius:50%;background:#ef4444;display:inline-block"></span>' : '')
-        + (hasMobility ? '<span style="width:4px;height:4px;border-radius:50%;background:#10b981;display:inline-block"></span>' : '');
+    const dots = (hasKraft ? '<span style="width:4px;height:4px;border-radius:50%;background:#a3c9a8;display:inline-block"></span>' : '')
+        + (hasAusdauer ? '<span style="width:4px;height:4px;border-radius:50%;background:#e88a8a;display:inline-block"></span>' : '')
+        + (hasMobility ? '<span style="width:4px;height:4px;border-radius:50%;background:#8aafe8;display:inline-block"></span>' : '');
 
     html += `<button onclick="window.selectCalDay('${dateStr}')" class="h-10 rounded-lg flex flex-col items-center justify-center cursor-pointer pointer-events-auto transition-all hover:opacity-80 relative" style="background:${bg};border:1px solid ${border}">
         <span class="text-xs font-black" style="color:${textColor}">${d}</span>
@@ -1446,7 +1446,7 @@ if(sorted.length === 0) {
 }
 if(emptyEl) emptyEl.classList.add('hidden');
 
-const typeMap = { kraft: {icon:'dumbbell',color:'#06b6d4',bg:'rgba(6,182,212,0.06)',border:'rgba(6,182,212,0.15)',pill:'rgba(6,182,212,0.15)',pillText:'#06b6d4',label:'Kraft'}, ausdauer: {icon:'heart-pulse',color:'#ef4444',bg:'rgba(239,68,68,0.06)',border:'rgba(239,68,68,0.15)',pill:'rgba(239,68,68,0.15)',pillText:'#ef4444',label:'Ausdauer'}, mobility: {icon:'stretch-horizontal',color:'#10b981',bg:'rgba(16,185,129,0.06)',border:'rgba(16,185,129,0.15)',pill:'rgba(16,185,129,0.15)',pillText:'#10b981',label:'Mobility'} };
+const typeMap = { kraft: {icon:'dumbbell',color:'#a3c9a8',bg:'rgba(163,201,168,0.06)',border:'rgba(163,201,168,0.15)',pill:'rgba(163,201,168,0.15)',pillText:'#a3c9a8',label:'Kraft'}, ausdauer: {icon:'heart-pulse',color:'#e88a8a',bg:'rgba(232,138,138,0.06)',border:'rgba(232,138,138,0.15)',pill:'rgba(232,138,138,0.15)',pillText:'#e88a8a',label:'Ausdauer'}, mobility: {icon:'stretch-horizontal',color:'#8aafe8',bg:'rgba(138,175,232,0.06)',border:'rgba(138,175,232,0.15)',pill:'rgba(138,175,232,0.15)',pillText:'#8aafe8',label:'Mobility'} };
 
 if(listEl) listEl.innerHTML = sorted.map(s => {
     const t = typeMap[s.type] || typeMap.kraft;
@@ -1464,7 +1464,7 @@ if(listEl) listEl.innerHTML = sorted.map(s => {
             </div>
             <div class="flex items-center gap-2">
                 <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest" style="background:${t.pill};color:${t.pillText}">${t.label}</span>
-                <button onclick="window.startQuickTrack('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all active:scale-95 flex items-center gap-1" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4">
+                <button onclick="window.startQuickTrack('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all active:scale-95 flex items-center gap-1" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.3);color:#a3c9a8">
                     <i data-lucide="play" class="w-3 h-3 pointer-events-none"></i> Start
                 </button>
             </div>
@@ -1626,7 +1626,7 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
     metricOptions.forEach(function(opt) {
         var isActive = metric === opt.id;
         metricPills += '<button ontouchstart="" onclick="window._qtSetMetric(' + idx + ',\'' + opt.id + '\')" class="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider pointer-events-auto cursor-pointer transition-all' +
-            (isActive ? '" style="background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4"' : '" style="background:rgba(39,39,42,0.5);border:1px solid rgba(63,63,70,0.5);color:#71717a"') +
+            (isActive ? '" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.3);color:#a3c9a8"' : '" style="background:rgba(39,39,42,0.5);border:1px solid rgba(63,63,70,0.5);color:#71717a"') +
             '>' + opt.label + '</button>';
     });
     metricPills += '</div>';
@@ -1646,7 +1646,7 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
                 '<button ontouchstart="" onclick="window._qtRemoveSet('+ idx + ',' + si + ')" class="text-zinc-700 hover:text-rose-400 cursor-pointer pointer-events-auto ml-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>' +
                 '</div>';
         }).join('');
-        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set</button>';
+        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set</button>';
 
     } else if(metric === 'setsReps') {
         inputFields = (ex.sets || []).map(function(s, si) {
@@ -1657,7 +1657,7 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
                 '<button ontouchstart="" onclick="window._qtRemoveSet('+ idx + ',' + si + ')" class="text-zinc-700 hover:text-rose-400 cursor-pointer pointer-events-auto ml-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>' +
                 '</div>';
         }).join('');
-        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set</button>';
+        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Set</button>';
 
     } else if(metric === 'distanceDuration') {
         inputFields = '<div class="flex items-center gap-2 mt-1.5">' +
@@ -1680,7 +1680,7 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
                 '<button ontouchstart="" onclick="window._qtRemoveSet('+ idx + ',' + si + ')" class="text-zinc-700 hover:text-rose-400 cursor-pointer pointer-events-auto ml-auto"><i data-lucide="x" class="w-3 h-3 pointer-events-none"></i></button>' +
                 '</div>';
         }).join('');
-        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:#06b6d4"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Runde</button>';
+        addSetBtn = '<button ontouchstart="" onclick="window._qtAddSet('+ idx + ')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8"><i data-lucide="plus" class="w-2.5 h-2.5 pointer-events-none"></i> Runde</button>';
 
     } else if(metric === 'holdRounds') {
         inputFields = '<div class="flex items-center gap-2 mt-1.5">' +
@@ -1707,7 +1707,7 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
     else if(metric === 'durationOnly') doneLabel = (ex.duration||0) + ' min';
 
     var doneStyle = ex.done ? 'opacity:0.5;' : '';
-    var checkColor = ex.done ? 'background:#10b981;border-color:#10b981;color:#000' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
+    var checkColor = ex.done ? 'background:#8aafe8;border-color:#8aafe8;color:#000' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
 
     // Letztes Mal Badge für PT Quick Track
     var lastTimeBadge = '';
@@ -2024,7 +2024,7 @@ for(let i = 0; i < labelCount; i++) {
 const first = values[0], last = values[values.length - 1];
 const pctChange = Math.round((last - first) / first * 100);
 if(pctChange !== 0) {
-    ctx.fillStyle = pctChange > 0 ? '#10b981' : '#ef4444';
+    ctx.fillStyle = pctChange > 0 ? '#8aafe8' : '#e88a8a';
     ctx.font = 'bold 8px Helvetica';
     ctx.textAlign = 'right';
     ctx.fillText((pctChange > 0 ? '+' : '') + pctChange + '%', width - 8, 14);
@@ -2860,9 +2860,9 @@ window._renderComplianceRings = function(clientId) {
     if(!row) return;
     const c = window.computeCompliance(clientId);
     const rings = [
-        { label: 'Woche', color: '#06b6d4', data: c.week },
+        { label: 'Woche', color: '#a3c9a8', data: c.week },
         { label: 'Monat', color: '#f59e0b', data: c.month },
-        { label: 'Gesamt', color: '#10b981', data: c.total }
+        { label: 'Gesamt', color: '#8aafe8', data: c.total }
     ];
     const circumference = 2 * Math.PI * 28; // 175.93
     row.innerHTML = rings.map(r => {

@@ -2987,6 +2987,17 @@
     </div>
 
     <script>
+        // Debounced Lucide Icon Refresh (Performance)
+        var _lucidePending = false;
+        window._refreshLucide = function() {
+            if (_lucidePending) return;
+            _lucidePending = true;
+            requestAnimationFrame(function() {
+                window._refreshLucide();
+                _lucidePending = false;
+            });
+        };
+
         const appIdGlobal = "base-v2-beta-test";
 
 
@@ -3029,7 +3040,7 @@
             if (!navigator.onLine) { 
                 if(o) { o.classList.remove('hidden'); o.classList.add('block'); } 
                 if(c) { c.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] uppercase font-bold tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20 shadow-sm"; c.innerHTML = `<i data-lucide="wifi-off" class="w-3 h-3"></i> <span data-i18n="statusOffline">${i18nData[window.currentLang]?.statusOffline || 'Offline'}</span>`; } 
-                if(window.lucide) lucide.createIcons(); 
+                window._refreshLucide(); 
             } else { if(o) { o.classList.add('hidden'); o.classList.remove('block'); } }
         }
         window.addEventListener('online', () => {
@@ -3247,7 +3258,7 @@
             window.generateSetFields(_initSets);
             window.loadBodyData();
             const bodyDateInput = document.getElementById('bodyDate'); if(bodyDateInput) bodyDateInput.valueAsDate = new Date();
-            if(window.lucide) lucide.createIcons();
+            window._refreshLucide();
             // KI-Buttons im Athleten-Modus zeigen
             if(window.currentMode === 'personal') {
                 var bw = document.getElementById('btnWarmup'); if(bw) { bw.classList.remove('hidden'); bw.style.display = 'flex'; }
@@ -3328,7 +3339,7 @@
                     extraFields.forEach(f => dynamicFieldsContainer.appendChild(renderField(f, `window.removeExtraField('${catId}','${f.id}')`)));
                 }
             }
-            if(window.lucide) lucide.createIcons();
+            window._refreshLucide();
         };
         
         window.generateSetFields = function(count) {
@@ -3727,7 +3738,7 @@
             if(motEl) motEl.textContent = msg;
             const modal = document.getElementById('weeklyReviewModal');
             if(modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
         };
         window._dismissWeeklyReview = function() {
             const modal = document.getElementById('weeklyReviewModal');
@@ -3752,7 +3763,7 @@
             if(_supersetActive) {
                 field.classList.remove('hidden');
                 if(btn) btn.style.cssText = `background:color-mix(in srgb,var(--secondary-hex) 15%,transparent);border:1px solid color-mix(in srgb,var(--secondary-hex) 40%,transparent);color:var(--secondary-hex)`;
-                if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                window._refreshLucide();
             } else {
                 field.classList.add('hidden');
                 if(btn) btn.style.cssText = `background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)`;
@@ -3802,7 +3813,7 @@
                     const d = new Date(); d.setMonth(d.getMonth() + 3);
                     dateEl.value = d.toISOString().split('T')[0];
                 }
-                if(window.lucide) lucide.createIcons();
+                window._refreshLucide();
             }, 100);
         };
 
@@ -3880,7 +3891,7 @@
                     <p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">${pct}% erreicht</p>
                 </div>`;
             }).join('');
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
         };
 
         window.deleteGoal = function(id) {
@@ -4120,7 +4131,7 @@
                 else {
                     if(empty) empty.classList.add('hidden');
                     list.innerHTML = mine.map(function(ch) { return window.renderChallengeCard(ch, false); }).join('');
-                    if(window.lucide) lucide.createIcons();
+                    window._refreshLucide();
                 }
                 var ac = mine.filter(function(c) { return new Date(c.endDate) > now; }).length;
                 var badge = document.getElementById('activeChallengesBadge');
@@ -4140,7 +4151,7 @@
                 else {
                     if(empty) empty.classList.add('hidden');
                     list.innerHTML = pub.map(function(ch) { return window.renderChallengeCard(ch, true); }).join('');
-                    if(window.lucide) lucide.createIcons();
+                    window._refreshLucide();
                 }
             });
         };
@@ -4611,7 +4622,7 @@
                 </div>`;
             }).join('');
 
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
         };
 
         // ============================================================
@@ -4744,7 +4755,7 @@
             }).join('');
 
             detail.classList.remove('hidden');
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
             detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         };
 
@@ -4851,7 +4862,7 @@
                     }).join('')}
                 </div>
             `;
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
         };
 
         // ============================================================
@@ -4964,7 +4975,7 @@
             // Modal öffnen
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
         };
 
         // ============================================================
@@ -5525,7 +5536,7 @@
         </div>
     `;
     mobileList.appendChild(card);
-} }); if(window.lucide) lucide.createIcons(); window.updateExerciseAutocomplete(); const emptyState = document.getElementById('emptyWorkoutState'); if(emptyState) { const hasRows = body.children.length > 0 || (mobileList && mobileList.children.length > 0); if(!hasRows) { emptyState.classList.remove('hidden'); emptyState.classList.add('block'); } else { emptyState.classList.add('hidden'); emptyState.classList.remove('block'); } } const vc = document.getElementById('verlaufCount'); if(vc) vc.textContent = filteredWorkouts.length + ' Sessions'; };
+} }); window._refreshLucide(); window.updateExerciseAutocomplete(); const emptyState = document.getElementById('emptyWorkoutState'); if(emptyState) { const hasRows = body.children.length > 0 || (mobileList && mobileList.children.length > 0); if(!hasRows) { emptyState.classList.remove('hidden'); emptyState.classList.add('block'); } else { emptyState.classList.add('hidden'); emptyState.classList.remove('block'); } } const vc = document.getElementById('verlaufCount'); if(vc) vc.textContent = filteredWorkouts.length + ' Sessions'; };
         document.body.addEventListener('click', function(e) { if(!e.target.closest('.workout-card-menu') && !e.target.closest('[onclick*="nextElementSibling"]')) { document.querySelectorAll('.workout-card-menu.show').forEach(m => m.classList.remove('show')); } });
         window.exportToCSV = () => { if(!Array.isArray(window.workouts) || window.workouts.length === 0) { window.showToast("Keine Daten vorhanden."); return; } let allDynamicKeys = new Set(); window.workouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allDynamicKeys.add(k)); }); const dynamicHeaders = Array.from(allDynamicKeys); let csv = "Datum;Kategorie;Sportart;Aktivitaet;Dauer;Notiz;" + dynamicHeaders.join(";") + "\n"; window.workouts.forEach(w => { let row = [ w.date || "", w.category || "", w.sportCategory || "", w.exercise || "", w.sessionDuration || "", (w.sessionComment || "").replace(/;/g, ',').replace(/\n/g, ' ') ]; dynamicHeaders.forEach(header => { let val = (w.data && w.data[header] !== undefined) ? w.data[header] : ""; row.push(String(val).replace(/;/g, ',')); }); csv += row.join(";") + "\n"; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `BASE_Export.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast("Export erfolgreich!"); };
 
@@ -5563,7 +5574,7 @@
                 toast.classList.add('pointer-events-none'); toast.classList.remove('pointer-events-auto');
             }
             toast.style.opacity = '1'; toast.style.transform = 'translate(-50%, 0)';
-            if (window.lucide) lucide.createIcons();
+            window._refreshLucide();
             clearTimeout(window._toastTimer);
             window._toastTimer = setTimeout(() => {
                 toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, 1rem)';
@@ -5728,7 +5739,7 @@
                 </div>`;
             }).join('');
 
-            if(window.lucide) lucide.createIcons();
+            window._refreshLucide();
         };
 
         window.renderBodyChart = function() {
@@ -5805,7 +5816,7 @@
                 // PR Section zeigen
                 if(prSection) prSection.classList.remove('hidden');
                 if(prBtn) { prBtn.classList.add('bg-zinc-800','text-white','shadow-sm'); prBtn.classList.remove('text-zinc-500'); }
-                if(prBtn && window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                if(prBtn) window._refreshLucide();
                 window.renderPRDashboard();
                 return;
             }
@@ -5830,7 +5841,7 @@
                 const btn = document.getElementById('btnAnalyse-muscles');
                 if(btn) { btn.classList.add('bg-zinc-800','text-white','shadow-sm'); btn.classList.remove('text-zinc-500'); }
                 window.renderMuscleHeatmap();
-                if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                window._refreshLucide();
                 return;
             }
 
@@ -5857,7 +5868,7 @@
                 const btn = document.getElementById('btnAnalyse-calendar');
                 if(btn) { btn.classList.add('bg-zinc-800','text-white','shadow-sm'); btn.classList.remove('text-zinc-500'); }
                 window.renderCalendar();
-                if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                window._refreshLucide();
                 return;
             }
 
@@ -5932,7 +5943,7 @@
             // Charts initialisieren wenn Analyse-Tab
             if(tab === 'analyse' && window.currentView === 'chart') window.initAnalytics();
             if(tab === 'menu') { setTimeout(() => { if(window.updatePushToggleUI) window.updatePushToggleUI(); }, 100); window.renderGoals && window.renderGoals(); }
-            if(window.lucide) lucide.createIcons();
+            window._refreshLucide();
         };
 
         // Settings Modal durch Menü-Tab ersetzen
@@ -5948,7 +5959,7 @@
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 50);
+            window._refreshLucide();
         };
 
         // ── AI UTILITY + ZNS + COACH + BUILDER → ausgelagert in js/base-ai.js ──
@@ -6358,7 +6369,7 @@
                     </div>`).join('');
             }
             window.toggleModal('oneRMModal');
-            if(window.lucide) lucide.createIcons();
+            window._refreshLucide();
         };
 
         // ============================================================
@@ -6551,7 +6562,7 @@
             };
 
             // UI: loading
-            if(btn) { btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin pointer-events-none inline-block mr-2"></i> Sendet...'; if(window.lucide) lucide.createIcons(); }
+            if(btn) { btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin pointer-events-none inline-block mr-2"></i> Sendet...'; window._refreshLucide(); }
 
             try {
                 // Firebase Firestore speichern
@@ -6577,7 +6588,7 @@
                 window.showToast('Fehler beim Senden. Bitte erneut versuchen.');
             }
 
-            if(btn) { btn.innerHTML = '<i data-lucide="send" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> Feedback senden'; if(window.lucide) lucide.createIcons(); }
+            if(btn) { btn.innerHTML = '<i data-lucide="send" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> Feedback senden'; window._refreshLucide(); }
         };
 
         // ============================================================
@@ -7118,7 +7129,7 @@
         window.openSportPicker = function() {
             window.renderSportPicker();
             window.toggleModal('sportPickerModal');
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 50);
+            window._refreshLucide();
         };
 
         window.filterSportList = function(query) {
@@ -7192,7 +7203,7 @@
                 </div>
             `).join('');
 
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
         };
 
         window.toggleSport = function(sportId) {
@@ -7262,7 +7273,7 @@
                         ${sport.name}
                     </button>`;
                 }).join('');
-                if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                window._refreshLucide();
             } else {
                 selector.classList.add('hidden');
             }
@@ -7330,7 +7341,7 @@
             // Dynamische Sport-Tabs
             if(!mainEnabled) {
                 container.innerHTML = '';
-                if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+                window._refreshLucide();
                 return;
             }
 
@@ -7347,7 +7358,7 @@
                 </button>`;
             }).join('');
 
-            if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+            window._refreshLucide();
             window.renderMeinSportSelector();
         };
 
@@ -7434,7 +7445,7 @@
                 addBtn.style.opacity = '1';
                 addBtn.title = 'Sport hinzufügen';
             }
-            if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+            window._refreshLucide();
         };
 
         window.openCustomTabCreator = function() {
@@ -7475,7 +7486,7 @@
             });
             setTimeout(function() {
                 window._selectCtIcon(document.querySelector('.ct-icon-btn'), 'target');
-                if(window.lucide) lucide.createIcons();
+                window._refreshLucide();
             }, 100);
         };
 
@@ -7652,7 +7663,7 @@
             // UI: aktiv
             _isListening = true;
             if(btn) btn.classList.add('mic-active');
-            if(icon) { icon.setAttribute('data-lucide', 'mic-2'); if(window.lucide) lucide.createIcons(); }
+            if(icon) { icon.setAttribute('data-lucide', 'mic-2'); window._refreshLucide(); }
             window.showToast('🎙 Spreche jetzt...');
 
             _recognition.onresult = (e) => {
@@ -7665,7 +7676,7 @@
             _recognition.onend = () => {
                 _isListening = false;
                 if(btn) btn.classList.remove('mic-active');
-                if(icon) { icon.setAttribute('data-lucide', 'mic'); if(window.lucide) lucide.createIcons(); }
+                if(icon) { icon.setAttribute('data-lucide', 'mic'); window._refreshLucide(); }
                 // Automatisch generieren wenn Eingabe vorhanden
                 const val = input?.value?.trim();
                 if(val) {
@@ -7677,7 +7688,7 @@
             _recognition.onerror = (e) => {
                 _isListening = false;
                 if(btn) btn.classList.remove('mic-active');
-                if(icon) { icon.setAttribute('data-lucide', 'mic'); if(window.lucide) lucide.createIcons(); }
+                if(icon) { icon.setAttribute('data-lucide', 'mic'); window._refreshLucide(); }
                 if(e.error === 'not-allowed') {
                     window.showToast('Mikrofon-Zugriff verweigert. Bitte in den Browser-Einstellungen erlauben.');
                 } else if(e.error !== 'no-speech') {
@@ -7693,7 +7704,7 @@
             const onboarding = document.getElementById('onboardingModal');
             if(onboarding && !window.userProfile.onboardingDone) {
                 // Schon beim ersten Start: Step 1 zeigen, Icons laden
-                setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 100);
+                setTimeout(() => { window._refreshLucide(); }, 100);
             }
         });
 
@@ -7841,7 +7852,7 @@
                     '</div>' +
                 '</div>';
 
-            if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+            window._refreshLucide();
         }
 
         window._dismissKiHint = function(flag, elementId) {
@@ -7861,7 +7872,7 @@
     <script src="js/base-timers.min.js?v=17" defer></script>
     <script src="js/base-ai.min.js?v=19" defer></script>
     <script src="js/base-settings.min.js?v=17" defer></script>
-    <script src="js/base-pt.min.js?v=20" defer></script>
+    <script src="js/base-pt.min.js?v=21" defer></script>
 
 
     <script type="module">
