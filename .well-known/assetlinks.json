@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "tech.baseapp.app",
+    "sha256_cert_fingerprints": ["68:C8:D5:56:7D:D9:E4:48:BA:03:49:28:73:26:2B:C8:E2:EA:43:7F:C2:E9:8A:ED:86:65:DB:DE:16:92:6C:56"]
+  }
+}]

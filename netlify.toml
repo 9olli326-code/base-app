@@ -104,3 +104,9 @@ force = false
   [redirects.conditions]
 
   [redirects.headers]
+
+[[headers]]
+  for = "/.well-known/*"
+  [headers.values]
+    Content-Type = "application/json"
+    Access-Control-Allow-Origin = "*"
