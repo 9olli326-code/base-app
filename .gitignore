@@ -1,2 +1,12 @@
 # Local Netlify folder
 .netlify
+
+# Node
+node_modules/
+
+# Capacitor build artifacts
+android/app/build/
+
+# Signing keys (NEVER commit!)
+*.jks
+*.keystore
