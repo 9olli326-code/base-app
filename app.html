@@ -472,11 +472,11 @@
     <!-- Workout Celebration Overlay -->
     <div id="workoutCelebrationModal" class="fixed inset-0 z-[900] hidden items-center justify-center pointer-events-auto" style="background:rgba(0,0,0,0.9)" onclick="window._dismissCelebration()">
         <div class="text-center pointer-events-none">
-            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Workout abgeschlossen!</p>
+            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3" data-i18n="workoutDone">Workout abgeschlossen!</p>
             <p id="celebNumber" class="celeb-number text-6xl font-black text-white" style="font-family:'Bebas Neue','Barlow Condensed',sans-serif;letter-spacing:-0.02em"></p>
             <p id="celebUnit" class="text-sm font-bold text-zinc-400 mt-1"></p>
             <p id="celebSub" class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-3"></p>
-            <div id="celebPR" class="hidden mt-4 inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/25 px-4 py-2 rounded-xl animate-pulse"><i data-lucide="trophy" class="w-4 h-4 text-amber-400 pointer-events-none"></i><span class="text-amber-400 text-xs font-black uppercase tracking-widest">Neuer PR!</span></div>
+            <div id="celebPR" class="hidden mt-4 inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/25 px-4 py-2 rounded-xl animate-pulse"><i data-lucide="trophy" class="w-4 h-4 text-amber-400 pointer-events-none"></i><span class="text-amber-400 text-xs font-black uppercase tracking-widest" data-i18n="lblNewPR">Neuer PR!</span></div>
         </div>
     </div>
 
@@ -525,28 +525,28 @@
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 bg-primary/10">
                     <i data-lucide="dumbbell" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif">Training</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif" data-i18n="navTraining">Training</span>
             </button>
             <button onclick="window.switchTab('analyse')" id="navBtn-analyse" class="nav-tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-zinc-600 transition-all relative group pointer-events-auto">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary transition-all duration-300 opacity-0" id="navIndicator-analyse"></div>
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200">
                     <i data-lucide="layout-dashboard" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif">Analyse</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif" data-i18n="navAnalyse">Analyse</span>
             </button>
             <button onclick="window.switchTab('tools')" id="navBtn-tools" class="nav-tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-zinc-600 transition-all relative group pointer-events-auto">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary transition-all duration-300 opacity-0" id="navIndicator-tools"></div>
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200">
                     <i data-lucide="sparkles" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif">KI Tools</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif" data-i18n="navTools">KI Tools</span>
             </button>
             <button onclick="window.switchTab('menu')" id="navBtn-menu" class="nav-tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-zinc-600 transition-all relative group pointer-events-auto">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary transition-all duration-300 opacity-0" id="navIndicator-menu"></div>
                 <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200">
                     <i data-lucide="sliders-horizontal" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif">Menü</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'DM Sans',sans-serif" data-i18n="navMenu">Menü</span>
             </button>
         </div>
     </nav>
@@ -561,7 +561,7 @@
         </div>
         <div id="floatingTimerExpanded" class="hidden rounded-2xl p-4 shadow-2xl w-48" style="background:var(--surface-hex);border:1px solid var(--border-hex);box-shadow:0 8px 32px rgba(0,0,0,0.5)">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-[10px] font-black uppercase tracking-widest" style="color:var(--primary-hex)">Workout Timer</p>
+                <p class="text-[10px] font-black uppercase tracking-widest" style="color:var(--primary-hex)" data-i18n="workoutTimer">Workout Timer</p>
                 <button onclick="document.getElementById('floatingTimerExpanded').classList.add('hidden');document.getElementById('floatingTimerCollapsed').classList.remove('hidden')" class="text-zinc-600 hover:text-white cursor-pointer pointer-events-auto transition-colors"><i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i></button>
             </div>
             <p id="workoutTimerDisplay" class="text-3xl font-black text-center mb-3" style="color:var(--text-main);font-family:'Barlow Condensed',sans-serif">00:00</p>
@@ -580,28 +580,28 @@
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200" style="background:color-mix(in srgb, var(--primary-hex), transparent 85%)">
                     <i data-lucide="users-2" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif">Kunden</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif" data-i18n="navClients">Kunden</span>
             </button>
             <button onclick="window.switchPTTab('plans')" id="ptNavBtn-plans" class="nav-tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-zinc-600 transition-all relative pointer-events-auto">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-all duration-300" style="background:var(--primary-hex)" id="ptNavIndicator-plans"></div>
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200">
                     <i data-lucide="calendar-days" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif">Pläne</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif" data-i18n="navPlans">Pläne</span>
             </button>
             <button onclick="window.switchPTTab('pttools')" id="ptNavBtn-pttools" class="nav-tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-zinc-600 transition-all relative pointer-events-auto">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-all duration-300" style="background:var(--primary-hex)" id="ptNavIndicator-pttools"></div>
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200">
                     <i data-lucide="sparkles" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif">KI Tools</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif" data-i18n="navTools">KI Tools</span>
             </button>
             <button onclick="window.switchPTTab('mytraining')" id="ptNavBtn-mytraining" class="nav-tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1.5 text-zinc-600 transition-all relative pointer-events-auto">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-all duration-300" style="background:var(--primary-hex)" id="ptNavIndicator-mytraining"></div>
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200">
                     <i data-lucide="dumbbell" class="w-4 h-4 pointer-events-none"></i>
                 </div>
-                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif">Training</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="font-family:'Outfit',sans-serif" data-i18n="navMyTraining">Training</span>
             </button>
         </div>
     </nav>
@@ -694,7 +694,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <p class="text-[9px] font-bold uppercase tracking-[0.18em] mb-1" style="color:var(--primary-hex);font-family:'Outfit',sans-serif">Session-Planer</p>
-                        <h2 class="text-2xl font-black uppercase tracking-tight text-white" style="font-family:'Sora',sans-serif">Kalender</h2>
+                        <h2 class="text-2xl font-black uppercase tracking-tight text-white" style="font-family:'Sora',sans-serif" data-i18n="lblCalendar">Kalender</h2>
                     </div>
                     <button onclick="window.openSessionModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest cursor-pointer transition-all pointer-events-auto active:scale-95" style="background:color-mix(in srgb, var(--primary-hex), transparent 85%);border:1px solid color-mix(in srgb, var(--primary-hex), transparent 70%);color:var(--primary-hex)">
                         <i data-lucide="plus" class="w-3.5 h-3.5 pointer-events-none"></i> Session
@@ -765,7 +765,7 @@
                     </button>
                     <button onclick="window.generatePreHab()" class="flex flex-col items-center justify-center p-6 rounded-lg cursor-pointer transition-all pointer-events-auto active:scale-95" style="background:#141414;border:1px solid color-mix(in srgb, var(--primary-hex), transparent 80%)">
                         <i data-lucide="shield-plus" class="w-7 h-7 mb-3 pointer-events-none" style="color:var(--primary-hex)"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-white" style="font-family:'Outfit',sans-serif">Pre-Hab</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white" style="font-family:'Outfit',sans-serif" data-i18n="prehabTitle">Pre-Hab</span>
                     </button>
                     <button onclick="window.exportClientPDF()" class="flex flex-col items-center justify-center p-6 rounded-lg cursor-pointer transition-all pointer-events-auto active:scale-95" style="background:#141414;border:1px solid color-mix(in srgb, var(--primary-hex), transparent 80%)">
                         <i data-lucide="file-text" class="w-7 h-7 mb-3 pointer-events-none" style="color:var(--primary-hex)"></i>
@@ -1197,7 +1197,7 @@
                 <!-- Analyse-Modus Switcher — eigene scrollbare Zeile -->
                 <div class="px-3 pt-3 pb-2 border-b border-zinc-800 bg-zinc-900/50">
                     <div class="flex gap-1 overflow-x-auto hide-scrollbar" style="-webkit-overflow-scrolling:touch">
-                        <button onclick="window.switchAnalyseMode('workouts')" id="btnAnalyse-workouts" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors bg-zinc-800 text-white shadow-sm cursor-pointer pointer-events-auto">Workouts</button>
+                        <button onclick="window.switchAnalyseMode('workouts')" id="btnAnalyse-workouts" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors bg-zinc-800 text-white shadow-sm cursor-pointer pointer-events-auto" data-i18n="navTraining">Workouts</button>
                         <button onclick="window.switchAnalyseMode('prs')" id="btnAnalyse-prs" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors text-zinc-500 hover:text-white cursor-pointer pointer-events-auto flex items-center gap-1">
                             <i data-lucide="trophy" class="w-3 h-3 pointer-events-none"></i> PRs
                         </button>
@@ -1205,11 +1205,11 @@
                             <i data-lucide="zap" class="w-3 h-3 pointer-events-none"></i> Muskeln
                         </button>
                         <button onclick="window.switchAnalyseMode('calendar')" id="btnAnalyse-calendar" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors text-zinc-500 hover:text-white cursor-pointer pointer-events-auto flex items-center gap-1">
-                            <i data-lucide="calendar" class="w-3 h-3 pointer-events-none"></i> Kalender
+                            <i data-lucide="calendar" class="w-3 h-3 pointer-events-none"></i> <span data-i18n="lblCalendar">Kalender</span>
                         </button>
-                        <button onclick="window.switchAnalyseMode('body')" id="btnAnalyse-body" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors text-zinc-500 hover:text-white cursor-pointer pointer-events-auto">Körper</button>
+                        <button onclick="window.switchAnalyseMode('body')" id="btnAnalyse-body" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors text-zinc-500 hover:text-white cursor-pointer pointer-events-auto" data-i18n="lblBodyTracker">Körper</button>
                         <button onclick="window.switchAnalyseMode('heatmap')" id="btnAnalyse-heatmap" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors text-zinc-500 hover:text-white cursor-pointer pointer-events-auto flex items-center gap-1">
-                            <i data-lucide="grid-3x3" class="w-3 h-3 pointer-events-none"></i> Aktivität
+                            <i data-lucide="grid-3x3" class="w-3 h-3 pointer-events-none"></i> <span data-i18n="lblActivity">Aktivität</span>
                         </button>
                     </div>
                 </div>
@@ -1341,14 +1341,14 @@
                 <div id="bodyTrackerSection" class="hidden">
                     <!-- Eingabe -->
                     <div class="p-5 border-b border-zinc-800 bg-zinc-950/30">
-                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Neue Messung</p>
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4" data-i18n="lblAddMeasurement">Neue Messung</p>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                             <div>
-                                <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Datum</label>
+                                <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1.5" data-i18n="lblDate">Datum</label>
                                 <input type="date" id="bodyDate" aria-label="Datum" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary cursor-pointer pointer-events-auto">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black text-primary uppercase tracking-widest mb-1.5">Gewicht (kg)</label>
+                                <label class="block text-[10px] font-black text-primary uppercase tracking-widest mb-1.5" data-i18n="lblBodyWeight">Gewicht (kg)</label>
                                 <input type="number" step="0.1" id="bodyWeight" aria-label="Gewicht in kg" placeholder="z.B. 82.5" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary cursor-text pointer-events-auto">
                             </div>
                             <div>
@@ -1369,7 +1369,7 @@
                             </div>
                         </div>
                         <button onclick="window.saveBodyEntry()" class="w-full bg-primary text-black font-black py-3 rounded-xl uppercase tracking-widest text-xs cursor-pointer pointer-events-auto active:scale-95 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i> Messung speichern
+                            <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i> <span data-i18n="lblAddMeasurement">Messung speichern</span>
                         </button>
                     </div>
 
@@ -1377,7 +1377,7 @@
                     <div id="bodyStatsSection" class="hidden p-5 border-b border-zinc-800">
                         <div id="bodyStatsRow" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5"></div>
                         <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
-                            <button onclick="window.switchBodyMetric('weight')" id="bodyBtn-weight" class="body-metric-btn px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer pointer-events-auto flex-shrink-0 bg-primary border-primary text-black">Gewicht</button>
+                            <button onclick="window.switchBodyMetric('weight')" id="bodyBtn-weight" class="body-metric-btn px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer pointer-events-auto flex-shrink-0 bg-primary border-primary text-black" data-i18n="lblWeight">Gewicht</button>
                             <button onclick="window.switchBodyMetric('fat')" id="bodyBtn-fat" class="body-metric-btn px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer pointer-events-auto flex-shrink-0 bg-zinc-900 border-zinc-800 text-zinc-400">Körperfett</button>
                             <button onclick="window.switchBodyMetric('chest')" id="bodyBtn-chest" class="body-metric-btn px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer pointer-events-auto flex-shrink-0 bg-zinc-900 border-zinc-800 text-zinc-400">Brust</button>
                             <button onclick="window.switchBodyMetric('waist')" id="bodyBtn-waist" class="body-metric-btn px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer pointer-events-auto flex-shrink-0 bg-zinc-900 border-zinc-800 text-zinc-400">Taille</button>
@@ -1413,8 +1413,8 @@
                             <i data-lucide="sparkles" class="w-6 h-6 text-indigo-400"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-black text-white uppercase tracking-tight">AI Coach</p>
-                            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Dein persönlicher Trainings-Coach</p>
+                            <p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="aiCoachTitle">AI Coach</p>
+                            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="aiCoachSub">Dein persönlicher Trainings-Coach</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 border-t border-indigo-500/20">
@@ -1424,7 +1424,7 @@
                         </button>
                         <button onclick="window.triggerCopilot()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-primary/10 transition-all cursor-pointer pointer-events-auto">
                             <i data-lucide="bot" class="w-3.5 h-3.5 text-indigo-400 pointer-events-none"></i>
-                            <span class="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Co-Pilot</span>
+                            <span class="text-[10px] font-black text-indigo-300 uppercase tracking-widest" data-i18n="toolCopilot">Co-Pilot</span>
                         </button>
                     </div>
                 </div>
@@ -1439,7 +1439,7 @@
                 <!-- KI Trainingsplan -->
                 <button onclick="window.openTrainingPlanModal()" class="w-full bg-violet-500/5 hover:bg-violet-500/10 border border-violet-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-days" class="w-6 h-6 text-violet-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">KI Trainingsplan</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Periodisierter Plan per KI generieren</p></div>
+                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="planTitle">KI Trainingsplan</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="planGoal">Periodisierter Plan per KI generieren</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
 
@@ -1451,7 +1451,7 @@
                             <i data-lucide="battery-charging" id="toolsZnsIcon" class="w-6 h-6 text-green-400 pointer-events-none"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-black text-white uppercase tracking-tight">ZNS Readiness</p>
+                            <p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="znsTitle">ZNS Readiness</p>
                             <p id="toolsZnsStatus" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Berechne...</p>
                             <!-- Mini Progress Bar -->
                             <div class="h-1 bg-zinc-800 rounded-full mt-2 overflow-hidden">
@@ -1465,14 +1465,14 @@
                     <!-- KI Analyse Button -->
                     <button onclick="window.analyzeReadinessWithAI()" class="w-full border-t border-green-500/15 px-5 py-3 flex items-center justify-center gap-2 hover:bg-green-500/10 transition-all cursor-pointer pointer-events-auto">
                         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-green-400 pointer-events-none"></i>
-                        <span class="text-[10px] font-black text-green-400 uppercase tracking-widest">KI Analyse starten</span>
+                        <span class="text-[10px] font-black text-green-400 uppercase tracking-widest" data-i18n="znsAnalyze">KI Analyse starten</span>
                     </button>
                 </div>
 
                 <!-- Challenges -->
                 <button onclick="window.openChallenges()" class="w-full bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="trophy" class="w-6 h-6 text-amber-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left flex-1"><p class="text-sm font-black text-white uppercase tracking-tight">Challenges</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Fordere Freunde heraus</p></div>
+                    <div class="text-left flex-1"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="challengeTitle">Challenges</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="challengeSub">Fordere Freunde heraus</p></div>
                     <span id="activeChallengesBadge" class="hidden bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full"></span>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
@@ -1480,7 +1480,7 @@
                 <!-- Pre-Hab -->
                 <button onclick="window.generatePreHab()" class="w-full bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="shield-plus" class="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Pre-Hab Coach</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Verletzungsprävention & Aktivierung</p></div>
+                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="prehabTitle">Pre-Hab Coach</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="prehabSub">Verletzungsprävention & Aktivierung</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
 
@@ -1511,19 +1511,19 @@
                 </button>
                 <button onclick="window.openRoutinesModal()" class="w-full flex items-center gap-4 bg-zinc-900/80 hover:bg-zinc-800 p-4 rounded-2xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto">
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 flex-shrink-0"><i data-lucide="bookmark" class="w-5 h-5 pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white" data-i18n="rT">Vorlagen</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Gespeicherte Workout-Routinen</p></div>
+                    <div class="text-left"><p class="text-sm font-black text-white" data-i18n="rT">Vorlagen</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest" data-i18n="lblNoRoutines">Gespeicherte Workout-Routinen</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
                 <button onclick="window.toggleModal('designModal')" class="w-full flex items-center gap-4 bg-zinc-900/80 hover:bg-zinc-800 p-4 rounded-2xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto">
                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 flex-shrink-0"><i data-lucide="palette" class="w-5 h-5 pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white">Design KI</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">App-Stil per KI anpassen</p></div>
+                    <div class="text-left"><p class="text-sm font-black text-white" data-i18n="menuDesign">Design Studio</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">App-Stil per KI anpassen</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
                 <div class="h-px bg-zinc-800 my-2"></div>
                 <!-- Feedback -->
                 <button onclick="window.toggleModal('feedbackModal')" class="w-full flex items-center gap-4 bg-zinc-900/80 hover:bg-zinc-800 p-4 rounded-2xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto">
                     <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 flex-shrink-0"><i data-lucide="message-square-heart" class="w-5 h-5 pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white">Feedback geben</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Hilf uns, BASE zu verbessern</p></div>
+                    <div class="text-left"><p class="text-sm font-black text-white" data-i18n="toastUpdate">Feedback geben</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Hilf uns, BASE zu verbessern</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
                 <!-- FREUNDE EINLADEN -->
@@ -1532,7 +1532,7 @@
                         <i data-lucide="user-plus" class="w-5 h-5 pointer-events-none" style="color:var(--primary-hex)"></i>
                     </div>
                     <div class="flex-1 text-left">
-                        <p class="text-sm font-black text-white">Freund einladen</p>
+                        <p class="text-sm font-black text-white" data-i18n="inviteTitle">Freund einladen</p>
                         <p class="text-[10px] font-bold uppercase tracking-widest mt-0.5" style="color:var(--primary-hex)">Via WhatsApp teilen</p>
                     </div>
                     <i data-lucide="share-2" class="w-4 h-4 text-zinc-600 pointer-events-none"></i>
@@ -1620,10 +1620,10 @@
             <h3 class="text-xl font-black text-white mb-6 uppercase tracking-tighter">Menü</h3>
             <div class="space-y-3">
                 <button onclick="window.toggleModal('settingsModal'); window.toggleModal('profileModal')" class="w-full flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 p-4 rounded-xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><i data-lucide="user" class="w-4 h-4 pointer-events-none"></i></div> <span data-i18n="pT">Athleten Profil</span></button>
-                <button onclick="window.toggleModal('settingsModal'); window.toggleModal('widgetStoreModal')" class="w-full flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 p-4 rounded-xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400"><i data-lucide="blocks" class="w-4 h-4 pointer-events-none"></i></div> Module & Tabs</button>
+                <button onclick="window.toggleModal('settingsModal'); window.toggleModal('widgetStoreModal')" class="w-full flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 p-4 rounded-xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400"><i data-lucide="blocks" class="w-4 h-4 pointer-events-none"></i></div> <span data-i18n="menuModules">Module & Tabs</span></button>
                 <button onclick="window.toggleModal('settingsModal'); window.openRoutinesModal()" class="w-full flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 p-4 rounded-xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400"><i data-lucide="bookmark" class="w-4 h-4 pointer-events-none"></i></div> <span data-i18n="rT">Vorlagen</span></button>
-                <button onclick="window.toggleModal('settingsModal'); window.toggleModal('designModal')" class="w-full flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 p-4 rounded-xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400"><i data-lucide="palette" class="w-4 h-4 pointer-events-none"></i></div> Design KI</button>
-                <button id="btnSecureAccount" onclick="window.toggleModal('settingsModal'); window.toggleModal('authModal')" class="w-full flex items-center gap-3 bg-primary/10 p-4 rounded-xl text-indigo-400 text-sm font-black border border-indigo-500/20 shadow-sm hover:bg-primary/20 transition-all cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center"><i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i></div>Daten dauerhaft sichern</button>
+                <button onclick="window.toggleModal('settingsModal'); window.toggleModal('designModal')" class="w-full flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 p-4 rounded-xl text-white text-sm font-bold transition-all border border-zinc-800 cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400"><i data-lucide="palette" class="w-4 h-4 pointer-events-none"></i></div> <span data-i18n="menuDesign">Design Studio</span></button>
+                <button id="btnSecureAccount" onclick="window.toggleModal('settingsModal'); window.toggleModal('authModal')" class="w-full flex items-center gap-3 bg-primary/10 p-4 rounded-xl text-indigo-400 text-sm font-black border border-indigo-500/20 shadow-sm hover:bg-primary/20 transition-all cursor-pointer pointer-events-auto"><div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center"><i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i></div><span data-i18n="menuSecure">Daten dauerhaft sichern</span></button>
             </div>
         </div>
     </div>
@@ -1633,7 +1633,7 @@
             <button aria-label="Schließen" onclick="window.closeAiModal()" class="absolute top-5 right-5 text-zinc-500 hover:text-white bg-zinc-900 hover:bg-zinc-800 p-2.5 rounded-full transition-colors z-[9999] cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-4 h-4 pointer-events-none"></i></button>
             <div class="flex items-center gap-4 mb-6 flex-shrink-0">
                 <div class="w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-indigo-400" id="aiModalIconBg"><i data-lucide="bot" class="w-6 h-6" id="aiModalIcon"></i></div>
-                <div><h3 class="text-xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400" id="aiModalTitle">Omni-Sport AI</h3><p class="text-xs text-zinc-400 font-bold uppercase tracking-widest mt-0.5" id="aiModalSubtitle">Dein persönlicher Data-Coach</p></div>
+                <div><h3 class="text-xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400" id="aiModalTitle">Omni-Sport AI</h3><p class="text-xs text-zinc-400 font-bold uppercase tracking-widest mt-0.5" id="aiModalSubtitle" data-i18n="aiCoachSub">Dein persönlicher Data-Coach</p></div>
             </div>
             <div id="aiContent" class="flex-1 overflow-y-auto text-sm text-zinc-300 leading-relaxed bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800 shadow-inner relative z-10 custom-scrollbar pointer-events-auto">
                 <div id="aiLoadingState" class="flex flex-col items-center justify-center h-full py-8 text-zinc-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-indigo-400 mb-4" id="aiLoadingIcon"></i><p class="font-bold tracking-widest uppercase text-[10px]" id="aiLoadingText" data-i18n="aiLoad">Analysiere Timeline...</p></div>
@@ -1726,15 +1726,15 @@
                 <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2)">
                     <i data-lucide="paintbrush" class="w-7 h-7" style="color:#a3c9a8"></i>
                 </div>
-                <h3 class="text-xl font-black text-white uppercase tracking-tight" style="font-family:'Sora',sans-serif">Design Studio</h3>
-                <p class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color:var(--text-muted)">Beschreibe dein Wunsch-Design — die KI baut es</p>
+                <h3 class="text-xl font-black text-white uppercase tracking-tight" style="font-family:'Sora',sans-serif" data-i18n="designTitle">Design Studio</h3>
+                <p class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color:var(--text-muted)" data-i18n="designSubtitle">Beschreibe dein Wunsch-Design — die KI baut es</p>
             </div>
 
             <!-- Prompt -->
             <textarea id="designPrompt" aria-label="Design Beschreibung" rows="3" class="w-full p-4 text-white text-sm font-bold mb-4 outline-none cursor-text pointer-events-auto rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" placeholder="Beschreibe dein Wunsch-Design..."></textarea>
 
             <!-- Inspirationen -->
-            <p class="text-[9px] font-black uppercase tracking-widest mb-2.5" style="color:var(--text-muted)">Inspirationen — tippe zum Uebernehmen</p>
+            <p class="text-[9px] font-black uppercase tracking-widest mb-2.5" style="color:var(--text-muted)" data-i18n="designInspiration">Inspirationen — tippe zum Uebernehmen</p>
             <div class="grid grid-cols-2 gap-2 mb-5" id="designInspirations">
                 <button onclick="window._setDesignPrompt('Neon Cyberpunk — leuchtende Akzente auf tiefem Schwarz, eckig und aggressiv')" class="text-left p-3 rounded-xl cursor-pointer pointer-events-auto transition-all hover:scale-[1.02]" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2)">
                     <p class="text-[10px] font-black text-violet-400 uppercase tracking-wider">Neon Cyberpunk</p>
@@ -1764,10 +1764,10 @@
 
             <!-- Buttons -->
             <button id="btnRunDesignAi" onclick="window.runDesignAI()" class="w-full text-black font-black py-4 rounded-xl uppercase shadow-xl hover:opacity-90 transition-all tracking-tight text-sm cursor-pointer pointer-events-auto mb-3" style="background:var(--primary-hex)">
-                <i data-lucide="sparkles" class="w-5 h-5 inline-block mr-2 pointer-events-none"></i> Design generieren
+                <i data-lucide="sparkles" class="w-5 h-5 inline-block mr-2 pointer-events-none"></i> <span data-i18n="designGenerate">Design generieren</span>
             </button>
             <button onclick="window.resetThemeToDefault()" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block mr-1.5 pointer-events-none"></i> Zuruecksetzen
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block mr-1.5 pointer-events-none"></i> <span data-i18n="designReset">Zurücksetzen</span>
             </button>
         </div>
     </div>
@@ -1814,13 +1814,13 @@
             <button aria-label="Schließen" onclick="window.toggleModal('trainingPlanModal')" class="absolute top-5 right-5 text-zinc-500 hover:text-white cursor-pointer pointer-events-auto z-50"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400"><i data-lucide="calendar-days" class="w-5 h-5"></i></div>
-                <div><h3 class="text-xl font-black text-white uppercase tracking-tighter">KI Trainingsplan</h3><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Personalisierter Periodisierungsplan</p></div>
+                <div><h3 class="text-xl font-black text-white uppercase tracking-tighter" data-i18n="planTitle">KI Trainingsplan</h3><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Personalisierter Periodisierungsplan</p></div>
             </div>
 
             <!-- Konfiguration -->
             <div id="planConfig" class="space-y-5">
                 <div>
-                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Dein Ziel</p>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3" data-i18n="planGoal">Dein Ziel</p>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="planGoalBtns">
                         <button onclick="window.setPlanGoal('Maximalkraft')" class="plan-goal-btn px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto hover:border-violet-500/50 flex flex-col items-center gap-1.5"><i data-lucide="zap" class="w-4 h-4"></i>Maximalkraft</button>
                         <button onclick="window.setPlanGoal('Muskelmasse')" class="plan-goal-btn px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer pointer-events-auto hover:border-violet-500/50 flex flex-col items-center gap-1.5"><i data-lucide="dumbbell" class="w-4 h-4"></i>Muskelmasse</button>
@@ -1849,7 +1849,7 @@
                 </div>
                 <button onclick="window.generateTrainingPlan()" id="btnGenPlan" class="w-full bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:opacity-90 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="sparkles" class="w-4 h-4 pointer-events-none"></i>
-                    <span id="btnGenPlanText">Plan generieren</span>
+                    <span id="btnGenPlanText" data-i18n="planGenerate">Plan generieren</span>
                 </button>
             </div>
 
@@ -2439,7 +2439,7 @@
 
             <!-- Übungen -->
             <div class="mb-5">
-                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Übungen</p>
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2" data-i18n="lblExercises">Übungen</p>
                 <!-- Schnellauswahl je nach Typ -->
                 <div id="sessionQuickPicks" class="flex flex-wrap gap-1.5 mb-3"></div>
                 <!-- Hinzugefügte Übungen -->
@@ -2612,7 +2612,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button aria-label="Aktualisieren" onclick="window.loadMyChallenges(); window.showToast('Aktualisiert!')" class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 flex items-center justify-center cursor-pointer pointer-events-auto transition-all"><i data-lucide="refresh-cw" class="w-4 h-4 pointer-events-none"></i></button>
+                    <button aria-label="Aktualisieren" onclick="window.loadMyChallenges(); window.showToast(window.t('toastUpdate'))" class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 flex items-center justify-center cursor-pointer pointer-events-auto transition-all"><i data-lucide="refresh-cw" class="w-4 h-4 pointer-events-none"></i></button>
                     <button aria-label="Schließen" onclick="window.toggleModal('challengeModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
                 </div>
             </div>
@@ -3069,12 +3069,12 @@
             else { if(btnConnect) btnConnect.classList.remove('hidden'); if(btnDisconnect) btnDisconnect.classList.add('hidden'); if(statusText) { statusText.textContent = "Nicht verbunden"; statusText.classList.replace('text-green-500', 'text-zinc-500'); } if(btnSync) { btnSync.classList.add('hidden'); btnSync.classList.remove('flex'); } }
         };
         window.connectStrava = function() { const currentUrl = window.location.origin + window.location.pathname; const authUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${currentUrl}&approval_prompt=force&scope=activity:read_all`; window.location.href = authUrl; };
-        window.disconnectStrava = function() { window.showModal('Strava trennen?', 'Strava Verbindung wirklich trennen?', true, () => { localStorage.removeItem('beastmode_strava_tokens'); stravaTokens = null; window.updateStravaUI(); window.showToast("Strava getrennt."); }); };
+        window.disconnectStrava = function() { window.showModal('Strava trennen?', 'Strava Verbindung wirklich trennen?', true, () => { localStorage.removeItem('beastmode_strava_tokens'); stravaTokens = null; window.updateStravaUI(); window.showToast(window.t("toastUpdate", "Strava getrennt.")); }); };
         window.handleStravaCallback = async function(code) { try { const res = await fetch('/.netlify/functions/strava-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: code, grant_type: 'authorization_code' }) }); if(!res.ok) throw new Error("Strava Token-Exchange fehlgeschlagen"); const data = await res.json(); stravaTokens = { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at }; localStorage.setItem('beastmode_strava_tokens', JSON.stringify(stravaTokens)); window.showToast("Strava erfolgreich verbunden!"); window.updateStravaUI(); } catch(e) { alert("Strava Login fehlgeschlagen: " + e.message); } };
         window.refreshStravaTokenIfNeeded = async function() { if(!stravaTokens) return false; if(Date.now() / 1000 > (stravaTokens.expires_at - 300)) { try { const res = await fetch('/.netlify/functions/strava-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: stravaTokens.refresh_token }) }); if(!res.ok) throw new Error("Token Refresh fehlgeschlagen"); const data = await res.json(); stravaTokens.access_token = data.access_token; stravaTokens.refresh_token = data.refresh_token; stravaTokens.expires_at = data.expires_at; localStorage.setItem('beastmode_strava_tokens', JSON.stringify(stravaTokens)); return true; } catch(e) { return false; } } return true; };
         window.syncStravaActivities = async function() {
             if(!stravaTokens) return alert("Strava nicht verbunden! Bitte im Profil verknüpfen."); 
-            window.showToast("Lade Strava Aktivitäten...");
+            window.showToast(window.t("aiAnalyzing", "Lade Strava Aktivitäten..."));
             await window.refreshStravaTokenIfNeeded();
             try {
                 const res = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=10', { headers: { 'Authorization': `Bearer ${stravaTokens.access_token}` } });
@@ -3091,7 +3091,7 @@
                         window.workouts.push(entry); if(window.syncToCloud) window.syncToCloud(entry); importedCount++;
                     }
                 });
-                if(importedCount > 0) { window.workouts = window.workouts.sort((a,b) => new Date(b.date) - new Date(a.date)); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); window.showToast(`${importedCount} Aktivitäten importiert!`); } else { window.showToast("Alles auf dem neuesten Stand."); }
+                if(importedCount > 0) { window.workouts = window.workouts.sort((a,b) => new Date(b.date) - new Date(a.date)); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); window.showToast(`${importedCount} Aktivitäten importiert!`); } else { window.showToast(window.t("toastUpdate", "Alles auf dem neuesten Stand.")); }
             } catch(e) { alert("Strava Sync Fehler: " + e.message); }
         };
 
@@ -3170,14 +3170,23 @@
         };
 
         const i18nData = {
-            de: { appTitle:"Base", appSub:"Tracke dein progressive Overload", sync:"Sync", weeks:"Wochen", bAi:"KI Builder", cAi:"AI Coach", mPers:"Mein Training", mPT:"PT Business", ptT:"Kunden Profile", ptS:"Business Management", fDate:"Datum", fEx:"Aktivität", fExP:"Name...", fEq:"Equipment", eqBb:"Langhantel", eqDb:"Kurzhantel", eqMa:"Maschine", eqCb:"Kabelzug", eqBw:"Eigengewicht", fSets:"Anzahl Sätze", fCust:"Feld hinzufügen", fSave:"Speichern", fUpdate:"Aktualisieren", tAct:"Aktiv", tArc:"Archiv", tDia:"Diagramme", fEnd:"WORKOUT BEENDEN", fDel:"Leeren", thDate:"Datum", thEx:"Sportart & Name", thData:"Erfasste Daten", thAction:"Aktion", emp:"Keine Daten", empTitle:"Dein erstes Workout wartet!", empSub:"Wähle oben eine Kategorie und tracke deinen Fortschritt.", empBtn:"Jetzt starten", pdPrompt:"Wähle deine Kategorie um loszulegen", bAiP:"Hacker Style...", bAiG:"UMBAUEN", aiLoad:"Analysiere...", close:"Schließen", pT:"Athleten Profil", pA:"Alter", pW:"Gewicht (kg)", pSave:"Profil Speichern", rT:"Vorlagen", btnCanc:"Abbrechen", btnConf:"Bestätigen", prText:"Neuer PR!", exCsv:"CSV", offlineWarn:"⚡ OFFLINE MODUS - LOKALE SPEICHERUNG", selectExercise:"Übung filtern", prSub:"Grenzen verschoben.", restTimer:"Pausen-Timer", statusOffline:"Offline", share:"Teilen", copied:"Kopiert!", obRoleT:"Wer bist du?", obRoleS:"Richte BASE ein.", obAth:"Athlet", obAthS:"Ich trainiere für mich", obPt:"Trainer", obPtS:"Ich manage Klienten", obFocT:"Dein Fokus", obFocS:"Was trackst du?", modStr:"Krafttraining", obStrS:"Sätze, Wdh, Gewicht", modCar:"Ausdauer", obCarS:"Laufen, Radfahren", modCus:"Mein Sport", obCusS:"KI baut Formular", tabStr:"Kraft", tabCar:"Ausdauer", tabRec:"Mobility", tabOwn:"Mein Sport", bAiDesc:"Lass die KI ein Formular bauen:", aiProg:"AI Coach: Progression Analysieren", btnEnd:"Beenden", btnDel:"Leeren", btnExp:"CSV", znsTitle:"ZNS Readiness" },
-            en: { appTitle:"Base", appSub:"Track your progression", sync:"Sync", weeks:"Weeks", bAi:"AI Builder", cAi:"AI Coach", mPers:"My Training", mPT:"PT Business", ptT:"Client Base", ptS:"Management", fDate:"Date", fEx:"Activity", fExP:"Name...", fEq:"Equipment", eqBb:"Barbell", eqDb:"Dumbbell", eqMa:"Machine", eqCb:"Cable", eqBw:"Bodyweight", fSets:"No. Sets", fCust:"Add Field", fSave:"Save", fUpdate:"Update", tAct:"Active", tArc:"Archive", tDia:"Analytics", fEnd:"FINISH WORKOUT", fDel:"Clear", thDate:"Date", thEx:"Sport & Name", thData:"Data", thAction:"Action", emp:"No Data", empTitle:"Your first workout awaits!", empSub:"Pick a category above and start tracking your progress.", empBtn:"Get started", bAiP:"Hacker style...", bAiG:"REBUILD", aiLoad:"Analyzing...", close:"Close", pT:"Athlete Profile", pA:"Age", pW:"Weight (kg)", pSave:"Save Profile", rT:"Routines", btnCanc:"Cancel", btnConf:"Confirm", prText:"NEW PR!", exCsv:"Export", offlineWarn:"⚡ OFFLINE MODE - LOCAL STORAGE", selectExercise:"Filter Exercise", prSub:"Limits pushed.", restTimer:"Rest Timer", statusOffline:"Offline", share:"Share", copied:"Copied!", obRoleT:"Who are you?", obRoleS:"Set up BASE.", obAth:"Athlete", obAthS:"I train for myself", obPt:"Trainer", obPtS:"I manage clients", obFocT:"Your Focus", obFocS:"What do you track?", modStr:"Strength", obStrS:"Sets, Reps, Weight", modCar:"Cardio", obCarS:"Running, Cycling", modCus:"Custom Sport", obCusS:"AI builds form", tabStr:"Strength", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"My Sport", bAiDesc:"Let AI build a form:", aiProg:"AI Coach: Analyze Progression", btnEnd:"Finish", btnDel:"Clear", btnExp:"CSV", znsTitle:"CNS Readiness" },
-            fr: { appTitle:"Base", appSub:"Suivez votre progression", sync:"Sync", weeks:"Semaines", bAi:"IA Builder", cAi:"Coach IA", mPers:"Mon Entraînement", mPT:"PT Business", ptT:"Profils Clients", ptS:"Gestion Business", fDate:"Date", fEx:"Activité", fExP:"Nom...", fEq:"Équipement", eqBb:"Barre", eqDb:"Haltères", eqMa:"Machine", eqCb:"Câble", eqBw:"Poids du corps", fSets:"Nombre de séries", fCust:"Ajouter un champ", fSave:"Enregistrer", fUpdate:"Mettre à jour", tAct:"Actif", tArc:"Archive", tDia:"Graphiques", fEnd:"TERMINER L'ENTRAÎNEMENT", fDel:"Vider", thDate:"Date", thEx:"Sport & Nom", thData:"Données", thAction:"Action", emp:"Aucune donnée", empTitle:"Votre premier entraînement vous attend!", empSub:"Choisissez une catégorie et suivez vos progrès.", empBtn:"Commencer", bAiP:"Style hacker...", bAiG:"RECONSTRUIRE", aiLoad:"Analyse en cours...", close:"Fermer", pT:"Profil Athlète", pA:"Âge", pW:"Poids (kg)", pSave:"Enregistrer le profil", rT:"Modèles", btnCanc:"Annuler", btnConf:"Confirmer", prText:"NOUVEAU PR!", exCsv:"Exporter", offlineWarn:"⚡ MODE HORS LIGNE - STOCKAGE LOCAL", selectExercise:"Filtrer l'exercice", prSub:"Limites repoussées.", restTimer:"Minuteur de repos", statusOffline:"Hors ligne", share:"Partager", copied:"Copié!", obRoleT:"Qui êtes-vous?", obRoleS:"Configurez BASE.", obAth:"Athlète", obAthS:"Je m'entraîne pour moi", obPt:"Coach", obPtS:"Je gère des clients", obFocT:"Votre focus", obFocS:"Que suivez-vous?", modStr:"Musculation", obStrS:"Séries, Reps, Poids", modCar:"Cardio", obCarS:"Course, Cyclisme", modCus:"Mon Sport", obCusS:"L'IA crée le formulaire", tabStr:"Force", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Mon Sport", bAiDesc:"Laissez l'IA créer un formulaire:", aiProg:"Coach IA: Analyser la progression", btnEnd:"Terminer", btnDel:"Vider", btnExp:"CSV", znsTitle:"Prêt SNC" },
-            es: { appTitle:"Base", appSub:"Rastrea tu progresión", sync:"Sync", weeks:"Semanas", bAi:"IA Builder", cAi:"Coach IA", mPers:"Mi Entrenamiento", mPT:"PT Business", ptT:"Perfiles de Clientes", ptS:"Gestión Business", fDate:"Fecha", fEx:"Actividad", fExP:"Nombre...", fEq:"Equipamiento", eqBb:"Barra", eqDb:"Mancuernas", eqMa:"Máquina", eqCb:"Cable", eqBw:"Peso corporal", fSets:"Número de series", fCust:"Añadir campo", fSave:"Guardar", fUpdate:"Actualizar", tAct:"Activo", tArc:"Archivo", tDia:"Gráficos", fEnd:"TERMINAR ENTRENAMIENTO", fDel:"Vaciar", thDate:"Fecha", thEx:"Deporte & Nombre", thData:"Datos", thAction:"Acción", emp:"Sin datos", empTitle:"¡Tu primer entrenamiento te espera!", empSub:"Elige una categoría y empieza a registrar tu progreso.", empBtn:"Empezar", bAiP:"Estilo hacker...", bAiG:"RECONSTRUIR", aiLoad:"Analizando...", close:"Cerrar", pT:"Perfil del Atleta", pA:"Edad", pW:"Peso (kg)", pSave:"Guardar perfil", rT:"Plantillas", btnCanc:"Cancelar", btnConf:"Confirmar", prText:"¡NUEVO PR!", exCsv:"Exportar", offlineWarn:"⚡ MODO OFFLINE - ALMACENAMIENTO LOCAL", selectExercise:"Filtrar ejercicio", prSub:"Límites superados.", restTimer:"Temporizador de descanso", statusOffline:"Sin conexión", share:"Compartir", copied:"¡Copiado!", obRoleT:"¿Quién eres?", obRoleS:"Configura BASE.", obAth:"Atleta", obAthS:"Entreno para mí", obPt:"Entrenador", obPtS:"Gestiono clientes", obFocT:"Tu enfoque", obFocS:"¿Qué rastreas?", modStr:"Musculación", obStrS:"Series, Reps, Peso", modCar:"Cardio", obCarS:"Correr, Ciclismo", modCus:"Mi Deporte", obCusS:"IA crea formulario", tabStr:"Fuerza", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Mi Deporte", bAiDesc:"Deja que la IA cree un formulario:", aiProg:"Coach IA: Analizar progresión", btnEnd:"Terminar", btnDel:"Vaciar", btnExp:"CSV", znsTitle:"Preparación SNC" },
-            it: { appTitle:"Base", appSub:"Traccia la tua progressione", sync:"Sync", weeks:"Settimane", bAi:"IA Builder", cAi:"Coach IA", mPers:"Il Mio Allenamento", mPT:"PT Business", ptT:"Profili Clienti", ptS:"Gestione Business", fDate:"Data", fEx:"Attività", fExP:"Nome...", fEq:"Attrezzatura", eqBb:"Bilanciere", eqDb:"Manubri", eqMa:"Macchina", eqCb:"Cavi", eqBw:"Peso corporeo", fSets:"Numero di serie", fCust:"Aggiungi campo", fSave:"Salva", fUpdate:"Aggiorna", tAct:"Attivo", tArc:"Archivio", tDia:"Grafici", fEnd:"TERMINA ALLENAMENTO", fDel:"Svuota", thDate:"Data", thEx:"Sport & Nome", thData:"Dati", thAction:"Azione", emp:"Nessun dato", empTitle:"Il tuo primo allenamento ti aspetta!", empSub:"Scegli una categoria e inizia a monitorare i tuoi progressi.", empBtn:"Inizia ora", bAiP:"Stile hacker...", bAiG:"RICOSTRUIRE", aiLoad:"Analisi in corso...", close:"Chiudi", pT:"Profilo Atleta", pA:"Età", pW:"Peso (kg)", pSave:"Salva profilo", rT:"Modelli", btnCanc:"Annulla", btnConf:"Conferma", prText:"NUOVO PR!", exCsv:"Esporta", offlineWarn:"⚡ MODALITÀ OFFLINE - ARCHIVIAZIONE LOCALE", selectExercise:"Filtra esercizio", prSub:"Limiti superati.", restTimer:"Timer di riposo", statusOffline:"Offline", share:"Condividi", copied:"Copiato!", obRoleT:"Chi sei?", obRoleS:"Configura BASE.", obAth:"Atleta", obAthS:"Mi alleno per me stesso", obPt:"Trainer", obPtS:"Gestisco clienti", obFocT:"Il tuo focus", obFocS:"Cosa tracci?", modStr:"Allenamento con pesi", obStrS:"Serie, Rip, Peso", modCar:"Cardio", obCarS:"Corsa, Ciclismo", modCus:"Il Mio Sport", obCusS:"IA crea modulo", tabStr:"Forza", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Il Mio Sport", bAiDesc:"Lascia che l'IA crei un modulo:", aiProg:"Coach IA: Analizza progressione", btnEnd:"Termina", btnDel:"Svuota", btnExp:"CSV", znsTitle:"Prontezza SNC" },
-            nl: { appTitle:"Base", appSub:"Volg je progressie", sync:"Sync", weeks:"Weken", bAi:"AI Builder", cAi:"AI Coach", mPers:"Mijn Training", mPT:"PT Business", ptT:"Klantprofielen", ptS:"Business Beheer", fDate:"Datum", fEx:"Activiteit", fExP:"Naam...", fEq:"Uitrusting", eqBb:"Halter", eqDb:"Dumbbell", eqMa:"Machine", eqCb:"Kabel", eqBw:"Lichaamsgewicht", fSets:"Aantal sets", fCust:"Veld toevoegen", fSave:"Opslaan", fUpdate:"Bijwerken", tAct:"Actief", tArc:"Archief", tDia:"Grafieken", fEnd:"TRAINING BEËINDIGEN", fDel:"Leegmaken", thDate:"Datum", thEx:"Sport & Naam", thData:"Gegevens", thAction:"Actie", emp:"Geen gegevens", empTitle:"Je eerste workout wacht!", empSub:"Kies een categorie en begin met het bijhouden van je voortgang.", empBtn:"Nu starten", bAiP:"Hacker stijl...", bAiG:"HERBOUWEN", aiLoad:"Analyseren...", close:"Sluiten", pT:"Atletenprofiel", pA:"Leeftijd", pW:"Gewicht (kg)", pSave:"Profiel opslaan", rT:"Sjablonen", btnCanc:"Annuleren", btnConf:"Bevestigen", prText:"NIEUW PR!", exCsv:"Exporteren", offlineWarn:"⚡ OFFLINE MODUS - LOKALE OPSLAG", selectExercise:"Oefening filteren", prSub:"Grenzen verlegd.", restTimer:"Rusttimer", statusOffline:"Offline", share:"Delen", copied:"Gekopieerd!", obRoleT:"Wie ben jij?", obRoleS:"Stel BASE in.", obAth:"Atleet", obAthS:"Ik train voor mezelf", obPt:"Trainer", obPtS:"Ik beheer klanten", obFocT:"Jouw focus", obFocS:"Wat volg je?", modStr:"Krachttraining", obStrS:"Sets, Reps, Gewicht", modCar:"Cardio", obCarS:"Lopen, Fietsen", modCus:"Mijn Sport", obCusS:"AI maakt formulier", tabStr:"Kracht", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Mijn Sport", bAiDesc:"Laat AI een formulier maken:", aiProg:"AI Coach: Progressie analyseren", btnEnd:"Beëindigen", btnDel:"Leegmaken", btnExp:"CSV", znsTitle:"ZNS Gereedheid" },
-            ar: { appTitle:"Base", appSub:"تتبع تقدمك", sync:"مزامنة", weeks:"أسابيع", bAi:"منشئ الذكاء", cAi:"مدرب الذكاء", mPers:"تدريبي", mPT:"أعمال PT", ptT:"ملفات العملاء", ptS:"إدارة الأعمال", fDate:"التاريخ", fEx:"النشاط", fExP:"الاسم...", fEq:"المعدات", eqBb:"البار", eqDb:"الدمبل", eqMa:"الآلة", eqCb:"الكابل", eqBw:"وزن الجسم", fSets:"عدد المجموعات", fCust:"إضافة حقل", fSave:"حفظ", fUpdate:"تحديث", tAct:"نشط", tArc:"الأرشيف", tDia:"الرسوم البيانية", fEnd:"إنهاء التمرين", fDel:"مسح", thDate:"التاريخ", thEx:"الرياضة والاسم", thData:"البيانات", thAction:"الإجراء", emp:"لا توجد بيانات", empTitle:"تمرينك الأول في انتظارك!", empSub:"اختر فئة وابدأ بتتبع تقدمك.", empBtn:"ابدأ الآن", bAiP:"أسلوب هاكر...", bAiG:"إعادة بناء", aiLoad:"جارٍ التحليل...", close:"إغلاق", pT:"ملف الرياضي", pA:"العمر", pW:"الوزن (كجم)", pSave:"حفظ الملف", rT:"القوالب", btnCanc:"إلغاء", btnConf:"تأكيد", prText:"رقم قياسي جديد!", exCsv:"تصدير", offlineWarn:"⚡ وضع عدم الاتصال - التخزين المحلي", selectExercise:"تصفية التمرين", prSub:"تخطيت الحدود.", restTimer:"مؤقت الراحة", statusOffline:"غير متصل", share:"مشاركة", copied:"تم النسخ!", obRoleT:"من أنت؟", obRoleS:"إعداد BASE.", obAth:"رياضي", obAthS:"أتدرب لنفسي", obPt:"مدرب", obPtS:"أدير العملاء", obFocT:"تركيزك", obFocS:"ماذا تتبع؟", modStr:"تدريب القوة", obStrS:"مجموعات، تكرارات، وزن", modCar:"كارديو", obCarS:"الجري، ركوب الدراجات", modCus:"رياضتي", obCusS:"الذكاء يبني النموذج", tabStr:"القوة", tabCar:"كارديو", tabRec:"Mobility", tabOwn:"رياضتي", bAiDesc:"دع الذكاء يبني نموذجاً:", aiProg:"مدرب الذكاء: تحليل التقدم", btnEnd:"إنهاء", btnDel:"مسح", btnExp:"CSV", znsTitle:"جاهزية الجهاز العصبي" }
+            de: { appTitle:"Base", appSub:"Tracke dein progressive Overload", sync:"Sync", weeks:"Wochen", bAi:"KI Builder", cAi:"AI Coach", mPers:"Mein Training", mPT:"PT Business", ptT:"Kunden Profile", ptS:"Business Management", fDate:"Datum", fEx:"Aktivität", fExP:"Name...", fEq:"Equipment", eqBb:"Langhantel", eqDb:"Kurzhantel", eqMa:"Maschine", eqCb:"Kabelzug", eqBw:"Eigengewicht", fSets:"Anzahl Sätze", fCust:"Feld hinzufügen", fSave:"Speichern", fUpdate:"Aktualisieren", tAct:"Aktiv", tArc:"Archiv", tDia:"Diagramme", fEnd:"WORKOUT BEENDEN", fDel:"Leeren", thDate:"Datum", thEx:"Sportart & Name", thData:"Erfasste Daten", thAction:"Aktion", emp:"Keine Daten", empTitle:"Dein erstes Workout wartet!", empSub:"Wähle oben eine Kategorie und tracke deinen Fortschritt.", empBtn:"Jetzt starten", pdPrompt:"Wähle deine Kategorie um loszulegen", bAiP:"Hacker Style...", bAiG:"UMBAUEN", aiLoad:"Analysiere...", close:"Schließen", pT:"Athleten Profil", pA:"Alter", pW:"Gewicht (kg)", pSave:"Profil Speichern", rT:"Vorlagen", btnCanc:"Abbrechen", btnConf:"Bestätigen", prText:"Neuer PR!", exCsv:"CSV", offlineWarn:"⚡ OFFLINE MODUS - LOKALE SPEICHERUNG", selectExercise:"Übung filtern", prSub:"Grenzen verschoben.", restTimer:"Pausen-Timer", statusOffline:"Offline", share:"Teilen", copied:"Kopiert!", obRoleT:"Wer bist du?", obRoleS:"Richte BASE ein.", obAth:"Athlet", obAthS:"Ich trainiere für mich", obPt:"Trainer", obPtS:"Ich manage Klienten", obFocT:"Dein Fokus", obFocS:"Was trackst du?", modStr:"Krafttraining", obStrS:"Sätze, Wdh, Gewicht", modCar:"Ausdauer", obCarS:"Laufen, Radfahren", modCus:"Mein Sport", obCusS:"KI baut Formular", tabStr:"Kraft", tabCar:"Ausdauer", tabRec:"Mobility", tabOwn:"Mein Sport", bAiDesc:"Lass die KI ein Formular bauen:", aiProg:"AI Coach: Progression Analysieren", btnEnd:"Beenden", btnDel:"Leeren", btnExp:"CSV", znsTitle:"ZNS Readiness", navTraining:"Training", navAnalyse:"Analyse", navTools:"KI Tools", navMenu:"Menü", navClients:"Kunden", navPlans:"Pläne", navCalendar:"Kalender", navMyTraining:"Mein Training", workoutTimer:"Workout Timer", workoutDone:"Workout abgeschlossen!", workoutArchived:"Workout archiviert!", menuModules:"Module & Tabs", menuDesign:"Design Studio", menuSecure:"Daten dauerhaft sichern", toolCoach:"AI Coach", toolPlan:"Trainingsplan", toolZns:"ZNS Readiness", toolPrehab:"Pre-Hab", toolCopilot:"Co-Pilot", toolChallenges:"Challenges", toastSaved:"Training gesichert! ✅", toastDeleted:"Eintrag gelöscht", toastArchived:"Workout archiviert!", toastCopied:"Kopiert!", toastExported:"Export erfolgreich!", toastError:"Fehler aufgetreten", toastUpdate:"Update erfolgreich! ✅", toastNoData:"Keine Daten vorhanden.", toastOffline:"⚡ Offline — Daten lokal gespeichert", btnSaveSession:"Session speichern", btnCancel:"Abbrechen", btnDelete:"Löschen", btnEdit:"Bearbeiten", btnShare:"Teilen", btnExport:"Exportieren", lblDate:"Datum", lblActivity:"Aktivität", lblEquipment:"Equipment", lblSets:"Sätze", lblReps:"Wdh", lblWeight:"Gewicht", lblDuration:"Dauer", lblDistance:"Distanz", lblNotes:"Notizen", lblFocus:"Fokus", lblClient:"Kunde", lblClients:"Meine Kunden", lblSessions:"Sessions", lblPlans:"Trainingspläne", lblProfile:"Athleten Profil", lblAge:"Alter", lblBodyWeight:"Gewicht (kg)", lblHeight:"Größe (cm)", lblGender:"Geschlecht", lblExperience:"Erfahrung", lblMale:"Männlich", lblFemale:"Weiblich", lblDiverse:"Divers", lblBeginner:"Anfänger", lblIntermediate:"Fortgeschritten", lblAdvanced:"Profi", lblInjuries:"Verletzungen / Einschränkungen", lblMedical:"Medical / Kontraindikationen", lblSaveProfile:"Profil Speichern", lblRoutines:"Vorlagen", lblNoRoutines:"Keine Vorlagen gespeichert", lblLoad:"Laden", lblDeleteConfirm:"Wirklich löschen?", lblYes:"Ja", lblNo:"Nein", lblNewPR:"Neuer PR!", lblPersonalRecord:"Persönlicher Rekord", lblStreak:"Streak", lblWeeks:"Wochen", lblToday:"Heute", lblThisWeek:"Diese Woche", lblAllTime:"Gesamt", lblProgress:"Fortschritt", lblVolume:"Volumen", lblMaxWeight:"Max Gewicht", ptDashTitle:"PT Business Dashboard", ptAddClient:"Neuer Kunde", ptNoClients:"Noch keine Kunden", ptSessionPlanner:"Session planen", ptWeeklyReport:"KI Wochenbericht", ptCustomType:"Neuer Session-Typ", ptQuickTrack:"Quick Track", lblSearch:"Suchen", lblFilter:"Filter", lblAll:"Alle", lblActive:"Aktiv", lblArchive:"Archiv", lblCharts:"Diagramme", lblCalendar:"Kalender", lblBodyTracker:"Körper-Tracker", lblAddMeasurement:"Messung hinzufügen", lblMeasurementSaved:"Messung gespeichert! ✅", designTitle:"Design Studio", designSubtitle:"Beschreibe dein Wunsch-Design — die KI baut es", designGenerate:"Design generieren", designReset:"Zurücksetzen", designInspiration:"Inspirationen — tippe zum Übernehmen", aiAnalyzing:"Analysiere...", aiError:"KI Fehler", aiCoachTitle:"AI Coach", aiCoachSub:"Dein persönlicher Data-Coach", planTitle:"Trainingsplan Generator", planGoal:"Trainingsziel", planDuration:"Dauer (Wochen)", planDays:"Tage pro Woche", planGenerate:"Plan generieren", znsAnalyze:"KI Analyse starten", znsFresh:"Frisch & bereit", znsModerate:"Moderate Belastung", znsFatigued:"Erhöhte Müdigkeit", prehabTitle:"Pre-Hab", prehabGenerate:"Pre-Hab starten", prehabSub:"Verletzungsprävention", copilotTitle:"KI Co-Pilot", copilotSub:"Empfehlungen pro Übung", challengeTitle:"Challenges", challengeSub:"Fordere Freunde heraus", inviteTitle:"Trainingspartner einladen", inviteSub:"Teile BASE mit Freunden", smartWorkout:"Smart Workout", smartWorkoutSub:"KI plant dein heutiges Training", firstWorkoutTitle:"Willkommen bei BASE!", firstWorkoutSub:"Tracke dein erstes Workout in 30 Sekunden.", registerBanner:"Registriere dich kostenlos um deine Workouts zu sichern.", accountDelete:"Account & Daten löschen", accountDeleteConfirm:"Account und alle Daten dauerhaft löschen? Das kann NICHT rückgängig gemacht werden!", lblLanguage:"Sprache", lblVersion:"Version", lblBarbell:"Langhantel", lblDumbbell:"Kurzhantel", lblMachine:"Maschine", lblCable:"Kabelzug", lblBodyweight:"Eigengewicht", sessionKraft:"Kraft", sessionAusdauer:"Ausdauer", sessionMobility:"Mobility", lblTime:"Uhrzeit", lblSessionDuration:"Dauer", lblMin:"MIN", lblSec:"SEK", lblExercises:"Übungen", lblAddExercise:"Übung hinzufügen", lblFromTemplate:"Aus Vorlage", lblAsTemplate:"Als Vorlage", onboardWelcome:"Willkommen", onboardSetup:"Richte BASE ein", lblStrava:"Strava verbinden", lblStravaConnected:"Strava verbunden", lblPushEnable:"Push-Benachrichtigungen", lblPushEnabled:"Aktiviert", lblRestTimer:"Pausen-Timer", lblRestSeconds:"Sekunden Pause" },
+            en: { appTitle:"Base", appSub:"Track your progression", sync:"Sync", weeks:"Weeks", bAi:"AI Builder", cAi:"AI Coach", mPers:"My Training", mPT:"PT Business", ptT:"Client Base", ptS:"Management", fDate:"Date", fEx:"Activity", fExP:"Name...", fEq:"Equipment", eqBb:"Barbell", eqDb:"Dumbbell", eqMa:"Machine", eqCb:"Cable", eqBw:"Bodyweight", fSets:"No. Sets", fCust:"Add Field", fSave:"Save", fUpdate:"Update", tAct:"Active", tArc:"Archive", tDia:"Analytics", fEnd:"FINISH WORKOUT", fDel:"Clear", thDate:"Date", thEx:"Sport & Name", thData:"Data", thAction:"Action", emp:"No Data", empTitle:"Your first workout awaits!", empSub:"Pick a category above and start tracking your progress.", empBtn:"Get started", bAiP:"Hacker style...", bAiG:"REBUILD", aiLoad:"Analyzing...", close:"Close", pT:"Athlete Profile", pA:"Age", pW:"Weight (kg)", pSave:"Save Profile", rT:"Routines", btnCanc:"Cancel", btnConf:"Confirm", prText:"NEW PR!", exCsv:"Export", offlineWarn:"⚡ OFFLINE MODE - LOCAL STORAGE", selectExercise:"Filter Exercise", prSub:"Limits pushed.", restTimer:"Rest Timer", statusOffline:"Offline", share:"Share", copied:"Copied!", obRoleT:"Who are you?", obRoleS:"Set up BASE.", obAth:"Athlete", obAthS:"I train for myself", obPt:"Trainer", obPtS:"I manage clients", obFocT:"Your Focus", obFocS:"What do you track?", modStr:"Strength", obStrS:"Sets, Reps, Weight", modCar:"Cardio", obCarS:"Running, Cycling", modCus:"Custom Sport", obCusS:"AI builds form", tabStr:"Strength", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"My Sport", bAiDesc:"Let AI build a form:", aiProg:"AI Coach: Analyze Progression", btnEnd:"Finish", btnDel:"Clear", btnExp:"CSV", znsTitle:"CNS Readiness", navTraining:"Training", navAnalyse:"Analytics", navTools:"AI Tools", navMenu:"Menu", navClients:"Clients", navPlans:"Plans", navCalendar:"Calendar", navMyTraining:"My Training", workoutTimer:"Workout Timer", workoutDone:"Workout complete!", workoutArchived:"Workout archived!", menuModules:"Modules & Tabs", menuDesign:"Design Studio", menuSecure:"Secure your data", toolCoach:"AI Coach", toolPlan:"Training Plan", toolZns:"CNS Readiness", toolPrehab:"Pre-Hab", toolCopilot:"Co-Pilot", toolChallenges:"Challenges", toastSaved:"Workout saved! ✅", toastDeleted:"Entry deleted", toastArchived:"Workout archived!", toastCopied:"Copied!", toastExported:"Export successful!", toastError:"An error occurred", toastUpdate:"Updated successfully! ✅", toastNoData:"No data available.", toastOffline:"⚡ Offline — data stored locally", btnSaveSession:"Save session", btnCancel:"Cancel", btnDelete:"Delete", btnEdit:"Edit", btnShare:"Share", btnExport:"Export", lblDate:"Date", lblActivity:"Activity", lblEquipment:"Equipment", lblSets:"Sets", lblReps:"Reps", lblWeight:"Weight", lblDuration:"Duration", lblDistance:"Distance", lblNotes:"Notes", lblFocus:"Focus", lblClient:"Client", lblClients:"My Clients", lblSessions:"Sessions", lblPlans:"Training Plans", lblProfile:"Athlete Profile", lblAge:"Age", lblBodyWeight:"Weight (kg)", lblHeight:"Height (cm)", lblGender:"Gender", lblExperience:"Experience", lblMale:"Male", lblFemale:"Female", lblDiverse:"Diverse", lblBeginner:"Beginner", lblIntermediate:"Intermediate", lblAdvanced:"Advanced", lblInjuries:"Injuries / Limitations", lblMedical:"Medical / Contraindications", lblSaveProfile:"Save Profile", lblRoutines:"Routines", lblNoRoutines:"No routines saved", lblLoad:"Load", lblDeleteConfirm:"Really delete?", lblYes:"Yes", lblNo:"No", lblNewPR:"New PR!", lblPersonalRecord:"Personal Record", lblStreak:"Streak", lblWeeks:"Weeks", lblToday:"Today", lblThisWeek:"This Week", lblAllTime:"All Time", lblProgress:"Progress", lblVolume:"Volume", lblMaxWeight:"Max Weight", ptDashTitle:"PT Business Dashboard", ptAddClient:"New Client", ptNoClients:"No clients yet", ptSessionPlanner:"Plan Session", ptWeeklyReport:"AI Weekly Report", ptCustomType:"New Session Type", ptQuickTrack:"Quick Track", lblSearch:"Search", lblFilter:"Filter", lblAll:"All", lblActive:"Active", lblArchive:"Archive", lblCharts:"Charts", lblCalendar:"Calendar", lblBodyTracker:"Body Tracker", lblAddMeasurement:"Add Measurement", lblMeasurementSaved:"Measurement saved! ✅", designTitle:"Design Studio", designSubtitle:"Describe your dream design — AI builds it", designGenerate:"Generate Design", designReset:"Reset", designInspiration:"Inspirations — tap to apply", aiAnalyzing:"Analyzing...", aiError:"AI Error", aiCoachTitle:"AI Coach", aiCoachSub:"Your personal data coach", planTitle:"Training Plan Generator", planGoal:"Training Goal", planDuration:"Duration (weeks)", planDays:"Days per week", planGenerate:"Generate Plan", znsAnalyze:"Start AI Analysis", znsFresh:"Fresh & ready", znsModerate:"Moderate load", znsFatigued:"Elevated fatigue", prehabTitle:"Pre-Hab", prehabGenerate:"Start Pre-Hab", prehabSub:"Injury Prevention", copilotTitle:"AI Co-Pilot", copilotSub:"Per-exercise recommendations", challengeTitle:"Challenges", challengeSub:"Challenge your friends", inviteTitle:"Invite training partner", inviteSub:"Share BASE with friends", smartWorkout:"Smart Workout", smartWorkoutSub:"AI plans your today's workout", firstWorkoutTitle:"Welcome to BASE!", firstWorkoutSub:"Track your first workout in 30 seconds.", registerBanner:"Sign up for free to secure your workouts.", accountDelete:"Delete account & data", accountDeleteConfirm:"Permanently delete account and all data? This CANNOT be undone!", lblLanguage:"Language", lblVersion:"Version", lblBarbell:"Barbell", lblDumbbell:"Dumbbell", lblMachine:"Machine", lblCable:"Cable", lblBodyweight:"Bodyweight", sessionKraft:"Strength", sessionAusdauer:"Cardio", sessionMobility:"Mobility", lblTime:"Time", lblSessionDuration:"Duration", lblMin:"MIN", lblSec:"SEC", lblExercises:"Exercises", lblAddExercise:"Add exercise", lblFromTemplate:"From Template", lblAsTemplate:"As Template", onboardWelcome:"Welcome", onboardSetup:"Set up BASE", lblStrava:"Connect Strava", lblStravaConnected:"Strava connected", lblPushEnable:"Push Notifications", lblPushEnabled:"Enabled", lblRestTimer:"Rest Timer", lblRestSeconds:"seconds rest" },
+            fr: { appTitle:"Base", appSub:"Suivez votre progression", sync:"Sync", weeks:"Semaines", bAi:"IA Builder", cAi:"Coach IA", mPers:"Mon Entraînement", mPT:"PT Business", ptT:"Profils Clients", ptS:"Gestion Business", fDate:"Date", fEx:"Activité", fExP:"Nom...", fEq:"Équipement", eqBb:"Barre", eqDb:"Haltères", eqMa:"Machine", eqCb:"Câble", eqBw:"Poids du corps", fSets:"Nombre de séries", fCust:"Ajouter un champ", fSave:"Enregistrer", fUpdate:"Mettre à jour", tAct:"Actif", tArc:"Archive", tDia:"Graphiques", fEnd:"TERMINER L'ENTRAÎNEMENT", fDel:"Vider", thDate:"Date", thEx:"Sport & Nom", thData:"Données", thAction:"Action", emp:"Aucune donnée", empTitle:"Votre premier entraînement vous attend!", empSub:"Choisissez une catégorie et suivez vos progrès.", empBtn:"Commencer", bAiP:"Style hacker...", bAiG:"RECONSTRUIRE", aiLoad:"Analyse en cours...", close:"Fermer", pT:"Profil Athlète", pA:"Âge", pW:"Poids (kg)", pSave:"Enregistrer le profil", rT:"Modèles", btnCanc:"Annuler", btnConf:"Confirmer", prText:"NOUVEAU PR!", exCsv:"Exporter", offlineWarn:"⚡ MODE HORS LIGNE - STOCKAGE LOCAL", selectExercise:"Filtrer l'exercice", prSub:"Limites repoussées.", restTimer:"Minuteur de repos", statusOffline:"Hors ligne", share:"Partager", copied:"Copié!", obRoleT:"Qui êtes-vous?", obRoleS:"Configurez BASE.", obAth:"Athlète", obAthS:"Je m'entraîne pour moi", obPt:"Coach", obPtS:"Je gère des clients", obFocT:"Votre focus", obFocS:"Que suivez-vous?", modStr:"Musculation", obStrS:"Séries, Reps, Poids", modCar:"Cardio", obCarS:"Course, Cyclisme", modCus:"Mon Sport", obCusS:"L'IA crée le formulaire", tabStr:"Force", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Mon Sport", bAiDesc:"Laissez l'IA créer un formulaire:", aiProg:"Coach IA: Analyser la progression", btnEnd:"Terminer", btnDel:"Vider", btnExp:"CSV", znsTitle:"Prêt SNC", navTraining:"Entraînement", navAnalyse:"Analyse", navTools:"Outils IA", navMenu:"Menu", navClients:"Clients", navPlans:"Plans", navCalendar:"Calendrier", navMyTraining:"Mon Entraînement", workoutTimer:"Chrono", workoutDone:"Entraînement terminé!", workoutArchived:"Entraînement archivé!", menuModules:"Modules & Onglets", menuDesign:"Studio Design", menuSecure:"Sécuriser vos données", toolCoach:"Coach IA", toolPlan:"Plan d'entraînement", toolZns:"Préparation SNC", toolPrehab:"Pré-Hab", toolCopilot:"Co-Pilote", toolChallenges:"Défis", toastSaved:"Entraînement enregistré! ✅", toastDeleted:"Entrée supprimée", toastArchived:"Entraînement archivé!", toastCopied:"Copié!", toastExported:"Export réussi!", toastError:"Une erreur est survenue", toastUpdate:"Mis à jour! ✅", toastNoData:"Aucune donnée.", toastOffline:"⚡ Hors ligne — données stockées localement", btnSaveSession:"Enregistrer session", btnCancel:"Annuler", btnDelete:"Supprimer", btnEdit:"Modifier", btnShare:"Partager", btnExport:"Exporter", lblDate:"Date", lblActivity:"Activité", lblEquipment:"Équipement", lblSets:"Séries", lblReps:"Reps", lblWeight:"Poids", lblDuration:"Durée", lblDistance:"Distance", lblNotes:"Notes", lblFocus:"Focus", lblClient:"Client", lblClients:"Mes Clients", lblSessions:"Sessions", lblPlans:"Plans d'entraînement", lblProfile:"Profil Athlète", lblAge:"Âge", lblBodyWeight:"Poids (kg)", lblHeight:"Taille (cm)", lblGender:"Genre", lblExperience:"Expérience", lblMale:"Homme", lblFemale:"Femme", lblDiverse:"Divers", lblBeginner:"Débutant", lblIntermediate:"Intermédiaire", lblAdvanced:"Avancé", lblInjuries:"Blessures / Limitations", lblMedical:"Médical / Contre-indications", lblSaveProfile:"Enregistrer le profil", lblRoutines:"Modèles", lblNoRoutines:"Aucun modèle enregistré", lblLoad:"Charger", lblDeleteConfirm:"Vraiment supprimer?", lblYes:"Oui", lblNo:"Non", lblNewPR:"Nouveau PR!", lblPersonalRecord:"Record Personnel", lblStreak:"Série", lblWeeks:"Semaines", lblToday:"Aujourd'hui", lblThisWeek:"Cette semaine", lblAllTime:"Total", lblProgress:"Progression", lblVolume:"Volume", lblMaxWeight:"Poids Max", ptDashTitle:"Tableau de bord PT", ptAddClient:"Nouveau Client", ptNoClients:"Pas encore de clients", ptSessionPlanner:"Planifier Session", ptWeeklyReport:"Rapport hebdo IA", ptCustomType:"Nouveau Type", ptQuickTrack:"Quick Track", lblSearch:"Rechercher", lblFilter:"Filtrer", lblAll:"Tous", lblActive:"Actif", lblArchive:"Archive", lblCharts:"Graphiques", lblCalendar:"Calendrier", lblBodyTracker:"Suivi Corporel", lblAddMeasurement:"Ajouter mesure", lblMeasurementSaved:"Mesure enregistrée! ✅", designTitle:"Studio Design", designSubtitle:"Décris ton design — l'IA le construit", designGenerate:"Générer le Design", designReset:"Réinitialiser", designInspiration:"Inspirations — touche pour appliquer", aiAnalyzing:"Analyse en cours...", aiError:"Erreur IA", aiCoachTitle:"Coach IA", aiCoachSub:"Ton coach personnel", planTitle:"Générateur de Plan", planGoal:"Objectif", planDuration:"Durée (semaines)", planDays:"Jours par semaine", planGenerate:"Générer le Plan", znsAnalyze:"Lancer l'analyse IA", znsFresh:"Frais & prêt", znsModerate:"Charge modérée", znsFatigued:"Fatigue élevée", prehabTitle:"Pré-Hab", prehabGenerate:"Lancer Pré-Hab", prehabSub:"Prévention des blessures", copilotTitle:"Co-Pilote IA", copilotSub:"Recommandations par exercice", challengeTitle:"Défis", challengeSub:"Défie tes amis", inviteTitle:"Inviter un partenaire", inviteSub:"Partage BASE avec tes amis", smartWorkout:"Smart Workout", smartWorkoutSub:"L'IA planifie ton entraînement", firstWorkoutTitle:"Bienvenue sur BASE!", firstWorkoutSub:"Enregistre ton premier entraînement en 30 secondes.", registerBanner:"Inscris-toi gratuitement pour sécuriser tes entraînements.", accountDelete:"Supprimer compte & données", accountDeleteConfirm:"Supprimer définitivement le compte et toutes les données? IRRÉVERSIBLE!", lblLanguage:"Langue", lblVersion:"Version", lblBarbell:"Barre", lblDumbbell:"Haltères", lblMachine:"Machine", lblCable:"Câble", lblBodyweight:"Poids du corps", sessionKraft:"Force", sessionAusdauer:"Cardio", sessionMobility:"Mobilité", lblTime:"Heure", lblSessionDuration:"Durée", lblMin:"MIN", lblSec:"SEC", lblExercises:"Exercices", lblAddExercise:"Ajouter exercice", lblFromTemplate:"Depuis modèle", lblAsTemplate:"Comme modèle", onboardWelcome:"Bienvenue", onboardSetup:"Configure BASE", lblStrava:"Connecter Strava", lblStravaConnected:"Strava connecté", lblPushEnable:"Notifications Push", lblPushEnabled:"Activé", lblRestTimer:"Minuteur de repos", lblRestSeconds:"secondes de repos" },
+            es: { appTitle:"Base", appSub:"Rastrea tu progresión", sync:"Sync", weeks:"Semanas", bAi:"IA Builder", cAi:"Coach IA", mPers:"Mi Entrenamiento", mPT:"PT Business", ptT:"Perfiles de Clientes", ptS:"Gestión Business", fDate:"Fecha", fEx:"Actividad", fExP:"Nombre...", fEq:"Equipamiento", eqBb:"Barra", eqDb:"Mancuernas", eqMa:"Máquina", eqCb:"Cable", eqBw:"Peso corporal", fSets:"Número de series", fCust:"Añadir campo", fSave:"Guardar", fUpdate:"Actualizar", tAct:"Activo", tArc:"Archivo", tDia:"Gráficos", fEnd:"TERMINAR ENTRENAMIENTO", fDel:"Vaciar", thDate:"Fecha", thEx:"Deporte & Nombre", thData:"Datos", thAction:"Acción", emp:"Sin datos", empTitle:"¡Tu primer entrenamiento te espera!", empSub:"Elige una categoría y empieza a registrar tu progreso.", empBtn:"Empezar", bAiP:"Estilo hacker...", bAiG:"RECONSTRUIR", aiLoad:"Analizando...", close:"Cerrar", pT:"Perfil del Atleta", pA:"Edad", pW:"Peso (kg)", pSave:"Guardar perfil", rT:"Plantillas", btnCanc:"Cancelar", btnConf:"Confirmar", prText:"¡NUEVO PR!", exCsv:"Exportar", offlineWarn:"⚡ MODO OFFLINE - ALMACENAMIENTO LOCAL", selectExercise:"Filtrar ejercicio", prSub:"Límites superados.", restTimer:"Temporizador de descanso", statusOffline:"Sin conexión", share:"Compartir", copied:"¡Copiado!", obRoleT:"¿Quién eres?", obRoleS:"Configura BASE.", obAth:"Atleta", obAthS:"Entreno para mí", obPt:"Entrenador", obPtS:"Gestiono clientes", obFocT:"Tu enfoque", obFocS:"¿Qué rastreas?", modStr:"Musculación", obStrS:"Series, Reps, Peso", modCar:"Cardio", obCarS:"Correr, Ciclismo", modCus:"Mi Deporte", obCusS:"IA crea formulario", tabStr:"Fuerza", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Mi Deporte", bAiDesc:"Deja que la IA cree un formulario:", aiProg:"Coach IA: Analizar progresión", btnEnd:"Terminar", btnDel:"Vaciar", btnExp:"CSV", znsTitle:"Preparación SNC", navTraining:"Entrenamiento", navAnalyse:"Análisis", navTools:"Herramientas IA", navMenu:"Menú", navClients:"Clientes", navPlans:"Planes", navCalendar:"Calendario", navMyTraining:"Mi Entrenamiento", workoutTimer:"Cronómetro", workoutDone:"¡Entrenamiento completado!", workoutArchived:"¡Entrenamiento archivado!", menuModules:"Módulos y Pestañas", menuDesign:"Estudio de Diseño", menuSecure:"Proteger tus datos", toolCoach:"Coach IA", toolPlan:"Plan de Entrenamiento", toolZns:"Preparación SNC", toolPrehab:"Pre-Hab", toolCopilot:"Co-Piloto", toolChallenges:"Desafíos", toastSaved:"¡Entrenamiento guardado! ✅", toastDeleted:"Entrada eliminada", toastArchived:"¡Entrenamiento archivado!", toastCopied:"¡Copiado!", toastExported:"¡Exportación exitosa!", toastError:"Se produjo un error", toastUpdate:"¡Actualizado! ✅", toastNoData:"Sin datos disponibles.", toastOffline:"⚡ Sin conexión — datos guardados localmente", btnSaveSession:"Guardar sesión", btnCancel:"Cancelar", btnDelete:"Eliminar", btnEdit:"Editar", btnShare:"Compartir", btnExport:"Exportar", lblDate:"Fecha", lblActivity:"Actividad", lblEquipment:"Equipamiento", lblSets:"Series", lblReps:"Reps", lblWeight:"Peso", lblDuration:"Duración", lblDistance:"Distancia", lblNotes:"Notas", lblFocus:"Enfoque", lblClient:"Cliente", lblClients:"Mis Clientes", lblSessions:"Sesiones", lblPlans:"Planes de Entrenamiento", lblProfile:"Perfil del Atleta", lblAge:"Edad", lblBodyWeight:"Peso (kg)", lblHeight:"Altura (cm)", lblGender:"Género", lblExperience:"Experiencia", lblMale:"Masculino", lblFemale:"Femenino", lblDiverse:"Diverso", lblBeginner:"Principiante", lblIntermediate:"Intermedio", lblAdvanced:"Avanzado", lblInjuries:"Lesiones / Limitaciones", lblMedical:"Médico / Contraindicaciones", lblSaveProfile:"Guardar Perfil", lblRoutines:"Plantillas", lblNoRoutines:"Sin plantillas guardadas", lblLoad:"Cargar", lblDeleteConfirm:"¿Realmente eliminar?", lblYes:"Sí", lblNo:"No", lblNewPR:"¡Nuevo PR!", lblPersonalRecord:"Récord Personal", lblStreak:"Racha", lblWeeks:"Semanas", lblToday:"Hoy", lblThisWeek:"Esta Semana", lblAllTime:"Total", lblProgress:"Progreso", lblVolume:"Volumen", lblMaxWeight:"Peso Máximo", ptDashTitle:"Panel PT Business", ptAddClient:"Nuevo Cliente", ptNoClients:"Sin clientes aún", ptSessionPlanner:"Planificar Sesión", ptWeeklyReport:"Informe Semanal IA", ptCustomType:"Nuevo Tipo", ptQuickTrack:"Quick Track", lblSearch:"Buscar", lblFilter:"Filtrar", lblAll:"Todos", lblActive:"Activo", lblArchive:"Archivo", lblCharts:"Gráficos", lblCalendar:"Calendario", lblBodyTracker:"Seguimiento Corporal", lblAddMeasurement:"Agregar medición", lblMeasurementSaved:"¡Medición guardada! ✅", designTitle:"Estudio de Diseño", designSubtitle:"Describe tu diseño — la IA lo construye", designGenerate:"Generar Diseño", designReset:"Restablecer", designInspiration:"Inspiraciones — toca para aplicar", aiAnalyzing:"Analizando...", aiError:"Error IA", aiCoachTitle:"Coach IA", aiCoachSub:"Tu coach personal", planTitle:"Generador de Plan", planGoal:"Objetivo", planDuration:"Duración (semanas)", planDays:"Días por semana", planGenerate:"Generar Plan", znsAnalyze:"Iniciar análisis IA", znsFresh:"Fresco y listo", znsModerate:"Carga moderada", znsFatigued:"Fatiga elevada", prehabTitle:"Pre-Hab", prehabGenerate:"Iniciar Pre-Hab", prehabSub:"Prevención de lesiones", copilotTitle:"Co-Piloto IA", copilotSub:"Recomendaciones por ejercicio", challengeTitle:"Desafíos", challengeSub:"Desafía a tus amigos", inviteTitle:"Invitar compañero", inviteSub:"Comparte BASE con amigos", smartWorkout:"Smart Workout", smartWorkoutSub:"La IA planifica tu entrenamiento de hoy", firstWorkoutTitle:"¡Bienvenido a BASE!", firstWorkoutSub:"Registra tu primer entrenamiento en 30 segundos.", registerBanner:"Regístrate gratis para proteger tus entrenamientos.", accountDelete:"Eliminar cuenta y datos", accountDeleteConfirm:"¿Eliminar permanentemente cuenta y datos? ¡IRREVERSIBLE!", lblLanguage:"Idioma", lblVersion:"Versión", lblBarbell:"Barra", lblDumbbell:"Mancuernas", lblMachine:"Máquina", lblCable:"Cable", lblBodyweight:"Peso corporal", sessionKraft:"Fuerza", sessionAusdauer:"Cardio", sessionMobility:"Movilidad", lblTime:"Hora", lblSessionDuration:"Duración", lblMin:"MIN", lblSec:"SEG", lblExercises:"Ejercicios", lblAddExercise:"Agregar ejercicio", lblFromTemplate:"Desde plantilla", lblAsTemplate:"Como plantilla", onboardWelcome:"Bienvenido", onboardSetup:"Configura BASE", lblStrava:"Conectar Strava", lblStravaConnected:"Strava conectado", lblPushEnable:"Notificaciones Push", lblPushEnabled:"Activado", lblRestTimer:"Temporizador de descanso", lblRestSeconds:"segundos de descanso" },
+            it: { appTitle:"Base", appSub:"Traccia la tua progressione", sync:"Sync", weeks:"Settimane", bAi:"IA Builder", cAi:"Coach IA", mPers:"Il Mio Allenamento", mPT:"PT Business", ptT:"Profili Clienti", ptS:"Gestione Business", fDate:"Data", fEx:"Attività", fExP:"Nome...", fEq:"Attrezzatura", eqBb:"Bilanciere", eqDb:"Manubri", eqMa:"Macchina", eqCb:"Cavi", eqBw:"Peso corporeo", fSets:"Numero di serie", fCust:"Aggiungi campo", fSave:"Salva", fUpdate:"Aggiorna", tAct:"Attivo", tArc:"Archivio", tDia:"Grafici", fEnd:"TERMINA ALLENAMENTO", fDel:"Svuota", thDate:"Data", thEx:"Sport & Nome", thData:"Dati", thAction:"Azione", emp:"Nessun dato", empTitle:"Il tuo primo allenamento ti aspetta!", empSub:"Scegli una categoria e inizia a monitorare i tuoi progressi.", empBtn:"Inizia ora", bAiP:"Stile hacker...", bAiG:"RICOSTRUIRE", aiLoad:"Analisi in corso...", close:"Chiudi", pT:"Profilo Atleta", pA:"Età", pW:"Peso (kg)", pSave:"Salva profilo", rT:"Modelli", btnCanc:"Annulla", btnConf:"Conferma", prText:"NUOVO PR!", exCsv:"Esporta", offlineWarn:"⚡ MODALITÀ OFFLINE - ARCHIVIAZIONE LOCALE", selectExercise:"Filtra esercizio", prSub:"Limiti superati.", restTimer:"Timer di riposo", statusOffline:"Offline", share:"Condividi", copied:"Copiato!", obRoleT:"Chi sei?", obRoleS:"Configura BASE.", obAth:"Atleta", obAthS:"Mi alleno per me stesso", obPt:"Trainer", obPtS:"Gestisco clienti", obFocT:"Il tuo focus", obFocS:"Cosa tracci?", modStr:"Allenamento con pesi", obStrS:"Serie, Rip, Peso", modCar:"Cardio", obCarS:"Corsa, Ciclismo", modCus:"Il Mio Sport", obCusS:"IA crea modulo", tabStr:"Forza", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Il Mio Sport", bAiDesc:"Lascia che l'IA crei un modulo:", aiProg:"Coach IA: Analizza progressione", btnEnd:"Termina", btnDel:"Svuota", btnExp:"CSV", znsTitle:"Prontezza SNC", navTraining:"Allenamento", navAnalyse:"Analisi", navTools:"Strumenti IA", navMenu:"Menu", navClients:"Clienti", navPlans:"Piani", navCalendar:"Calendario", navMyTraining:"Mio Allenamento", workoutTimer:"Cronometro", workoutDone:"Allenamento completato!", workoutArchived:"Allenamento archiviato!", menuModules:"Moduli & Schede", menuDesign:"Studio Design", menuSecure:"Proteggi i tuoi dati", toolCoach:"Coach IA", toolPlan:"Piano di Allenamento", toolZns:"Prontezza SNC", toolPrehab:"Pre-Hab", toolCopilot:"Co-Pilota", toolChallenges:"Sfide", toastSaved:"Allenamento salvato! ✅", toastDeleted:"Voce eliminata", toastArchived:"Allenamento archiviato!", toastCopied:"Copiato!", toastExported:"Esportazione riuscita!", toastError:"Si è verificato un errore", toastUpdate:"Aggiornato! ✅", toastNoData:"Nessun dato disponibile.", toastOffline:"⚡ Offline — dati salvati localmente", btnSaveSession:"Salva sessione", btnCancel:"Annulla", btnDelete:"Elimina", btnEdit:"Modifica", btnShare:"Condividi", btnExport:"Esporta", lblDate:"Data", lblActivity:"Attività", lblEquipment:"Attrezzatura", lblSets:"Serie", lblReps:"Rip", lblWeight:"Peso", lblDuration:"Durata", lblDistance:"Distanza", lblNotes:"Note", lblFocus:"Focus", lblClient:"Cliente", lblClients:"I Miei Clienti", lblSessions:"Sessioni", lblPlans:"Piani di Allenamento", lblProfile:"Profilo Atleta", lblAge:"Età", lblBodyWeight:"Peso (kg)", lblHeight:"Altezza (cm)", lblGender:"Genere", lblExperience:"Esperienza", lblMale:"Maschio", lblFemale:"Femmina", lblDiverse:"Diverso", lblBeginner:"Principiante", lblIntermediate:"Intermedio", lblAdvanced:"Avanzato", lblInjuries:"Infortuni / Limitazioni", lblMedical:"Medico / Controindicazioni", lblSaveProfile:"Salva Profilo", lblRoutines:"Modelli", lblNoRoutines:"Nessun modello salvato", lblLoad:"Carica", lblDeleteConfirm:"Eliminare davvero?", lblYes:"Sì", lblNo:"No", lblNewPR:"Nuovo PR!", lblPersonalRecord:"Record Personale", lblStreak:"Serie", lblWeeks:"Settimane", lblToday:"Oggi", lblThisWeek:"Questa Settimana", lblAllTime:"Totale", lblProgress:"Progresso", lblVolume:"Volume", lblMaxWeight:"Peso Massimo", ptDashTitle:"Pannello PT Business", ptAddClient:"Nuovo Cliente", ptNoClients:"Nessun cliente ancora", ptSessionPlanner:"Pianifica Sessione", ptWeeklyReport:"Report Settimanale IA", ptCustomType:"Nuovo Tipo", ptQuickTrack:"Quick Track", lblSearch:"Cerca", lblFilter:"Filtra", lblAll:"Tutti", lblActive:"Attivo", lblArchive:"Archivio", lblCharts:"Grafici", lblCalendar:"Calendario", lblBodyTracker:"Tracker Corporeo", lblAddMeasurement:"Aggiungi misurazione", lblMeasurementSaved:"Misurazione salvata! ✅", designTitle:"Studio Design", designSubtitle:"Descrivi il tuo design — l'IA lo costruisce", designGenerate:"Genera Design", designReset:"Ripristina", designInspiration:"Ispirazioni — tocca per applicare", aiAnalyzing:"Analisi in corso...", aiError:"Errore IA", aiCoachTitle:"Coach IA", aiCoachSub:"Il tuo coach personale", planTitle:"Generatore di Piano", planGoal:"Obiettivo", planDuration:"Durata (settimane)", planDays:"Giorni a settimana", planGenerate:"Genera Piano", znsAnalyze:"Avvia analisi IA", znsFresh:"Fresco e pronto", znsModerate:"Carico moderato", znsFatigued:"Affaticamento elevato", prehabTitle:"Pre-Hab", prehabGenerate:"Avvia Pre-Hab", prehabSub:"Prevenzione infortuni", copilotTitle:"Co-Pilota IA", copilotSub:"Raccomandazioni per esercizio", challengeTitle:"Sfide", challengeSub:"Sfida i tuoi amici", inviteTitle:"Invita un partner", inviteSub:"Condividi BASE con gli amici", smartWorkout:"Smart Workout", smartWorkoutSub:"L'IA pianifica il tuo allenamento di oggi", firstWorkoutTitle:"Benvenuto su BASE!", firstWorkoutSub:"Registra il tuo primo allenamento in 30 secondi.", registerBanner:"Registrati gratis per proteggere i tuoi allenamenti.", accountDelete:"Elimina account e dati", accountDeleteConfirm:"Eliminare definitivamente account e dati? IRREVERSIBILE!", lblLanguage:"Lingua", lblVersion:"Versione", lblBarbell:"Bilanciere", lblDumbbell:"Manubri", lblMachine:"Macchina", lblCable:"Cavi", lblBodyweight:"Peso corporeo", sessionKraft:"Forza", sessionAusdauer:"Cardio", sessionMobility:"Mobilità", lblTime:"Ora", lblSessionDuration:"Durata", lblMin:"MIN", lblSec:"SEC", lblExercises:"Esercizi", lblAddExercise:"Aggiungi esercizio", lblFromTemplate:"Da modello", lblAsTemplate:"Come modello", onboardWelcome:"Benvenuto", onboardSetup:"Configura BASE", lblStrava:"Connetti Strava", lblStravaConnected:"Strava connesso", lblPushEnable:"Notifiche Push", lblPushEnabled:"Attivato", lblRestTimer:"Timer di riposo", lblRestSeconds:"secondi di riposo" },
+            nl: { appTitle:"Base", appSub:"Volg je progressie", sync:"Sync", weeks:"Weken", bAi:"AI Builder", cAi:"AI Coach", mPers:"Mijn Training", mPT:"PT Business", ptT:"Klantprofielen", ptS:"Business Beheer", fDate:"Datum", fEx:"Activiteit", fExP:"Naam...", fEq:"Uitrusting", eqBb:"Halter", eqDb:"Dumbbell", eqMa:"Machine", eqCb:"Kabel", eqBw:"Lichaamsgewicht", fSets:"Aantal sets", fCust:"Veld toevoegen", fSave:"Opslaan", fUpdate:"Bijwerken", tAct:"Actief", tArc:"Archief", tDia:"Grafieken", fEnd:"TRAINING BEËINDIGEN", fDel:"Leegmaken", thDate:"Datum", thEx:"Sport & Naam", thData:"Gegevens", thAction:"Actie", emp:"Geen gegevens", empTitle:"Je eerste workout wacht!", empSub:"Kies een categorie en begin met het bijhouden van je voortgang.", empBtn:"Nu starten", bAiP:"Hacker stijl...", bAiG:"HERBOUWEN", aiLoad:"Analyseren...", close:"Sluiten", pT:"Atletenprofiel", pA:"Leeftijd", pW:"Gewicht (kg)", pSave:"Profiel opslaan", rT:"Sjablonen", btnCanc:"Annuleren", btnConf:"Bevestigen", prText:"NIEUW PR!", exCsv:"Exporteren", offlineWarn:"⚡ OFFLINE MODUS - LOKALE OPSLAG", selectExercise:"Oefening filteren", prSub:"Grenzen verlegd.", restTimer:"Rusttimer", statusOffline:"Offline", share:"Delen", copied:"Gekopieerd!", obRoleT:"Wie ben jij?", obRoleS:"Stel BASE in.", obAth:"Atleet", obAthS:"Ik train voor mezelf", obPt:"Trainer", obPtS:"Ik beheer klanten", obFocT:"Jouw focus", obFocS:"Wat volg je?", modStr:"Krachttraining", obStrS:"Sets, Reps, Gewicht", modCar:"Cardio", obCarS:"Lopen, Fietsen", modCus:"Mijn Sport", obCusS:"AI maakt formulier", tabStr:"Kracht", tabCar:"Cardio", tabRec:"Mobility", tabOwn:"Mijn Sport", bAiDesc:"Laat AI een formulier maken:", aiProg:"AI Coach: Progressie analyseren", btnEnd:"Beëindigen", btnDel:"Leegmaken", btnExp:"CSV", znsTitle:"ZNS Gereedheid", navTraining:"Training", navAnalyse:"Analyse", navTools:"AI Tools", navMenu:"Menu", navClients:"Klanten", navPlans:"Plannen", navCalendar:"Kalender", navMyTraining:"Mijn Training", workoutTimer:"Workout Timer", workoutDone:"Workout voltooid!", workoutArchived:"Workout gearchiveerd!", menuModules:"Modules & Tabs", menuDesign:"Design Studio", menuSecure:"Data beveiligen", toolCoach:"AI Coach", toolPlan:"Trainingsplan", toolZns:"ZNS Gereedheid", toolPrehab:"Pre-Hab", toolCopilot:"Co-Piloot", toolChallenges:"Uitdagingen", toastSaved:"Workout opgeslagen! ✅", toastDeleted:"Item verwijderd", toastArchived:"Workout gearchiveerd!", toastCopied:"Gekopieerd!", toastExported:"Export succesvol!", toastError:"Er is een fout opgetreden", toastUpdate:"Bijgewerkt! ✅", toastNoData:"Geen gegevens beschikbaar.", toastOffline:"⚡ Offline — gegevens lokaal opgeslagen", btnSaveSession:"Sessie opslaan", btnCancel:"Annuleren", btnDelete:"Verwijderen", btnEdit:"Bewerken", btnShare:"Delen", btnExport:"Exporteren", lblDate:"Datum", lblActivity:"Activiteit", lblEquipment:"Uitrusting", lblSets:"Sets", lblReps:"Reps", lblWeight:"Gewicht", lblDuration:"Duur", lblDistance:"Afstand", lblNotes:"Notities", lblFocus:"Focus", lblClient:"Klant", lblClients:"Mijn Klanten", lblSessions:"Sessies", lblPlans:"Trainingsplannen", lblProfile:"Atletenprofiel", lblAge:"Leeftijd", lblBodyWeight:"Gewicht (kg)", lblHeight:"Lengte (cm)", lblGender:"Geslacht", lblExperience:"Ervaring", lblMale:"Man", lblFemale:"Vrouw", lblDiverse:"Divers", lblBeginner:"Beginner", lblIntermediate:"Gevorderd", lblAdvanced:"Expert", lblInjuries:"Blessures / Beperkingen", lblMedical:"Medisch / Contra-indicaties", lblSaveProfile:"Profiel opslaan", lblRoutines:"Sjablonen", lblNoRoutines:"Geen sjablonen opgeslagen", lblLoad:"Laden", lblDeleteConfirm:"Echt verwijderen?", lblYes:"Ja", lblNo:"Nee", lblNewPR:"Nieuw PR!", lblPersonalRecord:"Persoonlijk Record", lblStreak:"Reeks", lblWeeks:"Weken", lblToday:"Vandaag", lblThisWeek:"Deze Week", lblAllTime:"Totaal", lblProgress:"Voortgang", lblVolume:"Volume", lblMaxWeight:"Max Gewicht", ptDashTitle:"PT Business Dashboard", ptAddClient:"Nieuwe Klant", ptNoClients:"Nog geen klanten", ptSessionPlanner:"Sessie Plannen", ptWeeklyReport:"AI Weekrapport", ptCustomType:"Nieuw Type", ptQuickTrack:"Quick Track", lblSearch:"Zoeken", lblFilter:"Filteren", lblAll:"Alle", lblActive:"Actief", lblArchive:"Archief", lblCharts:"Grafieken", lblCalendar:"Kalender", lblBodyTracker:"Lichaams Tracker", lblAddMeasurement:"Meting toevoegen", lblMeasurementSaved:"Meting opgeslagen! ✅", designTitle:"Design Studio", designSubtitle:"Beschrijf je droomdesign — AI bouwt het", designGenerate:"Design Genereren", designReset:"Herstellen", designInspiration:"Inspiraties — tik om toe te passen", aiAnalyzing:"Analyseren...", aiError:"AI Fout", aiCoachTitle:"AI Coach", aiCoachSub:"Je persoonlijke data-coach", planTitle:"Trainingsplan Generator", planGoal:"Trainingsdoel", planDuration:"Duur (weken)", planDays:"Dagen per week", planGenerate:"Plan Genereren", znsAnalyze:"Start AI Analyse", znsFresh:"Fris & klaar", znsModerate:"Matige belasting", znsFatigued:"Verhoogde vermoeidheid", prehabTitle:"Pre-Hab", prehabGenerate:"Start Pre-Hab", prehabSub:"Blessurepreventie", copilotTitle:"AI Co-Piloot", copilotSub:"Aanbevelingen per oefening", challengeTitle:"Uitdagingen", challengeSub:"Daag je vrienden uit", inviteTitle:"Trainingspartner uitnodigen", inviteSub:"Deel BASE met vrienden", smartWorkout:"Smart Workout", smartWorkoutSub:"AI plant je training van vandaag", firstWorkoutTitle:"Welkom bij BASE!", firstWorkoutSub:"Registreer je eerste workout in 30 seconden.", registerBanner:"Registreer gratis om je workouts te beveiligen.", accountDelete:"Account & data verwijderen", accountDeleteConfirm:"Account en alle data permanent verwijderen? KAN NIET ongedaan worden!", lblLanguage:"Taal", lblVersion:"Versie", lblBarbell:"Halter", lblDumbbell:"Dumbbell", lblMachine:"Machine", lblCable:"Kabel", lblBodyweight:"Lichaamsgewicht", sessionKraft:"Kracht", sessionAusdauer:"Cardio", sessionMobility:"Mobiliteit", lblTime:"Tijd", lblSessionDuration:"Duur", lblMin:"MIN", lblSec:"SEC", lblExercises:"Oefeningen", lblAddExercise:"Oefening toevoegen", lblFromTemplate:"Vanuit sjabloon", lblAsTemplate:"Als sjabloon", onboardWelcome:"Welkom", onboardSetup:"Stel BASE in", lblStrava:"Strava verbinden", lblStravaConnected:"Strava verbonden", lblPushEnable:"Push-meldingen", lblPushEnabled:"Geactiveerd", lblRestTimer:"Rusttimer", lblRestSeconds:"seconden rust" },
+            ar: { appTitle:"Base", appSub:"تتبع تقدمك", sync:"مزامنة", weeks:"أسابيع", bAi:"منشئ الذكاء", cAi:"مدرب الذكاء", mPers:"تدريبي", mPT:"أعمال PT", ptT:"ملفات العملاء", ptS:"إدارة الأعمال", fDate:"التاريخ", fEx:"النشاط", fExP:"الاسم...", fEq:"المعدات", eqBb:"البار", eqDb:"الدمبل", eqMa:"الآلة", eqCb:"الكابل", eqBw:"وزن الجسم", fSets:"عدد المجموعات", fCust:"إضافة حقل", fSave:"حفظ", fUpdate:"تحديث", tAct:"نشط", tArc:"الأرشيف", tDia:"الرسوم البيانية", fEnd:"إنهاء التمرين", fDel:"مسح", thDate:"التاريخ", thEx:"الرياضة والاسم", thData:"البيانات", thAction:"الإجراء", emp:"لا توجد بيانات", empTitle:"تمرينك الأول في انتظارك!", empSub:"اختر فئة وابدأ بتتبع تقدمك.", empBtn:"ابدأ الآن", bAiP:"أسلوب هاكر...", bAiG:"إعادة بناء", aiLoad:"جارٍ التحليل...", close:"إغلاق", pT:"ملف الرياضي", pA:"العمر", pW:"الوزن (كجم)", pSave:"حفظ الملف", rT:"القوالب", btnCanc:"إلغاء", btnConf:"تأكيد", prText:"رقم قياسي جديد!", exCsv:"تصدير", offlineWarn:"⚡ وضع عدم الاتصال - التخزين المحلي", selectExercise:"تصفية التمرين", prSub:"تخطيت الحدود.", restTimer:"مؤقت الراحة", statusOffline:"غير متصل", share:"مشاركة", copied:"تم النسخ!", obRoleT:"من أنت؟", obRoleS:"إعداد BASE.", obAth:"رياضي", obAthS:"أتدرب لنفسي", obPt:"مدرب", obPtS:"أدير العملاء", obFocT:"تركيزك", obFocS:"ماذا تتبع؟", modStr:"تدريب القوة", obStrS:"مجموعات، تكرارات، وزن", modCar:"كارديو", obCarS:"الجري، ركوب الدراجات", modCus:"رياضتي", obCusS:"الذكاء يبني النموذج", tabStr:"القوة", tabCar:"كارديو", tabRec:"Mobility", tabOwn:"رياضتي", bAiDesc:"دع الذكاء يبني نموذجاً:", aiProg:"مدرب الذكاء: تحليل التقدم", btnEnd:"إنهاء", btnDel:"مسح", btnExp:"CSV", znsTitle:"جاهزية الجهاز العصبي", navTraining:"تدريب", navAnalyse:"تحليل", navTools:"أدوات الذكاء", navMenu:"القائمة", navClients:"العملاء", navPlans:"الخطط", navCalendar:"التقويم", navMyTraining:"تدريبي", workoutTimer:"مؤقت التمرين", workoutDone:"!اكتمل التمرين", workoutArchived:"!تمت أرشفة التمرين", menuModules:"الوحدات والعلامات", menuDesign:"استوديو التصميم", menuSecure:"تأمين بياناتك", toolCoach:"المدرب الذكي", toolPlan:"خطة التدريب", toolZns:"جاهزية الجهاز العصبي", toolPrehab:"الوقاية", toolCopilot:"المساعد", toolChallenges:"التحديات", toastSaved:"✅ !تم حفظ التمرين", toastDeleted:"تم حذف العنصر", toastArchived:"!تمت أرشفة التمرين", toastCopied:"!تم النسخ", toastExported:"!تم التصدير بنجاح", toastError:"حدث خطأ", toastUpdate:"✅ !تم التحديث", toastNoData:".لا توجد بيانات", toastOffline:"⚡ غير متصل — البيانات محفوظة محلياً", btnSaveSession:"حفظ الجلسة", btnCancel:"إلغاء", btnDelete:"حذف", btnEdit:"تعديل", btnShare:"مشاركة", btnExport:"تصدير", lblDate:"التاريخ", lblActivity:"النشاط", lblEquipment:"المعدات", lblSets:"مجموعات", lblReps:"تكرارات", lblWeight:"الوزن", lblDuration:"المدة", lblDistance:"المسافة", lblNotes:"ملاحظات", lblFocus:"التركيز", lblClient:"العميل", lblClients:"عملائي", lblSessions:"الجلسات", lblPlans:"خطط التدريب", lblProfile:"ملف الرياضي", lblAge:"العمر", lblBodyWeight:"(الوزن (كجم", lblHeight:"(الطول (سم", lblGender:"الجنس", lblExperience:"الخبرة", lblMale:"ذكر", lblFemale:"أنثى", lblDiverse:"متنوع", lblBeginner:"مبتدئ", lblIntermediate:"متوسط", lblAdvanced:"متقدم", lblInjuries:"الإصابات / القيود", lblMedical:"طبي / موانع", lblSaveProfile:"حفظ الملف", lblRoutines:"القوالب", lblNoRoutines:"لا توجد قوالب محفوظة", lblLoad:"تحميل", lblDeleteConfirm:"هل تريد الحذف فعلاً؟", lblYes:"نعم", lblNo:"لا", lblNewPR:"!رقم قياسي جديد", lblPersonalRecord:"رقم قياسي شخصي", lblStreak:"سلسلة", lblWeeks:"أسابيع", lblToday:"اليوم", lblThisWeek:"هذا الأسبوع", lblAllTime:"الإجمالي", lblProgress:"التقدم", lblVolume:"الحجم", lblMaxWeight:"أقصى وزن", ptDashTitle:"لوحة المدرب الشخصي", ptAddClient:"عميل جديد", ptNoClients:"لا يوجد عملاء بعد", ptSessionPlanner:"تخطيط الجلسة", ptWeeklyReport:"تقرير أسبوعي بالذكاء الاصطناعي", ptCustomType:"نوع جديد", ptQuickTrack:"تتبع سريع", lblSearch:"بحث", lblFilter:"تصفية", lblAll:"الكل", lblActive:"نشط", lblArchive:"الأرشيف", lblCharts:"الرسوم البيانية", lblCalendar:"التقويم", lblBodyTracker:"متتبع الجسم", lblAddMeasurement:"إضافة قياس", lblMeasurementSaved:"✅ !تم حفظ القياس", designTitle:"استوديو التصميم", designSubtitle:"صف تصميمك — الذكاء الاصطناعي يبنيه", designGenerate:"إنشاء التصميم", designReset:"إعادة تعيين", designInspiration:"إلهام — اضغط للتطبيق", aiAnalyzing:"...جاري التحليل", aiError:"خطأ في الذكاء الاصطناعي", aiCoachTitle:"المدرب الذكي", aiCoachSub:"مدربك الشخصي", planTitle:"مولد خطة التدريب", planGoal:"الهدف", planDuration:"(المدة (أسابيع", planDays:"أيام في الأسبوع", planGenerate:"إنشاء الخطة", znsAnalyze:"بدء تحليل الذكاء الاصطناعي", znsFresh:"منتعش وجاهز", znsModerate:"حمل معتدل", znsFatigued:"إرهاق مرتفع", prehabTitle:"الوقاية", prehabGenerate:"بدء الوقاية", prehabSub:"الوقاية من الإصابات", copilotTitle:"المساعد الذكي", copilotSub:"توصيات لكل تمرين", challengeTitle:"التحديات", challengeSub:"تحدى أصدقاءك", inviteTitle:"دعوة شريك تدريب", inviteSub:"شارك BASE مع أصدقائك", smartWorkout:"تمرين ذكي", smartWorkoutSub:"الذكاء الاصطناعي يخطط تمرينك اليوم", firstWorkoutTitle:"!مرحباً بك في BASE", firstWorkoutSub:".سجل أول تمرين لك في 30 ثانية", registerBanner:".سجل مجاناً لتأمين تمريناتك", accountDelete:"حذف الحساب والبيانات", accountDeleteConfirm:"!حذف الحساب وجميع البيانات نهائياً؟ لا يمكن التراجع", lblLanguage:"اللغة", lblVersion:"الإصدار", lblBarbell:"بار", lblDumbbell:"دمبل", lblMachine:"آلة", lblCable:"كابل", lblBodyweight:"وزن الجسم", sessionKraft:"قوة", sessionAusdauer:"كارديو", sessionMobility:"مرونة", lblTime:"الوقت", lblSessionDuration:"المدة", lblMin:"دقيقة", lblSec:"ثانية", lblExercises:"التمارين", lblAddExercise:"إضافة تمرين", lblFromTemplate:"من قالب", lblAsTemplate:"كقالب", onboardWelcome:"مرحباً", onboardSetup:"إعداد BASE", lblStrava:"ربط Strava", lblStravaConnected:"Strava متصل", lblPushEnable:"إشعارات الدفع", lblPushEnabled:"مفعل", lblRestTimer:"مؤقت الراحة", lblRestSeconds:"ثواني راحة" }
         };
+
+        window.t = function(key, fallback) {
+            var lang = window.currentLang || 'de';
+            var data = typeof i18nData !== 'undefined' ? i18nData[lang] : null;
+            if (data && data[key]) return data[key];
+            if (typeof i18nData !== 'undefined' && i18nData.de && i18nData.de[key]) return i18nData.de[key];
+            return fallback || key;
+        };
+
 
         window.switchLanguage = function(lang) {
             window.currentLang = lang; localStorage.setItem('beastmode_lang', lang);
@@ -3374,8 +3383,8 @@
                 const ssExercise = _supersetActive ? document.getElementById('supersetExercise')?.value?.trim() : null;
                 const exEl = document.getElementById('exerciseInput'); const dtEl = document.getElementById('dateInput');
                 if (!exEl || !dtEl) return;
-                if (!exEl.value.trim()) { window.showToast("Bitte eine Aktivität eingeben!"); exEl.focus(); return; }
-                if (!dtEl.value) { window.showToast("Bitte ein Datum wählen!"); return; }
+                if (!exEl.value.trim()) { window.showToast(window.t("toastError", "Bitte eine Aktivität eingeben!")); exEl.focus(); return; }
+                if (!dtEl.value) { window.showToast(window.t("toastError", "Bitte ein Datum wählen!")); return; }
                 
                 let entry = { id: window.editingWorkoutId || Date.now().toString(), category: window.currentCategory, date: dtEl.value, exercise: exEl.value.trim().substring(0, 200), archived: window.editingWorkoutId ? (window.workouts.find(w => w.id === window.editingWorkoutId)?.archived || false) : false, data: {}, setDetails: [], volume: 0, maxWeight: 0 };
                 let isPR = false; let prType = ''; let prSubText = ''; let prValue = ''; let prUnit = ''; let prDiffText = '';
@@ -3422,7 +3431,7 @@
                 if (window.editingWorkoutId) { 
                     const idx = window.workouts.findIndex(w => w.id === window.editingWorkoutId); 
                     if (idx !== -1) window.workouts[idx] = entry; 
-                    window.showToast("Update erfolgreich! ✅"); 
+                    window.showToast(window.t("toastUpdate")); 
                 } else { 
                     window.workouts.unshift(entry); 
                     if(isPR) { 
@@ -3445,7 +3454,7 @@
                             }
                         }, 500); 
                     } else { 
-                        window.showToast("Training gesichert! ✅"); 
+                        window.showToast(window.t("toastSaved")); 
                         if(typeof window.startRestCountdown === 'function') window.startRestCountdown(window.selectedRestTime); 
                     } 
                 }
@@ -3462,7 +3471,7 @@
                 if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-saved'); }, 2000);
             } catch (err) { 
                 console.error("Speicher-Fehler:", err); 
-                window.showToast("Fehler beim Speichern: " + err.message); 
+                window.showToast(window.t("toastError") + ": " + err.message); 
             }
         };
 
@@ -3471,7 +3480,7 @@
         window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
         // --- DASHBOARD & TABELLE ---
-        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast("Workout archiviert!"); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); }, true); };
+        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); }, true); };
         // ============================================================
         // ERSTES WORKOUT FLOW
         // ============================================================
@@ -3585,7 +3594,7 @@
             if(navigator.share) {
                 navigator.share({ title: 'BASE Fitness App', text: 'Probier BASE aus - die beste Fitness App!', url: 'https://base-app.tech' });
             } else {
-                navigator.clipboard.writeText('https://base-app.tech').then(() => window.showToast('Link kopiert!'));
+                navigator.clipboard.writeText('https://base-app.tech').then(() => window.showToast(window.t('toastCopied')));
             }
         };
         window.dismissReview = function() {
@@ -3799,7 +3808,7 @@
                     const exercise = document.getElementById('goalExercise')?.value?.trim();
                     const weight = parseFloat(document.getElementById('goalWeight')?.value);
                     const date = document.getElementById('goalDate')?.value;
-                    if(!exercise || !weight) { window.showToast('Bitte Übung und Zielgewicht eingeben'); return; }
+                    if(!exercise || !weight) { window.showToast(window.t('toastError', 'Bitte Übung und Zielgewicht eingeben')); return; }
                     _goals.push({ id: Date.now().toString(), exercise, targetWeight: weight, deadline: date || null, createdAt: new Date().toISOString() });
                     localStorage.setItem('base_goals', JSON.stringify(_goals));
                     window.renderGoals();
@@ -4071,8 +4080,8 @@
             title = title.trim();
             var exercise = (document.getElementById('chExercise') || {}).value || '';
             exercise = exercise.trim();
-            if(!title) { window.showToast('Bitte einen Namen eingeben!'); return; }
-            if(!exercise) { window.showToast('Bitte Sportart eingeben!'); return; }
+            if(!title) { window.showToast(window.t('toastError', 'Bitte einen Namen eingeben!')); return; }
+            if(!exercise) { window.showToast(window.t('toastError', 'Bitte Sportart eingeben!')); return; }
             var metricLabel = _chMetric;
             if(_chMetric === 'custom') {
                 metricLabel = (document.getElementById('chCustomMetric') || {}).value || '';
@@ -4084,7 +4093,7 @@
             if(btn) btn.disabled = true;
             if(btnText) btnText.textContent = 'Erstelle...';
             var uid = window._chGetUid ? window._chGetUid() : null;
-            if(!uid) { window.showToast('Warte kurz, Auth wird geladen...'); if(btn) btn.disabled = false; if(btnText) btnText.textContent = 'Challenge erstellen'; return; }
+            if(!uid) { window.showToast(window.t('aiAnalyzing', 'Warte kurz...')); if(btn) btn.disabled = false; if(btnText) btnText.textContent = 'Challenge erstellen'; return; }
             var cname = window._chGetName ? window._chGetName() : 'Athlet';
             var now = new Date();
             var end = new Date(now.getTime() + _chDuration * 24 * 60 * 60 * 1000);
@@ -4100,7 +4109,7 @@
                 if(btn) btn.disabled = false;
                 if(btnText) btnText.textContent = 'Challenge erstellen';
                 if(result === true) {
-                    window.showToast('Challenge erstellt!');
+                    window.showToast(window.t('toastUpdate', 'Challenge erstellt!'));
                     var ti = document.getElementById('chTitle'); if(ti) ti.value = '';
                     var ei = document.getElementById('chExercise'); if(ei) ei.value = '';
                     window.switchChallengeTab('my');
@@ -4159,16 +4168,16 @@
         window.joinChallenge = function(challengeId) {
             var uid = window._chGetUid ? window._chGetUid() : null;
             var cname = window._chGetName ? window._chGetName() : 'Athlet';
-            if(!uid) { window.showToast('Bitte erst einloggen'); return; }
+            if(!uid) { window.showToast(window.t('toastError', 'Bitte erst einloggen')); return; }
             window._chList(function(all) {
                 var found = null;
                 all.forEach(function(ch) { if(ch.id === challengeId) found = ch; });
-                if(!found) { window.showToast('Challenge nicht gefunden'); return; }
+                if(!found) { window.showToast(window.t('toastError', 'Challenge nicht gefunden')); return; }
                 var parts = found.participants || [];
-                if(parts.some(function(p) { return p.uid === uid; })) { window.showToast('Bereits beigetreten!'); return; }
+                if(parts.some(function(p) { return p.uid === uid; })) { window.showToast(window.t('toastError', 'Bereits beigetreten!')); return; }
                 parts.push({ uid: uid, name: cname, progress: 0, lastUpdate: new Date().toISOString() });
                 window._chUpdate(challengeId, { participants: parts }).then(function(result) {
-                    if(result === true) { window.showToast('Challenge beigetreten!'); window.loadMyChallenges(); }
+                    if(result === true) { window.showToast(window.t('toastUpdate', 'Challenge beigetreten!')); window.loadMyChallenges(); }
                     else { window.showToast('Fehler: ' + result); }
                 });
             });
@@ -4233,13 +4242,13 @@
         window.shareChallenge = function(id) {
             var url = window.location.origin + '/app.html?challenge=' + id;
             if(navigator.share) { navigator.share({ title: 'BASE Challenge', text: 'Tritt meiner Challenge bei!', url: url }); }
-            else { navigator.clipboard.writeText(url).then(function() { window.showToast('Link kopiert!'); }); }
+            else { navigator.clipboard.writeText(url).then(function() { window.showToast(window.t('toastCopied')); }); }
         };
 
         window.deleteChallenge = function(id) {
             window.showModal('Challenge löschen?', 'Diese Challenge wird dauerhaft gelöscht.', true, () => {
                 window._chDelete(id).then(function(result) {
-                    if(result === true) { window.showToast('Challenge gelöscht!'); window.loadMyChallenges(); }
+                    if(result === true) { window.showToast(window.t('toastDeleted')); window.loadMyChallenges(); }
                     else { window.showToast('Fehler: ' + result); }
                 });
             });
@@ -4249,14 +4258,14 @@
             var val = prompt('Fortschritt hinzufügen (' + unit + '):');
             if(!val) return;
             var num = parseFloat(val.replace(',', '.'));
-            if(isNaN(num) || num <= 0) { window.showToast('Bitte eine gültige Zahl eingeben'); return; }
+            if(isNaN(num) || num <= 0) { window.showToast(window.t('toastError', 'Bitte eine gültige Zahl eingeben')); return; }
             var uid = window._chGetUid ? window._chGetUid() : null;
             var cname = window._chGetName ? window._chGetName() : 'Athlet';
             if(!uid) return;
             window._chList(function(all) {
                 var found = null;
                 all.forEach(function(ch) { if(ch.id === challengeId) found = ch; });
-                if(!found) { window.showToast('Challenge nicht gefunden'); return; }
+                if(!found) { window.showToast(window.t('toastError', 'Challenge nicht gefunden')); return; }
                 var parts = (found.participants || []).slice();
                 var myIdx = -1;
                 parts.forEach(function(p, i) { if(p.uid === uid) myIdx = i; });
@@ -4283,7 +4292,7 @@
                 if(!found) return;
                 var parts = (found.participants || []).filter(function(p) { return p.uid !== uid; });
                 window._chUpdate(challengeId, { participants: parts }).then(function(result) {
-                    if(result === true) { window.showToast('Challenge verlassen'); window.loadMyChallenges(); }
+                    if(result === true) { window.showToast(window.t('toastUpdate', 'Challenge verlassen')); window.loadMyChallenges(); }
                     else { window.showToast('Fehler: ' + result); }
                 });
             });
@@ -5043,21 +5052,21 @@
         // Stripe Checkout starten
         window.startCheckout = async function(plan) {
             if(!window._firebaseAuth || !window._firebaseAuth.currentUser) {
-                window.showToast('Bitte zuerst Account verknüpfen', 'error');
+                window.showToast(window.t('toastError', 'Bitte zuerst Account verknüpfen'), 'error');
                 window.closePaywall();
                 window.toggleModal('authModal');
                 return;
             }
             const user = window._firebaseAuth.currentUser;
             if(user.isAnonymous) {
-                window.showToast('Bitte zuerst Account mit E-Mail verknüpfen', 'error');
+                window.showToast(window.t('toastError', 'Bitte zuerst Account mit E-Mail verknüpfen'), 'error');
                 window.closePaywall();
                 window.toggleModal('authModal');
                 return;
             }
 
             try {
-                window.showToast('Weiterleitung zu Stripe...');
+                window.showToast(window.t('aiAnalyzing', 'Weiterleitung zu Stripe...'));
                 const res = await fetch('/.netlify/functions/stripe-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -5075,7 +5084,7 @@
                 }
             } catch(e) {
                 console.error('Stripe Checkout Error:', e);
-                window.showToast('Verbindungsfehler', 'error');
+                window.showToast(window.t('toastError', 'Verbindungsfehler'), 'error');
             }
         };
 
@@ -5084,14 +5093,14 @@
             const params = new URLSearchParams(window.location.search);
             const stripeStatus = params.get('stripe');
             if(stripeStatus === 'success') {
-                window.showToast('Zahlung erfolgreich! PRO wird aktiviert...');
+                window.showToast(window.t('toastUpdate', 'Zahlung erfolgreich!'));
                 // Status wird asynchron via Webhook in Firestore gesetzt
                 // Beim nächsten Load wird er geladen
                 setTimeout(() => { if(window._loadSubscriptionStatus) window._loadSubscriptionStatus(); }, 2000);
                 // URL aufräumen
                 window.history.replaceState({}, '', window.location.pathname);
             } else if(stripeStatus === 'cancel') {
-                window.showToast('Zahlung abgebrochen');
+                window.showToast(window.t('toastError', 'Zahlung abgebrochen'));
                 window.history.replaceState({}, '', window.location.pathname);
             }
         };
@@ -5257,7 +5266,7 @@
                 localStorage.removeItem('base_push_last_sent');
                 const statusText = document.getElementById('pushStatusText');
                 if (statusText) statusText.textContent = 'Deaktiviert';
-                window.showToast('🔕 Erinnerungen deaktiviert');
+                window.showToast(window.t('toastUpdate', 'Erinnerungen deaktiviert'));
             }
         };
 
@@ -5538,7 +5547,7 @@
     mobileList.appendChild(card);
 } }); window._refreshLucide(); window.updateExerciseAutocomplete(); const emptyState = document.getElementById('emptyWorkoutState'); if(emptyState) { const hasRows = body.children.length > 0 || (mobileList && mobileList.children.length > 0); if(!hasRows) { emptyState.classList.remove('hidden'); emptyState.classList.add('block'); } else { emptyState.classList.add('hidden'); emptyState.classList.remove('block'); } } const vc = document.getElementById('verlaufCount'); if(vc) vc.textContent = filteredWorkouts.length + ' Sessions'; };
         document.body.addEventListener('click', function(e) { if(!e.target.closest('.workout-card-menu') && !e.target.closest('[onclick*="nextElementSibling"]')) { document.querySelectorAll('.workout-card-menu.show').forEach(m => m.classList.remove('show')); } });
-        window.exportToCSV = () => { if(!Array.isArray(window.workouts) || window.workouts.length === 0) { window.showToast("Keine Daten vorhanden."); return; } let allDynamicKeys = new Set(); window.workouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allDynamicKeys.add(k)); }); const dynamicHeaders = Array.from(allDynamicKeys); let csv = "Datum;Kategorie;Sportart;Aktivitaet;Dauer;Notiz;" + dynamicHeaders.join(";") + "\n"; window.workouts.forEach(w => { let row = [ w.date || "", w.category || "", w.sportCategory || "", w.exercise || "", w.sessionDuration || "", (w.sessionComment || "").replace(/;/g, ',').replace(/\n/g, ' ') ]; dynamicHeaders.forEach(header => { let val = (w.data && w.data[header] !== undefined) ? w.data[header] : ""; row.push(String(val).replace(/;/g, ',')); }); csv += row.join(";") + "\n"; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `BASE_Export.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast("Export erfolgreich!"); };
+        window.exportToCSV = () => { if(!Array.isArray(window.workouts) || window.workouts.length === 0) { window.showToast(window.t("toastNoData")); return; } let allDynamicKeys = new Set(); window.workouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allDynamicKeys.add(k)); }); const dynamicHeaders = Array.from(allDynamicKeys); let csv = "Datum;Kategorie;Sportart;Aktivitaet;Dauer;Notiz;" + dynamicHeaders.join(";") + "\n"; window.workouts.forEach(w => { let row = [ w.date || "", w.category || "", w.sportCategory || "", w.exercise || "", w.sessionDuration || "", (w.sessionComment || "").replace(/;/g, ',').replace(/\n/g, ' ') ]; dynamicHeaders.forEach(header => { let val = (w.data && w.data[header] !== undefined) ? w.data[header] : ""; row.push(String(val).replace(/;/g, ',')); }); csv += row.join(";") + "\n"; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `BASE_Export.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast(window.t("toastExported")); };
 
         // --- DIAGRAMME ---
         window.initAnalytics = function() { if(!Array.isArray(window.workouts)) return; window._ensureChartJS().then(() => window._initAnalyticsCore()).catch(e => console.error('Chart.js laden fehlgeschlagen:', e)); };
@@ -6092,14 +6101,14 @@
         // --- VOICE INPUT ---
         window.startVoiceInput = function() {
             var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if(!SpeechRec) { window.showToast('Spracheingabe nicht verfügbar'); return; }
+            if(!SpeechRec) { window.showToast(window.t('toastError', 'Spracheingabe nicht verfügbar')); return; }
             var recognition = new SpeechRec();
             recognition.lang = window.currentLang === 'en' ? 'en-US' : 'de-DE';
             recognition.continuous = false;
             recognition.interimResults = false;
             var btn = document.getElementById('voiceInputBtn');
             if(btn) { btn.style.background = 'rgba(239,68,68,0.15)'; btn.style.borderColor = 'rgba(239,68,68,0.3)'; btn.style.color = '#ef4444'; }
-            window.showToast('Sprich jetzt...');
+            window.showToast(window.t('toastUpdate', 'Sprich jetzt...'));
             recognition.onresult = function(event) {
                 var transcript = event.results[0][0].transcript;
                 if(btn) { btn.style.background = 'var(--inner-bg-hex)'; btn.style.borderColor = 'var(--border-hex)'; btn.style.color = 'var(--text-muted)'; }
@@ -6107,7 +6116,7 @@
             };
             recognition.onerror = function() {
                 if(btn) { btn.style.background = 'var(--inner-bg-hex)'; btn.style.borderColor = 'var(--border-hex)'; btn.style.color = 'var(--text-muted)'; }
-                window.showToast('Spracheingabe fehlgeschlagen');
+                window.showToast(window.t('toastError', 'Spracheingabe fehlgeschlagen'));
             };
             recognition.onend = function() {
                 if(btn) { btn.style.background = 'var(--inner-bg-hex)'; btn.style.borderColor = 'var(--border-hex)'; btn.style.color = 'var(--text-muted)'; }
@@ -6287,7 +6296,7 @@
             else if(w.data) details = Object.entries(w.data).map(([k,v])=>`${k}: ${v}`).join(' | ');
             const text = `🏋️ ${w.exercise} — ${w.date}\n${details}\n\nTracked with BASE V2`;
             if(navigator.share) { navigator.share({title:'Workout', text}); }
-            else { navigator.clipboard?.writeText(text).then(()=>window.showToast("Kopiert! 📋")); }
+            else { navigator.clipboard?.writeText(text).then(()=>window.showToast(window.t("toastCopied"))); }
         };
 
         // ============================================================
@@ -6431,14 +6440,14 @@
 
         window.downloadBragCard = function() {
             const el = document.getElementById('bragCardContent');
-            if(!el) { window.showToast('Download nicht verfügbar'); return; }
+            if(!el) { window.showToast(window.t('toastError', 'Download nicht verfügbar')); return; }
             window._ensureHtml2Canvas().then(() => html2canvas(el, { backgroundColor: '#09090b', scale: 2, useCORS: true })).then(canvas => {
                 const a = document.createElement('a');
                 a.download = 'BASE_Workout_' + new Date().toISOString().slice(0,10) + '.png';
                 a.href = canvas.toDataURL('image/png');
                 a.click();
-                window.showToast('Bild gespeichert! 📸');
-            }).catch(() => window.showToast('Fehler beim Speichern'));
+                window.showToast(window.t('toastSaved', 'Bild gespeichert! 📸'));
+            }).catch(() => window.showToast(window.t('toastError')));
         };
 
         window.shareBragCard = function() {
@@ -6447,7 +6456,7 @@
                 // Fallback: Text teilen
                 const d = _bragCardData;
                 const text = `💪 Workout Complete!\n${d?.exercises || ''}\n⏱ ${d?.duration || ''}\nTracked with BASE Tracker`;
-                navigator.share ? navigator.share({ title: 'Workout', text }) : navigator.clipboard?.writeText(text).then(() => window.showToast('Kopiert! 📋'));
+                navigator.share ? navigator.share({ title: 'Workout', text }) : navigator.clipboard?.writeText(text).then(() => window.showToast(window.t('toastCopied')));
                 return;
             }
             window._ensureHtml2Canvas().then(() => html2canvas(el, { backgroundColor: '#09090b', scale: 2, useCORS: true })).then(async canvas => {
@@ -6455,12 +6464,12 @@
                     if(navigator.share && blob) {
                         try {
                             await navigator.share({ title: 'Workout Complete', files: [new File([blob], 'workout.png', { type: 'image/png' })] });
-                        } catch(e) { window.showToast('Teilen abgebrochen'); }
+                        } catch(e) { window.showToast(window.t('toastError', 'Teilen abgebrochen')); }
                     } else {
                         window.downloadBragCard();
                     }
                 });
-            }).catch(() => window.showToast('Fehler beim Teilen'));
+            }).catch(() => window.showToast(window.t('toastError')));
         };
 
         // ============================================================
@@ -6545,7 +6554,7 @@
             const btn = document.getElementById('btnSubmitFeedback');
 
             if(!text && _feedbackStar === 0) {
-                window.showToast('Bitte Sterne oder Text ausfüllen.');
+                window.showToast(window.t('toastError', 'Bitte Feedback ausfüllen'));
                 return;
             }
 
@@ -6578,14 +6587,14 @@
 
                 // Reset + Schließen
                 window.toggleModal('feedbackModal');
-                window.showToast('❤️ Danke für dein Feedback!');
+                window.showToast(window.t('toastUpdate', '❤️ Danke!'));
                 document.getElementById('feedbackText').value = '';
                 document.getElementById('feedbackEmail').value = '';
                 _feedbackStar = 0; _feedbackCat = '';
                 document.querySelectorAll('.feedback-star').forEach(b => { b.style.color=''; b.style.borderColor=''; b.style.background=''; });
                 document.querySelectorAll('.feedback-cat').forEach(b => { b.classList.remove('cat-active-fb'); b.style.color=''; b.style.borderColor=''; b.style.background=''; });
             } catch(e) {
-                window.showToast('Fehler beim Senden. Bitte erneut versuchen.');
+                window.showToast(window.t('toastError'));
             }
 
             if(btn) { btn.innerHTML = '<i data-lucide="send" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> Feedback senden'; window._refreshLucide(); }
@@ -7315,7 +7324,7 @@
 
                     window.renderDynamicSportTabs();
                     window.renderSportPicker('');
-                    window.showToast('Sport gelöscht');
+                    window.showToast(window.t('toastDeleted'));
                 }
             );
         };
@@ -7449,7 +7458,7 @@
         };
 
         window.openCustomTabCreator = function() {
-            if(window._customTabs.length >= 3) { window.showToast('Maximum 3 Custom Tabs erreicht'); return; }
+            if(window._customTabs.length >= 3) { window.showToast(window.t('toastError', 'Maximum 3 Custom Tabs')); return; }
             var iconGrid = _CT_ICONS.map(function(ic) {
                 return '<button type="button" onclick="window._selectCtIcon(this,\'' + ic + '\')" class="ct-icon-btn w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)"><i data-lucide="' + ic + '" class="w-5 h-5 pointer-events-none"></i></button>';
             }).join('');
@@ -7467,7 +7476,7 @@
                 '</div></div>';
             window.showModal('Custom Tab', html, true, function() {
                 var name = (document.getElementById('ctName')?.value || '').trim();
-                if(!name) { window.showToast('Bitte Name eingeben'); return; }
+                if(!name) { window.showToast(window.t('toastError', 'Bitte Name eingeben')); return; }
                 var icon = document.getElementById('ctIconVal')?.value || 'target';
                 var fieldInputs = document.querySelectorAll('.ct-field-input');
                 var fieldTypes = document.querySelectorAll('.ct-field-type');
@@ -7476,7 +7485,7 @@
                     var label = inp.value.trim();
                     if(label) fields.push({ label: label, type: fieldTypes[i]?.value || 'text', placeholder: '' });
                 });
-                if(fields.length === 0) { window.showToast('Mindestens 1 Feld benötigt'); return; }
+                if(fields.length === 0) { window.showToast(window.t('toastError', 'Mindestens 1 Feld')); return; }
                 var tab = { id: 'ct_' + Date.now().toString(36), name: name, icon: icon, fields: fields };
                 window._customTabs.push(tab);
                 localStorage.setItem('base_custom_tabs', JSON.stringify(window._customTabs));
@@ -7504,7 +7513,7 @@
         window._addCtField = function() {
             var container = document.getElementById('ctFields');
             if(!container) return;
-            if(container.children.length >= 6) { window.showToast('Maximum 6 Felder'); return; }
+            if(container.children.length >= 6) { window.showToast(window.t('toastError', 'Maximum 6 Felder')); return; }
             var div = document.createElement('div');
             div.className = 'flex gap-2';
             div.innerHTML = '<input type="text" placeholder="Feld-Name" class="ct-field-input flex-1 px-2.5 py-2 rounded-lg text-xs font-bold outline-none cursor-text pointer-events-auto" style="background:var(--bg-hex);border:1px solid var(--border-hex);color:var(--text-main)"><select class="ct-field-type px-2 py-2 rounded-lg text-xs font-bold outline-none cursor-pointer pointer-events-auto" style="background:var(--bg-hex);border:1px solid var(--border-hex);color:var(--text-main)"><option value="number">Zahl</option><option value="text">Text</option></select>';
@@ -7519,7 +7528,7 @@
                 delete window.categorySchemas[tabId];
                 window._renderCustomTabs();
                 window.switchCategory('strength');
-                window.showToast('Tab gelöscht');
+                window.showToast(window.t('toastDeleted'));
             });
         };
 
@@ -7638,7 +7647,7 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
             if(!SpeechRecognition) {
-                window.showToast('Spracheingabe wird in diesem Browser nicht unterstützt.');
+                window.showToast(window.t('toastError', 'Spracheingabe nicht unterstützt'));
                 return;
             }
 
@@ -7664,7 +7673,7 @@
             _isListening = true;
             if(btn) btn.classList.add('mic-active');
             if(icon) { icon.setAttribute('data-lucide', 'mic-2'); window._refreshLucide(); }
-            window.showToast('🎙 Spreche jetzt...');
+            window.showToast(window.t('toastUpdate', '🎙 Spreche jetzt...'));
 
             _recognition.onresult = (e) => {
                 const transcript = Array.from(e.results)
@@ -7690,7 +7699,7 @@
                 if(btn) btn.classList.remove('mic-active');
                 if(icon) { icon.setAttribute('data-lucide', 'mic'); window._refreshLucide(); }
                 if(e.error === 'not-allowed') {
-                    window.showToast('Mikrofon-Zugriff verweigert. Bitte in den Browser-Einstellungen erlauben.');
+                    window.showToast(window.t('toastError', 'Mikrofon-Zugriff verweigert'));
                 } else if(e.error !== 'no-speech') {
                     window.showToast('Spracheingabe Fehler: ' + e.error);
                 }
@@ -7925,7 +7934,7 @@
             window.handleAuthAction = async () => {
                 const email = document.getElementById('authEmail').value.trim();
                 const password = document.getElementById('authPassword').value;
-                if (!email || !password) { window.showToast("Bitte Felder ausfüllen!"); return; }
+                if (!email || !password) { window.showToast(window.t("toastError", "Bitte Felder ausfüllen!")); return; }
                 const btn = document.getElementById('btnSubmitAuth');
                 if(btn) { btn.disabled = true; btn.textContent = '⏳ Bitte warten...'; }
 
@@ -7933,7 +7942,7 @@
                     if(_authMode === 'login') {
                         // Einloggen — direkt mit E-Mail + Passwort
                         await signInWithEmailAndPassword(auth, email, password);
-                        window.showToast("Erfolgreich eingeloggt! 🔐");
+                        window.showToast(window.t("toastUpdate", "Erfolgreich eingeloggt! 🔐"));
                         window.toggleModal('authModal');
                         const secBtn = document.getElementById('btnSecureAccount');
                         if(secBtn) secBtn.classList.add('hidden');
@@ -7942,7 +7951,7 @@
                         try {
                             const credential = EmailAuthProvider.credential(email, password);
                             await linkWithCredential(auth.currentUser, credential);
-                            window.showToast("Account erfolgreich erstellt! 🔐");
+                            window.showToast(window.t("toastUpdate", "Account erfolgreich erstellt! 🔐"));
                             window.toggleModal('authModal');
                             const secBtn = document.getElementById('btnSecureAccount');
                             if(secBtn) secBtn.classList.add('hidden');
@@ -7951,7 +7960,7 @@
                         } catch(linkError) {
                             // E-Mail bereits vergeben → automatisch zu Login wechseln
                             if(linkError.code === 'auth/email-already-in-use' || linkError.code === 'auth/credential-already-in-use') {
-                                window.showToast("E-Mail bereits registriert — bitte einloggen");
+                                window.showToast(window.t("toastError", "E-Mail bereits registriert — bitte einloggen"));
                                 window.setAuthMode('login');
                             } else {
                                 throw linkError;
@@ -7978,7 +7987,7 @@
                     // Nur lokale Daten löschen
                     window.showModal('Daten löschen?', 'Alle lokalen Daten löschen? Das kann nicht rückgängig gemacht werden.', true, () => {
                         localStorage.clear();
-                        window.showToast('Lokale Daten gelöscht.');
+                        window.showToast(window.t('toastDeleted'));
                         setTimeout(function() { window.location.reload(); }, 1000);
                     });
                     return;
@@ -7997,11 +8006,11 @@
                     await auth.currentUser.delete();
                     // Lokale Daten löschen
                     localStorage.clear();
-                    window.showToast('Account gelöscht. Auf Wiedersehen!');
+                    window.showToast(window.t('toastUpdate', 'Account gelöscht'));
                     setTimeout(function() { window.location.reload(); }, 1500);
                 } catch(e) {
                     if(e.code === 'auth/requires-recent-login') {
-                        window.showToast('Bitte zuerst neu einloggen, dann erneut versuchen.');
+                        window.showToast(window.t('toastError', 'Bitte zuerst neu einloggen'));
                         window.setAuthMode('login');
                         window.toggleModal('authModal');
                     } else {
