@@ -976,8 +976,10 @@ window._renderSessionQuickPicks = function() {
     var filtered = picks.filter(function(p) { return existing.indexOf(p.toLowerCase()) === -1; });
     var color = _sessionType === 'kraft' ? '163,201,168' : _sessionType === 'ausdauer' ? '232,138,138' : '138,175,232';
     var hex = _sessionType === 'kraft' ? '#a3c9a8' : _sessionType === 'ausdauer' ? '#e88a8a' : '#8aafe8';
+    var _exKeys = {'Bankdrücken':'exBenchPress','Kniebeuge':'exSquat','Kreuzheben':'exDeadlift','Schulterdrücken':'exOHP','Rudern':'exRow','Klimmzüge':'exPullUp','Laufen':'exRun','Radfahren':'exCycling','Schwimmen':'exSwim','Rudergerät':'exRower','Seilspringen':'exJumpRope','Beinpresse':'exLegPress','Bizeps Curls':'exBicepCurl','Trizeps':'exTricep'};
     container.innerHTML = filtered.slice(0, 6).map(function(pick) {
-        return '<button type="button" onclick="window.addQuickPick(\'' + window._escapeHtml(pick).replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider cursor-pointer pointer-events-auto transition-all" style="background:rgba(' + color + ',0.08);border:1px solid rgba(' + color + ',0.2);color:' + hex + '">' + window._escapeHtml(pick) + '</button>';
+        var label = _exKeys[pick] ? window.t(_exKeys[pick], pick) : pick;
+        return '<button type="button" onclick="window.addQuickPick(\'' + window._escapeHtml(pick).replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider cursor-pointer pointer-events-auto transition-all" style="background:rgba(' + color + ',0.08);border:1px solid rgba(' + color + ',0.2);color:' + hex + '">' + window._escapeHtml(label) + '</button>';
     }).join('');
     window._refreshLucide();
 };
@@ -1622,11 +1624,11 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
     // Metric selector pills
     var metricOptions = [];
     if(_qtSessionType === 'kraft') {
-        metricOptions = [{id:'setsRepsWeight',label:'Sets\u00d7Wdh\u00d7kg'},{id:'setsReps',label:'Sets\u00d7Wdh'}];
+        metricOptions = [{id:'setsRepsWeight',label:window.t('lblSets','Sets')+'\u00d7'+window.t('lblReps','Wdh')+'\u00d7kg'},{id:'setsReps',label:window.t('lblSets','Sets')+'\u00d7'+window.t('lblReps','Wdh')}];
     } else if(_qtSessionType === 'ausdauer') {
-        metricOptions = [{id:'distanceDuration',label:'km / min'},{id:'roundsDuration',label:'Runden\u00d7Sek'},{id:'setsRepsWeight',label:'Sets\u00d7Wdh\u00d7kg'}];
+        metricOptions = [{id:'distanceDuration',label:'km / min'},{id:'roundsDuration',label:window.t('ptRounds','Runden')+'\u00d7'+window.t('lblSec','Sek')},{id:'setsRepsWeight',label:window.t('lblSets','Sets')+'\u00d7'+window.t('lblReps','Wdh')+'\u00d7kg'}];
     } else {
-        metricOptions = [{id:'holdRounds',label:'Sek \u00d7 Runden'},{id:'setsReps',label:'Sets \u00d7 Wdh'},{id:'durationOnly',label:'Dauer (min)'}];
+        metricOptions = [{id:'holdRounds',label:window.t('lblSec','Sek')+' \u00d7 '+window.t('ptRounds','Runden')},{id:'setsReps',label:window.t('lblSets','Sets')+' \u00d7 '+window.t('lblReps','Wdh')},{id:'durationOnly',label:window.t('lblDuration','Dauer')+' (min)'}];
     }
 
     var metricPills = '<div class="flex flex-wrap gap-1 mt-1.5 mb-1.5">';
