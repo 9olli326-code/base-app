@@ -275,14 +275,13 @@ if(!localStorage.getItem('base_pt_onboarded')) {
     localStorage.setItem('base_pt_onboarded', '1');
     setTimeout(function() {
         window.showModal(
-            'Willkommen im PT Modus!',
-            'Lege deinen ersten Kunden an und plane die erste Session. ' +
-            'Nutze die KI Tools für Trainingspläne und Wochenberichte.',
+            window.t('ptWelcome','Willkommen im PT Modus!'),
+            window.t('ptWelcomeSub','Lege deinen ersten Kunden an und plane die erste Session. Nutze die KI Tools für Trainingspläne und Wochenberichte.'),
             true,
             function() { window.addNewClient(); }
         );
         var btn = document.getElementById('modalBtnConfirm');
-        if(btn) btn.textContent = 'Ersten Kunden anlegen';
+        if(btn) btn.textContent = window.t('ptAddClient','Ersten Kunden anlegen');
     }, 500);
 }
 };
@@ -380,7 +379,7 @@ listEl.innerHTML = window.clients.map(c => {
     const cw = window.getClientWorkouts(c.id);
     const sorted = [...cw].sort((a,b) => (b.date||'').localeCompare(a.date||''));
     const last = sorted[0];
-    const lastStr = last ? (last.date||'').substring(5).replace('-','.') : 'Noch kein Training';
+    const lastStr = last ? (last.date||'').substring(5).replace('-','.') : window.t('ptNoTraining','Noch kein Training');
     const weekCount = cw.filter(w => w.date >= weekAgo).length;
     const initials = window._escapeHtml(c.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2));
     const safeName = window._escapeHtml(c.name);
@@ -401,7 +400,7 @@ listEl.innerHTML = window.clients.map(c => {
         <div class="flex items-center justify-between mt-2">
             <div class="flex items-center gap-1.5">
                 <div class="w-1.5 h-1.5 rounded-full" style="background:${weekCount > 0 ? '#8aafe8' : '#52525b'}"></div>
-                <p class="text-[10px] font-bold" style="color:var(--text-muted)">${weekCount}× diese Woche</p>
+                <p class="text-[10px] font-bold" style="color:var(--text-muted)">${weekCount}× ${window.t('lblThisWeek','diese Woche')}</p>
             </div>
             <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 pointer-events-none"></i>
         </div>
@@ -426,10 +425,10 @@ window.renderDayView();
 window.renderPTMyTraining = function() {
 window.switchMode('personal');
 const inner = document.getElementById('ptMyTrainingInner');
-if(inner) inner.innerHTML = '<p class="text-center text-[10px] font-bold uppercase tracking-widest py-4" style="color:var(--primary-hex)">Persönlicher Training-Modus aktiv</p>';
+if(inner) inner.innerHTML = '<p class="text-center text-[10px] font-bold uppercase tracking-widest py-4" style="color:var(--primary-hex)">' + window.t('ptPersonalMode','Persönlicher Modus — tippe auf KI Tools um zurückzukehren') + '</p>';
 window.switchTab('training');
 window.deactivatePTMode();
-window.showToast('💪 Persönlicher Modus — tippe auf KI Tools um zurückzukehren');
+window.showToast(window.t('ptPersonalMode','Persönlicher Modus — tippe auf KI Tools um zurückzukehren'));
 };
 
 window.switchMode = function(mode) {
@@ -471,7 +470,7 @@ window._updateModeSwitchPill = function() {
     if(!hasPT) { pill.classList.add('hidden'); pill.classList.remove('inline-flex'); return; }
     pill.classList.remove('hidden'); pill.classList.add('inline-flex');
     if(window.currentMode === 'pt') {
-        pill.textContent = 'ICH';
+        pill.textContent = window.t('ptPillMe','ICH');
         var _pc = window._getPrimaryHex();
         pill.style.cssText = 'background:' + _pc + '1a;border:1px solid ' + _pc + '33;color:' + _pc + ';font-family:var(--ui-font-body);-webkit-tap-highlight-color:transparent';
     } else {
@@ -524,7 +523,7 @@ const el = (id) => document.getElementById(id);
 const back = el('obBtnBack');
 const next = el('obBtnNext');
 if(back) back.classList.toggle('hidden', _onboardStep === 1);
-if(next) next.textContent = _onboardStep === 3 ? 'Kunde anlegen' : 'Weiter';
+if(next) next.textContent = _onboardStep === 3 ? window.t('btnCreate','Kunde anlegen') : window.t('ptNext','Weiter');
 // Render dynamic UI
 if(_onboardStep === 2) { window._renderObGoals(); window._renderObExp(); }
 if(_onboardStep === 3) { window._renderObDays(); window._renderObTimes(); }
@@ -579,7 +578,7 @@ window._setObTime = function(t) { _onboardData.time = t; window._renderObTimes()
 window.nextOnboardStep = function() {
 if(_onboardStep === 1) {
     const name = (document.getElementById('obName')?.value || '').trim();
-    if(!name) { window.showToast('Name ist Pflichtfeld!'); return; }
+    if(!name) { window.showToast(window.t('ptEnterName','Name ist Pflichtfeld!')); return; }
     _onboardData.name = name.substring(0, 60);
     _onboardData.age = document.getElementById('obAge')?.value || '';
     _onboardData.weight = document.getElementById('obWeight')?.value || '';
@@ -615,14 +614,14 @@ const profile = {
 window.saveClientProfile(client.id, profile);
 window.toggleModal('clientOnboardModal');
 window.renderPTClientsDashboard();
-window.showToast(`${window._escapeHtml(client.name)} hinzugefügt!`);
+window.showToast(`${window._escapeHtml(client.name)} ${window.t('ptAdded','hinzugefügt!')}`);
 };
 
 window.deleteClient = function() {
 if(!_activeClientDetailId) return;
 const c = window.clients.find(c => c.id === _activeClientDetailId);
 if(!c) return;
-window.showModal('Kunde löschen?', `"${window._escapeHtml(c.name)}" wirklich löschen? Alle Daten gehen verloren.`, true, () => {
+window.showModal(window.t('ptDeleteClient','Kunde löschen?'), `"${window._escapeHtml(c.name)}" ${window.t('ptDeleteClientConfirm','wirklich löschen? Alle Daten gehen verloren.')}`, true, () => {
     window.clients = window.clients.filter(c => c.id !== _activeClientDetailId);
     localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
     localStorage.removeItem(`beastmode_v2_cache_${_activeClientDetailId}`);
@@ -633,7 +632,7 @@ window.showModal('Kunde löschen?', `"${window._escapeHtml(c.name)}" wirklich l�
     window.saveSessions(sessions);
     window.toggleModal('clientDetailModal');
     window.renderPTClientsDashboard();
-    window.showToast('Kunde gelöscht');
+    window.showToast(window.t('toastDeleted'));
 });
 };
 
@@ -650,7 +649,7 @@ window.shareClientPortal = function() {
     if(navigator.share) {
         navigator.share({ title: 'Dein Training – BASE', url: url }).catch(() => {});
     } else if(navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(() => window.showToast('Link kopiert! 📋'));
+        navigator.clipboard.writeText(url).then(() => window.showToast(window.t('toastCopied')));
     } else {
         window.showToast('Link: ' + url);
     }
@@ -694,7 +693,7 @@ window.saveClientProfileFromModal = function() {
     window.saveClientProfile(_activeClientDetailId, profile);
     window.toggleModal('clientProfileEditModal');
     window.openClientDetail(_activeClientDetailId);
-    window.showToast('Profil aktualisiert ✅');
+    window.showToast(window.t('toastUpdate'));
 };
 
 // ── CLIENT DETAIL (refactored) ─────────────────────────────
@@ -728,10 +727,10 @@ const topOrm = Object.entries(orms).sort((a,b)=>b[1]-a[1])[0];
 
 const statsEl = document.getElementById('clientDetailStats');
 if(statsEl) statsEl.innerHTML = `
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Gesamt</p><p class="text-2xl font-black text-white">${stats.total}</p><p class="text-[10px] text-zinc-500">Workouts</p></div>
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Diese Woche</p><p class="text-2xl font-black text-white">${stats.week}</p><p class="text-[10px] text-zinc-500">Sessions</p></div>
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Top 1RM</p><p class="text-xl font-black text-white">${topOrm ? topOrm[1]+'kg' : '—'}</p><p class="text-[10px] text-zinc-500 truncate">${topOrm ? window._escapeHtml(topOrm[0]) : 'Keine Daten'}</p></div>`;
-if(subEl) subEl.textContent = `${stats.total} Workouts · ${stats.week} diese Woche`;
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">' + window.t('lblAllTime','Gesamt') + '</p><p class="text-2xl font-black text-white">${stats.total}</p><p class="text-[10px] text-zinc-500">${window.t('navTraining','Workouts')}</p></div>
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">${window.t('lblThisWeek','Diese Woche')}</p><p class="text-2xl font-black text-white">${stats.week}</p><p class="text-[10px] text-zinc-500">${window.t('lblSessions','Sessions')}</p></div>
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3 text-center"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Top 1RM</p><p class="text-xl font-black text-white">${topOrm ? topOrm[1]+'kg' : '—'}</p><p class="text-[10px] text-zinc-500 truncate">${topOrm ? window._escapeHtml(topOrm[0]) : window.t('toastNoData','Keine Daten')}</p></div>`;
+if(subEl) subEl.textContent = `${stats.total} ${window.t('navTraining','Workouts')} · ${stats.week} ${window.t('lblThisWeek','diese Woche')}`;
 
 // Profile tab
 const profile = window.getClientProfile(id);
@@ -776,7 +775,7 @@ window._renderClientWorkoutsList = function(clientWorkouts) {
 const listEl = document.getElementById('clientDetailWorkouts');
 if(!listEl) return;
 if(clientWorkouts.length === 0) {
-    listEl.innerHTML = '<p class="text-zinc-600 text-xs text-center py-6 font-bold">Noch keine Workout-Daten.</p>';
+    listEl.innerHTML = '<p class="text-zinc-600 text-xs text-center py-6 font-bold">' + window.t('ptNoData','Noch keine Workout-Daten.') + '</p>';
     return;
 }
 const sorted = [...clientWorkouts].sort((a,b) => (b.date||'').localeCompare(a.date||''));
@@ -810,7 +809,7 @@ window._renderClientSessionsList(_activeClientDetailId);
 
 window._renderClientSessionsList = function(clientId) {
 if(!clientId) return;
-const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const monthNames = [window.t('monthJan','Januar'),window.t('monthFeb','Februar'),window.t('monthMar','März'),window.t('monthApr','April'),window.t('monthMay','Mai'),window.t('monthJun','Juni'),window.t('monthJul','Juli'),window.t('monthAug','August'),window.t('monthSep','September'),window.t('monthOct','Oktober'),window.t('monthNov','November'),window.t('monthDec','Dezember')];
 const labelEl = document.getElementById('clientCalMonthLabel');
 if(labelEl) labelEl.textContent = `${monthNames[_clientCalMonth]} ${_clientCalYear}`;
 
@@ -877,15 +876,15 @@ const dayLabel = document.getElementById('clientCalDayLabel');
 if(!listEl) return;
 
 const d = new Date(dateStr);
-const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const dayNames = [window.t('daySu','So'),window.t('dayMo','Mo'),window.t('dayTu','Di'),window.t('dayWe','Mi'),window.t('dayTh','Do'),window.t('dayFr','Fr'),window.t('daySa','Sa')];
 const today = new Date().toISOString().split('T')[0];
-if(dayLabel) dayLabel.textContent = dateStr === today ? 'Heute' : `${dayNames[d.getDay()]} ${d.getDate()}.${d.getMonth()+1}.`;
+if(dayLabel) dayLabel.textContent = dateStr === today ? window.t('lblToday','Heute') : `${dayNames[d.getDay()]} ${d.getDate()}.${d.getMonth()+1}.`;
 
 const daySessions = window.getSessions().filter(s => s.clientId === clientId && s.date === dateStr)
     .sort((a,b) => (a.time||'').localeCompare(b.time||''));
 
 if(daySessions.length === 0) {
-    listEl.innerHTML = '<p class="text-zinc-600 text-xs text-center py-4 font-bold">Keine Sessions an diesem Tag</p>';
+    listEl.innerHTML = '<p class="text-zinc-600 text-xs text-center py-4 font-bold">' + window.t('ptNoSessions','Keine Sessions an diesem Tag') + '</p>';
     window._refreshLucide();
     return;
 }
@@ -896,7 +895,7 @@ listEl.innerHTML = daySessions.map(s => {
         <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${t.bg};border:1px solid ${t.border}"><i data-lucide="${t.icon}" class="w-3.5 h-3.5 pointer-events-none" style="color:${t.color}"></i></div>
         <div class="flex-1 min-w-0">
             <p class="text-white font-black text-sm truncate">${window._escapeHtml(s.focus || s.type)}</p>
-            <p class="text-[10px] font-bold" style="color:var(--text-muted)">${s.time} · ${window._formatDuration(s.duration)}${s.exercises?.length ? ' · ' + s.exercises.length + ' Übungen' : ''}</p>
+            <p class="text-[10px] font-bold" style="color:var(--text-muted)">${s.time} · ${window._formatDuration(s.duration)}${s.exercises?.length ? ' · ' + s.exercises.length + ' ' + window.t('lblExercises','Übungen') : ''}</p>
         </div>
     </div>`;
 }).join('');
@@ -1176,7 +1175,7 @@ _sessionSelectedClient = preselected || null;
 const el = document.getElementById('sessionClientPills');
 if(!el) return;
 if(window.clients.length === 0) {
-    el.innerHTML = '<p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Erst Kunden anlegen</p>';
+    el.innerHTML = '<p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">' + window.t('ptNoClients','Erst Kunden anlegen') + '</p>';
     return;
 }
 el.innerHTML = window.clients.map(c => {
@@ -1195,7 +1194,7 @@ window._renderSessionClientPills(clientId);
 };
 
 window.saveSession = function() {
-if(!_sessionSelectedClient) { window.showToast('Bitte Kunden wählen'); return; }
+if(!_sessionSelectedClient) { window.showToast(window.t('ptEnterName','Bitte Kunden wählen')); return; }
 const time = document.getElementById('sessionTime')?.value || '09:00';
 const durMin = parseInt(document.getElementById('sessionDuration')?.value) || 0;
 const durSec = parseInt(document.getElementById('sessionDurationSec')?.value) || 0;
@@ -1242,12 +1241,12 @@ if(_editingSessionId) {
 window.saveSessions(sessions);
 window.toggleModal('sessionPlannerModal');
 window.renderDayView();
-window.showToast('Session gespeichert ✅');
+window.showToast(window.t('ptSaved','Gespeichert!'));
 };
 
 // --- SESSION VORLAGEN ---
 window.saveSessionAsTemplate = function() {
-    if(_sessionExercises.length === 0) { window.showToast('Keine Übungen zum Speichern'); return; }
+    if(_sessionExercises.length === 0) { window.showToast(window.t('toastError','Keine Übungen zum Speichern')); return; }
     const name = (document.getElementById('sessionFocus')?.value || '').trim() || (_sessionType === 'kraft' ? 'Kraft-Vorlage' : _sessionType === 'ausdauer' ? 'Ausdauer-Vorlage' : 'Mobility-Vorlage');
     const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
     templates.push({
@@ -1260,24 +1259,24 @@ window.saveSessionAsTemplate = function() {
         createdAt: new Date().toISOString()
     });
     localStorage.setItem('base_pt_session_templates', JSON.stringify(templates));
-    window.showToast('Vorlage gespeichert ✅');
+    window.showToast(window.t('ptSaved','Vorlage gespeichert!'));
 };
 
 window.showSessionTemplates = function() {
     const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
-    if(templates.length === 0) { window.showToast('Noch keine Vorlagen gespeichert'); return; }
+    if(templates.length === 0) { window.showToast(window.t('lblNoRoutines','Noch keine Vorlagen gespeichert')); return; }
     const list = document.getElementById('sessionTemplateList');
     const container = document.getElementById('sessionTemplateSection');
     if(!list || !container) return;
     container.classList.toggle('hidden');
     if(container.classList.contains('hidden')) return;
     list.innerHTML = templates.map((t, i) => {
-        const typeLabel = { kraft:'Kraft', ausdauer:'Ausdauer', mobility:'Mobility' }[t.type] || t.type;
+        const typeLabel = { kraft:window.t('sessionKraft','Kraft'), ausdauer:window.t('sessionAusdauer','Ausdauer'), mobility:window.t('sessionMobility','Mobility') }[t.type] || t.type;
         const exCount = (t.exercises || []).length;
         return `<div class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer pointer-events-auto hover:bg-white/5 transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" onclick="window.loadSessionTemplate(${i})">
             <div class="flex-1 min-w-0">
                 <p class="text-white text-sm font-bold truncate">${window._escapeHtml(t.name)}</p>
-                <p class="text-[10px] text-zinc-500 font-bold">${typeLabel} · ${exCount} Übungen · ${window._formatDuration(t.duration)}</p>
+                <p class="text-[10px] text-zinc-500 font-bold">${typeLabel} · ${exCount} ${window.t('lblExercises','Übungen')} · ${window._formatDuration(t.duration)}</p>
             </div>
             <button onclick="event.stopPropagation();window.deleteSessionTemplate(${i})" class="text-zinc-600 hover:text-rose-400 cursor-pointer pointer-events-auto p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
         </div>`;
@@ -1298,7 +1297,7 @@ window.loadSessionTemplate = function(idx) {
     if(focusEl) focusEl.value = t.focus || '';
     window._renderSessionExercises();
     document.getElementById('sessionTemplateSection')?.classList.add('hidden');
-    window.showToast('Vorlage geladen');
+    window.showToast(window.t('ptSaved','Vorlage geladen'));
 };
 
 window.deleteSessionTemplate = function(idx) {
@@ -1306,18 +1305,18 @@ window.deleteSessionTemplate = function(idx) {
     templates.splice(idx, 1);
     localStorage.setItem('base_pt_session_templates', JSON.stringify(templates));
     window.showSessionTemplates();
-    window.showToast('Vorlage gelöscht');
+    window.showToast(window.t('toastDeleted'));
 };
 
 window.deleteSession = function() {
 if(!_editingSessionId) return;
-window.showModal('Session löschen?', 'Diese Session wird dauerhaft gelöscht.', true, () => {
+window.showModal(window.t('ptDeleteSession','Session löschen?'), window.t('ptDeleteSessionConfirm','Diese Session wird dauerhaft gelöscht.'), true, () => {
     const sessions = window.getSessions().filter(s => s.id !== _editingSessionId);
     window.saveSessions(sessions);
     _editingSessionId = null;
     window.toggleModal('sessionPlannerModal');
     window.renderDayView();
-    window.showToast('Session gelöscht');
+    window.showToast(window.t('toastDeleted'));
 });
 };
 
@@ -1419,10 +1418,10 @@ if(!detailEl) return;
 detailEl.classList.remove('hidden');
 
 const d = new Date(dateStr);
-const dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const dayNames = [window.t('daySunday','Sonntag'),window.t('dayMonday','Montag'),window.t('dayTuesday','Dienstag'),window.t('dayWednesday','Mittwoch'),window.t('dayThursday','Donnerstag'),window.t('dayFriday','Freitag'),window.t('daySaturday','Samstag')];
 const labelEl = document.getElementById('ptDayDetailLabel');
 const today = new Date().toISOString().split('T')[0];
-if(labelEl) labelEl.textContent = dateStr === today ? 'Heute' : `${dayNames[d.getDay()]}, ${d.getDate()}.${d.getMonth()+1}.`;
+if(labelEl) labelEl.textContent = dateStr === today ? window.t('lblToday','Heute') : `${dayNames[d.getDay()]}, ${d.getDate()}.${d.getMonth()+1}.`;
 
 const allSessions = window.getSessions().filter(s => s.date === dateStr);
 const sorted = [...allSessions].sort((a,b) => (a.time||'').localeCompare(b.time||''));
@@ -1432,9 +1431,9 @@ sorted.forEach(s => { if(s.type==='kraft') kraft++; if(s.type==='ausdauer') ausd
 const kEl = document.getElementById('ptDayKraft');
 const aEl = document.getElementById('ptDayCardio');
 const mEl = document.getElementById('ptDayMobility');
-if(kEl) kEl.textContent = kraft + ' Kraft';
-if(aEl) aEl.textContent = ausdauer + ' Ausdauer';
-if(mEl) mEl.textContent = mobility + ' Mobility';
+if(kEl) kEl.textContent = kraft + ' ' + window.t('sessionKraft','Kraft');
+if(aEl) aEl.textContent = ausdauer + ' ' + window.t('sessionAusdauer','Ausdauer');
+if(mEl) mEl.textContent = mobility + ' ' + window.t('sessionMobility','Mobility');
 
 const listEl = document.getElementById('ptDaySessions');
 const emptyEl = document.getElementById('ptDayEmpty');
@@ -1446,12 +1445,12 @@ if(sorted.length === 0) {
 }
 if(emptyEl) emptyEl.classList.add('hidden');
 
-const typeMap = { kraft: {icon:'dumbbell',color:'#a3c9a8',bg:'rgba(163,201,168,0.06)',border:'rgba(163,201,168,0.15)',pill:'rgba(163,201,168,0.15)',pillText:'#a3c9a8',label:'Kraft'}, ausdauer: {icon:'heart-pulse',color:'#e88a8a',bg:'rgba(232,138,138,0.06)',border:'rgba(232,138,138,0.15)',pill:'rgba(232,138,138,0.15)',pillText:'#e88a8a',label:'Ausdauer'}, mobility: {icon:'stretch-horizontal',color:'#8aafe8',bg:'rgba(138,175,232,0.06)',border:'rgba(138,175,232,0.15)',pill:'rgba(138,175,232,0.15)',pillText:'#8aafe8',label:'Mobility'} };
+const typeMap = { kraft: {icon:'dumbbell',color:'#a3c9a8',bg:'rgba(163,201,168,0.06)',border:'rgba(163,201,168,0.15)',pill:'rgba(163,201,168,0.15)',pillText:'#a3c9a8',label:window.t('sessionKraft','Kraft')}, ausdauer: {icon:'heart-pulse',color:'#e88a8a',bg:'rgba(232,138,138,0.06)',border:'rgba(232,138,138,0.15)',pill:'rgba(232,138,138,0.15)',pillText:'#e88a8a',label:window.t('sessionAusdauer','Ausdauer')}, mobility: {icon:'stretch-horizontal',color:'#8aafe8',bg:'rgba(138,175,232,0.06)',border:'rgba(138,175,232,0.15)',pill:'rgba(138,175,232,0.15)',pillText:'#8aafe8',label:window.t('sessionMobility','Mobility')} };
 
 if(listEl) listEl.innerHTML = sorted.map(s => {
     const t = typeMap[s.type] || typeMap.kraft;
     const client = window.clients.find(c => c.id === s.clientId);
-    const clientName = client ? window._escapeHtml(client.name) : 'Unbekannt';
+    const clientName = client ? window._escapeHtml(client.name) : window.t('ptUnknown','Unbekannt');
     const exList = (s.exercises||[]).slice(0,3).map(e => window._escapeHtml(e)).join(' · ');
     return `<div class="p-4 rounded-2xl transition-all" style="background:${t.bg};border:1px solid ${t.border}">
         <div class="flex items-center justify-between mb-2">
@@ -1558,7 +1557,7 @@ const nameEl = document.getElementById('qtClientName');
 const infoEl = document.getElementById('qtSessionInfo');
 if(avatarEl) avatarEl.textContent = client.name.charAt(0).toUpperCase();
 if(nameEl) nameEl.textContent = client.name;
-const typeLabels = { kraft:'Kraft', ausdauer:'Ausdauer', mobility:'Mobility' };
+const typeLabels = { kraft:window.t('sessionKraft','Kraft'), ausdauer:window.t('sessionAusdauer','Ausdauer'), mobility:window.t('sessionMobility','Mobility') };
 if(infoEl) infoEl.textContent = `${typeLabels[s.type] || s.type} · ${window._formatDuration(s.duration)}${s.focus ? ' · ' + s.focus : ''}`;
 
 // Start timer
@@ -1700,9 +1699,9 @@ listEl.innerHTML = _qtExercises.map(function(ex, idx) {
 
     // Done label based on metric
     var doneLabel = '';
-    if(metric === 'setsRepsWeight' || metric === 'setsReps') doneLabel = (ex.sets||[]).length + ' Sets abgeschlossen';
+    if(metric === 'setsRepsWeight' || metric === 'setsReps') doneLabel = (ex.sets||[]).length + ' Sets';
     else if(metric === 'distanceDuration') doneLabel = (ex.distance||0) + ' km \u00b7 ' + (ex.duration||0) + ' min';
-    else if(metric === 'roundsDuration') doneLabel = (ex.sets||[]).length + ' Runden';
+    else if(metric === 'roundsDuration') doneLabel = (ex.sets||[]).length + ' ' + window.t('ptRounds','Runden');
     else if(metric === 'holdRounds') doneLabel = (ex.holdTime||0) + ' Sek \u00d7 ' + (ex.rounds||0) + ' Runden';
     else if(metric === 'durationOnly') doneLabel = (ex.duration||0) + ' min';
 
@@ -1801,7 +1800,7 @@ window._renderQtExercises();
 };
 
 window.endQuickTrack = function() {
-window.showModal('Abbrechen?', 'Session beenden ohne zu speichern?', true, () => {
+window.showModal(window.t('btnCancel','Abbrechen?'), window.t('ptCancelSession','Session beenden ohne zu speichern?'), true, () => {
     if(_qtTimerInterval) clearInterval(_qtTimerInterval);
     _qtTimerInterval = null;
     _qtStartTime = null;
@@ -1812,7 +1811,7 @@ window.showModal('Abbrechen?', 'Session beenden ohne zu speichern?', true, () =>
 window.saveQtAsTemplate = function() {
     if(!_qtExercises || _qtExercises.length === 0) { window.showToast('Keine Übungen zum Speichern'); return; }
     const s = window.getSessions().find(s => s.id === _qtSessionId);
-    const name = s?.focus || 'Quick-Track Vorlage';
+    const name = s?.focus || window.t('ptQuickTrack','Quick-Track Vorlage');
     const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
     templates.push({
         id: 'tpl_' + Date.now(),
@@ -1898,7 +1897,7 @@ window.toggleModal('quickTrackModal');
 window.renderDayView();
 
 const client = window.clients.find(c => c.id === s.clientId);
-window.showToast(`Session mit ${client ? client.name : 'Kunde'} gespeichert! ✅ ${completedExercises.length} Übungen getrackt`);
+window.showToast(window.t('ptSaved','Gespeichert!') + ` ${completedExercises.length} ${window.t('lblExercises','Übungen')}`);
 };
 
 // ── PDF EXPORT V2: Progressions-Charts + Trainer-Branding ──
@@ -1909,11 +1908,11 @@ input.accept = 'image/png,image/jpeg,image/webp';
 input.onchange = async (e) => {
     const file = e.target.files[0];
     if(!file) return;
-    if(file.size > 500000) { window.showToast('Logo max 500KB'); return; }
+    if(file.size > 500000) { window.showToast(window.t('toastError','Logo max 500KB')); return; }
     const reader = new FileReader();
     reader.onload = () => {
         localStorage.setItem('base_trainer_logo', reader.result);
-        window.showToast('Logo gespeichert! Wird in PDFs angezeigt.');
+        window.showToast(window.t('ptSaved','Logo gespeichert!'));
     };
     reader.readAsDataURL(file);
 };
@@ -1922,18 +1921,18 @@ input.click();
 
 window.setTrainerBranding = function() {
 const current = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
-const name = prompt('Dein Name / Studio-Name:', current.name || '');
+const name = prompt(window.t('ptEnterName','Dein Name / Studio-Name:'), current.name || '');
 if(name === null) return;
 var _defColor = window._getPrimaryHex();
-const color = prompt('Akzentfarbe (Hex, z.B. ' + _defColor + '):', current.color || _defColor);
+const color = prompt(window.t('ptAccentColor','Akzentfarbe (Hex):') + ' ' + _defColor, current.color || _defColor);
 if(color === null) return;
-const tagline = prompt('Slogan / Tagline (optional):', current.tagline || '');
+const tagline = prompt(window.t('ptTagline','Slogan / Tagline (optional):'), current.tagline || '');
 localStorage.setItem('base_trainer_branding', JSON.stringify({
     name: (name||'').trim().substring(0,60),
     color: /^#[0-9a-fA-F]{6}$/.test(color) ? color : _defColor,
     tagline: (tagline||'').trim().substring(0,80)
 }));
-window.showToast('Branding gespeichert! ✅');
+window.showToast(window.t('ptSaved'));
 };
 
 window._renderProgressionChart = function(exerciseName, dataPoints, width, height) {
@@ -2039,7 +2038,7 @@ const c = window.clients.find(c => c.id === _activeClientDetailId);
 if(!c) return;
 
 if(!window.jspdf) {
-    window.showToast('PDF wird vorbereitet...');
+    window.showToast(window.t('aiGenerating','PDF wird vorbereitet...'));
     await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
@@ -2101,7 +2100,7 @@ y = 48;
 doc.setFontSize(11);
 doc.setFont('helvetica', 'bold');
 doc.setTextColor(accentR, accentG, accentB);
-doc.text('DEINE PROGRESSION', 15, y);
+doc.text(window.t('lblProgress','DEINE PROGRESSION').toUpperCase(), 15, y);
 y += 8;
 
 // Build progression data per exercise
@@ -2125,7 +2124,7 @@ if(chartExercises.length === 0) {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(120, 120, 130);
-    doc.text('Noch nicht genug Daten für Progressions-Charts (min. 3 Workouts pro Übung).', 15, y);
+    doc.text(window.t('ptNoData','Noch nicht genug Daten für Progressions-Charts'), 15, y);
     y += 12;
 } else {
     const chartW = (w - 35) / 2;
@@ -2158,7 +2157,7 @@ const bestExercises = chartExercises.slice(0,3).map(([name, pts]) => {
     const pct = Math.round((last - first) / first * 100);
     return `${name}: ${pct > 0 ? '+' : ''}${pct}%`;
 }).join('  |  ');
-doc.text(`${stats.total} Workouts gesamt  |  ${stats.week} diese Woche`, 20, y + 6);
+doc.text(`${stats.total} Workouts ${window.t('lblAllTime','Gesamt')}  |  ${stats.week} ${window.t('lblThisWeek','diese Woche')}`, 20, y + 6);
 doc.setFont('helvetica', 'normal');
 doc.setTextColor(100, 100, 110);
 if(bestExercises) doc.text(bestExercises, 20, y + 13);
@@ -2169,12 +2168,12 @@ for(let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(7);
     doc.setTextColor(160, 160, 170);
-    const footerText = branding.name ? `${branding.name} · Powered by BASE` : 'Erstellt mit BASE';
+    const footerText = branding.name ? `${branding.name} · Powered by BASE` : 'BASE';
     doc.text(`${footerText} · ${new Date().toLocaleDateString('de-DE')} · Seite ${i}/${pageCount}`, w/2, 290, { align: 'center' });
 }
 
 doc.save(`Report_${c.name.replace(/[^a-zA-Z0-9]/g,'_')}_${new Date().toISOString().split('T')[0]}.pdf`);
-window.showToast('PDF heruntergeladen! 📄');
+window.showToast(window.t('toastExported'));
 };
 
 window.generateClientWeeklyReport = async function() {
@@ -2185,16 +2184,16 @@ if (!_activeClientDetailId && window.clients && window.clients.length > 0) {
     _activeClientDetailId = window.clients[0].id;
 }
 if (!_activeClientDetailId) {
-    window.showToast('Bitte erst einen Kunden anlegen oder auswählen');
+    window.showToast(window.t('ptEnterName','Bitte erst einen Kunden anlegen oder auswählen'));
     return;
 }
 const btn = document.getElementById('btnGenClientReport');
 const resultEl = document.getElementById('clientReportResult');
-if(btn) btn.textContent = '⏳ Analysiere...';
+if(btn) btn.textContent = '⏳ ' + window.t('aiAnalyzing','Analysiere...');
 
 const clientWorkouts = window.getClientWorkouts(_activeClientDetailId);
 const c = window.clients.find(c => c.id === _activeClientDetailId);
-const clientName = c ? c.name : 'Kunde';
+const clientName = c ? c.name : window.t('lblClient','Kunde');
 const profile = window.getClientProfile(_activeClientDetailId);
 const recent = clientWorkouts.slice(0,14).map(w => {
     let d = w.setDetails ? w.setDetails.map(s=>`${s.reps}×${s.weight}kg`).join(', ') : '';
@@ -2225,7 +2224,7 @@ try {
 } catch(e) {
     if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = 'Fehler: ' + e.message; }
 } finally {
-    if(btn) { btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> Wochenbericht generieren'; if(window.lucide) lucide.createIcons(); }
+    if(btn) { btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> ' + window.t('ptWeeklyReport','Wochenbericht generieren'); if(window.lucide) lucide.createIcons(); }
 }
 };
 
@@ -2233,21 +2232,21 @@ window.exportClientPlan = function() {
 if(!_activeClientDetailId) return;
 const clientWorkouts = window.getClientWorkouts(_activeClientDetailId);
 const c = window.clients.find(c => c.id === _activeClientDetailId);
-const clientName = c ? c.name : 'Kunde';
+const clientName = c ? c.name : window.t('lblClient','Kunde');
 const recent = clientWorkouts.slice(0,10);
 let text = `📊 Trainingsübersicht: ${clientName}\n`;
-text += `Stand: ${new Date().toLocaleDateString('de-DE')}\n\n`;
+text += new Date().toLocaleDateString() + '\n\n';
 recent.forEach(w => {
     let d = '';
     if(w.setDetails?.length > 0) d = w.setDetails.map(s=>`${s.reps}×${s.weight}kg`).join(' | ');
     else if(w.data) d = Object.entries(w.data).map(([k,v])=>`${k}: ${v}`).join(' · ');
     text += `• ${w.date}: ${w.exercise} — ${d}\n`;
 });
-text += '\nErstellt mit BASE Tracker';
+text += '\nBASE Tracker';
 if(navigator.share) {
     navigator.share({ title: `Training ${clientName}`, text });
 } else {
-    navigator.clipboard?.writeText(text).then(() => window.showToast('Kopiert! 📋'));
+    navigator.clipboard?.writeText(text).then(() => window.showToast(window.t('toastCopied')));
 }
 };
 
@@ -2372,7 +2371,7 @@ window._renderContactFields = function() {
 window.previewTrainerPhoto = function(input) {
     const file = input.files && input.files[0];
     if(!file) return;
-    if(file.size > 500 * 1024) { window.showToast('Bild zu groß (max 500KB)'); input.value = ''; return; }
+    if(file.size > 500 * 1024) { window.showToast(window.t('toastError','Bild zu groß (max 500KB)')); input.value = ''; return; }
     const reader = new FileReader();
     reader.onload = function(e) {
         const preview = document.getElementById('tpPhotoPreview');
@@ -2384,11 +2383,11 @@ window.previewTrainerPhoto = function(input) {
 window.saveTrainerProfile = async function() {
     const db = window._fbDb;
     const auth = window._fbAuth;
-    if(!db || !auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
+    if(!db || !auth || !auth.currentUser) { window.showToast(window.t('toastError','Bitte zuerst einloggen!')); return; }
     const el = (id) => document.getElementById(id);
     const name = (el('tpName')?.value || '').trim();
-    if(!name) { window.showToast('Name ist Pflichtfeld!'); return; }
-    if(_selectedSpecs.length === 0) { window.showToast('Mindestens eine Spezialisierung wählen!'); return; }
+    if(!name) { window.showToast(window.t('ptEnterName','Name ist Pflichtfeld!')); return; }
+    if(_selectedSpecs.length === 0) { window.showToast(window.t('toastError','Mindestens eine Spezialisierung wählen!')); return; }
 
     const preview = document.getElementById('tpPhotoPreview');
     const img = preview?.querySelector('img');
@@ -2443,7 +2442,7 @@ window.saveTrainerProfile = async function() {
         } catch(e) { /* ignore */ }
 
         window.toggleModal('trainerProfileModal');
-        window.showToast('Trainer-Profil gespeichert!');
+        window.showToast(window.t('ptSaved','Trainer-Profil gespeichert!'));
         window._updateTrainerProfileUI();
     } catch(err) {
         console.error('Trainer-Profil Fehler:', err);
@@ -2470,8 +2469,8 @@ window._updateTrainerProfileUI = function() {
     const sub = document.getElementById('trainerProfileBtnSub');
     const statsBar = document.getElementById('trainerStatsBar');
     if(_trainerProfileCache) {
-        if(label) label.textContent = 'Profil bearbeiten';
-        if(sub) sub.textContent = _trainerProfileCache.active ? 'Aktiv — sichtbar für alle' : 'Inaktiv';
+        if(label) label.textContent = window.t('ptEditProfile','Profil bearbeiten');
+        if(sub) sub.textContent = _trainerProfileCache.active ? window.t('ptProfileActive','Aktiv — sichtbar für alle') : window.t('ptProfileInactive','Inaktiv');
         if(statsBar) {
             statsBar.classList.remove('hidden');
             statsBar.classList.add('grid');
@@ -2575,8 +2574,8 @@ window._renderTrainerCards = function(trainers) {
     if(trainers.length === 0) {
         list.innerHTML = '<div class="text-center py-8 col-span-full">' +
             '<div class="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4"><i data-lucide="search" class="w-8 h-8 text-cyan-400"></i></div>' +
-            '<h3 class="text-lg font-black text-white mb-2">Noch keine Trainer auf BASE</h3>' +
-            '<p class="text-zinc-500 text-sm mb-6">Wir bauen unser Trainer-Netzwerk auf. Finde jetzt einen Trainer in deiner Naehe.</p>' +
+            '<h3 class="text-lg font-black text-white mb-2">' + window.t('ptNoTrainers','Noch keine Trainer auf BASE') + '</h3>' +
+            '<p class="text-zinc-500 text-sm mb-6">' + window.t('ptTrainerNetworkSub','Wir bauen unser Trainer-Netzwerk auf.') + '</p>' +
             '<button onclick="window.searchTrainerGoogle()" class="w-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 py-3 rounded-xl text-sm font-black uppercase tracking-widest mb-3 pointer-events-auto cursor-pointer hover:bg-cyan-500/20 transition-all">Personal Trainer in meiner Naehe</button>' +
             '<button onclick="window.searchTrainerGoogle(\'online\')" class="w-full bg-zinc-800 text-zinc-300 py-3 rounded-xl text-sm font-black uppercase tracking-widest pointer-events-auto cursor-pointer hover:bg-zinc-700 transition-all">Online Personal Trainer finden</button>' +
             '<p class="text-zinc-600 text-[10px] mt-6 uppercase tracking-widest">Bist du Trainer? <button onclick="window.toggleModal(\'trainerDirectoryModal\'); setTimeout(function() { window.switchMode(\'pt\'); window.activatePTMode(); }, 300);" class="text-indigo-400 font-black pointer-events-auto cursor-pointer">Profil erstellen</button></p>' +
@@ -2595,13 +2594,13 @@ window._renderTrainerCards = function(trainers) {
                 ${photo}
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-black text-white truncate">${esc(t.name)}</p>
-                    <p class="text-[10px] text-zinc-500 font-bold truncate">${esc(t.city || 'Keine Stadt')}</p>
+                    <p class="text-[10px] text-zinc-500 font-bold truncate">${esc(t.city || window.t('ptNoCity','Keine Stadt'))}</p>
                     <p class="text-[10px] font-bold text-amber-400 mt-0.5">${stars}</p>
                 </div>
             </div>
             <div class="flex flex-wrap gap-1 mb-3">${specs}${t.freeConsultation ? '<span class="bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/20">Gratis Erstgespräch</span>' : ''}</div>
             <div class="flex items-center justify-between">
-                ${t.pricePerSession ? `<span class="text-white font-black text-sm">${t.pricePerSession}€<span class="text-zinc-500 text-[10px] font-bold">/Session</span></span>` : '<span class="text-zinc-500 text-[10px] font-bold">Preis n.V.</span>'}
+                ${t.pricePerSession ? `<span class="text-white font-black text-sm">${t.pricePerSession}€<span class="text-zinc-500 text-[10px] font-bold">/Session</span></span>` : '<span class="text-zinc-500 text-[10px] font-bold">' + window.t('ptPriceNA','Preis n.V.') + '</span>'}
                 <button onclick="window.openTrainerDetail('${t.uid}')" class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto hover:bg-cyan-500/20 transition-all">Profil</button>
             </div>
         </div>`;
@@ -2651,7 +2650,7 @@ window.openTrainerDetail = async function(uid) {
             if(snap.exists()) trainer = { uid: uid, ...snap.data() };
         } catch(e) { /* ignore */ }
     }
-    if(!trainer) { window.showToast('Trainer nicht gefunden'); return; }
+    if(!trainer) { window.showToast(window.t('toastError','Trainer nicht gefunden')); return; }
 
     // Reviews laden
     let reviews = [];
@@ -2691,7 +2690,7 @@ window._renderTrainerDetail = function(t, reviews) {
     const safeDetailPhoto = window._safePhotoUrl(t.photo);
     const photo = safeDetailPhoto ? `<img src="${safeDetailPhoto}" class="w-full h-48 object-cover rounded-2xl mb-4" alt="${esc(t.name)}">` : '';
     const specs = (t.specializations || []).map(s => `<span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-2 py-1 rounded-lg">${esc(s)}</span>`).join(' ');
-    const stars = t.reviewCount > 0 ? `<span class="text-amber-400 font-black">${(t.rating || 0).toFixed(1)} ★</span> <span class="text-zinc-500 text-xs">(${t.reviewCount} Bewertungen)</span>` : '<span class="text-zinc-500 text-xs">Noch keine Bewertungen</span>';
+    const stars = t.reviewCount > 0 ? `<span class="text-amber-400 font-black">${(t.rating || 0).toFixed(1)} ★</span> <span class="text-zinc-500 text-xs">(${t.reviewCount} Bewertungen)</span>` : '<span class="text-zinc-500 text-xs">' + window.t('ptNoReviews','Noch keine Bewertungen') + '</span>';
 
     // Verfügbarkeit Grid
     let availHtml = '';
@@ -2793,7 +2792,7 @@ window.submitTrainerReview = async function() {
     const db = window._fbDb;
     const auth = window._fbAuth;
     if(!db || !auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
-    if(_reviewRating < 1 || _reviewRating > 5) { window.showToast('Bitte Sterne auswählen!'); return; }
+    if(_reviewRating < 1 || _reviewRating > 5) { window.showToast(window.t('toastError','Bitte Sterne auswählen!')); return; }
     if(!_reviewTrainerId) return;
 
     const text = (document.getElementById('reviewText')?.value || '').trim().substring(0, 300);
@@ -2821,7 +2820,7 @@ window.submitTrainerReview = async function() {
         });
 
         window.toggleModal('trainerReviewModal');
-        window.showToast('Bewertung abgeschickt!');
+        window.showToast(window.t('ptSaved','Bewertung abgeschickt!'));
         // Detail-Modal aktualisieren
         window.openTrainerDetail(_reviewTrainerId);
     } catch(err) {
@@ -2860,9 +2859,9 @@ window._renderComplianceRings = function(clientId) {
     if(!row) return;
     const c = window.computeCompliance(clientId);
     const rings = [
-        { label: 'Woche', color: '#a3c9a8', data: c.week },
-        { label: 'Monat', color: '#f59e0b', data: c.month },
-        { label: 'Gesamt', color: '#8aafe8', data: c.total }
+        { label: window.t('lblThisWeek','Woche'), color: '#a3c9a8', data: c.week },
+        { label: window.t('ptMonth','Monat'), color: '#f59e0b', data: c.month },
+        { label: window.t('lblAllTime','Gesamt'), color: '#8aafe8', data: c.total }
     ];
     const circumference = 2 * Math.PI * 28; // 175.93
     row.innerHTML = rings.map(r => {
@@ -2890,10 +2889,10 @@ window.generateKiCheckIn = async function() {
     if(window.aiGate && !(await window.aiGate())) return;
     if(!_activeClientDetailId) return;
     const btn = document.getElementById('btnKiCheckIn');
-    if(btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin pointer-events-none"></i> Generiere...';
+    if(btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin pointer-events-none"></i> ' + window.t('aiGenerating','Generiere...');
 
     const c = window.clients.find(c => c.id === _activeClientDetailId);
-    const clientName = c ? c.name : 'Kunde';
+    const clientName = c ? c.name : window.t('lblClient','Kunde');
     const profile = window.getClientProfile(_activeClientDetailId);
     const compliance = window.computeCompliance(_activeClientDetailId);
     const cw = window.getClientWorkouts(_activeClientDetailId);
@@ -2930,7 +2929,7 @@ Antworte auf ${lang}.`;
     } catch(err) {
         window.showToast('Fehler: ' + err.message);
     }
-    if(btn) btn.innerHTML = '<i data-lucide="message-circle" class="w-3.5 h-3.5 pointer-events-none"></i> KI Check-In';
+    if(btn) btn.innerHTML = '<i data-lucide="message-circle" class="w-3.5 h-3.5 pointer-events-none"></i> ' + window.t('ptKiCheckIn','KI Check-In');
     window._refreshLucide();
 };
 
@@ -2942,7 +2941,7 @@ window._sendCheckInWhatsApp = function() {
 
 window._copyCheckInText = function() {
     if(!_lastCheckInText) return;
-    navigator.clipboard.writeText(_lastCheckInText).then(() => window.showToast('Kopiert!'));
+    navigator.clipboard.writeText(_lastCheckInText).then(() => window.showToast(window.t('toastCopied')));
 };
 
 // ============================================================
@@ -2955,7 +2954,7 @@ window.shareTrainerBrandLink = function() {
     if(navigator.share) {
         navigator.share({ title: 'BASE Fitness', text: 'Tracke dein Training mit meiner personalisierten App:', url: url });
     } else {
-        navigator.clipboard.writeText(url).then(() => window.showToast('Link kopiert!'));
+        navigator.clipboard.writeText(url).then(() => window.showToast(window.t('toastCopied')));
     }
 };
 
@@ -3016,7 +3015,7 @@ var _cstSelectedIcon = 'heart';
 
 window.openCustomSessionTypeModal = function() {
     var existing = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
-    if (existing.length >= 3) return window.showToast('Maximum 3 eigene Typen');
+    if (existing.length >= 3) return window.showToast(window.t('ptMaxTypes','Maximum 3 eigene Typen'));
 
     _cstSelectedIcon = 'heart';
     var n = document.getElementById('cstName');
@@ -3074,11 +3073,11 @@ window.saveCustomSessionType = async function() {
     var name = (nameEl && nameEl.value || '').trim();
     var userFields = (exEl && exEl.value || '').trim();
 
-    if (!name) return window.showToast('Bitte Name eingeben');
+    if (!name) return window.showToast(window.t('ptEnterName','Bitte Name eingeben'));
 
     var id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 12);
     var btn = document.getElementById('btnSaveCST');
-    if (btn) btn.textContent = 'KI generiert...';
+    if (btn) btn.textContent = window.t('aiGenerating','KI generiert...');
 
     var quickPicks = [];
     var schema = [];
@@ -3127,7 +3126,7 @@ window.saveCustomSessionType = async function() {
         ];
     }
 
-    if (btn) btn.textContent = 'Erstellen';
+    if (btn) btn.textContent = window.t('btnCreate','Erstellen');
 
     var existing = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
     existing.push({
@@ -3144,7 +3143,7 @@ window.saveCustomSessionType = async function() {
     window._renderCustomSessionTypes();
     window.toggleModal('customSessionTypeModal');
     setTimeout(function() { window.setSessionType(id); }, 100);
-    window.showToast('"' + name + '" erstellt!');
+    window.showToast(name + ' ' + window.t('ptAdded','erstellt!'));
 };
 
 window._renderCustomSessionTypes = function() {
@@ -3206,7 +3205,7 @@ window._renderCustomSessionFields = function() {
             var inputHtml = '';
             if (field.type === 'select' && field.options) {
                 inputHtml = '<select id="cst_field_' + field.id + '" class="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-sm outline-none cursor-pointer pointer-events-auto">' +
-                    '<option value="">Waehlen...</option>' +
+                    '<option value="">' + window.t('lblFilter','Wählen...') + '</option>' +
                     field.options.map(function(o) { return '<option value="' + window._escapeHtml(o) + '">' + window._escapeHtml(o) + '</option>'; }).join('') +
                     '</select>';
             } else if (field.type === 'range') {
@@ -3261,14 +3260,14 @@ window._initCSTLongPress = function() {
         var timer = null;
         var start = function(ev) {
             timer = setTimeout(function() {
-                window.showModal('"' + t.name + '" löschen?', 'Diesen Session-Typ entfernen?', true, function() {
+                window.showModal(t.name + ' ' + window.t('btnDelete','löschen') + '?', window.t('ptDeleteSessionConfirm','Diesen Session-Typ entfernen?'), true, function() {
                     var arr = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
                     arr = arr.filter(function(x) { return x.id !== t.id; });
                     localStorage.setItem('base_pt_custom_session_types', JSON.stringify(arr));
                     if (typeof _sessionQuickPicks !== 'undefined') delete _sessionQuickPicks[t.id];
                     window._renderCustomSessionTypes();
                     window.setSessionType('kraft');
-                    window.showToast('Typ gelöscht');
+                    window.showToast(window.t('toastDeleted'));
                 });
             }, 700);
         };
