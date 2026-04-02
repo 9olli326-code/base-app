@@ -8,10 +8,10 @@
 window.runDesignAI = async function() {
     if(!window.checkOnlineForAI()) return;
     var prompt = document.getElementById('designPrompt').value.trim();
-    if (!prompt) { window.showToast("Bitte beschreibe dein Wunsch-Design!"); return; }
+    if (!prompt) { window.showToast(window.t("designEnterPrompt","Bitte beschreibe dein Wunsch-Design!")); return; }
     var btn = document.getElementById('btnRunDesignAi');
     var origHTML = btn.innerHTML;
-    btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> KI designt...';
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> ' + window.t('aiGenerating','KI designt...');
     btn.disabled = true;
     if(window.lucide) lucide.createIcons();
 
@@ -74,20 +74,20 @@ window.runDesignAI = async function() {
             })
         });
         clearTimeout(timeoutId);
-        if (!res.ok) throw new Error('Server Fehler');
+        if (!res.ok) throw new Error(window.t('aiServerError','Server Fehler'));
         var data = await res.json();
         var jsonStr = (data.reply || '{}').replace(/```json/g, '').replace(/```/g, '').trim();
         var result = JSON.parse(jsonStr);
         if (result.theme) {
             localStorage.setItem('beastmode_v2_theme', JSON.stringify(result.theme));
             var name = result.designName || 'Custom';
-            window.showToast(name + ' wird geladen...');
+            window.showToast(name + ' ' + window.t('aiGenerating','wird geladen...'));
             setTimeout(function() { window.location.reload(); }, 800);
         } else {
-            throw new Error('Kein Theme im JSON');
+            throw new Error('No theme');
         }
     } catch(e) {
-        window.showToast('Design-KI Fehler: ' + e.message);
+        window.showToast(window.t('aiError','KI Fehler') + ': ' + e.message);
     } finally {
         btn.innerHTML = origHTML;
         btn.disabled = false;
@@ -106,7 +106,7 @@ window.closeAiModal = function() { const m = document.getElementById('aiModal');
 // --- OFFLINE CHECK für KI-Features ---
 window.checkOnlineForAI = function() {
     if (!navigator.onLine) {
-        window.showToast('Kein Internet — KI-Features benötigen eine Verbindung.', 'error');
+        window.showToast(window.t('aiNoInternet','Kein Internet — KI-Features benötigen eine Verbindung.'), 'error');
         return false;
     }
     return true;
@@ -182,7 +182,7 @@ window.calculateReadiness = function() {
     const color = score >= 70 ? '#22c55e' : score >= 40 ? '#f59e0b' : '#ef4444';
     if (scoreEl) scoreEl.textContent = score + '%';
     if (barEl) { barEl.style.width = score + '%'; barEl.style.backgroundColor = color; }
-    if (statusEl) statusEl.textContent = score >= 70 ? 'Bereit – Vollgas geben!' : score >= 40 ? 'Moderat erholt' : 'Hohe Ermüdung – Erholen!';
+    if (statusEl) statusEl.textContent = score >= 70 ? window.t('znsFresh','Frisch & bereit') : score >= 40 ? window.t('znsModerate','Moderate Belastung') : window.t('znsFatigued','Erhöhte Müdigkeit');
     if (iconEl && iconBgEl) {
         const icon = score >= 70 ? 'battery-full' : score >= 40 ? 'battery-medium' : 'battery-low';
         iconEl.setAttribute('data-lucide', icon);
@@ -196,7 +196,7 @@ window.calculateReadiness = function() {
     const toolsIcon = document.getElementById('toolsZnsIcon');
     if(toolsScore) { toolsScore.textContent = score + '%'; toolsScore.style.color = color; }
     if(toolsBar) { toolsBar.style.width = score + '%'; toolsBar.style.backgroundColor = color; }
-    if(toolsStatus) toolsStatus.textContent = score >= 70 ? 'Bereit – Vollgas geben!' : score >= 40 ? 'Moderat erholt' : 'Hohe Ermüdung – Erholen!';
+    if(toolsStatus) toolsStatus.textContent = score >= 70 ? window.t('znsFresh','Frisch & bereit') : score >= 40 ? window.t('znsModerate','Moderate Belastung') : window.t('znsFatigued','Erhöhte Müdigkeit');
     if(toolsIcon) { toolsIcon.setAttribute('data-lucide', score >= 70 ? 'battery-full' : score >= 40 ? 'battery-medium' : 'battery-low'); toolsIcon.style.color = color; if(window.lucide) lucide.createIcons(); }
 };
 
@@ -221,8 +221,8 @@ window.analyzeReadinessWithAI = async function() {
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
-    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = 'ZNS Readiness';
-    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = 'Erholung & Bereitschaft';
+    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('znsTitle','ZNS Readiness');
+    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('znsAnalyze','Erholung & Bereitschaft');
     const ctx = window.buildAIContext();
     const prompt = `Du bist Sportwissenschaftler mit Spezialisierung auf Erholung und neuromuskuläre Anpassung.
 
@@ -252,11 +252,11 @@ Max 180 Wörter. Antworte auf ${window.getPromptLang()}.`;
         const data = await res.json();
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || 'Keine Antwort.'; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = 'Fehler: ' + e.message; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = window.t('toastError','Fehler') + ': ' + e.message; }
     }
 };
 
@@ -268,8 +268,8 @@ window.triggerCopilot = async function() {
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
-    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = 'AI Co-Pilot';
-    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = 'Smarte Trainingsempfehlung';
+    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('copilotTitle','AI Co-Pilot');
+    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('copilotSub','Smarte Trainingsempfehlung');
     const ctx = window.buildAIContext();
     // Letzte Einheiten der gewünschten Übung herausfiltern für direkten Vergleich
     const exHistory = exercise ? window.workouts.filter(w => w.exercise.toLowerCase() === exercise.toLowerCase()).slice(0,5).map(w => {
@@ -312,7 +312,7 @@ Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = 'Fehler: '+e.message; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = window.t('toastError','Fehler') + ': ' + e.message; }
     }
 };
 
@@ -323,8 +323,8 @@ window.generatePreHab = async function() {
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
-    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = 'Pre-Hab';
-    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = 'Verletzungsprävention';
+    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('prehabTitle','Pre-Hab');
+    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('prehabSub','Verletzungsprävention');
     const exercise = document.getElementById('exerciseInput')?.value?.trim();
     const ctx = window.buildAIContext();
     const prompt = `Du bist Physiotherapeut und Athletiktrainer.
@@ -347,7 +347,7 @@ Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = 'Fehler: '+e.message; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = window.t('toastError','Fehler') + ': ' + e.message; }
     }
 };
 
@@ -358,8 +358,8 @@ window.analyzeWithAI = async function() {
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
-    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = 'AI Coach';
-    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = 'Progression Analyse';
+    if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('aiCoachTitle','AI Coach');
+    if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('aiCoachSub','Progression Analyse');
     const ctx = window.buildAIContext();
     const prompt = `Du bist Sportwissenschaftler mit Expertise in Leistungsdiagnostik und evidenzbasiertem Training.
 
@@ -396,7 +396,7 @@ Max 320 Wörter, präzise und datenbasiert. Antworte auf ${window.getPromptLang(
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = 'Fehler: '+e.message; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = window.t('toastError','Fehler') + ': ' + e.message; }
     }
 };
 
@@ -405,10 +405,10 @@ window.generateForm = async function() {
     if(!window.checkOnlineForAI()) return;
     if(window.aiGate && !(await window.aiGate())) return;
     const input = document.getElementById('sportTypeInput')?.value?.trim();
-    if (!input) { window.showToast("Bitte eine Beschreibung eingeben!"); return; }
+    if (!input) { window.showToast(window.t("aiEnterActivity","Bitte eine Beschreibung eingeben!")); return; }
     const btnText = document.getElementById('btnGenText');
     const btn = document.getElementById('btnGenerateForm');
-    if(btnText) btnText.textContent = '⏳ KI denkt...';
+    if(btnText) btnText.textContent = '⏳ ' + window.t('aiGenerating','KI denkt...');
     if(btn) btn.disabled = true;
 
     // Prüfen ob Sport bereits in window.SPORT_LIBRARY oder window.activeSports existiert
@@ -481,14 +481,14 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
             headers:{'Content-Type':'application/json'}, 
             body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.2} }) 
         });
-        if(!res.ok) throw new Error("Server Fehler " + res.status);
+        if(!res.ok) throw new Error(window.t('aiServerError','Server Fehler') + ' ' + res.status);
         const data = await res.json();
-        if(!data.reply) throw new Error("Keine Antwort vom Server");
+        if(!data.reply) throw new Error(window.t('toastNoData','Keine Antwort'));
         let jsonStr = data.reply.replace(/```json/gi,'').replace(/```/g,'').trim();
         const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-        if(!jsonMatch) throw new Error("Kein JSON in der Antwort gefunden");
+        if(!jsonMatch) throw new Error('No JSON in response');
         const result = JSON.parse(jsonMatch[0]);
-        if(!result.schema || result.schema.length === 0) throw new Error("Leeres Schema erhalten");
+        if(!result.schema || result.schema.length === 0) throw new Error('Empty schema');
 
         const all = JSON.parse(localStorage.getItem('beastmode_v2_multi_schemas')||'{}');
 
@@ -592,22 +592,22 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
 
     } catch(e) {
         console.error("KI Builder Fehler:", e);
-        window.showToast("Fehler: " + e.message);
+        window.showToast(window.t("toastError") + ": " + e.message);
     } finally {
-        if(btnText) btnText.textContent = 'Generieren';
+        if(btnText) btnText.textContent = window.t('planGenerate','Generieren');
         if(btn) btn.disabled = false;
     }
 };
 
 window.deleteCurrentSchema = function() {
-    if(window.currentCategory === 'strength' || window.currentCategory === 'cardio') { window.showToast("Standard-Schema kann nicht gelöscht werden."); return; }
-    window.showModal('Schema löschen?', 'Das aktuelle Schema wird dauerhaft gelöscht.', true, () => {
+    if(window.currentCategory === 'strength' || window.currentCategory === 'cardio') { window.showToast(window.t("toastError","Standard-Schema kann nicht gelöscht werden.")); return; }
+    window.showModal(window.t('ptDeleteSession','Löschen?'), window.t('ptDeleteSessionConfirm','Das aktuelle Schema wird dauerhaft gelöscht.'), true, () => {
         window.categorySchemas[window.currentCategory] = null;
         const all = JSON.parse(localStorage.getItem('beastmode_v2_multi_schemas')||'{}');
         delete all[window.currentCategory];
         localStorage.setItem('beastmode_v2_multi_schemas', JSON.stringify(all));
         window.switchCategory(window.currentCategory);
-        window.showToast("Schema gelöscht.");
+        window.showToast(window.t("toastDeleted"));
     });
 };
 
@@ -670,11 +670,11 @@ window.openTrainingPlanModal = function() {
 window.generateTrainingPlan = async function() {
     if(!window.checkOnlineForAI()) return;
     if(window.aiGate && !(await window.aiGate())) return;
-    if(!planGoal) { window.showToast('Bitte ein Ziel wählen!'); return; }
+    if(!planGoal) { window.showToast(window.t('toastError','Bitte ein Ziel wählen!')); return; }
     var btn = document.getElementById('btnGenPlan');
     var btnText = document.getElementById('btnGenPlanText');
     if(btn) btn.disabled = true;
-    if(btnText) btnText.textContent = 'KI erstellt Plan...';
+    if(btnText) btnText.textContent = window.t('planGenerating','KI erstellt Plan...');
     var profile = window.userProfile || {};
     var workouts = (window.workouts || []).filter(function(w) { return w.archived; });
     var recent = workouts.slice(-15).map(function(w) {
@@ -712,22 +712,22 @@ window.generateTrainingPlan = async function() {
         }).catch(function() { return null; });
     }
     try {
-        if(btnText) btnText.textContent = 'Generiere ' + totalWeeks + ' Wochen...';
+        if(btnText) btnText.textContent = window.t('aiGenerating','Generiere...') + ' ' + totalWeeks + ' ' + window.t('lblWeeks','Wochen');
         var promises = [];
         for(var w = 1; w <= totalWeeks; w++) promises.push(fetchSingleWeek(w));
         var results = await Promise.all(promises);
         var allWeeks = results.filter(function(w) { return w !== null; });
         allWeeks.sort(function(a, b) { return (a.week || 0) - (b.week || 0); });
-        if(allWeeks.length === 0) throw new Error('Plan konnte nicht generiert werden. Bitte erneut versuchen.');
-        if(allWeeks.length < totalWeeks) window.showToast(allWeeks.length + ' von ' + totalWeeks + ' Wochen generiert');
+        if(allWeeks.length === 0) throw new Error(window.t('toastError','Plan konnte nicht generiert werden'));
+        if(allWeeks.length < totalWeeks) window.showToast(allWeeks.length + '/' + totalWeeks + ' ' + window.t('lblWeeks','Wochen'));
         var plan = { planName: totalWeeks + '-Wochen ' + planGoal, goal: planGoal, weeks: allWeeks, progressionNotes: 'Progressiver ' + totalWeeks + '-Wochen Plan mit Periodisierung und Deload.' };
         _generatedPlan = plan;
         window.renderTrainingPlan(plan);
     } catch(e) {
-        window.showToast('Fehler: ' + e.message);
+        window.showToast(window.t('toastError') + ': ' + e.message);
     } finally {
         if(btn) btn.disabled = false;
-        if(btnText) btnText.textContent = 'Plan generieren';
+        if(btnText) btnText.textContent = window.t('planGenerate','Plan generieren');
     }
 };
 
@@ -741,7 +741,7 @@ window.renderTrainingPlan = function(plan) {
     content.innerHTML = (plan.weeks || []).map((week, wi) => `
         <div class="bg-zinc-950/60 border ${weekColors[wi % weekColors.length]} rounded-2xl p-4">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-white font-black text-sm uppercase tracking-tight">Woche ${esc(String(week.week))}</p>
+                <p class="text-white font-black text-sm uppercase tracking-tight">${window.t("lblWeeks","Woche")} ${esc(String(week.week))}</p>
                 <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">${esc(week.focus || '')}</span>
             </div>
             <div class="space-y-2">
@@ -800,7 +800,7 @@ window.savePlanAsRoutines = function() {
         });
     });
     localStorage.setItem('beastmode_v2_routines', JSON.stringify(window.savedRoutines));
-    window.showToast(`${saved} Vorlagen gespeichert! ✅`);
+    window.showToast(`${saved} ${window.t('planSaved','Vorlagen gespeichert! ✅')}`);
 };
 
 // ============================================================
@@ -843,7 +843,7 @@ Sprache für name und purpose: ${lang}`;
         if(typeof window._aiTrackCall === 'function') window._aiTrackCall();
     } catch(e) {
         console.error('Warmup KI Error:', e);
-        list.innerHTML = '<p class="text-rose-400 text-sm p-4">Fehler bei der KI-Antwort. Bitte erneut versuchen.</p>';
+        list.innerHTML = '<p class="text-rose-400 text-sm p-4">' + window.t('toastError','Fehler') + '</p>';
     }
 };
 
@@ -937,7 +937,7 @@ window._addRecToWorkout = function(idx) {
     if(!ex) return;
     var input = document.getElementById('exerciseInput');
     if(input) { input.value = ex.name; input.dispatchEvent(new Event('input')); }
-    window.showToast(ex.name + ' übernommen ✅');
+    window.showToast(ex.name + ' ✅');
 };
 
 window._addAllRecsToWorkout = function() {
@@ -947,7 +947,7 @@ window._addAllRecsToWorkout = function() {
         if(input) input.value = ex.name;
     });
     window.toggleModal('exerciseRecModal');
-    window.showToast(window._exerciseRecs.length + ' Übungen übernommen ✅');
+    window.showToast(window._exerciseRecs.length + ' ' + window.t('lblExercises','Übungen') + ' ✅');
 };
 
 // ============================================================
@@ -961,7 +961,7 @@ window.generateSmartWorkout = async function() {
     if(window.aiGate && !(await window.aiGate())) return;
     var workouts = window.workouts || [];
     var archived = workouts.filter(function(w) { return w.archived; });
-    if(archived.length < 3) { window.showToast('Tracke mindestens 3 Workouts damit die KI planen kann'); return; }
+    if(archived.length < 3) { window.showToast(window.t('toastError','Tracke mindestens 3 Workouts für KI-Planung')); return; }
     var profile = window.userProfile || {};
     var recent = archived.slice(-30).map(function(w) {
         var detail = '';
@@ -979,7 +979,7 @@ window.generateSmartWorkout = async function() {
     var dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
     var today = dayNames[new Date().getDay()];
     var userPrompt = 'Erstelle mein Workout für heute (' + today + ').\n\nATHLETEN-PROFIL:\nAlter: ' + (profile.age || '?') + '\nGewicht: ' + (profile.weight || '?') + ' kg\nLevel: ' + (profile.experience || 'Anfänger') + '\n\nTRAININGSHISTORIE (letzte 30):\n' + recent + '\n\nDIESE WOCHE TRAINIERT:\n' + (thisWeek.length > 0 ? thisWeek.join(', ') : 'Noch nichts') + '\n\nLETZTE 48H:\n' + (last48h.length > 0 ? last48h.join(', ') : 'Nichts') + '\n\nErstelle 5-7 Übungen. JSON Array.';
-    window.showToast('Dein Workout wird geplant...');
+    window.showToast(window.t('aiGenerating','Dein Workout wird geplant...'));
     var btn = document.getElementById('smartWorkoutBtn');
     if(btn) btn.style.opacity = '0.5';
     try {
@@ -994,13 +994,13 @@ window.generateSmartWorkout = async function() {
         else if(data.reply) text = data.reply;
         else if(data.text) text = data.text;
         var jsonMatch = text.match(/\[[\s\S]*?\]/);
-        if(!jsonMatch) { window.showToast('Workout konnte nicht erstellt werden'); if(btn) btn.style.opacity = '1'; return; }
+        if(!jsonMatch) { window.showToast(window.t('toastError','Workout konnte nicht erstellt werden')); if(btn) btn.style.opacity = '1'; return; }
         var exercises = JSON.parse(jsonMatch[0]);
         if(btn) btn.style.opacity = '1';
         window._showSmartWorkoutResult(exercises);
     } catch(e) {
         console.error('Smart Workout Error:', e);
-        window.showToast('Fehler: ' + e.message);
+        window.showToast(window.t('toastError') + ': ' + e.message);
         if(btn) btn.style.opacity = '1';
     }
 };
@@ -1018,7 +1018,7 @@ window._showSmartWorkoutResult = function(exercises) {
             '</div>';
     });
     html += '</div>';
-    window.showModal('Dein Workout', html, true, function() {
+    window.showModal(window.t('smartWorkout','Dein Workout'), html, true, function() {
         var today = new Date().toISOString().split('T')[0];
         exercises.forEach(function(ex) {
             var sets = [];
@@ -1034,7 +1034,7 @@ window._showSmartWorkoutResult = function(exercises) {
         });
         window.saveWorkoutsForCurrentClient();
         window.renderTable();
-        window.showToast('Workout geladen — viel Erfolg!');
+        window.showToast(window.t('toastSaved','Workout geladen!'));
     });
 };
 

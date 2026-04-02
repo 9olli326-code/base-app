@@ -20,7 +20,7 @@ window.toggleHiitTimer = function() {
     if(!settings) return;
     const isVisible = !settings.classList.contains('hidden');
     settings.classList.toggle('hidden', isVisible);
-    if(btn) btn.textContent = isVisible ? 'Einrichten' : 'Fertig';
+    if(btn) btn.textContent = isVisible ? window.t('btnEdit','Einrichten') : window.t('ptSaved','Fertig');
 };
 
 function _hiitGetWorkSecs() { return parseInt(document.getElementById('hiitWork')?.value) || 40; }
@@ -31,7 +31,7 @@ window.startHiit = function() {
         _hiitPausedRemaining = Math.max(0, Math.ceil((_hiitPhaseEndTime - Date.now()) / 1000));
         clearInterval(_hiitInterval); _hiitRunning = false; _hiitPhaseEndTime = null;
         const btn = document.getElementById('btnHiitStart');
-        if(btn) btn.textContent = '▶ Weiter';
+        if(btn) btn.textContent = '▶ ' + window.t('ptNext','Weiter');
         return;
     }
     if(_hiitCurrentRound === 0) {
@@ -42,7 +42,7 @@ window.startHiit = function() {
     _hiitRunning = true;
     _hiitPhaseEndTime = Date.now() + (_hiitPausedRemaining * 1000);
     const btn = document.getElementById('btnHiitStart');
-    if(btn) btn.textContent = '⏸ Pause';
+    if(btn) btn.textContent = '⏸ ' + window.t('lblRestTimer','Pause');
     const tick = () => {
         const remaining = Math.max(0, Math.ceil((_hiitPhaseEndTime - Date.now()) / 1000));
         _hiitPausedRemaining = remaining;
@@ -54,7 +54,7 @@ window.startHiit = function() {
             } else {
                 _hiitCurrentRound++;
                 if(_hiitCurrentRound > _hiitTotalRounds) {
-                    window.resetHiit(); window.showToast('🎉 HIIT abgeschlossen!');
+                    window.resetHiit(); window.showToast(window.t('workoutDone','🎉 HIIT abgeschlossen!'));
                     window.playBeep && window.playBeep(); return;
                 }
                 _hiitCurrentPhase = 'work';
@@ -78,8 +78,8 @@ window.updateHiitDisplay = function() {
     const mins = Math.floor(secs / 60);
     const s = secs % 60;
     if(timeEl) { timeEl.textContent = String(mins).padStart(2,'0') + ':' + String(s).padStart(2,'0'); timeEl.style.color = _hiitCurrentPhase === 'work' ? primary : restColor; }
-    if(phaseEl) { phaseEl.textContent = _hiitCurrentPhase === 'work' ? '💪 Arbeit' : '😮‍💨 Pause'; phaseEl.style.color = _hiitCurrentPhase === 'work' ? primary : restColor; }
-    if(roundEl) roundEl.textContent = 'Runde ' + _hiitCurrentRound + ' / ' + _hiitTotalRounds;
+    if(phaseEl) { phaseEl.textContent = _hiitCurrentPhase === 'work' ? '💪 ' + window.t('hiitWork','Arbeit') : '😮‍💨 ' + window.t('lblRestTimer','Pause'); phaseEl.style.color = _hiitCurrentPhase === 'work' ? primary : restColor; }
+    if(roundEl) roundEl.textContent = window.t('ptRounds','Runde') + ' ' + _hiitCurrentRound + ' / ' + _hiitTotalRounds;
 };
 
 window.resetHiit = function() {
@@ -91,7 +91,7 @@ window.resetHiit = function() {
     const roundEl = document.getElementById('hiitRoundLabel');
     const btn = document.getElementById('btnHiitStart');
     if(timeEl) timeEl.textContent = '00:00';
-    if(phaseEl) { phaseEl.textContent = 'Bereit'; phaseEl.style.color = 'var(--text-muted)'; }
+    if(phaseEl) { phaseEl.textContent = window.t('znsFresh','Bereit'); phaseEl.style.color = 'var(--text-muted)'; }
     if(roundEl) roundEl.textContent = '—';
     if(btn) btn.textContent = '▶ Start';
 };

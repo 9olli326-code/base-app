@@ -66,7 +66,7 @@ window.saveModules = function() {
     window.applyModules();
     window.renderWidgetStoreUI();
     window.toggleModal('widgetStoreModal');
-    window.showToast("Einstellungen gespeichert! ✅");
+    window.showToast(window.t("ptSaved","Einstellungen gespeichert!"));
 };
 
 // --- PROFIL ---
@@ -99,7 +99,7 @@ window.saveProfile = function(e) {
     window.userProfile.injuries = Array.from(window.selectedInjuries);
     localStorage.setItem('beastmode_v2_profile', JSON.stringify(window.userProfile));
     window.toggleModal('profileModal');
-    window.showToast("Profil gespeichert! ✅");
+    window.showToast(window.t("profileSaved","Profil gespeichert! ✅"));
 };
 // Attach profile form submit
 window.addEventListener('load', () => {
@@ -280,15 +280,15 @@ window.obSaveQuickWorkout = function() {
 window.obCreateAccount = async function() {
     const email = (document.getElementById('obAuthEmail')?.value || '').trim();
     const pw = document.getElementById('obAuthPassword')?.value || '';
-    if(!email || pw.length < 6) { window.showToast('E-Mail + Passwort (min 6 Zeichen) eingeben'); return; }
+    if(!email || pw.length < 6) { window.showToast(window.t('toastError','E-Mail + Passwort (min 6 Zeichen) eingeben')); return; }
     const btn = document.getElementById('obAuthBtn');
-    if(btn) btn.textContent = 'Bitte warten...';
+    if(btn) btn.textContent = window.t('aiGenerating','Bitte warten...');
     try {
         if(window._firebaseAuth && window._firebaseAuth.currentUser) {
             const { EmailAuthProvider, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
             const credential = EmailAuthProvider.credential(email, pw);
             await linkWithCredential(window._firebaseAuth.currentUser, credential);
-            window.showToast('Account erstellt!');
+            window.showToast(window.t('toastUpdate','Account erstellt!'));
             const secBtn = document.getElementById('btnSecureAccount');
             if(secBtn) secBtn.classList.add('hidden');
             localStorage.removeItem('base_auth_skipped');
@@ -301,11 +301,11 @@ window.obCreateAccount = async function() {
         }
     } catch(e) {
         if(e.code === 'auth/email-already-in-use') {
-            window.showToast('E-Mail bereits registriert — bitte einloggen');
+            window.showToast(window.t('toastError','E-Mail bereits registriert — bitte einloggen'));
         } else {
-            window.showToast('Fehler: ' + (e.message || e.code));
+            window.showToast(window.t('toastError') + ': ' + (e.message || e.code));
         }
-        if(btn) btn.textContent = 'Account erstellen';
+        if(btn) btn.textContent = window.t('btnCreate','Account erstellen');
         return;
     }
     window.obFinish();
@@ -352,9 +352,9 @@ window.obFinish = function() {
     if(obRole === 'pt') {
         // PT-Modus automatisch aktivieren
         if(typeof window.activatePTMode === 'function') setTimeout(function() { window.switchMode('pt'); window.activatePTMode(); }, 300);
-        window.showToast('Willkommen, Trainer!');
+        window.showToast(window.t('ptWelcome','Willkommen, Trainer!'));
     } else {
-        window.showToast('Willkommen bei BASE!');
+        window.showToast(window.t('onboardWelcome','Willkommen bei BASE!'));
         // Nach Onboarding: Kraft vorauswählen damit das Formular sofort sichtbar ist
         setTimeout(function() {
             if(typeof window.switchCategory === 'function') window.switchCategory('strength');
@@ -396,9 +396,9 @@ window.openRoutinesModal = function() {
 
 window.saveCurrentAsRoutine = function() {
     const name = document.getElementById('routineNameInput')?.value?.trim();
-    if(!name) { window.showToast('Bitte einen Namen eingeben!'); return; }
+    if(!name) { window.showToast(window.t('ptEnterName','Bitte einen Namen eingeben!')); return; }
     const activeWorkouts = window.workouts.filter(w => !w.archived);
-    if(activeWorkouts.length === 0) { window.showToast('Keine aktiven Übungen zum Speichern!'); return; }
+    if(activeWorkouts.length === 0) { window.showToast(window.t('toastError','Keine aktiven Übungen zum Speichern!')); return; }
     const routine = {
         id: Date.now().toString(),
         name,
@@ -417,13 +417,13 @@ window.saveCurrentAsRoutine = function() {
     localStorage.setItem('beastmode_v2_routines', JSON.stringify(window.savedRoutines));
     document.getElementById('routineNameInput').value = '';
     window.renderRoutinesList();
-    window.showToast(`"${name}" gespeichert! ✅`);
+    window.showToast(`"${name}" ${window.t('ptSaved','gespeichert!')}`);
 };
 
 window.loadRoutine = function(id) {
     const routine = window.savedRoutines.find(r => r.id === id);
     if(!routine) return;
-    window.showModal('Vorlage laden?', `"${routine.name}" als aktives Workout laden?`, true, () => {
+    window.showModal(window.t('lblLoad','Vorlage laden?'), `"${routine.name}" ${window.t('lblLoad','laden')}?`, true, () => {
         // Kategorie wechseln falls nötig
         if(routine.category && routine.category !== window.currentCategory) window.switchCategory(routine.category);
         // Übungen ins aktive Workout laden
@@ -438,7 +438,7 @@ window.loadRoutine = function(id) {
         window.saveWorkoutsForCurrentClient();
         window.renderTable();
         window.toggleModal('routinesModal');
-        window.showToast(`"${routine.name}" geladen! 🔥`);
+        window.showToast(`"${routine.name}" ${window.t('lblLoad','geladen!')}`);
         // Erste Übung ins Formular laden
         if(newWorkouts.length > 0 && document.getElementById('exerciseInput')) {
             document.getElementById('exerciseInput').value = newWorkouts[0].exercise;
@@ -449,11 +449,11 @@ window.loadRoutine = function(id) {
 window.deleteRoutine = function(id) {
     const routine = window.savedRoutines.find(r => r.id === id);
     if(!routine) return;
-    window.showModal('Löschen?', `"${routine.name}" wirklich löschen?`, true, () => {
+    window.showModal(window.t('lblDeleteConfirm','Löschen?'), `"${routine.name}" ${window.t('lblDeleteConfirm','wirklich löschen?')}`, true, () => {
         window.savedRoutines = window.savedRoutines.filter(r => r.id !== id);
         localStorage.setItem('beastmode_v2_routines', JSON.stringify(window.savedRoutines));
         window.renderRoutinesList();
-        window.showToast('Vorlage gelöscht.');
+        window.showToast(window.t('toastDeleted'));
     });
 };
 
