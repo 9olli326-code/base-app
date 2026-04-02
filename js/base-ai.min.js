@@ -128,7 +128,7 @@ window.buildAIContext = function() {
     const schemaLines = [];
     Object.entries(window.categorySchemas).forEach(([cat, data]) => {
         if(!data) return;
-        const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Regeneration', main:'Mein Sport' }[cat] || cat;
+        const catName = { strength:window.t('modStr','Krafttraining'), cardio:window.t('modCar','Ausdauer'), recovery:window.t('tabRec','Regeneration'), main:window.t('modCus','Mein Sport') }[cat] || cat;
         const baseFields = (data.schema || []).map(f => f.label).join(', ');
         const extraFields = (data.extraFields || []).map(f => f.label).join(', ');
         let line = `${catName}: Basisfelder=[${baseFields}]`;
@@ -308,7 +308,7 @@ Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
         const data = await res.json();
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || 'Keine Antwort.'; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
@@ -343,7 +343,7 @@ Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B
         const data = await res.json();
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || 'Keine Antwort.'; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
@@ -392,7 +392,7 @@ Max 320 Wörter, präzise und datenbasiert. Antworte auf ${window.getPromptLang(
         const data = await res.json();
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || 'Keine Antwort.'; }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');

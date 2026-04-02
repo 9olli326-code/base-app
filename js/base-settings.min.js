@@ -115,25 +115,25 @@ let _obFocus = { strength: true, cardio: false, recovery: false, main: false };
 let _obQuickWorkoutSaved = false;
 let _obSelectedExercise = null;
 let _obPtSpecs = [];
-const _OB_PT_SPECS = ['Krafttraining','Ausdauer','Gewichtsverlust','Rehabilitation','Bodybuilding','CrossFit','Yoga/Pilates','Kampfsport','Senioren-Fitness'];
+const _OB_PT_SPECS = [window.t('specStrength','Krafttraining'),window.t('specEndurance','Ausdauer'),window.t('specWeightLoss','Gewichtsverlust'),window.t('specRehab','Rehabilitation'),window.t('specBodybuilding','Bodybuilding'),window.t('specCrossfit','CrossFit'),window.t('specYoga','Yoga/Pilates'),window.t('specMartialArts','Kampfsport'),window.t('specSenior','Senioren-Fitness')];
 
 const _OB_FOCUS_CARDS = [
-    { key:'strength', icon:'dumbbell', name:'Krafttraining', color:'cyan', sub:'Sätze, Gewicht, 1RM' },
-    { key:'cardio', icon:'heart-pulse', name:'Ausdauer', color:'rose', sub:'Laufen, Radfahren, Schwimmen' },
-    { key:'recovery', icon:'stretch-horizontal', name:'Mobility', color:'emerald', sub:'Stretching, Yoga, Foam Rolling' },
-    { key:'main', icon:'trophy', name:'Mein Sport', color:'amber', sub:'86 Sportarten tracken' }
+    { key:'strength', icon:'dumbbell', name: window.t('modStr','Krafttraining'), color:'cyan', sub: window.t('catStrSub','Sätze, Gewicht, 1RM') },
+    { key:'cardio', icon:'heart-pulse', name: window.t('modCar','Ausdauer'), color:'rose', sub: window.t('catCarSub','Laufen, Radfahren, Schwimmen') },
+    { key:'recovery', icon:'stretch-horizontal', name: window.t('tabRec','Mobility'), color:'emerald', sub: window.t('catRecSub','Stretching, Yoga, Foam Rolling') },
+    { key:'main', icon:'trophy', name: window.t('modCus','Mein Sport'), color:'amber', sub: window.t('catCusSub','86 Sportarten tracken') }
 ];
 
 const _OB_QUICK_EXERCISES = {
     strength: [
-        { name:'Bankdrücken', de:'Bankdrücken', id:'Barbell_Bench_Press_-_Medium_Grip', fields:[{l:'Gewicht (kg)',p:'60'},{l:'Wiederholungen',p:'8'}] },
-        { name:'Kniebeuge', de:'Kniebeuge', id:'Barbell_Squat', fields:[{l:'Gewicht (kg)',p:'80'},{l:'Wiederholungen',p:'5'}] },
-        { name:'Klimmzüge', de:'Klimmzug', id:'Pullups', fields:[{l:'Gewicht (kg)',p:'0'},{l:'Wiederholungen',p:'8'}] }
+        { name:'Bankdrücken', de:'Bankdrücken', id:'Barbell_Bench_Press_-_Medium_Grip', fields:[{l: window.t('lblWeight','Gewicht (kg)'),p:'60'},{l: window.t('lblReps','Wiederholungen'),p:'8'}] },
+        { name:'Kniebeuge', de:'Kniebeuge', id:'Barbell_Squat', fields:[{l: window.t('lblWeight','Gewicht (kg)'),p:'80'},{l: window.t('lblReps','Wiederholungen'),p:'5'}] },
+        { name:'Klimmzüge', de:'Klimmzug', id:'Pullups', fields:[{l: window.t('lblWeight','Gewicht (kg)'),p:'0'},{l: window.t('lblReps','Wiederholungen'),p:'8'}] }
     ],
     cardio: [
-        { name:'Laufen', de:'Laufen', id:'Jogging,_Treadmill', fields:[{l:'Distanz (km)',p:'5'},{l:'Dauer (min)',p:'30'}], cat:'cardio' },
-        { name:'Radfahren', de:'Radfahren', id:'Bicycling,_Stationary', fields:[{l:'Distanz (km)',p:'20'},{l:'Dauer (min)',p:'45'}], cat:'cardio' },
-        { name:'Schwimmen', de:'Schwimmen', id:'Rowing,_Stationary', fields:[{l:'Distanz (m)',p:'1000'},{l:'Dauer (min)',p:'30'}], cat:'cardio' }
+        { name:'Laufen', de:'Laufen', id:'Jogging,_Treadmill', fields:[{l: window.t('schema_distance','Distanz (km)'),p:'5'},{l: window.t('schema_duration','Dauer (min)'),p:'30'}], cat:'cardio' },
+        { name:'Radfahren', de:'Radfahren', id:'Bicycling,_Stationary', fields:[{l: window.t('schema_distance','Distanz (km)'),p:'20'},{l: window.t('schema_duration','Dauer (min)'),p:'45'}], cat:'cardio' },
+        { name:'Schwimmen', de:'Schwimmen', id:'Rowing,_Stationary', fields:[{l: window.t('schema_distanceM','Distanz (m)'),p:'1000'},{l: window.t('schema_duration','Dauer (min)'),p:'30'}], cat:'cardio' }
     ]
 };
 
@@ -223,7 +223,7 @@ window._renderObWorkoutCards = function() {
     const IMG = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
     c.innerHTML = exercises.map((ex, idx) => `<button onclick="window._obSelectExercise(${idx},'${type}')" class="flex items-center gap-3 p-3 rounded-xl border border-zinc-800 bg-zinc-900 hover:border-primary/30 transition-all cursor-pointer pointer-events-auto text-left w-full">
         <img src="${IMG}${ex.id}/0.jpg" alt="${window._escapeHtml(ex.de)}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-zinc-800" onerror="this.style.display='none'">
-        <div class="flex-1 min-w-0"><p class="text-white font-black text-sm">${window._escapeHtml(ex.de)}</p><p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Tippe zum Tracken</p></div>
+        <div class="flex-1 min-w-0"><p class="text-white font-black text-sm">${window._escapeHtml(ex.de)}</p><p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">${window.t('obTapToTrack','Tippe zum Tracken')}</p></div>
         <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 flex-shrink-0 pointer-events-none"></i>
     </button>`).join('');
 };
@@ -475,13 +475,13 @@ window.renderRoutinesList = function() {
                 <div class="w-9 h-9 rounded-xl flex-shrink-0 ${ui.bg} border ${ui.border} flex items-center justify-center ${ui.color}"><i data-lucide="${ui.icon}" class="w-4 h-4"></i></div>
                 <div class="min-w-0">
                     <p class="text-white font-black text-sm truncate">${window._escapeHtml(r.name)}</p>
-                    <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">${r.exercises.length} Übung${r.exercises.length !== 1 ? 'en' : ''} · ${window._escapeHtml(r.createdAt)}</p>
+                    <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">${r.exercises.length} ${window.t('lblExercises','Übungen')} · ${window._escapeHtml(r.createdAt)}</p>
                     <p class="text-zinc-600 text-[10px] truncate mt-0.5">${window._escapeHtml(exNames)}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-                <button onclick="window.loadRoutine('${r.id}')" class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer pointer-events-auto">Laden</button>
-                <button aria-label="Löschen" onclick="window.deleteRoutine('${r.id}')" class="text-zinc-600 hover:text-rose-400 p-1.5 transition-colors cursor-pointer pointer-events-auto"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button>
+                <button onclick="window.loadRoutine('${r.id}')" class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer pointer-events-auto">${window.t('lblLoad','Laden')}</button>
+                <button aria-label="${window.t('lblDeleteConfirm','Löschen')}" onclick="window.deleteRoutine('${r.id}')" class="text-zinc-600 hover:text-rose-400 p-1.5 transition-colors cursor-pointer pointer-events-auto"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button>
             </div>
         </div>`;
     }).join('');

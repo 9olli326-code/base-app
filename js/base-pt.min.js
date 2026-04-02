@@ -532,9 +532,11 @@ if(_onboardStep === 3) { window._renderObDays(); window._renderObTimes(); }
 window._renderObGoals = function() {
 const c = document.getElementById('obGoalChips');
 if(!c) return;
+const _goalKeys = {'Muskelaufbau':'goalMuscle','Abnehmen':'goalLose','Ausdauer':'goalEndurance','Rehabilitation':'goalRehab','Allgemeine Fitness':'goalGenFit','Wettkampf':'goalCompetition'};
 c.innerHTML = _OB_GOALS.map(g => {
     const active = _onboardData.goal === g;
-    return `<button onclick="window._setObGoal('${g}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${window._escapeHtml(g)}</button>`;
+    const label = _goalKeys[g] ? window.t(_goalKeys[g], g) : g;
+    return `<button onclick="window._setObGoal('${g}')" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${window._escapeHtml(label)}</button>`;
 }).join('');
 };
 window._setObGoal = function(g) { _onboardData.goal = g; window._renderObGoals(); };
@@ -542,9 +544,11 @@ window._setObGoal = function(g) { _onboardData.goal = g; window._renderObGoals()
 window._renderObExp = function() {
 const c = document.getElementById('obExpCards');
 if(!c) return;
+const _expKeys = {'Anfänger':'lblBeginner','Fortgeschritten':'lblIntermediate','Profi':'lblAdvanced'};
 c.innerHTML = _OB_EXP.map(e => {
     const active = _onboardData.experience === e.k;
-    return `<button onclick="window._setObExp('${e.k}')" class="flex flex-col items-center gap-2 p-3 rounded-xl cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/15 border border-indigo-500/30' : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-700'}"><i data-lucide="${e.icon}" class="w-5 h-5 ${active ? 'text-indigo-400' : 'text-zinc-600'} pointer-events-none"></i><span class="text-[10px] font-black uppercase tracking-widest ${active ? 'text-indigo-400' : 'text-zinc-500'}">${window._escapeHtml(e.k)}</span></button>`;
+    const label = _expKeys[e.k] ? window.t(_expKeys[e.k], e.k) : e.k;
+    return `<button onclick="window._setObExp('${e.k}')" class="flex flex-col items-center gap-2 p-3 rounded-xl cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/15 border border-indigo-500/30' : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-700'}"><i data-lucide="${e.icon}" class="w-5 h-5 ${active ? 'text-indigo-400' : 'text-zinc-600'} pointer-events-none"></i><span class="text-[10px] font-black uppercase tracking-widest ${active ? 'text-indigo-400' : 'text-zinc-500'}">${window._escapeHtml(label)}</span></button>`;
 }).join('');
 window._refreshLucide();
 };
@@ -553,9 +557,11 @@ window._setObExp = function(e) { _onboardData.experience = e; window._renderObEx
 window._renderObDays = function() {
 const c = document.getElementById('obDaysRow');
 if(!c) return;
+const _dayKeys = {'Mo':'dayMo','Di':'dayTu','Mi':'dayWe','Do':'dayTh','Fr':'dayFr','Sa':'daySa','So':'daySu'};
 c.innerHTML = _OB_DAYS.map(d => {
     const active = _onboardData.days.includes(d);
-    return `<button onclick="window._toggleObDay('${d}')" class="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-black cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500 text-black' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${d}</button>`;
+    const label = _dayKeys[d] ? window.t(_dayKeys[d], d) : d;
+    return `<button onclick="window._toggleObDay('${d}')" class="w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-black cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500 text-black' : 'bg-zinc-900 text-zinc-500 border border-zinc-800 hover:border-zinc-700'}">${label}</button>`;
 }).join('');
 };
 window._toggleObDay = function(d) {
@@ -568,9 +574,11 @@ window._renderObDays();
 window._renderObTimes = function() {
 const c = document.getElementById('obTimeSlots');
 if(!c) return;
+const _timeKeys = {'Morgens':'timeMorning','Mittags':'timeNoon','Abends':'timeEvening'};
 c.innerHTML = _OB_TIMES.map(t => {
     const active = _onboardData.time === t.k;
-    return `<button onclick="window._setObTime('${t.k}')" class="py-2.5 rounded-xl text-center cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:border-zinc-700'}"><p class="text-[10px] font-black uppercase tracking-widest">${t.k}</p><p class="text-[9px] mt-0.5 opacity-60">${t.l}</p></button>`;
+    const label = _timeKeys[t.k] ? window.t(_timeKeys[t.k], t.k) : t.k;
+    return `<button onclick="window._setObTime('${t.k}')" class="py-2.5 rounded-xl text-center cursor-pointer pointer-events-auto transition-all ${active ? 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:border-zinc-700'}"><p class="text-[10px] font-black uppercase tracking-widest">${label}</p><p class="text-[9px] mt-0.5 opacity-60">${t.l}</p></button>`;
 }).join('');
 };
 window._setObTime = function(t) { _onboardData.time = t; window._renderObTimes(); };
@@ -647,7 +655,7 @@ window.shareClientPortal = function() {
     }
     const url = `${window.location.origin}/app.html?client_view=${clientId}&token=${token}`;
     if(navigator.share) {
-        navigator.share({ title: 'Dein Training – BASE', url: url }).catch(() => {});
+        navigator.share({ title: window.t('shareTitle','Dein Training – BASE'), url: url }).catch(() => {});
     } else if(navigator.clipboard) {
         navigator.clipboard.writeText(url).then(() => window.showToast(window.t('toastCopied')));
     } else {
@@ -1247,7 +1255,7 @@ window.showToast(window.t('ptSaved','Gespeichert!'));
 // --- SESSION VORLAGEN ---
 window.saveSessionAsTemplate = function() {
     if(_sessionExercises.length === 0) { window.showToast(window.t('toastError','Keine Übungen zum Speichern')); return; }
-    const name = (document.getElementById('sessionFocus')?.value || '').trim() || (_sessionType === 'kraft' ? 'Kraft-Vorlage' : _sessionType === 'ausdauer' ? 'Ausdauer-Vorlage' : 'Mobility-Vorlage');
+    const name = (document.getElementById('sessionFocus')?.value || '').trim() || (_sessionType === 'kraft' ? window.t('tplStrength','Kraft-Vorlage') : _sessionType === 'ausdauer' ? window.t('tplCardio','Ausdauer-Vorlage') : window.t('tplMobility','Mobility-Vorlage'));
     const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
     templates.push({
         id: 'tpl_' + Date.now(),
@@ -1346,7 +1354,7 @@ window.renderDayDetail(_ptSelectedDate);
 window.renderDayView = function() { window.renderPTCalendar(); };
 
 window.renderPTCalendar = function() {
-const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const monthNames = [window.t('monthJan','Januar'),window.t('monthFeb','Februar'),window.t('monthMar','März'),window.t('monthApr','April'),window.t('monthMay','Mai'),window.t('monthJun','Juni'),window.t('monthJul','Juli'),window.t('monthAug','August'),window.t('monthSep','September'),window.t('monthOct','Oktober'),window.t('monthNov','November'),window.t('monthDec','Dezember')];
 const labelEl = document.getElementById('ptCalMonthLabel');
 if(labelEl) labelEl.textContent = `${monthNames[_ptCalMonth]} ${_ptCalYear}`;
 
@@ -2696,7 +2704,7 @@ window._renderTrainerDetail = function(t, reviews) {
     let availHtml = '';
     if(t.availability && Object.keys(t.availability).length > 0) {
         const days = [['Mo-Fr','wd'],['Sa','sa'],['So','so']];
-        const times = [['Morgens','m'],['Mittags','d'],['Abends','e']];
+        const times = [[window.t('timeMorning','Morgens'),'m'],[window.t('timeNoon','Mittags'),'d'],[window.t('timeEvening','Abends'),'e']];
         availHtml = '<div class="mt-4"><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Verfügbarkeit</p><div class="grid grid-cols-4 gap-1 text-center">';
         availHtml += '<div></div>' + days.map(d => `<div class="text-[9px] text-zinc-500 font-bold">${d[0]}</div>`).join('');
         times.forEach(time => {
