@@ -2596,7 +2596,7 @@ window._renderTrainerCards = function(trainers) {
     const esc = window._escapeHtml;
     list.innerHTML = trainers.map(t => {
         const specs = (t.specializations || []).slice(0, 3).map(s => `<span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-1.5 py-0.5 rounded">${esc(s)}</span>`).join(' ');
-        const stars = t.reviewCount > 0 ? (t.rating || 0).toFixed(1) + ' ★ <span class="text-zinc-500">(' + t.reviewCount + ')</span>' : '<span class="text-zinc-500">Neu</span>';
+        const stars = t.reviewCount > 0 ? (t.rating || 0).toFixed(1) + ' ★ <span class="text-zinc-500">(' + t.reviewCount + ')</span>' : '<span class="text-zinc-500">' + window.t('ptNew','Neu') + '</span>';
         const safePhoto = window._safePhotoUrl(t.photo);
         const photo = safePhoto ? `<img src="${safePhoto}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" alt="">` : `<div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 text-sm font-black">${esc((t.name || '??').substring(0,2).toUpperCase())}</div>`;
         return `<div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 hover:border-cyan-500/30 transition-all">

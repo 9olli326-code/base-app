@@ -1,4 +1,4 @@
-const CACHE_NAME = 'base-v2-cache-v98';
+const CACHE_NAME = 'base-v2-cache-v99';
 
 const PRECACHE_URLS = [
     '/app.html',
