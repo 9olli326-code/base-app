@@ -510,3 +510,171 @@
     font-size: 12px !important;
 }
 
+/* ══════════════════════════════════════════════════════════
+   DESIGN OVERHAUL STEP 1 — Kill ALL CAPS & Micro-Text
+   ══════════════════════════════════════════════════════════ */
+
+.tracking-widest { letter-spacing: 0.03em !important; }
+.tracking-wider { letter-spacing: 0.02em !important; }
+[class*="tracking-[0.12em]"] { letter-spacing: 0.03em !important; }
+[class*="tracking-[0.3em]"] { letter-spacing: 0.05em !important; }
+[class*="tracking-[0.4em]"] { letter-spacing: 0.05em !important; }
+
+.uppercase:not(#prOverlay *):not(#celebOverlay *):not(#offlineIndicator):not(#app-loader *) {
+    text-transform: none !important;
+}
+
+[class*="text-[8px]"] { font-size: 11px !important; }
+[class*="text-[9px]"] { font-size: 11px !important; }
+[class*="text-[10px]"] { font-size: 12px !important; }
+
+#bottomNav span {
+    font-size: 10px !important;
+    letter-spacing: 0.02em !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+}
+
+label.uppercase, label[class*="tracking-widest"] {
+    text-transform: none !important;
+    letter-spacing: 0.02em !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+.zen-overline {
+    text-transform: none !important;
+    letter-spacing: 0.03em !important;
+    font-size: 11px !important;
+}
+
+#setsContainer .zen-set-label {
+    text-transform: none !important;
+    letter-spacing: 0.03em !important;
+    font-size: 11px !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN OVERHAUL STEP 2 — Glows & Shadows Kill
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Workout Form Card: Glow-Shadow → flat ── */
+#formRevealWrapper > .card-bg {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+}
+#formRevealWrapper > .card-bg:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ── Speichern/Save Button: Glow weg ── */
+button[onclick*="saveWorkout"],
+button[data-i18n="fSave"],
+button[data-i18n="fUpdate"],
+#btnSave {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* ── Alle card-bg Elemente: aggressive Shadows reduzieren ── */
+.card-bg {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+/* ── Category-Tab aktiv: Glow-Shadow weg ── */
+[class*="bg-primary"]:not(#prOverlay *),
+button[style*="box-shadow"] {
+    box-shadow: none !important;
+}
+
+/* ── Globaler Glow-Killer für inline box-shadows mit glow-Pattern ── */
+[style*="0 0 20px"],
+[style*="0 0 24px"],
+[style*="0 0 30px"],
+[style*="0 0 40px"] {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN OVERHAUL STEP 3 — Blur & Radius
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Backdrop-Blur: nur Bottom Nav + Modals behalten ── */
+.card-bg { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* ── Border-Radius: konsistent 12px statt 18px ── */
+.rounded-2xl { border-radius: 12px !important; }
+.rounded-3xl { border-radius: 14px !important; }
+[class*="rounded-[18px]"] { border-radius: 12px !important; }
+[class*="rounded-[20px]"] { border-radius: 12px !important; }
+
+/* ── Input-Radius: 10px statt 14px ── */
+input, select, textarea {
+    border-radius: 10px !important;
+}
+
+/* ── card-bg Radius: einheitlich ── */
+.card-bg {
+    border-radius: var(--mode-radius, 12px) !important;
+}
+
+/* ═══════════════════���══════════════════════════��═══════════
+   DESIGN OVERHAUL STEP 4 — Clean Background & Colors
+   ═════════════════��════════════���═══════════════════════════ */
+
+/* ── Dot-Grid Background-Pattern weg ── */
+body, main, #app, [style*="radial-gradient(rgba(244,244,245"] {
+    background-image: none !important;
+}
+
+/* ── Gradient-Text entfernen (solid color stattdessen) ── */
+[style*="-webkit-background-clip: text"],
+[style*="background-clip: text"],
+[class*="bg-gradient-to"] {
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    -webkit-text-fill-color: unset !important;
+    color: var(--primary-hex, #a3c9a8) !important;
+    background: none !important;
+}
+/* Ausnahme: Elemente die gradient als echten Hintergrund brauchen */
+button[class*="bg-gradient-to"],
+div[class*="bg-gradient-to"]:not([style*="background-clip"]) {
+    background: revert !important;
+    color: revert !important;
+}
+
+/* ── Inline-Style Dot-Grid Kill ── */
+[style*="background-size: 24px 24px"] {
+    background-image: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN OVERHAUL STEP 5 — Final Polish
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Inputs: größer, besser lesbar ── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select {
+    font-size: 15px !important;
+    padding: 12px 14px !important;
+}
+
+/* ── Buttons: flat, professionell ── */
+button {
+    text-shadow: none !important;
+}
+
+/* ── Scrollbar: dezent ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* ── Toast: lesbar ── */
+#toast {
+    font-size: 13px !important;
+    letter-spacing: 0.01em !important;
+    text-transform: none !important;
+}
+
