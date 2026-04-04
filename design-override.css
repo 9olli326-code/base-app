@@ -678,3 +678,21 @@ button {
     text-transform: none !important;
 }
 
+/* ══════════════════════════════════════════════════════════
+   KI FITNESS CHAT — Styles
+   ══════════════════════════════════════════════════════════ */
+
+#kiChatModal > div {
+    animation: kiChatSlideUp 0.3s ease;
+}
+@keyframes kiChatSlideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+#kiChatMessages::-webkit-scrollbar { width: 3px; }
+#kiChatMessages::-webkit-scrollbar-track { background: transparent; }
+#kiChatMessages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+#kiChatInput:focus { border-color: var(--cat-accent, #a3c9a8) !important; }
+
