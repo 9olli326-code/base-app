@@ -170,7 +170,7 @@ window.obNext = function(step) {
     // Step-specific init
     if(step === 1) setTimeout(function() { document.querySelectorAll('.ob-feature').forEach(function(f) { f.style.opacity = '1'; f.style.transform = 'translateY(0)'; }); }, 100);
     if(step === 3) window._renderObFocusCards();
-    if(step === 4) window._renderObWorkoutCards();
+    if(step === 4) { window._renderObWorkoutCards(); var _sk=document.getElementById('obSkipStep4'); if(_sk) { _sk.classList.add('hidden'); setTimeout(function(){_sk.classList.remove('hidden');},8000); } }
     if(step === '4pt') window._renderObPtSpecChips();
     if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
 };
@@ -236,7 +236,7 @@ window._obSelectExercise = function(idx, type) {
     if(!_obSelectedExercise) return;
     document.getElementById('obWorkoutExName').textContent = _obSelectedExercise.de;
     const fields = document.getElementById('obWorkoutFields');
-    if(fields) fields.innerHTML = _obSelectedExercise.fields.map((f, i) => `<div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">${window._escapeHtml(f.l)}</p><input type="number" id="obField${i}" placeholder="${f.p}" step="any" class="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm font-bold outline-none focus:border-primary cursor-text pointer-events-auto"></div>`).join('');
+    if(fields) fields.innerHTML = _obSelectedExercise.fields.map((f, i) => `<div><p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">${window._escapeHtml(f.l)}</p><input type="number" id="obField${i}" value="${f.p}" placeholder="${f.p}" step="any" class="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white text-sm font-bold outline-none focus:border-primary cursor-text pointer-events-auto"></div>`).join('');
     document.getElementById('obWorkoutForm').classList.remove('hidden');
     document.getElementById('obWorkoutCards').classList.add('hidden');
 };
@@ -311,6 +311,36 @@ window.obCreateAccount = async function() {
     window.obFinish();
 };
 
+window.obAskPush = async function() {
+    // Push nicht moeglich oder schon entschieden -> direkt zu Step 5
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || Notification.permission !== 'default') {
+        window.obNext(5);
+        return;
+    }
+    // Zeige Push-Opt-in Step
+    var step = document.getElementById('ob-step-push');
+    if (!step) { window.obNext(5); return; }
+    // Alle Steps verstecken, Push-Step zeigen
+    ['1','2','3','4','5','3pt','4pt'].forEach(function(s) {
+        var el = document.getElementById('ob-step-'+s);
+        if(el) el.classList.add('hidden');
+    });
+    step.classList.remove('hidden');
+    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+};
+
+window._obPushAccept = async function() {
+    try {
+        var permission = await Notification.requestPermission();
+        if (permission === 'granted' && typeof window.setupPushSubscription === 'function') {
+            await window.setupPushSubscription();
+        }
+    } catch(e) {
+        console.warn('Push setup error:', e);
+    }
+    window.obNext(5);
+};
+
 window.obSkipAuth = function() {
     localStorage.setItem('base_auth_skipped', 'true');
     localStorage.setItem('base_auth_skip_count', '0');
@@ -359,6 +389,12 @@ window.obFinish = function() {
         setTimeout(function() {
             if(typeof window.switchCategory === 'function') window.switchCategory('strength');
         }, 200);
+        // Post-Onboarding: Zeige dem User was er als nächstes tun soll
+        setTimeout(function() {
+            if (typeof window.showToast === 'function') {
+                window.showToast(window.t('firstWorkoutSub', 'Tracke dein erstes Workout in 30 Sekunden.'), 'info', 5000);
+            }
+        }, 1500);
     }
 };
 

@@ -59,9 +59,14 @@ function pickNotification(user) {
         return { title: 'Zeit fuer ein Comeback', body: m[Math.floor(Math.random() * m.length)] };
     }
 
-    // 14+ Tage Pause
+    // 14+ Tage Pause — Feature-basierte Win-Back statt Guilt-Trip
     if (days >= 14) {
-        return { title: 'Wir vermissen dich!', body: 'Schon ' + days + ' Tage nicht trainiert. 20 Minuten reichen!' };
+        var wb = [
+            { title: 'Dein Trainingsplan wartet', body: 'Der KI Planner hat einen neuen Plan fuer dich erstellt.' },
+            { title: 'Battery-Score: 100%', body: 'Voll erholt — perfekter Zeitpunkt fuer ein starkes Workout.' },
+            { title: 'Neues Feature: Coach Chat', body: 'Frag die KI alles ueber dein Training — sie kennt dein Profil.' }
+        ];
+        return wb[Math.floor(Math.random() * wb.length)];
     }
 
     // Mitte der Woche, wenig trainiert
