@@ -6604,6 +6604,24 @@
         let _feedbackStar = 0;
         let _feedbackCat = '';
 
+        // === FEEDBACK EVENT DELEGATION (iOS Fix) ===
+        document.addEventListener('DOMContentLoaded', function() {
+            var feedbackModal = document.getElementById('feedbackModal');
+            if (!feedbackModal) return;
+            feedbackModal.addEventListener('click', function(e) {
+                var starBtn = e.target.closest('.feedback-star');
+                if (starBtn) { e.preventDefault(); e.stopPropagation(); var starNum = parseInt(starBtn.getAttribute('data-star')); if (starNum) window.setFeedbackStar(starNum); return; }
+                var catBtn = e.target.closest('.feedback-cat');
+                if (catBtn) { e.preventDefault(); e.stopPropagation(); window.toggleFeedbackCat(catBtn); return; }
+            }, true);
+            feedbackModal.addEventListener('touchend', function(e) {
+                var starBtn = e.target.closest('.feedback-star');
+                if (starBtn) { e.preventDefault(); var starNum = parseInt(starBtn.getAttribute('data-star')); if (starNum) window.setFeedbackStar(starNum); return; }
+                var catBtn = e.target.closest('.feedback-cat');
+                if (catBtn) { e.preventDefault(); window.toggleFeedbackCat(catBtn); return; }
+            }, { passive: false });
+        });
+
         window.setFeedbackStar = function(n) {
             _feedbackStar = n;
             document.querySelectorAll('.feedback-star').forEach((btn, i) => {
