@@ -6621,6 +6621,35 @@
             }
         };
 
+        // Feedback Modal: Event Delegation (iOS Touch Fix)
+        (function() {
+            function initFeedbackDelegation() {
+                var modal = document.getElementById('feedbackModal');
+                if (!modal || modal._delegationReady) return;
+                modal._delegationReady = true;
+
+                modal.addEventListener('click', function(e) {
+                    var star = e.target.closest('.feedback-star');
+                    if (star) {
+                        var n = parseInt(star.getAttribute('data-star'));
+                        if (n) window.setFeedbackStar(n);
+                        return;
+                    }
+                    var cat = e.target.closest('.feedback-cat');
+                    if (cat) {
+                        var text = cat.textContent.trim();
+                        window._feedbackCatSelect(text);
+                        return;
+                    }
+                }, true);
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() { setTimeout(initFeedbackDelegation, 300); });
+            } else {
+                setTimeout(initFeedbackDelegation, 300);
+            }
+        })();
+
         window.setFeedbackStar = function(n) {
             _feedbackStar = n;
             document.querySelectorAll('.feedback-star').forEach((btn, i) => {
