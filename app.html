@@ -6622,6 +6622,7 @@
         });
 
         window._feedbackCatSelect = function(cat) {
+            alert('CAT: ' + cat);
             _feedbackCat = cat;
             document.querySelectorAll('.feedback-cat').forEach(function(lbl) {
                 lbl.style.borderColor = '';
@@ -6640,6 +6641,7 @@
         };
 
         window.setFeedbackStar = function(n) {
+            alert('STAR: ' + n);
             _feedbackStar = n;
             document.querySelectorAll('.feedback-star').forEach((btn, i) => {
                 if(i < n) {
