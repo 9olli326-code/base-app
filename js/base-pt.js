@@ -2227,7 +2227,8 @@ Erstelle einen prägnanten Wochenbericht mit:
 Schreibe professionell aber motivierend. Max 200 Wörter. Antworte auf ${window.getPromptLang()}. Der Trainer entscheidet selbst was er mit dem Bericht macht.`;
 
 try {
-    const res = await fetch('/.netlify/functions/gemini', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+    const res = await fetch('/.netlify/functions/gemini', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
+    if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
     const raw = await res.text();
     const parsed = window._parseGeminiResponse(raw);
     if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = parsed || 'Keine Antwort.'; }
@@ -2928,8 +2929,9 @@ Antworte auf ${lang}.`;
         const res = await fetch('/.netlify/functions/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ prompt, userId: window._getAiUserId() })
         });
+        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
         const raw = await res.text();
         _lastCheckInText = window._parseGeminiResponse(raw) || 'Keine Antwort erhalten.';
         const textEl = document.getElementById('kiCheckInText');
@@ -3110,9 +3112,11 @@ window.saveCustomSessionType = async function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { responseMimeType: 'application/json' }
+                generationConfig: { responseMimeType: 'application/json' },
+                userId: window._getAiUserId()
             })
         });
+        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
         var data = await res.json();
         var replyText = data.reply || '';
         var result;

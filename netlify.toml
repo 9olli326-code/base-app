@@ -41,6 +41,7 @@ functions = "netlify/functions"
   external_node_modules = [
     "web-push",
     "@netlify/functions",
+    "@netlify/blobs",
     "stripe"
   ]
   node_bundler = "esbuild"

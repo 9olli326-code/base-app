@@ -382,6 +382,11 @@
             return JSON.stringify(parsed);
         };
 
+        window._getAiUserId = function() {
+            var auth = window._firebaseAuth || window._fbAuth;
+            return (auth && auth.currentUser && auth.currentUser.uid) || localStorage.getItem('base_anonymous_id') || '';
+        };
+
         // KI-Call Wrapper (zentral)
         window._callAI = async function(options) {
             if(window.checkOnlineForAI && !window.checkOnlineForAI()) return;
@@ -396,6 +401,7 @@
                     body = { prompt: options.prompt };
                     if(options.systemPrompt) body.systemPrompt = options.systemPrompt;
                 }
+                body.userId = window._getAiUserId();
                 var res = await fetch('/.netlify/functions/gemini', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -3282,6 +3288,9 @@
         window.saveWorkoutsForCurrentClient = function() { localStorage.setItem(window.getStorageKey(), JSON.stringify(window.workouts)); window.calculateStreak(); if(window._checkFirstWorkoutComplete) window._checkFirstWorkoutComplete(); };
 
         window.addEventListener('load', () => {
+            if (!localStorage.getItem('base_anonymous_id')) {
+                localStorage.setItem('base_anonymous_id', 'anon_' + Date.now().toString(36) + Math.random().toString(36).substring(2,8));
+            }
             document.getElementById('langSelectApp').value = window.currentLang; window.switchLanguage(window.currentLang);
             const urlParams = new URLSearchParams(window.location.search); const code = urlParams.get('code'); if(code && !stravaTokens) { window.handleStravaCallback(code); window.history.replaceState({}, document.title, window.location.pathname); }
             window.updateStravaUI();
@@ -8153,8 +8162,16 @@
             var res = await fetch('/.netlify/functions/gemini', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: fullPrompt, systemPrompt: systemPrompt })
+                body: JSON.stringify({ prompt: fullPrompt, systemPrompt: systemPrompt, userId: window._getAiUserId() })
             });
+            if (!res.ok && res.status === 429) {
+                _removeTypingIndicator();
+                try { var errData = await res.json(); _addChatMessage('ai', errData.error || 'Tageslimit erreicht.'); } catch(e) { _addChatMessage('ai', 'Tageslimit erreicht. Versuch es morgen nochmal.'); }
+                input.disabled = false;
+                document.getElementById('kiChatSendBtn').style.opacity = '1';
+                input.focus();
+                return;
+            }
             var data = await res.json();
             _removeTypingIndicator();
 

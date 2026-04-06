@@ -9,6 +9,7 @@
     "@capacitor/push-notifications": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
+    "@netlify/blobs": "^10.7.4",
     "@netlify/functions": "^2.4.0",
     "stripe": "^17.5.0",
     "web-push": "^3.6.7"
