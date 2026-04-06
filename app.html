@@ -6627,18 +6627,19 @@
                 var modal = document.getElementById('feedbackModal');
                 if (!modal || modal._delegationReady) return;
                 modal._delegationReady = true;
+                console.log('FEEDBACK DELEGATION INITIALIZED');
 
                 modal.addEventListener('click', function(e) {
                     var star = e.target.closest('.feedback-star');
                     if (star) {
                         var n = parseInt(star.getAttribute('data-star'));
-                        if (n) window.setFeedbackStar(n);
+                        if (n) { alert('DELEGATION STAR: ' + n); window.setFeedbackStar(n); }
                         return;
                     }
                     var cat = e.target.closest('.feedback-cat');
                     if (cat) {
                         var text = cat.textContent.trim();
-                        window._feedbackCatSelect(text);
+                        alert('DELEGATION CAT: ' + text); window._feedbackCatSelect(text);
                         return;
                     }
                 }, true);
