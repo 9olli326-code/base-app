@@ -104,6 +104,14 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .card-bg:hover { border-color: color-mix(in srgb, var(--primary-hex), transparent 75%) !important; }
+        /* Fix: Doppelter backdrop-filter killt Touch-Events auf iOS */
+        [class*="backdrop-blur"] > .card-bg,
+        .fixed.backdrop-blur-xl > .card-bg,
+        [id$="Modal"] > .card-bg {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            pointer-events: auto !important;
+        }
         /* Modal-Cards: solider Hintergrund, kein Blur-Through */
         #clientOnboardModal > div,
         #sessionPlannerModal > div,
