@@ -1928,19 +1928,22 @@ input.click();
 };
 
 window.setTrainerBranding = function() {
-const current = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
-const name = prompt(window.t('ptEnterName','Dein Name / Studio-Name:'), current.name || '');
-if(name === null) return;
+var current = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
 var _defColor = window._getPrimaryHex();
-const color = prompt(window.t('ptAccentColor','Akzentfarbe (Hex):') + ' ' + _defColor, current.color || _defColor);
-if(color === null) return;
-const tagline = prompt(window.t('ptTagline','Slogan / Tagline (optional):'), current.tagline || '');
-localStorage.setItem('base_trainer_branding', JSON.stringify({
+window.showInputModal(window.t('ptEnterName','Dein Name / Studio-Name'), 'Name...', function(name) {
+ if(!name) return;
+ window.showInputModal(window.t('ptAccentColor','Akzentfarbe (Hex)'), _defColor, function(color) {
+  if(!color) color = _defColor;
+  window.showInputModal(window.t('ptTagline','Slogan / Tagline (optional)'), 'z.B. Train Hard, Stay Humble', function(tagline) {
+   localStorage.setItem('base_trainer_branding', JSON.stringify({
     name: (name||'').trim().substring(0,60),
     color: /^#[0-9a-fA-F]{6}$/.test(color) ? color : _defColor,
     tagline: (tagline||'').trim().substring(0,80)
-}));
-window.showToast(window.t('ptSaved'));
+   }));
+   window.showToast(window.t('ptSaved'));
+  }, current.tagline || '');
+ }, current.color || _defColor);
+}, current.name || '');
 };
 
 window._renderProgressionChart = function(exerciseName, dataPoints, width, height) {

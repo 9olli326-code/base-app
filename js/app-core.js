@@ -1,3 +1,24 @@
+  // Custom Input Modal (ersetzt native prompt())
+  window.showInputModal = function(title, placeholder, callback, defaultValue) {
+   var overlay = document.createElement('div');
+   overlay.id = '_inputModalOverlay';
+   overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);padding:24px';
+   overlay.innerHTML = '<div style="background:#1a1a1f;border:1px solid #2a2a30;border-radius:20px;padding:24px;max-width:360px;width:100%">' +
+    '<p style="font-size:14px;font-weight:800;color:#f4f4f5;margin-bottom:12px">' + window._escapeHtml(title) + '</p>' +
+    '<input id="_inputModalField" type="text" value="' + window._escapeHtml(defaultValue || '') + '" placeholder="' + window._escapeHtml(placeholder || '') + '" ' +
+    'style="width:100%;background:#111;border:1px solid #333;border-radius:12px;color:#f4f4f5;padding:12px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:16px" class="pointer-events-auto">' +
+    '<div style="display:flex;gap:8px">' +
+    '<button aria-label="Abbrechen" onclick="document.getElementById(\'_inputModalOverlay\').remove()" style="flex:1;padding:12px;border-radius:12px;background:none;border:1px solid #333;color:#82828c;font-weight:600;font-size:13px;cursor:pointer" class="pointer-events-auto">Abbrechen</button>' +
+    '<button aria-label="Bestaetigen" id="_inputModalConfirm" style="flex:1;padding:12px;border-radius:12px;background:#a3c9a8;color:#0f110f;border:none;font-weight:800;font-size:13px;cursor:pointer" class="pointer-events-auto">OK</button>' +
+    '</div></div>';
+   document.body.appendChild(overlay);
+   var field = document.getElementById('_inputModalField');
+   var confirmBtn = document.getElementById('_inputModalConfirm');
+   field.focus(); field.select();
+   field.addEventListener('keydown', function(e) { if(e.key === 'Enter') confirmBtn.click(); if(e.key === 'Escape') overlay.remove(); });
+   confirmBtn.onclick = function() { var val = field.value; overlay.remove(); if(callback) callback(val); };
+  };
+
   // XSS Protection — Fallback falls app.html Definition noch nicht geladen
   if(!window._escapeHtml) {
    window._escapeHtml = function(str) { if(!str) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; };
@@ -1376,10 +1397,10 @@
   };
 
   window.addChallengeProgress = function(challengeId, unit) {
-   var val = prompt('Fortschritt hinzufügen (' + unit + '):');
+   window.showInputModal('Fortschritt hinzufuegen (' + unit + ')', '0', function(val) {
    if(!val) return;
    var num = parseFloat(val.replace(',', '.'));
-   if(isNaN(num) || num <= 0) { window.showToast(window.t('toastError', 'Bitte eine gültige Zahl eingeben')); return; }
+   if(isNaN(num) || num <= 0) { window.showToast(window.t('toastError', 'Bitte eine gueltige Zahl eingeben')); return; }
    var uid = window._chGetUid ? window._chGetUid() : null;
    var cname = window._chGetName ? window._chGetName() : 'Athlet';
    if(!uid) return;
@@ -1401,6 +1422,7 @@
      } else { window.showToast('Fehler: ' + result); }
     });
    });
+   }); // showInputModal callback end
   };
 
   window.leaveChallenge = function(challengeId) {
