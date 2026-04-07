@@ -418,8 +418,29 @@
    return fallback || key;
   };
 
+  window._i18nLoaded = {};
+  window._loadLanguage = function(lang, callback) {
+   if (window._i18nLoaded[lang]) { if (callback) callback(); return; }
+   var script = document.createElement('script');
+   script.src = 'js/i18n/' + lang + '.js?v=' + Date.now();
+   script.onload = function() {
+    if (window._i18nLang) { window._i18nLoaded[lang] = window._i18nLang; if (window.i18nData) window.i18nData[lang] = window._i18nLang; window._i18nLang = null; }
+    if (callback) callback();
+   };
+   script.onerror = function() { if (callback) callback(); };
+   document.head.appendChild(script);
+  };
+  var _lazyLangs = ['fr', 'es', 'it', 'nl', 'ar'];
+
   window.switchLanguage = function(lang) {
    window.currentLang = lang; localStorage.setItem('beastmode_lang', lang);
+   if (_lazyLangs.indexOf(lang) !== -1 && (!i18nData[lang] || !window._i18nLoaded[lang])) {
+    window._loadLanguage(lang, function() { window._applyI18n(lang); });
+    return;
+   }
+   window._applyI18n(lang);
+  };
+  window._applyI18n = function(lang) {
    document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';            document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (i18nData[lang] && i18nData[lang][key]) {

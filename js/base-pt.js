@@ -1202,19 +1202,34 @@ window._renderSessionClientPills(clientId);
 
 window.saveSession = function() {
 if(!_sessionSelectedClient) { window.showToast(window.t('ptEnterName','Bitte Kunden wählen')); return; }
+const targetDate = new Date();
+targetDate.setDate(targetDate.getDate() + _ptDayOffset);
+const dateStr = targetDate.toISOString().split('T')[0];
+
+// Duplikat-Check (nur bei neuer Session, nicht beim Editieren)
+if(!_editingSessionId) {
+    var existingSessions = window.getSessions();
+    var isDuplicate = existingSessions.some(function(s) { return s.date === dateStr && s.clientId === _sessionSelectedClient; });
+    if(isDuplicate) {
+        window.showModal(
+            window.t('sessionDuplicateTitle', 'Session existiert bereits'),
+            window.t('sessionDuplicateText', 'An diesem Tag gibt es bereits eine Session fuer diesen Kunden. Trotzdem erstellen?'),
+            true,
+            function() { window._saveSessionConfirmed(dateStr); }
+        );
+        return;
+    }
+}
+window._saveSessionConfirmed(dateStr);
+};
+
+window._saveSessionConfirmed = function(dateStr) {
 const time = document.getElementById('sessionTime')?.value || '09:00';
 const durMin = parseInt(document.getElementById('sessionDuration')?.value) || 0;
 const durSec = parseInt(document.getElementById('sessionDurationSec')?.value) || 0;
 const duration = durMin * 60 + durSec;
 const focus = (document.getElementById('sessionFocus')?.value || '').trim().substring(0, 200);
-
-const targetDate = new Date();
-targetDate.setDate(targetDate.getDate() + _ptDayOffset);
-const dateStr = targetDate.toISOString().split('T')[0];
-
 const sessions = window.getSessions();
-
-// Custom Schema-Felder sammeln
 var customFields = {};
 var _cstTypes = JSON.parse(localStorage.getItem('base_pt_custom_session_types') || '[]');
 var _cstCurrent = _cstTypes.find(function(t) { return t.id === _sessionType; });
@@ -1224,7 +1239,6 @@ if (_cstCurrent && _cstCurrent.schema) {
         if (el) customFields[field.label] = el.value;
     });
 }
-
 if(_editingSessionId) {
     const idx = sessions.findIndex(s => s.id === _editingSessionId);
     if(idx !== -1) {
@@ -1244,7 +1258,6 @@ if(_editingSessionId) {
         createdAt: new Date().toISOString()
     });
 }
-
 window.saveSessions(sessions);
 window.toggleModal('sessionPlannerModal');
 window.renderDayView();
