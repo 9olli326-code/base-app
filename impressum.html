@@ -1,108 +1,72 @@
 <!DOCTYPE html>
-<html lang="de" class="scroll-smooth">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impressum | BASE</title>
+    <title>Impressum | BASE Fitness App</title>
     <link rel="icon" type="image/png" href="icon.png">
-    <meta name="theme-color" content="#06b6d4">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0f110f">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #09090b; font-family: 'Inter', sans-serif; }
-        h1, h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f110f; color: #f4f4f5; font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-weight: 400; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+        a { color: #a3c9a8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .wrap { max-width: 800px; margin: 0 auto; padding: 24px; padding-top: 80px; padding-bottom: 80px; }
+        .back { display: inline-block; margin-bottom: 40px; font-size: 14px; font-weight: 600; color: #a3c9a8; }
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+        .subtitle { color: #82828c; font-size: 14px; margin-bottom: 32px; }
+        h2 { font-size: 20px; font-weight: 700; margin-top: 36px; margin-bottom: 12px; color: #f4f4f5; }
+        p { color: #c4c4cc; font-size: 14px; margin-bottom: 8px; }
+        .section { background: #181a18; border: 1px solid #2a2d2a; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .footer { text-align: center; color: #82828c; font-size: 12px; margin-top: 48px; padding-top: 24px; border-top: 1px solid #2a2d2a; }
+        @media (max-width: 640px) { h1 { font-size: 26px; } .wrap { padding: 16px; padding-top: 60px; } }
     </style>
 </head>
-<body class="text-zinc-300 antialiased min-h-screen">
+<body>
+    <div class="wrap">
+        <a href="app.html" class="back">&larr; Zurueck zu BASE</a>
 
-    <!-- Nav -->
-    <nav class="fixed w-full z-50 top-0 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
-        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
-                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                        <rect width="40" height="40" rx="9" fill="#09090b"/>
-                        <rect x="2.5" y="2.5" width="35" height="35" rx="7" fill="#0f0f12" stroke="#1f1f24" stroke-width="0.5"/>
-                        <rect x="7" y="10" width="1.5" height="21" rx="0.75" fill="#06b6d4"/>
-                        <circle cx="32" cy="11" r="1.5" fill="#06b6d4"/>
-                        <text x="11" y="29" font-family="'Arial Black',Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="-0.5">B</text>
-                    </svg>
-                </div>
-                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;" class="text-xl tracking-tighter text-white uppercase">BASE</span>
-            </a>
-            <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">← Zurück</a>
-        </div>
-    </nav>
+        <h1>Impressum</h1>
+        <p class="subtitle">Angaben gemaess &sect; 5 TMG</p>
 
-    <!-- Content -->
-    <div class="max-w-2xl mx-auto px-6 pt-32 pb-24">
-
-        <h1 class="text-5xl md:text-7xl uppercase text-white mb-3 tracking-tighter">Impressum</h1>
-        <p class="text-zinc-600 text-sm font-medium mb-12">Angaben gemäß § 5 TMG</p>
-
-        <!-- Verantwortlicher -->
-        <div class="mb-10">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Verantwortlicher</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 space-y-1 text-zinc-400 text-sm leading-relaxed">
-                <p class="text-white font-bold">Oliver Angermann</p>
-                <p>Akazienweg 7</p>
-                <p>49808 Lingen</p>
-                <p>Deutschland</p>
-            </div>
+        <h2>Anbieter</h2>
+        <div class="section">
+            <p><strong>Oliver Angermann</strong><br>
+            Akazienweg 7<br>
+            49808 Lingen<br>
+            Deutschland</p>
+            <p>E-Mail: <a href="mailto:support.base-app@proton.me">support.base-app@proton.me</a></p>
         </div>
 
-        <!-- Kontakt -->
-        <div class="mb-10">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Kontakt</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm">
-                <p>E-Mail: <a href="mailto:support.base-app@proton.me" class="text-cyan-400 hover:text-cyan-300 transition-colors">support.base-app@proton.me</a></p>
-            </div>
+        <h2>Verantwortlich fuer den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
+        <div class="section">
+            <p><strong>Oliver Angermann</strong><br>
+            Akazienweg 7<br>
+            49808 Lingen</p>
         </div>
 
-        <!-- Kleinunternehmer -->
-        <div class="mb-10">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Umsatzsteuer</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed">
-                <p>Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</p>
-            </div>
+        <h2>Haftung fuer Inhalte</h2>
+        <div class="section">
+            <p>Als Diensteanbieter sind wir gemaess &sect; 7 Abs. 1 TMG fuer eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach &sect;&sect; 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, uebermittelte oder gespeicherte fremde Informationen zu ueberwachen oder nach Umstaenden zu forschen, die auf eine rechtswidrige Taetigkeit hinweisen.</p>
+            <p>Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberuehrt. Eine diesbezuegliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung moeglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.</p>
         </div>
 
-        <!-- Inhaltlich verantwortlich -->
-        <div class="mb-10">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Inhaltlich verantwortlich</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed">
-                <p>Oliver Angermann (Anschrift wie oben)</p>
-            </div>
+        <h2>Haftung fuer Links</h2>
+        <div class="section">
+            <p>Trotz sorgfaeltiger inhaltlicher Kontrolle uebernehmen wir keine Haftung fuer die Inhalte externer Links. Fuer den Inhalt der verlinkten Seiten sind ausschliesslich deren Betreiber verantwortlich.</p>
+            <p>Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf moegliche Rechtsverstoesse ueberprueft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar.</p>
         </div>
 
-        <!-- Haftung für Inhalte -->
-        <div class="mb-10">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Haftung für Inhalte</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-3">
-                <p>Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen.</p>
-                <p>Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.</p>
-            </div>
+        <h2>Urheberrecht</h2>
+        <div class="section">
+            <p>Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfaeltigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechtes beduerfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+            <p>Downloads und Kopien dieser Seite sind nur fuer den privaten, nicht kommerziellen Gebrauch gestattet.</p>
         </div>
 
-        <!-- Haftung für Links -->
-        <div class="mb-10">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Haftung für Links</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-3">
-                <p>Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
-                <p>Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.</p>
-            </div>
+        <div class="footer">
+            &copy; 2026 Oliver Angermann &middot; BASE &middot; <a href="datenschutz.html">Datenschutz</a>
         </div>
-
-        <!-- Urheberrecht -->
-        <div class="mb-16">
-            <h2 class="text-xl uppercase tracking-tight text-white mb-4">Urheberrecht</h2>
-            <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-sm leading-relaxed space-y-3">
-                <p>Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
-                <p>Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.</p>
-            </div>
-        </div>
-
-        <p class="text-center text-[10px] font-black text-zinc-700 uppercase tracking-widest">© 2026 Oliver Angermann · BASE</p>
     </div>
 </body>
 </html>
