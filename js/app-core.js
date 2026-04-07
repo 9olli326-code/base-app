@@ -1,3 +1,16 @@
+  // XSS Protection — Fallback falls app.html Definition noch nicht geladen
+  if(!window._escapeHtml) {
+   window._escapeHtml = function(str) { if(!str) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; };
+  }
+  window._sanitizeAIHtml = function(text) {
+   if(!text) return '';
+   var escaped = window._escapeHtml(text);
+   escaped = escaped.replace(/\n/g, '<br>');
+   escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+   escaped = escaped.replace(/\*(.+?)\*/g, '<i>$1</i>');
+   return escaped;
+  };
+
   var _lucideTimer = null;
   window._refreshLucide = function() {
    if(_lucideTimer) clearTimeout(_lucideTimer);
@@ -2697,10 +2710,13 @@
    if (titleEl) titleEl.textContent = title;
    if (msgEl) {
     if (msg && typeof msg === 'string' && msg.includes('<') && msg.includes('>')) {
-     var sanitized = msg.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/on\w+\s*=\s*[^\s>]*/gi, '');
-     msgEl.innerHTML = sanitized;
+     var tmp = document.createElement('div');
+     tmp.innerHTML = msg;
+     tmp.querySelectorAll('script,iframe,object,embed,form').forEach(function(el) { el.remove(); });
+     tmp.querySelectorAll('*').forEach(function(el) {
+      Array.from(el.attributes).forEach(function(attr) { if(attr.name.startsWith('on') || attr.value.indexOf('javascript:') !== -1) el.removeAttribute(attr.name); });
+     });
+     msgEl.innerHTML = tmp.innerHTML;
     } else {
      msgEl.textContent = msg || '';
     }

@@ -447,14 +447,28 @@
   };
 
   window._isClientView = false;
+  window._validatePortalToken = function(clientId, token) {
+   var stored = localStorage.getItem('base_portal_token_' + clientId);
+   if(!stored || !token) return false;
+   if(stored.length !== token.length) return false;
+   var match = true;
+   for(var i = 0; i < stored.length; i++) { if(stored.charCodeAt(i) !== token.charCodeAt(i)) match = false; }
+   return match;
+  };
   (function() {
    const p = new URLSearchParams(window.location.search);
    const clientId = p.get('client_view');
    const token = p.get('token');
    if(clientId && token) {
-    window._isClientView = true;
-    window._clientViewId = clientId;
-    window._clientViewToken = token;
+    if(window._validatePortalToken(clientId, token)) {
+     window._isClientView = true;
+     window._clientViewId = clientId;
+     window._clientViewToken = token;
+    } else {
+     document.addEventListener('DOMContentLoaded', function() {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f110f;color:#f4f4f5;font-family:sans-serif;text-align:center;padding:24px"><div><p style="font-size:48px;margin-bottom:16px">\uD83D\uDD12</p><p style="font-size:18px;font-weight:700">Zugang verweigert</p><p style="font-size:13px;color:#82828c;margin-top:8px">Dieser Link ist ungueltig oder abgelaufen.</p><a href="/app.html" style="display:inline-block;margin-top:24px;padding:12px 24px;background:#a3c9a8;color:#0f110f;border-radius:12px;font-weight:700;text-decoration:none">Zur App</a></div></div>';
+     });
+    }
    }
   })();
     </script>
