@@ -681,16 +681,28 @@ window.setPlanDays = function(days) {
         b.classList.toggle('bg-zinc-900', !active);
         b.classList.toggle('text-zinc-400', !active);
     });
+    window._trainingDayAssignment = {};
+    if (window._renderDayAssignment) window._renderDayAssignment('dayAssignmentContainer', days);
 };
 
 window.openTrainingPlanModal = function() {
-    // Defaults setzen
     window.setPlanGoal('Muskelmasse');
     window.setPlanDuration(6);
     window.setPlanDays(4);
     document.getElementById('planResult')?.classList.add('hidden');
     document.getElementById('planConfig')?.classList.remove('hidden');
     window.toggleModal('trainingPlanModal');
+    // Init new plan wizard sections
+    window._selectedFocusMuscles = new Set();
+    window._trainingDayAssignment = {};
+    if (window._renderDayAssignment) window._renderDayAssignment('dayAssignmentContainer', 4);
+    if (window._renderFocusMuscleChips) window._renderFocusMuscleChips('focusMuscleChips');
+    // Show injuries from profile
+    var injContainer = document.getElementById('planInjuryChips');
+    if (injContainer) {
+        var inj = Array.from(window.selectedInjuries || []);
+        injContainer.innerHTML = inj.length > 0 ? inj.map(function(v) { return '<span class="px-3 py-1.5 rounded-lg text-[10px] font-bold" style="background:rgba(232,138,138,0.1);border:1px solid rgba(232,138,138,0.2);color:#e88a8a">' + window._escapeHtml(v) + '</span>'; }).join('') : '<span class="text-[10px] text-zinc-600">' + window.t('lblNone','Keine') + '</span>';
+    }
     if(window.lucide) lucide.createIcons();
 };
 
@@ -711,19 +723,28 @@ window.generateTrainingPlan = async function() {
     var orms = '';
     try { var od = JSON.parse(localStorage.getItem('base_1rm_data') || '{}'); if(Object.keys(od).length > 0) orms = Object.entries(od).map(function(e) { return e[0] + ': ' + e[1] + 'kg'; }).join(', '); } catch(e) {}
     var totalWeeks = Math.min(planDuration || 6, 12);
+    // Collect focus muscles, injuries, day assignments for prompt
+    var _focusList = (window._selectedFocusMuscles && window._selectedFocusMuscles.size > 0) ? Array.from(window._selectedFocusMuscles).map(function(id) { var all = [].concat(window._FOCUS_MUSCLES.upper, window._FOCUS_MUSCLES.lower, window._FOCUS_MUSCLES.core); var m = all.find(function(x) { return x.id === id; }); return m ? m.en : id; }).join(', ') : 'ausgewogen';
+    var _injuriesStr = window._getInjuriesForAI ? window._getInjuriesForAI() : 'keine';
+    var _dayMap = { mon:'Mo', tue:'Di', wed:'Mi', thu:'Do', fri:'Fr', sat:'Sa', sun:'So' };
+    var _dayAssign = Object.keys(window._trainingDayAssignment || {}).map(function(k) { return k.replace('day','Tag ') + ': ' + (_dayMap[window._trainingDayAssignment[k]] || '?'); }).join(', ') || 'flexibel';
+
     function fetchSingleWeek(weekNum) {
-        var phase = '';
-        if(weekNum === 1) phase = 'Aufbauphase — moderate Intensitaet, Technik-Fokus.';
-        else if(weekNum === totalWeeks) phase = 'Deload-Woche — 50% Volumen, gleiche Intensitaet.';
-        else if(weekNum <= Math.ceil(totalWeeks * 0.4)) phase = 'Aufbauphase — Volumen steigern.';
-        else if(weekNum <= Math.ceil(totalWeeks * 0.8)) phase = 'Steigerung — progressive Overload, hoehere Intensitaet.';
-        else phase = 'Peak-Phase — maximale Intensitaet.';
-        var p = planGoal + ' Plan. Woche ' + weekNum + ' von ' + totalWeeks + '. ' + planDays + ' Trainingstage. ' + phase + ' ';
+        var phase = '', mesoRIR = 2, mesoSets = '1.0';
+        if(weekNum === 1) { phase = 'Basiswoche (Akkumulation) — moderate Intensitaet, RIR 3, Technik-Fokus.'; mesoRIR = 3; mesoSets = '1.0'; }
+        else if(weekNum === totalWeeks) { phase = 'Deload — 60% Volumen, RIR 4+, aktive Erholung.'; mesoRIR = 4; mesoSets = '0.6'; }
+        else if(weekNum <= Math.ceil(totalWeeks * 0.4)) { phase = 'Aufbauphase (Akkumulation) — Volumen steigern, RIR 2.'; mesoRIR = 2; mesoSets = '1.0'; }
+        else if(weekNum <= Math.ceil(totalWeeks * 0.8)) { phase = 'Steigerung — progressive Overload, RIR 1-2.'; mesoRIR = 1; mesoSets = '1.1'; }
+        else { phase = 'Peak/Overreach — maximale Intensitaet, RIR 0-1.'; mesoRIR = 0; mesoSets = '1.2'; }
+        var p = planGoal + ' Plan (Mesozyklus). Woche ' + weekNum + ' von ' + totalWeeks + '. ' + planDays + ' Trainingstage. ' + phase + ' ';
+        p += 'MESOZYKLUS: Sets-Multiplikator ' + mesoSets + ', Ziel-RIR ' + mesoRIR + '. ';
+        p += 'FOKUS-MUSKELGRUPPEN: ' + _focusList + '. ';
+        p += 'EINSCHRAENKUNGEN: ' + _injuriesStr + '. ';
+        p += 'TRAININGSTAGE: ' + _dayAssign + '. ';
         p += 'Athlet: ' + (profile.experience || 'Anfaenger') + ', ' + (profile.weight || '?') + 'kg. ';
         if(orms) p += '1RMs: ' + orms + '. ';
-        if(profile.injuries && profile.injuries.length > 0) p += 'Verletzungen: ' + profile.injuries.join(', ') + '. ';
         p += 'Letzte Workouts: ' + (recent || 'keine Daten') + '. ';
-        p += 'Antworte NUR mit kompaktem JSON: {"week":' + weekNum + ',"focus":"kurzer Fokus","sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Uebung","sets":3,"reps":"8-10","intensity":"RPE 7","notes":""}]}]}';
+        p += 'Antworte NUR mit kompaktem JSON: {"week":' + weekNum + ',"focus":"kurzer Fokus","phase":"' + (weekNum === totalWeeks ? 'deload' : weekNum <= Math.ceil(totalWeeks*0.4) ? 'accumulation' : weekNum <= Math.ceil(totalWeeks*0.8) ? 'accumulation' : 'overreach') + '","targetRIR":' + mesoRIR + ',"setsMultiplier":' + mesoSets + ',"sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Uebung","sets":3,"reps":"8-10","rir":' + mesoRIR + ',"intensity":"RPE 7","notes":""}]}]}';
         return fetch('/.netlify/functions/gemini', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: p }] }], userId: window._getAiUserId() })
@@ -749,7 +770,9 @@ window.generateTrainingPlan = async function() {
         allWeeks.sort(function(a, b) { return (a.week || 0) - (b.week || 0); });
         if(allWeeks.length === 0) throw new Error(window.t('toastError','Plan konnte nicht generiert werden'));
         if(allWeeks.length < totalWeeks) window.showToast(allWeeks.length + '/' + totalWeeks + ' ' + window.t('lblWeeks','Wochen'));
-        var plan = { planName: totalWeeks + '-Wochen ' + planGoal, goal: planGoal, weeks: allWeeks, progressionNotes: 'Progressiver ' + totalWeeks + '-Wochen Plan mit Periodisierung und Deload.' };
+        // Build mesoCycle phases from week data
+        var _mesoPhases = allWeeks.map(function(w) { return { week: w.week, name: w.focus || ('Woche ' + w.week), type: w.phase || 'accumulation', setsMultiplier: w.setsMultiplier || 1.0, targetRIR: w.targetRIR != null ? w.targetRIR : 2 }; });
+        var plan = { planName: totalWeeks + '-Wochen ' + planGoal, goal: planGoal, mesoCycle: { totalWeeks: totalWeeks, phases: _mesoPhases }, weeks: allWeeks, focusMuscles: Array.from(window._selectedFocusMuscles || []), injuries: window._getInjuriesForAI ? window._getInjuriesForAI() : 'keine', progressionNotes: 'Progressiver ' + totalWeeks + '-Wochen Mesozyklus mit Periodisierung und Deload.' };
         _generatedPlan = plan;
         window.renderTrainingPlan(plan);
         if(window.awardXP) window.awardXP('planGenerated');
@@ -768,7 +791,8 @@ window.renderTrainingPlan = function(plan) {
     const weekColors = ['border-violet-500/30', 'border-indigo-500/30', 'border-cyan-500/30', 'border-emerald-500/30', 'border-amber-500/30', 'border-rose-500/30', 'border-orange-500/30', 'border-pink-500/30'];
 
     const esc = window._escapeHtml || function(s){return s||'';};
-    content.innerHTML = (plan.weeks || []).map((week, wi) => `
+    var mesoHtml = window._renderMesoCycleOverview ? window._renderMesoCycleOverview(plan) : '';
+    content.innerHTML = mesoHtml + (plan.weeks || []).map((week, wi) => `
         <div class="bg-zinc-950/60 border ${weekColors[wi % weekColors.length]} rounded-2xl p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-white font-black text-sm uppercase tracking-tight">${window.t("lblWeeks","Woche")} ${esc(String(week.week))}</p>
@@ -788,7 +812,7 @@ window.renderTrainingPlan = function(plan) {
                                         ${ex.notes ? `<p class="text-zinc-600 text-[10px]">${esc(ex.notes)}</p>` : ''}
                                     </div>
                                     <div class="text-right flex-shrink-0">
-                                        <p class="text-primary text-[11px] font-black">${esc(String(ex.sets))}×${esc(String(ex.reps))}</p>
+                                        <p class="text-primary text-[11px] font-black">${esc(String(ex.sets))}\u00d7${esc(String(ex.reps))}${ex.rir != null ? '<span class="ml-1 text-[8px]" style="color:#a3c9a8">RIR '+ex.rir+'</span>' : ''}</p>
                                         <p class="text-zinc-500 text-[10px] font-bold">${esc(ex.intensity || '')}</p>
                                     </div>
                                 </div>`).join('')}

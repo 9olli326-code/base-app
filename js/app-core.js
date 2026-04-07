@@ -5306,6 +5306,119 @@
   };
 
   // ============================================================
+  // FOCUS MUSCLES + DAY ASSIGNMENT + INJURIES HELPER + MESOCYCLE
+  // ============================================================
+  window._FOCUS_MUSCLES = {
+   upper: [
+    { id: 'chest', de: 'Brust', en: 'Chest' },
+    { id: 'upper_back', de: 'Ruecken (oben)', en: 'Upper Back' },
+    { id: 'lats', de: 'Latissimus', en: 'Lats' },
+    { id: 'front_delts', de: 'Vordere Schulter', en: 'Front Delts' },
+    { id: 'rear_delts', de: 'Hintere Schulter', en: 'Rear Delts' },
+    { id: 'mid_delts', de: 'Mittlere Schulter', en: 'Side Delts' },
+    { id: 'biceps', de: 'Bizeps', en: 'Biceps' },
+    { id: 'triceps', de: 'Trizeps', en: 'Triceps' },
+    { id: 'traps', de: 'Nacken/Trapez', en: 'Traps' }
+   ],
+   lower: [
+    { id: 'quads', de: 'Beinstrecker', en: 'Quads' },
+    { id: 'hamstrings', de: 'Beinbeuger', en: 'Hamstrings' },
+    { id: 'glutes', de: 'Po', en: 'Glutes' },
+    { id: 'calves', de: 'Waden', en: 'Calves' }
+   ],
+   core: [
+    { id: 'abs', de: 'Bauch', en: 'Abs' },
+    { id: 'obliques', de: 'Seitl. Bauch', en: 'Obliques' },
+    { id: 'lower_back_muscle', de: 'Unterer Ruecken', en: 'Lower Back' }
+   ]
+  };
+  window._selectedFocusMuscles = new Set();
+
+  window._renderFocusMuscleChips = function(containerId) {
+   var container = document.getElementById(containerId || 'focusMuscleChips');
+   if (!container) return;
+   var lang = window.currentLang || 'de';
+   var html = '';
+   ['upper', 'lower', 'core'].forEach(function(group) {
+    var gl = { upper: { de: 'Oberkoerper', en: 'Upper Body' }, lower: { de: 'Unterkoerper', en: 'Lower Body' }, core: { de: 'Core', en: 'Core' } }[group];
+    html += '<p class="text-[8px] font-black text-zinc-600 uppercase tracking-widest mt-3 mb-1">' + (lang === 'de' ? gl.de : gl.en) + '</p><div class="flex flex-wrap gap-1.5 mb-2">';
+    window._FOCUS_MUSCLES[group].forEach(function(m) {
+     var sel = window._selectedFocusMuscles.has(m.id);
+     var label = lang === 'de' ? m.de : m.en;
+     html += '<button type="button" onclick="window._toggleFocusMuscle(\'' + m.id + '\',\'' + (containerId || 'focusMuscleChips') + '\')" class="px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto transition-all" style="' + (sel ? 'background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.3);color:#a3c9a8' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)') + '">' + window._escapeHtml(label) + '</button>';
+    });
+    html += '</div>';
+   });
+   if (window._selectedFocusMuscles.size >= 2) html += '<p class="text-[9px] text-amber-500 mt-1">' + window.t('focusMax', 'Max. 2 Fokus-Muskelgruppen empfohlen') + '</p>';
+   container.innerHTML = html;
+  };
+
+  window._toggleFocusMuscle = function(muscleId, containerId) {
+   if (window._selectedFocusMuscles.has(muscleId)) { window._selectedFocusMuscles.delete(muscleId); }
+   else { if (window._selectedFocusMuscles.size >= 3) { window.showToast(window.t('focusTooMany', 'Maximal 3 Fokus-Muskelgruppen')); return; } window._selectedFocusMuscles.add(muscleId); }
+   window._renderFocusMuscleChips(containerId);
+  };
+
+  // Day Assignment
+  window._trainingDayAssignment = {};
+  window._renderDayAssignment = function(containerId, numDays) {
+   var container = document.getElementById(containerId || 'dayAssignmentContainer');
+   if (!container) return;
+   numDays = numDays || 3;
+   var dayLabels = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+   var dayIds = ['mon','tue','wed','thu','fri','sat','sun'];
+   var html = '<button type="button" onclick="window._autoDistributeDays(' + numDays + ')" class="w-full mb-3 py-2 rounded-xl text-[10px] font-bold cursor-pointer pointer-events-auto flex items-center justify-center gap-2" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)"><i data-lucide="shuffle" class="w-3 h-3 pointer-events-none"></i> ' + window.t('dayAutoDistribute', 'Gleichmaessig verteilen') + '</button>';
+   for (var d = 0; d < numDays; d++) {
+    var dn = d + 1; var assigned = window._trainingDayAssignment['day' + dn] || '';
+    html += '<div class="p-3 rounded-xl mb-2" style="background:var(--inner-bg-hex);border:1px solid ' + (assigned ? 'rgba(163,201,168,0.3)' : 'var(--border-hex)') + '"><div class="flex items-center gap-2 mb-2"><span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black" style="background:rgba(163,201,168,0.15);color:#a3c9a8">' + dn + '</span><span class="text-xs font-bold text-white">' + window.t('lblDay', 'Tag') + ' ' + dn + '</span></div><div class="flex gap-1.5">';
+    for (var i = 0; i < 7; i++) {
+     var isSel = assigned === dayIds[i];
+     var isUsed = false;
+     for (var k in window._trainingDayAssignment) { if (k !== 'day' + dn && window._trainingDayAssignment[k] === dayIds[i]) { isUsed = true; break; } }
+     html += '<button type="button" onclick="window._assignDay(' + dn + ',\'' + dayIds[i] + '\')" class="flex-1 py-2 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto transition-all" style="' + (isSel ? 'background:rgba(163,201,168,0.2);border:1px solid rgba(163,201,168,0.4);color:#a3c9a8' : isUsed ? 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:#333;opacity:0.4' : 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)') + '">' + dayLabels[i] + '</button>';
+    }
+    html += '</div></div>';
+   }
+   container.innerHTML = html;
+   window._refreshLucide();
+  };
+
+  window._assignDay = function(dayNum, dayId) {
+   for (var k in window._trainingDayAssignment) { if (window._trainingDayAssignment[k] === dayId) delete window._trainingDayAssignment[k]; }
+   window._trainingDayAssignment['day' + dayNum] = dayId;
+   window._renderDayAssignment(null, Object.keys(window._trainingDayAssignment).length > 0 ? Math.max.apply(null, Object.keys(window._trainingDayAssignment).map(function(k) { return parseInt(k.replace('day', '')); })) : 3);
+  };
+
+  window._autoDistributeDays = function(n) {
+   window._trainingDayAssignment = {};
+   var maps = { 2: { day1: 'mon', day2: 'thu' }, 3: { day1: 'mon', day2: 'wed', day3: 'fri' }, 4: { day1: 'mon', day2: 'tue', day3: 'thu', day4: 'fri' }, 5: { day1: 'mon', day2: 'tue', day3: 'wed', day4: 'fri', day5: 'sat' }, 6: { day1: 'mon', day2: 'tue', day3: 'wed', day4: 'thu', day5: 'fri', day6: 'sat' } };
+   window._trainingDayAssignment = maps[n] || maps[3];
+   window._renderDayAssignment(null, n);
+  };
+
+  // Injuries helper for AI prompts
+  window._getInjuriesForAI = function() {
+   var injuries = Array.from(window.selectedInjuries || []);
+   return injuries.length > 0 ? injuries.join(', ') : 'keine';
+  };
+
+  // Mesocycle overview renderer
+  window._renderMesoCycleOverview = function(plan) {
+   if (!plan.mesoCycle || !plan.mesoCycle.phases) return '';
+   var html = '<div class="mb-4 p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-xs font-black text-white uppercase tracking-widest mb-3">' + window.t('mesoTitle', 'Mesozyklus') + '</p>';
+   plan.mesoCycle.phases.forEach(function(phase, i) {
+    var isDeload = phase.type === 'deload';
+    var bg = isDeload ? 'rgba(138,175,232,0.1)' : i === 0 ? 'rgba(163,201,168,0.1)' : 'var(--inner-bg-hex)';
+    var bc = isDeload ? 'rgba(138,175,232,0.25)' : i === 0 ? 'rgba(163,201,168,0.25)' : 'var(--border-hex)';
+    var lc = isDeload ? '#8aafe8' : '#a3c9a8';
+    var tl = { accumulation: window.t('mesoAccum', 'Akkumulation'), overreach: window.t('mesoOverreach', 'Overreach'), deload: 'Deload' }[phase.type] || phase.type;
+    html += '<div class="flex items-center gap-3 p-3 rounded-xl mb-2" style="background:' + bg + ';border:1px solid ' + bc + '"><span class="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black" style="background:' + (i === 0 ? 'rgba(163,201,168,0.2)' : 'var(--inner-bg-hex)') + ';color:' + lc + '">' + phase.week + '</span><div class="flex-1"><p class="text-xs font-bold text-white">' + window._escapeHtml(phase.name) + '</p><p class="text-[9px] text-zinc-500">Sets \u00d7' + phase.setsMultiplier + ' \u00b7 RIR ' + phase.targetRIR + '</p></div><span class="text-[8px] font-black uppercase px-2 py-1 rounded" style="color:' + lc + '">' + tl + (i === 0 ? ' \u00b7 ' + window.t('mesoCurrent', 'AKTUELL') : '') + '</span></div>';
+   });
+   html += '</div>';
+   return html;
+  };
+
+  // ============================================================
   // EXERCISE SWAP
   // ============================================================
   window._findExerciseAlternatives = function(exerciseName, maxResults) {

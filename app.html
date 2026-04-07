@@ -1849,6 +1849,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="mb-4">
+                    <p class="text-sm font-black text-white mb-1" data-i18n="lblDayAssign">Wochentage zuweisen</p>
+                    <p class="text-[9px] text-zinc-500 mb-3" data-i18n="lblDayAssignSub">An welchen Tagen moechtest du trainieren?</p>
+                    <div id="dayAssignmentContainer"></div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-sm font-black text-white mb-1" data-i18n="lblFocusMuscles">Fokus-Muskelgruppen</p>
+                    <p class="text-[9px] text-zinc-500 mb-2" data-i18n="lblFocusSub">Waehle bis zu 2 Muskelgruppen die besonders betont werden (optional)</p>
+                    <div id="focusMuscleChips"></div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-sm font-black text-white mb-1" data-i18n="lblPlanInjuries">Schmerzbereiche</p>
+                    <p class="text-[9px] text-zinc-500 mb-2" data-i18n="lblPlanInjuriesSub">Vorausgefuellt aus deinem Profil</p>
+                    <div id="planInjuryChips" class="flex flex-wrap gap-2"></div>
+                </div>
                 <button aria-label="Generieren" onclick="window.generateTrainingPlan()" id="btnGenPlan" class="w-full bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-black py-4 rounded-xl uppercase tracking-widest text-sm cursor-pointer pointer-events-auto shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:opacity-90 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="sparkles" class="w-4 h-4 pointer-events-none"></i>
                     <span id="btnGenPlanText" data-i18n="planGenerate">Plan generieren</span>
