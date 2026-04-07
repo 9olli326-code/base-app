@@ -2456,7 +2456,7 @@
                     <h3 class="text-xl font-black text-white uppercase tracking-tighter" data-i18n="lblFeedback">Dein Feedback</h3>
                     <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="feedbackSub">Direkt an die Entwickler</p>
                 </div>
-                <input type="button" value="&#10005;" onclick="window.toggleModal('feedbackModal')" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:8px">
+                <input type="button" value="&#10005;" onclick="window.toggleModal('feedbackModal')" class="pointer-events-auto" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:8px">
             </div>
 
             <p class="text-sm font-bold text-zinc-300 mb-3" data-i18n="feedbackRate">Wie gefällt dir BASE?</p>
@@ -2481,7 +2481,7 @@
             <p class="text-sm font-bold text-zinc-300 mb-2" data-i18n="feedbackMsg">Deine Nachricht</p>
             <textarea id="feedbackText" rows="4" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none resize-none focus:border-zinc-600" placeholder="Was beschäftigt dich? Was vermisst du? Was ist grandios?" data-i18n-placeholder="feedbackPlaceholder"></textarea>
             <input id="feedbackEmail" type="email" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600" placeholder="E-Mail (optional — für Rückmeldung)" data-i18n-placeholder="feedbackEmailPlaceholder">
-            <input type="button" id="btnSubmitFeedback" onclick="window.submitFeedback()" value="&#9992; Feedback senden" class="w-full py-3.5 rounded-xl font-black text-sm uppercase tracking-widest cursor-pointer" style="background:var(--primary-hex,#a3c9a8);color:#000;border:none">
+            <input type="button" id="btnSubmitFeedback" onclick="window.submitFeedback()" value="&#9992; Feedback senden" class="w-full py-3.5 rounded-xl font-black text-sm uppercase tracking-widest cursor-pointer pointer-events-auto" style="background:var(--primary-hex,#a3c9a8);color:#000;border:none">
         </div>
     </div>
 

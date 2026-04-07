@@ -1237,7 +1237,7 @@
     '<p style="color:#71717a;font-size:11px;margin:0 0 16px 0">Kein Account nötig — einfach loslegen.</p>' +
     '<input id="anonJoinName" type="text" required placeholder="Wie sollen dich die anderen sehen?" style="width:100%;box-sizing:border-box;background:#09090b;border:1px solid #27272a;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:600;outline:none;margin-bottom:12px" />' +
     '<button id="anonJoinBtn" style="width:100%;padding:14px;background:#84a98c;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer">Mitmachen</button>' +
-    '<p style="color:#52525b;font-size:10px;text-align:center;margin:12px 0 0 0">Optional: <a onclick="document.getElementById(\'anonJoinOverlay\').remove();window.toggleModal(\'authModal\')" style="color:#6366f1;cursor:pointer;text-decoration:underline">Account erstellen</a> für Cloud-Sync</p>' +
+    '<p style="color:#52525b;font-size:10px;text-align:center;margin:12px 0 0 0">Optional: <a onclick="document.getElementById(\'anonJoinOverlay\').remove();window.toggleModal(\'authModal\')" style="color:#6366f1;cursor:pointer;text-decoration:underline;pointer-events:auto">Account erstellen</a> für Cloud-Sync</p>' +
     '</div>';
    document.body.appendChild(overlay);
    overlay.addEventListener('click', function(e) { if(e.target === overlay) overlay.remove(); });
