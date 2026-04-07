@@ -49,6 +49,8 @@ window.renderWidgetStoreUI = function() {
         else if(elId === 'mod_readiness') el.checked = !!(widgets.readiness);
         else el.checked = modules[modKey] !== false;
     });
+    var vcToggle = document.getElementById('mod_voiceCoach');
+    if (vcToggle) vcToggle.checked = localStorage.getItem('base_voice_coach') === 'true';
 };
 
 window.saveModules = function() {
