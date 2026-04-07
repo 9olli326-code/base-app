@@ -427,6 +427,7 @@
        resolve(snap.exists() ? snap.data() : null);
       });
      });
+     if(data && data.gatingActive === true) window._GATING_ACTIVE = true;
      return data && data.paywallActive === true;
     } catch(e) { return false; }
    };

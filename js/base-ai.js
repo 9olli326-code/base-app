@@ -219,7 +219,7 @@ window.toggleZNS = function() {
 
 window.analyzeReadinessWithAI = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('scan')) return;
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
@@ -267,7 +267,7 @@ Max 180 Wörter. Antworte auf ${window.getPromptLang()}.`;
 // --- AI CO-PILOT ---
 window.triggerCopilot = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('coach')) return;
     const exercise = document.getElementById('exerciseInput')?.value?.trim();
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
@@ -324,7 +324,7 @@ Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
 // --- PRE-HAB ---
 window.generatePreHab = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('scan')) return;
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
@@ -360,7 +360,7 @@ Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B
 // --- HAUPT AI ANALYSE ---
 window.analyzeWithAI = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('scan')) return;
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
@@ -410,7 +410,7 @@ Max 320 Wörter, präzise und datenbasiert. Antworte auf ${window.getPromptLang(
 // --- KI FORM BUILDER ---
 window.generateForm = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('coach')) return;
     const input = document.getElementById('sportTypeInput')?.value?.trim();
     if (!input) { window.showToast(window.t("aiEnterActivity","Bitte eine Beschreibung eingeben!")); return; }
     const btnText = document.getElementById('btnGenText');
@@ -677,7 +677,7 @@ window.openTrainingPlanModal = function() {
 
 window.generateTrainingPlan = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('plan')) return;
     if(!planGoal) { window.showToast(window.t('toastError','Bitte ein Ziel wählen!')); return; }
     var btn = document.getElementById('btnGenPlan');
     var btnText = document.getElementById('btnGenPlanText');
@@ -818,7 +818,7 @@ window.savePlanAsRoutines = function() {
 // ============================================================
 window.getWarmupRecommendation = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(typeof window.aiGate === 'function' && !window.aiGate()) return;
+    if(!window.checkFeatureGate('coach')) return;
     const ctx = window.buildAIContext();
     const cat = window.currentCategory || 'strength';
     const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Mobility', main:'Custom' }[cat] || cat;
@@ -882,7 +882,7 @@ window._renderWarmupList = function(exercises) {
 // ============================================================
 window.getExerciseRecommendation = async function() {
     if(!window.checkOnlineForAI()) return;
-    if(typeof window.aiGate === 'function' && !window.aiGate()) return;
+    if(!window.checkFeatureGate('coach')) return;
     const ctx = window.buildAIContext();
     const cat = window.currentCategory || 'strength';
     const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Mobility', main:'Custom' }[cat] || cat;
@@ -971,7 +971,7 @@ window._SMART_WORKOUT_SYSTEM_PROMPT = 'Du bist ein Sportwissenschaftler mit 15 J
 
 window.generateSmartWorkout = async function() {
     if(window.checkOnlineForAI && !window.checkOnlineForAI()) return;
-    if(window.aiGate && !(await window.aiGate())) return;
+    if(!window.checkFeatureGate('plan')) return;
     var workouts = window.workouts || [];
     var archived = workouts.filter(function(w) { return w.archived; });
     if(archived.length < 3) { window.showToast(window.t('toastError','Tracke mindestens 3 Workouts für KI-Planung')); return; }

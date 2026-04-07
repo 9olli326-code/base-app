@@ -607,6 +607,11 @@ if(_onboardStep > 1) { _onboardStep--; window._renderOnboardStep(); }
 };
 
 window.saveOnboardClient = function() {
+if(window._GATING_ACTIVE && !window._userIsPro) {
+ var clientCount = (window.clients || []).length;
+ var clientLimit = window._FEATURE_LIMITS && window._FEATURE_LIMITS.client ? window._FEATURE_LIMITS.client.max : 2;
+ if(clientCount >= clientLimit) { window._showUpgradePrompt('client', window._FEATURE_LIMITS ? window._FEATURE_LIMITS.client : { max: 2, period: 'total', label: 'PT Kunden', labelKey: 'gateClient' }); return; }
+}
 const client = { id: 'client_' + Date.now(), name: _onboardData.name };
 window.clients.push(client);
 localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));

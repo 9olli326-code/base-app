@@ -1133,6 +1133,7 @@
   };
 
   window.createChallenge = function() {
+   if(!window.checkFeatureGate('challenge')) return;
    var title = (document.getElementById('chTitle') || {}).value || '';
    title = title.trim();
    var exercise = (document.getElementById('chExercise') || {}).value || '';
@@ -2056,6 +2057,97 @@
   window._aiCallsToday = 0;
   window._paywallActive = false;
   window._userIsPro = false;
+
+  // === FEATURE GATING SYSTEM ===
+  window._GATING_ACTIVE = false;
+  window._FEATURE_LIMITS = {
+   coach:     { max: 3, period: 'daily',   label: 'KI Coach',            labelKey: 'gateCoach' },
+   plan:      { max: 1, period: 'monthly', label: 'Trainingsplan',       labelKey: 'gatePlan' },
+   scan:      { max: 1, period: 'weekly',  label: 'KI Analyse/Scan',     labelKey: 'gateScan' },
+   challenge: { max: 1, period: 'daily',   label: 'Challenge erstellen', labelKey: 'gateChallenge' },
+   client:    { max: 2, period: 'total',   label: 'PT Kunden',           labelKey: 'gateClient' }
+  };
+
+  window._getFeatureUsage = function(feature) {
+   var key = 'base_gate_' + feature;
+   var raw = localStorage.getItem(key);
+   if(!raw) return 0;
+   try {
+    var data = JSON.parse(raw);
+    var limit = window._FEATURE_LIMITS[feature];
+    if(!limit) return 0;
+    if(limit.period === 'total') return data.count || 0;
+    var now = new Date();
+    if(limit.period === 'daily' && data.date !== now.toISOString().slice(0, 10)) return 0;
+    if(limit.period === 'weekly') { var ws = new Date(now); ws.setDate(now.getDate() - now.getDay() + 1); if(!data.week || data.week !== ws.toISOString().slice(0, 10)) return 0; }
+    if(limit.period === 'monthly' && (!data.month || data.month !== now.toISOString().slice(0, 7))) return 0;
+    return data.count || 0;
+   } catch(e) { return 0; }
+  };
+
+  window._incrementFeatureUsage = function(feature) {
+   var key = 'base_gate_' + feature;
+   var limit = window._FEATURE_LIMITS[feature];
+   if(!limit) return;
+   var now = new Date();
+   var data = { count: window._getFeatureUsage(feature) + 1 };
+   if(limit.period === 'daily') data.date = now.toISOString().slice(0, 10);
+   if(limit.period === 'weekly') { var ws = new Date(now); ws.setDate(now.getDate() - now.getDay() + 1); data.week = ws.toISOString().slice(0, 10); }
+   if(limit.period === 'monthly') data.month = now.toISOString().slice(0, 7);
+   localStorage.setItem(key, JSON.stringify(data));
+  };
+
+  window._cleanupFeatureUsage = function() {
+   var now = new Date();
+   Object.keys(window._FEATURE_LIMITS).forEach(function(f) {
+    var key = 'base_gate_' + f;
+    var raw = localStorage.getItem(key);
+    if(!raw) return;
+    try {
+     var data = JSON.parse(raw);
+     var limit = window._FEATURE_LIMITS[f];
+     if(limit.period === 'daily' && data.date && data.date !== now.toISOString().slice(0, 10)) localStorage.removeItem(key);
+     if(limit.period === 'weekly') { var ws = new Date(now); ws.setDate(now.getDate() - now.getDay() + 1); if(data.week && data.week !== ws.toISOString().slice(0, 10)) localStorage.removeItem(key); }
+     if(limit.period === 'monthly' && data.month && data.month !== now.toISOString().slice(0, 7)) localStorage.removeItem(key);
+    } catch(e) { localStorage.removeItem(key); }
+   });
+  };
+
+  window.checkFeatureGate = function(feature) {
+   if(!window._GATING_ACTIVE) return true;
+   if(window._userIsPro) return true;
+   var limit = window._FEATURE_LIMITS[feature];
+   if(!limit) return true;
+   var usage = window._getFeatureUsage(feature);
+   if(usage >= limit.max) { window._showUpgradePrompt(feature, limit); return false; }
+   window._incrementFeatureUsage(feature);
+   return true;
+  };
+
+  window._showUpgradePrompt = function(feature, limit) {
+   var periodText = { daily: window.t('gateToday','heute'), weekly: window.t('gateWeek','diese Woche'), monthly: window.t('gateMonth','diesen Monat'), total: '' }[limit.period] || '';
+   var label = limit.labelKey ? window.t(limit.labelKey, limit.label) : limit.label;
+   var msg = label + ': ' + limit.max + 'x ' + periodText + ' ' + window.t('gateFree','im Free-Plan');
+   var overlay = document.getElementById('featureGateOverlay');
+   if(overlay) {
+    var nameEl = document.getElementById('gateFeatureName');
+    var infoEl = document.getElementById('gateLimitInfo');
+    if(nameEl) nameEl.textContent = label;
+    if(infoEl) infoEl.textContent = msg;
+    overlay.classList.remove('hidden'); overlay.classList.add('flex');
+    window._refreshLucide();
+    return;
+   }
+   if(window.showPaywall) window.showPaywall();
+  };
+
+  window._closeFeatureGate = function() {
+   var el = document.getElementById('featureGateOverlay');
+   if(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+  };
+
+  setTimeout(function() { window._cleanupFeatureUsage(); }, 2000);
+
   var AI_FREE_LIMIT = 1;
 
   window._initPaywall = async function() {
