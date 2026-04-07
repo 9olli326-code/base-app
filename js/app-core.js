@@ -325,7 +325,7 @@
    window.setupInjuryChips(); window.populateProfile(); 
    const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
    
-   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility();
+   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar();
    if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('init'); }, 3000);
    if (window.DESIGN_MORPH_ACTIVE && window._applyModeTheme) {
     var _dmInitMode = 'athlete';
@@ -539,7 +539,7 @@
   window.editEntry = (id) => { const w = window.workouts.find(x => x.id === id); if(!w) return; if(window.currentCategory !== w.category) window.switchCategory(w.category); window.editingWorkoutId = id; document.getElementById('dateInput').value = w.date; document.getElementById('exerciseInput').value = w.exercise; if (w.category === 'strength') { const sInput = document.getElementById('setsInput'); if(sInput && w.setDetails) { sInput.value = w.setDetails.length || 3; window.generateSetFields(sInput.value); setTimeout(() => { w.setDetails.forEach((s, idx) => { const i = idx + 1; const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); if(rEl) rEl.value = s.reps; if(wEl) wEl.value = s.weight; }); }, 50); } const eqInput = document.getElementById('equipmentInput'); if(eqInput && w.equipment) eqInput.value = w.equipment; } else { if(window.categorySchemas[w.category] && window.categorySchemas[w.category].schema) { window.categorySchemas[w.category].schema.forEach(field => { const el = document.getElementById('dyn_' + field.id); if(el && w.data[field.label] !== undefined) { el.value = w.data[field.label]; } }); } } document.getElementById('btnSaveText').textContent = "Update"; document.getElementById('btnSubmitWorkout').classList.replace('bg-primary', 'bg-primary'); document.getElementById('btnSubmitIcon').classList.replace('fill-black/20', 'fill-white/20'); document.getElementById('btnSubmitWorkout').classList.replace('text-black', 'text-white'); document.getElementById('btnCancelEdit').classList.remove('hidden'); document.getElementById('workoutForm').scrollIntoView({behavior: 'smooth'}); };
   window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
-  window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); window._lastWorkoutBrag = { category: window.currentCategory === 'strength' ? 'Krafttraining' : window.currentCategory === 'cardio' ? 'Ausdauer' : window.currentCategory === 'recovery' ? 'Regeneration' : 'Training', duration: durationDisplay || durationStr || 'Beendet', exercises: String(activeWorkouts.length || 0), sets: String(activeWorkouts.reduce(function(sum, w) { return sum + (w.setDetails ? w.setDetails.length : 1); }, 0)), volume: String(Math.round(sessionVolume || 0)), exerciseList: activeWorkouts.slice(0, 6).map(function(w) { var detail = ''; if(w.setDetails && w.setDetails.length > 0) { detail = w.setDetails.length + ' Sets'; if(w.setDetails[0].weight) detail += ' \u00d7 ' + w.setDetails[0].weight + 'kg'; } else if(w.data) { var keys = Object.keys(w.data).slice(0, 2); detail = keys.map(function(k) { return k + ': ' + w.data[k]; }).join(' | '); } return { name: w.exercise || 'Uebung', detail: detail }; }) }; setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } }, true); };
+  window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); window._lastWorkoutBrag = { category: window.currentCategory === 'strength' ? 'Krafttraining' : window.currentCategory === 'cardio' ? 'Ausdauer' : window.currentCategory === 'recovery' ? 'Regeneration' : 'Training', duration: durationDisplay || durationStr || 'Beendet', exercises: String(activeWorkouts.length || 0), sets: String(activeWorkouts.reduce(function(sum, w) { return sum + (w.setDetails ? w.setDetails.length : 1); }, 0)), volume: String(Math.round(sessionVolume || 0)), exerciseList: activeWorkouts.slice(0, 6).map(function(w) { var detail = ''; if(w.setDetails && w.setDetails.length > 0) { detail = w.setDetails.length + ' Sets'; if(w.setDetails[0].weight) detail += ' \u00d7 ' + w.setDetails[0].weight + 'kg'; } else if(w.data) { var keys = Object.keys(w.data).slice(0, 2); detail = keys.map(function(k) { return k + ': ' + w.data[k]; }).join(' | '); } return { name: w.exercise || 'Uebung', detail: detail }; }) }; setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(window.awardXP) window.awardXP('workout'); if(window._checkGoalProgress) window._checkGoalProgress(); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } }, true); };
   window._checkAnonConversion = function() {
    var anonId = localStorage.getItem('base_anon_challenge_id');
    if(!anonId) return;
@@ -1265,7 +1265,7 @@
     if(parts.some(function(p) { return p.uid === uid; })) { window.showToast(window.t('toastError', 'Bereits beigetreten!')); return; }
     parts.push({ uid: uid, name: cname, progress: 0, lastUpdate: new Date().toISOString() });
     window._chUpdate(challengeId, { participants: parts }).then(function(result) {
-     if(result === true) { window.showToast(window.t('toastUpdate', 'Challenge beigetreten!')); window.loadMyChallenges(); }
+     if(result === true) { window.showToast(window.t('toastUpdate', 'Challenge beigetreten!')); window.loadMyChallenges(); if(window.awardXP) window.awardXP('challengeJoin'); }
      else { window.showToast('Fehler: ' + result); }
     });
    });
@@ -3234,8 +3234,11 @@
      if(Math.abs(expected - d) < 86400000) { dayStreak++; } else break;
     }
    }
+   var prevStreak = parseInt(localStorage.getItem('base_streak_count') || '0');
    localStorage.setItem('base_streak_count', dayStreak);
    localStorage.setItem('base_streak_last_date', new Date().toISOString().split('T')[0]);
+   if(dayStreak >= 7 && prevStreak < 7 && window.awardXP) window.awardXP('streak7');
+   if(dayStreak >= 30 && prevStreak < 30 && window.awardXP) window.awardXP('streak30');
 
    const bar = document.getElementById('streakBar');
    const countEl = document.getElementById('streakCount');
@@ -4828,5 +4831,235 @@
      if (el.parentNode) el.parentNode.removeChild(el);
     }, 350);
    }
+  };
+
+  // ============================================================
+  // XP / LEVEL / RANG SYSTEM
+  // ============================================================
+  window.BASE_XP = {
+   sources: { workout: 50, coachChat: 15, scanAnalysis: 25, planGenerated: 40, challengeJoin: 30, goalComplete: 500, streak7: 200, streak30: 1000 },
+   maxPerDay: { workout: 2, coachChat: 3, scanAnalysis: 1, planGenerated: 1, challengeJoin: 1 },
+   ranks: [
+    { name: 'Rookie', minXP: 0, maxLevel: 4 },
+    { name: 'Contender', minXP: 500, maxLevel: 9 },
+    { name: 'Veteran', minXP: 2000, maxLevel: 14 },
+    { name: 'Elite', minXP: 6000, maxLevel: 19 },
+    { name: 'Legend', minXP: 15000, maxLevel: 99 }
+   ]
+  };
+
+  window._xpForLevel = function(level) {
+   if(level <= 1) return 0;
+   return Math.floor(100 * Math.pow(1.3, level - 1));
+  };
+
+  window._getLevelFromXP = function(totalXP) {
+   var level = 1, xpNeeded = 0;
+   while(true) {
+    var nextLevel = window._xpForLevel(level + 1);
+    if(totalXP < xpNeeded + nextLevel) break;
+    xpNeeded += nextLevel;
+    level++;
+    if(level > 99) break;
+   }
+   return { level: level, currentXP: totalXP - xpNeeded, nextLevelXP: window._xpForLevel(level + 1), totalXP: totalXP };
+  };
+
+  window._getRank = function(totalXP) {
+   var ranks = window.BASE_XP.ranks;
+   var rank = ranks[0];
+   for(var i = ranks.length - 1; i >= 0; i--) {
+    if(totalXP >= ranks[i].minXP) { rank = ranks[i]; break; }
+   }
+   return rank;
+  };
+
+  window.awardXP = function(source) {
+   var xpData = JSON.parse(localStorage.getItem('base_xp_data') || '{"totalXP":0,"history":[],"dailyCounts":{}}');
+   var today = new Date().toISOString().split('T')[0];
+   var maxPerDay = window.BASE_XP.maxPerDay[source];
+   if(maxPerDay) {
+    var dailyKey = source + '_' + today;
+    var count = xpData.dailyCounts[dailyKey] || 0;
+    if(count >= maxPerDay) return null;
+    xpData.dailyCounts[dailyKey] = count + 1;
+   }
+   Object.keys(xpData.dailyCounts).forEach(function(key) {
+    if(!key.endsWith(today) && !key.endsWith(new Date(Date.now() - 86400000).toISOString().split('T')[0])) { delete xpData.dailyCounts[key]; }
+   });
+   var amount = window.BASE_XP.sources[source];
+   if(!amount) return null;
+   var oldLevel = window._getLevelFromXP(xpData.totalXP).level;
+   xpData.totalXP += amount;
+   var newLevel = window._getLevelFromXP(xpData.totalXP).level;
+   xpData.history.push({ source: source, amount: amount, date: today });
+   if(xpData.history.length > 100) xpData.history = xpData.history.slice(-100);
+   localStorage.setItem('base_xp_data', JSON.stringify(xpData));
+   window._renderXPBar();
+   if(newLevel > oldLevel) { window._showLevelUp(newLevel, window._getRank(xpData.totalXP)); }
+   window._syncXPToCloud(xpData);
+   return { amount: amount, totalXP: xpData.totalXP, level: newLevel };
+  };
+
+  window._renderXPBar = function() {
+   var container = document.getElementById('xpBarContainer');
+   if(!container) return;
+   var xpData = JSON.parse(localStorage.getItem('base_xp_data') || '{"totalXP":0}');
+   var info = window._getLevelFromXP(xpData.totalXP);
+   var rank = window._getRank(xpData.totalXP);
+   var pct = info.nextLevelXP > 0 ? Math.min(100, Math.round((info.currentXP / info.nextLevelXP) * 100)) : 100;
+   container.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">' +
+    '<span style="font-size:10px;font-weight:800;color:#a3c9a8;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap">' + rank.name + ' \u00b7 Lv ' + info.level + '</span>' +
+    '<div style="flex:1;height:4px;background:#1e201e;border-radius:99px;overflow:hidden">' +
+    '<div style="height:100%;width:' + pct + '%;background:#a3c9a8;border-radius:99px;transition:width 0.5s ease"></div></div>' +
+    '<span style="font-size:9px;color:#82828c;white-space:nowrap">' + info.currentXP + '/' + info.nextLevelXP + ' XP</span></div>';
+  };
+
+  window._showLevelUp = function(level, rank) {
+   var overlay = document.createElement('div');
+   overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85)';
+   overlay.innerHTML = '<div style="text-align:center"><p style="font-size:14px;color:#a3c9a8;font-weight:800;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:8px">LEVEL UP!</p><p style="font-size:72px;font-weight:900;color:#f4f4f5;line-height:1">' + level + '</p><p style="font-size:18px;color:#a3c9a8;font-weight:700;margin-top:8px">' + rank.name + '</p><p style="font-size:13px;color:#82828c;margin-top:16px">Weiter so!</p></div>';
+   overlay.onclick = function() { overlay.remove(); };
+   document.body.appendChild(overlay);
+   setTimeout(function() { overlay.remove(); }, 3000);
+  };
+
+  window._syncXPToCloud = async function(xpData) {
+   var auth = window._fbAuth;
+   if(!auth || !auth.currentUser || !window._fbDb) return;
+   try {
+    var ref = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'xp_progress');
+    await window._fbSetDoc(ref, { totalXP: xpData.totalXP, history: xpData.history.slice(-20), updated: new Date().toISOString() });
+   } catch(e) { console.log('XP sync error:', e); }
+  };
+
+  // ============================================================
+  // PERSOENLICHE ZIELE
+  // ============================================================
+  window.getGoals = function() { return JSON.parse(localStorage.getItem('base_goals') || '[]'); };
+  window.saveGoals = function(goals) { localStorage.setItem('base_goals', JSON.stringify(goals)); window._syncGoalsToCloud(goals); };
+  window._syncGoalsToCloud = async function(goals) {
+   var auth = window._fbAuth;
+   if(!auth || !auth.currentUser || !window._fbDb) return;
+   try {
+    var ref = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'goals');
+    await window._fbSetDoc(ref, { goals: goals, updated: new Date().toISOString() });
+   } catch(e) { console.log('Goals sync error:', e); }
+  };
+
+  window.openGoalModal = function() {
+   var goals = window.getGoals();
+   var activeGoals = goals.filter(function(g) { return !g.completed; });
+   var completedGoals = goals.filter(function(g) { return g.completed; });
+   var html = '<div style="margin-bottom:16px"><p class="text-sm font-bold text-zinc-300 mb-3">Aktive Ziele</p>';
+   if(activeGoals.length === 0) { html += '<p class="text-xs text-zinc-600 mb-4">Noch keine Ziele gesetzt. Setze dir dein erstes Ziel!</p>'; }
+   else { activeGoals.forEach(function(g) {
+    var pct = g.targetValue > 0 ? Math.min(100, Math.round((g.currentValue / g.targetValue) * 100)) : 0;
+    var daysLeft = Math.max(0, Math.ceil((new Date(g.deadline) - new Date()) / 86400000));
+    html += '<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-3"><div class="flex items-center justify-between mb-2"><p class="text-sm font-bold text-white">' + window._escapeHtml(g.title) + '</p>';
+    html += '<button onclick="window.deleteGoal(\'' + g.id + '\')" class="text-zinc-600 hover:text-rose-400 cursor-pointer pointer-events-auto"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button></div>';
+    html += '<div class="flex items-center gap-2 mb-2"><div style="flex:1;height:6px;background:#1e201e;border-radius:99px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#a3c9a8;border-radius:99px;transition:width 0.3s"></div></div>';
+    html += '<span class="text-xs font-bold" style="color:#a3c9a8">' + pct + '%</span></div>';
+    html += '<div class="flex items-center justify-between"><span class="text-[10px] text-zinc-500">' + g.currentValue + ' / ' + g.targetValue + ' ' + window._escapeHtml(g.unit || '') + '</span>';
+    html += '<span class="text-[10px] text-zinc-500">' + (daysLeft > 0 ? daysLeft + ' Tage' : 'Abgelaufen') + '</span></div>';
+    if(pct >= 100) { html += '<button onclick="window.completeGoal(\'' + g.id + '\')" class="w-full mt-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.15);color:#a3c9a8;border:1px solid rgba(163,201,168,0.3)">Ziel erreicht \u2014 500 XP!</button>'; }
+    html += '</div>';
+   }); }
+   html += '</div>';
+   if(completedGoals.length > 0) { html += '<p class="text-sm font-bold text-zinc-300 mb-3">Erreichte Ziele</p>';
+    completedGoals.slice(0, 5).forEach(function(g) {
+     html += '<div class="flex items-center gap-3 py-2 border-b border-zinc-800/50"><span style="color:#a3c9a8;font-size:16px">\u2713</span><div>';
+     html += '<p class="text-xs font-bold text-zinc-400">' + window._escapeHtml(g.title) + '</p>';
+     html += '<p class="text-[10px] text-zinc-600">Erreicht am ' + (g.completedDate || '\u2014') + ' \u00b7 +500 XP</p></div></div>';
+    });
+   }
+   html += '<button onclick="window.openCreateGoal()" class="w-full mt-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest cursor-pointer pointer-events-auto" style="background:#a3c9a8;color:#0f110f">+ Neues Ziel setzen</button>';
+   var container = document.getElementById('goalModalContent');
+   if(container) container.innerHTML = html;
+   window.toggleModal('goalModal');
+   if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+  };
+
+  window.openCreateGoal = function() {
+   var html = '<div><p class="text-sm font-bold text-zinc-300 mb-2">Was ist dein Ziel?</p>';
+   html += '<input id="goalTitle" type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="z.B. 100kg Bankdruecken, 5km unter 25min...">';
+   html += '<div class="grid grid-cols-2 gap-3 mb-4"><div><p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Zielwert</p>';
+   html += '<input id="goalTarget" type="number" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="100"></div>';
+   html += '<div><p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Einheit</p>';
+   html += '<input id="goalUnit" type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="kg, km, min..."></div></div>';
+   html += '<p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Aktueller Stand</p>';
+   html += '<input id="goalCurrent" type="number" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="80">';
+   html += '<p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Deadline</p>';
+   html += '<input id="goalDeadline" type="date" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto">';
+   html += '<div class="flex gap-3"><button onclick="window.openGoalModal()" class="flex-1 py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-bold cursor-pointer pointer-events-auto">Zurueck</button>';
+   html += '<button onclick="window.saveNewGoal()" class="flex-1 py-3 rounded-xl text-sm font-black cursor-pointer pointer-events-auto" style="background:#a3c9a8;color:#0f110f">Speichern</button></div></div>';
+   var container = document.getElementById('goalModalContent');
+   if(container) container.innerHTML = html;
+  };
+
+  window.saveNewGoal = function() {
+   var title = (document.getElementById('goalTitle') || {}).value || '';
+   var target = parseFloat((document.getElementById('goalTarget') || {}).value) || 0;
+   var unit = (document.getElementById('goalUnit') || {}).value || '';
+   var current = parseFloat((document.getElementById('goalCurrent') || {}).value) || 0;
+   var deadline = (document.getElementById('goalDeadline') || {}).value || '';
+   if(!title.trim()) { window.showToast('Bitte Ziel eingeben'); return; }
+   if(!target) { window.showToast('Bitte Zielwert eingeben'); return; }
+   if(!deadline) { window.showToast('Bitte Deadline waehlen'); return; }
+   var goals = window.getGoals();
+   goals.push({ id: 'goal_' + Date.now(), title: title.trim(), targetValue: target, currentValue: current, unit: unit.trim(), deadline: deadline, completed: false, completedDate: null, createdDate: new Date().toISOString().split('T')[0] });
+   window.saveGoals(goals);
+   window.showToast('Ziel gesetzt!');
+   window.openGoalModal();
+  };
+
+  window.completeGoal = function(goalId) {
+   var goals = window.getGoals();
+   var goal = goals.find(function(g) { return g.id === goalId; });
+   if(!goal) return;
+   goal.completed = true; goal.completedDate = new Date().toISOString().split('T')[0];
+   window.saveGoals(goals);
+   if(window.awardXP) window.awardXP('goalComplete');
+   window._showGoalComplete(goal);
+   window.openGoalModal();
+  };
+
+  window.deleteGoal = function(goalId) {
+   var goals = window.getGoals().filter(function(g) { return g.id !== goalId; });
+   window.saveGoals(goals);
+   window.openGoalModal();
+  };
+
+  window.updateGoalProgress = function(goalId, newValue) {
+   var goals = window.getGoals();
+   var goal = goals.find(function(g) { return g.id === goalId; });
+   if(!goal) return;
+   goal.currentValue = newValue;
+   window.saveGoals(goals);
+  };
+
+  window._showGoalComplete = function(goal) {
+   var overlay = document.createElement('div');
+   overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.9)';
+   overlay.innerHTML = '<div style="text-align:center"><p style="font-size:48px;margin-bottom:16px">\uD83C\uDFAF</p><p style="font-size:14px;color:#a3c9a8;font-weight:800;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:8px">ZIEL ERREICHT!</p><p style="font-size:24px;font-weight:900;color:#f4f4f5;margin-bottom:8px">' + window._escapeHtml(goal.title) + '</p><p style="font-size:36px;font-weight:900;color:#a3c9a8">+500 XP</p><p style="font-size:13px;color:#82828c;margin-top:16px">Setze dir dein naechstes Ziel!</p></div>';
+   overlay.onclick = function() { overlay.remove(); };
+   document.body.appendChild(overlay);
+   setTimeout(function() { overlay.remove(); }, 4000);
+  };
+
+  window._checkGoalProgress = function() {
+   var goals = window.getGoals().filter(function(g) { return !g.completed; });
+   if(goals.length === 0) return;
+   goals.forEach(function(goal) {
+    var title = goal.title.toLowerCase();
+    if(Array.isArray(window.workouts)) {
+     window.workouts.forEach(function(w) {
+      if(!w.archived) return;
+      if(w.setDetails) { w.setDetails.forEach(function(set) { var weight = parseFloat(set.weight) || 0; if(weight > 0 && w.exercise && title.includes(w.exercise.toLowerCase()) && weight >= goal.targetValue) { goal.currentValue = Math.max(goal.currentValue, weight); } }); }
+      if(w.data) { var dist = parseFloat(w.data['Distanz (km)'] || w.data['Distanz'] || 0); if(dist > 0 && (title.includes('km') || title.includes('lauf') || title.includes('run'))) { goal.currentValue = Math.max(goal.currentValue, dist); } }
+     });
+    }
+   });
+   window.saveGoals(goals);
   };
 

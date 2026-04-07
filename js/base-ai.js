@@ -256,6 +256,7 @@ Max 180 Wörter. Antworte auf ${window.getPromptLang()}.`;
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
         if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
+        if(window.awardXP) window.awardXP('coachChat');
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
@@ -731,6 +732,7 @@ window.generateTrainingPlan = async function() {
         var plan = { planName: totalWeeks + '-Wochen ' + planGoal, goal: planGoal, weeks: allWeeks, progressionNotes: 'Progressiver ' + totalWeeks + '-Wochen Plan mit Periodisierung und Deload.' };
         _generatedPlan = plan;
         window.renderTrainingPlan(plan);
+        if(window.awardXP) window.awardXP('planGenerated');
     } catch(e) {
         window.showToast(window.t('toastError') + ': ' + e.message);
     } finally {
@@ -849,6 +851,7 @@ Sprache für name und purpose: ${lang}`;
         const arrMatch = jsonStr.match(/\[[\s\S]*\]/);
         const exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr);
         window._renderWarmupList(exercises);
+        if(window.awardXP) window.awardXP('scanAnalysis');
         if(typeof window._aiTrackCall === 'function') window._aiTrackCall();
     } catch(e) {
         console.error('Warmup KI Error:', e);
