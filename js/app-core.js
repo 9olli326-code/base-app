@@ -116,7 +116,7 @@
 
   if(!document.getElementById('retentionStyles')) {
    var _rs = document.createElement('style'); _rs.id = 'retentionStyles';
-   _rs.textContent = '@keyframes slideUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}';
+   _rs.textContent = '@keyframes slideUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes fadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(20px)}}';
    document.head.appendChild(_rs);
   }
 
@@ -715,7 +715,7 @@
   window.editEntry = (id) => { const w = window.workouts.find(x => x.id === id); if(!w) return; if(window.currentCategory !== w.category) window.switchCategory(w.category); window.editingWorkoutId = id; document.getElementById('dateInput').value = w.date; document.getElementById('exerciseInput').value = w.exercise; if (w.category === 'strength') { const sInput = document.getElementById('setsInput'); if(sInput && w.setDetails) { sInput.value = w.setDetails.length || 3; window.generateSetFields(sInput.value); setTimeout(() => { w.setDetails.forEach((s, idx) => { const i = idx + 1; const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); if(rEl) rEl.value = s.reps; if(wEl) wEl.value = s.weight; }); }, 50); } const eqInput = document.getElementById('equipmentInput'); if(eqInput && w.equipment) eqInput.value = w.equipment; } else { if(window.categorySchemas[w.category] && window.categorySchemas[w.category].schema) { window.categorySchemas[w.category].schema.forEach(field => { const el = document.getElementById('dyn_' + field.id); if(el && w.data[field.label] !== undefined) { el.value = w.data[field.label]; } }); } } document.getElementById('btnSaveText').textContent = "Update"; document.getElementById('btnSubmitWorkout').classList.replace('bg-primary', 'bg-primary'); document.getElementById('btnSubmitIcon').classList.replace('fill-black/20', 'fill-white/20'); document.getElementById('btnSubmitWorkout').classList.replace('text-black', 'text-white'); document.getElementById('btnCancelEdit').classList.remove('hidden'); document.getElementById('workoutForm').scrollIntoView({behavior: 'smooth'}); };
   window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
-  window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); window._lastWorkoutBrag = { category: window.currentCategory === 'strength' ? 'Krafttraining' : window.currentCategory === 'cardio' ? 'Ausdauer' : window.currentCategory === 'recovery' ? 'Regeneration' : 'Training', duration: durationDisplay || durationStr || 'Beendet', exercises: String(activeWorkouts.length || 0), sets: String(activeWorkouts.reduce(function(sum, w) { return sum + (w.setDetails ? w.setDetails.length : 1); }, 0)), volume: String(Math.round(sessionVolume || 0)), exerciseList: activeWorkouts.slice(0, 6).map(function(w) { var detail = ''; if(w.setDetails && w.setDetails.length > 0) { detail = w.setDetails.length + ' Sets'; if(w.setDetails[0].weight) detail += ' \u00d7 ' + w.setDetails[0].weight + 'kg'; } else if(w.data) { var keys = Object.keys(w.data).slice(0, 2); detail = keys.map(function(k) { return k + ': ' + w.data[k]; }).join(' | '); } return { name: w.exercise || 'Uebung', detail: detail }; }) }; setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(window.awardXP) window.awardXP('workout'); if(window._checkGoalProgress) window._checkGoalProgress(); if(window._trackActivity) window._trackActivity('workout'); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } }, true); };
+  window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); window._lastWorkoutBrag = { category: window.currentCategory === 'strength' ? 'Krafttraining' : window.currentCategory === 'cardio' ? 'Ausdauer' : window.currentCategory === 'recovery' ? 'Regeneration' : 'Training', duration: durationDisplay || durationStr || 'Beendet', exercises: String(activeWorkouts.length || 0), sets: String(activeWorkouts.reduce(function(sum, w) { return sum + (w.setDetails ? w.setDetails.length : 1); }, 0)), volume: String(Math.round(sessionVolume || 0)), exerciseList: activeWorkouts.slice(0, 6).map(function(w) { var detail = ''; if(w.setDetails && w.setDetails.length > 0) { detail = w.setDetails.length + ' Sets'; if(w.setDetails[0].weight) detail += ' \u00d7 ' + w.setDetails[0].weight + 'kg'; } else if(w.data) { var keys = Object.keys(w.data).slice(0, 2); detail = keys.map(function(k) { return k + ': ' + w.data[k]; }).join(' | '); } return { name: w.exercise || 'Uebung', detail: detail }; }) }; setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(window.awardXP) window.awardXP('workout'); if(window._checkGoalProgress) window._checkGoalProgress(); if(window._trackActivity) window._trackActivity('workout'); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } setTimeout(function() { if (window._showPostWorkoutCoachNudge) { window._showPostWorkoutCoachNudge({ exercises: String(exerciseNames ? exerciseNames.size : 0), volume: String(Math.round(sessionVolume || 0)), duration: durationDisplay || durationStr || '' }); } }, 5000); }, true); };
   window._checkAnonConversion = function() {
    var anonId = localStorage.getItem('base_anon_challenge_id');
    if(!anonId) return;
@@ -909,6 +909,54 @@
      window.addChallengeProgress(activeChallenge.id, unit);
     }, 6000);
    });
+  };
+
+  window._showPostWorkoutCoachNudge = function(workoutData) {
+   var today = new Date().toISOString().split('T')[0];
+   var lastNudge = localStorage.getItem('base_coach_nudge_date');
+   if (lastNudge === today) return;
+   var archived = (window.workouts || []).filter(function(w) { return w.archived; });
+   if (archived.length < 3) return;
+   localStorage.setItem('base_coach_nudge_date', today);
+   var messages = [
+    window.t('coachNudge1', 'Dein KI Coach hat dein Workout analysiert — tippe fuer Tipps'),
+    window.t('coachNudge2', 'Basierend auf deinem Workout: Dein Coach hat Empfehlungen'),
+    window.t('coachNudge3', 'Starkes Workout! Dein KI Coach hat Verbesserungsvorschlaege')
+   ];
+   var msg = messages[Math.floor(Math.random() * messages.length)];
+   var exerciseCount = workoutData.exercises || '0';
+   var duration = workoutData.duration || '';
+   var nudge = document.createElement('div');
+   nudge.id = 'coachNudgeBar';
+   nudge.style.cssText = 'position:fixed;bottom:80px;left:16px;right:16px;z-index:600;animation:slideUp 0.4s ease';
+   nudge.innerHTML = '<div onclick="window._openCoachFromNudge()" class="flex items-center gap-3 p-4 rounded-2xl cursor-pointer pointer-events-auto" style="background:linear-gradient(135deg,rgba(163,201,168,0.15),rgba(163,201,168,0.05));border:1px solid rgba(163,201,168,0.25);backdrop-filter:blur(8px)">' +
+    '<div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.2)">' +
+    '<i data-lucide="sparkles" class="w-5 h-5 pointer-events-none" style="color:#a3c9a8"></i></div>' +
+    '<div class="flex-1 min-w-0">' +
+    '<p class="text-xs font-black text-white truncate">' + window._escapeHtml(msg) + '</p>' +
+    '<p class="text-[10px] font-bold uppercase tracking-widest" style="color:#a3c9a8">KI Coach' + (duration ? ' \u00b7 ' + window._escapeHtml(duration) : '') + ' \u00b7 ' + window._escapeHtml(exerciseCount) + ' ' + window.t('lblExercises', 'Uebungen') + '</p>' +
+    '</div>' +
+    '<i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>' +
+    '</div>';
+   var dismiss = document.createElement('button');
+   dismiss.setAttribute('aria-label', window.t('btnClose', 'Schliessen'));
+   dismiss.className = 'pointer-events-auto';
+   dismiss.style.cssText = 'position:absolute;top:8px;right:8px;background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:4px;line-height:1';
+   dismiss.textContent = '\u2715';
+   dismiss.onclick = function(e) { e.stopPropagation(); nudge.style.animation = 'fadeOut 0.3s ease'; setTimeout(function() { nudge.remove(); }, 300); };
+   nudge.querySelector('div').appendChild(dismiss);
+   document.body.appendChild(nudge);
+   window._refreshLucide();
+   setTimeout(function() { if (document.getElementById('coachNudgeBar')) { nudge.style.animation = 'fadeOut 0.3s ease'; setTimeout(function() { nudge.remove(); }, 300); } }, 15000);
+  };
+
+  window._openCoachFromNudge = function() {
+   var nudge = document.getElementById('coachNudgeBar');
+   if (nudge) nudge.remove();
+   if (window.switchTab) window.switchTab('tools');
+   setTimeout(function() {
+    if (window.analyzeWithAI) window.analyzeWithAI();
+   }, 300);
   };
 
   window.renderActivityHeatmap = function() {
@@ -3224,6 +3272,7 @@
     const el = document.getElementById('toolsZnsScore');
     if(el) el.textContent = window.currentReadinessScore + '%';
     if (window._checkKiDiscovery) window._checkKiDiscovery('tools-tab');
+    if (window._renderKiDiscoveryHints) window._renderKiDiscoveryHints();
    }
    if(tab === 'analyse' && window.currentView === 'chart') window.initAnalytics();
    if(tab === 'menu') { setTimeout(() => { if(window.updatePushToggleUI) window.updatePushToggleUI(); }, 100); window.renderGoals && window.renderGoals(); }
@@ -5147,6 +5196,33 @@
      if (el.parentNode) el.parentNode.removeChild(el);
     }, 350);
    }
+  };
+
+  window._markFeatureUsed = function(feature) {
+   var usage = JSON.parse(localStorage.getItem('base_ki_discovery') || '{}');
+   usage[feature] = true;
+   localStorage.setItem('base_ki_discovery', JSON.stringify(usage));
+  };
+
+  window._renderKiDiscoveryHints = function() {
+   var container = document.getElementById('kiDiscoveryHints');
+   if (!container) return;
+   var usage = JSON.parse(localStorage.getItem('base_ki_discovery') || '{}');
+   var hints = [];
+   if (!usage.coach_used) hints.push({ icon: 'brain', label: window.t('hintCoach', 'KI Coach'), desc: window.t('hintCoachDesc', 'Analysiert dein Training und gibt dir persoenliche Empfehlungen'), action: 'analyzeWithAI' });
+   if (!usage.plan_used) hints.push({ icon: 'calendar', label: window.t('hintPlan', 'Trainingsplan'), desc: window.t('hintPlanDesc', 'KI erstellt einen personalisierten Plan basierend auf deinen Daten'), action: 'openPlanBuilder' });
+   if (!usage.prehab_used) hints.push({ icon: 'shield', label: window.t('hintPrehab', 'Verletzungspraevention'), desc: window.t('hintPrehabDesc', 'Aktivierungsuebungen und Warm-Up basierend auf deinem Training'), action: 'generatePreHab' });
+   if (hints.length === 0) { container.classList.add('hidden'); return; }
+   container.classList.remove('hidden');
+   container.innerHTML = '<p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">' + window.t('hintTitle', 'Noch nicht entdeckt') + '</p>' +
+    hints.slice(0, 2).map(function(h) {
+     return '<div onclick="if(window.' + h.action + ')window.' + h.action + '()" class="flex items-center gap-3 p-3 rounded-xl mb-2 cursor-pointer pointer-events-auto transition-all" style="background:rgba(163,201,168,0.05);border:1px solid rgba(163,201,168,0.1)">' +
+      '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(163,201,168,0.1)"><i data-lucide="' + h.icon + '" class="w-4 h-4 pointer-events-none" style="color:#a3c9a8"></i></div>' +
+      '<div><p class="text-xs font-bold text-white">' + window._escapeHtml(h.label) + '</p>' +
+      '<p class="text-[9px]" style="color:var(--text-muted)">' + window._escapeHtml(h.desc) + '</p></div>' +
+      '<i data-lucide="chevron-right" class="w-3 h-3 flex-shrink-0 pointer-events-none" style="color:#555"></i></div>';
+    }).join('');
+   window._refreshLucide();
   };
 
   // ============================================================

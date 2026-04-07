@@ -350,6 +350,7 @@ Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
 window.generatePreHab = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('scan')) return;
+    if(window._markFeatureUsed) window._markFeatureUsed('prehab_used');
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
@@ -385,6 +386,7 @@ Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B
 window.analyzeWithAI = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('scan')) return;
+    if(window._markFeatureUsed) window._markFeatureUsed('coach_used');
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
@@ -695,6 +697,7 @@ window.openTrainingPlanModal = function() {
 window.generateTrainingPlan = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('plan')) return;
+    if(window._markFeatureUsed) window._markFeatureUsed('plan_used');
     if(!planGoal) { window.showToast(window.t('toastError','Bitte ein Ziel wählen!')); return; }
     var btn = document.getElementById('btnGenPlan');
     var btnText = document.getElementById('btnGenPlanText');
