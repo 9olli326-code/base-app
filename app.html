@@ -3562,7 +3562,41 @@
         window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
         // --- DASHBOARD & TABELLE ---
-        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); }, true); };
+        window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } }, true); };
+        // --- Anon Conversion Nudge nach 3 Workouts ---
+        window._checkAnonConversion = function() {
+            var anonId = localStorage.getItem('base_anon_challenge_id');
+            if(!anonId) return;
+            // Falls bereits eingeloggt, nicht zeigen
+            if(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_')) return;
+            var count = parseInt(localStorage.getItem('base_anon_workout_count') || '0');
+            if(count < 3) return;
+            // Nur einmal pro Session zeigen
+            if(window._anonConversionShown) return;
+            window._anonConversionShown = true;
+            setTimeout(function() {
+                var overlay = document.createElement('div');
+                overlay.id = 'anonConversionOverlay';
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:960;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(8px)';
+                overlay.innerHTML = '<div style="background:#18181b;border:1px solid rgba(6,182,212,0.2);border-radius:var(--ui-radius,1rem);padding:1.5rem;max-width:340px;width:100%;text-align:center">' +
+                    '<div style="font-size:32px;margin-bottom:8px">\uD83D\uDD25</div>' +
+                    '<h3 style="color:#fff;font-size:16px;font-weight:900;margin:0 0 8px 0">Du trainierst wie ein Profi!</h3>' +
+                    '<p style="color:#a1a1aa;font-size:12px;margin:0 0 20px 0;line-height:1.5">Erstelle einen kostenlosen Account um deinen Fortschritt zu sichern und alle KI-Features freizuschalten.</p>' +
+                    '<button id="anonConvertBtn" style="width:100%;padding:14px;background:#06b6d4;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;margin-bottom:8px">Account erstellen</button>' +
+                    '<button id="anonConvertLater" style="width:100%;padding:10px;background:transparent;color:#52525b;border:none;font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:0.1em">Sp\u00e4ter</button>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+                document.getElementById('anonConvertBtn').onclick = function() {
+                    overlay.remove();
+                    window.toggleModal('authModal');
+                };
+                document.getElementById('anonConvertLater').onclick = function() {
+                    overlay.remove();
+                };
+                overlay.addEventListener('click', function(e) { if(e.target === overlay) overlay.remove(); });
+            }, 1500);
+        };
+
         // ============================================================
         // ERSTES WORKOUT FLOW
         // ============================================================
@@ -3726,6 +3760,31 @@
             const modal = document.getElementById('workoutCelebrationModal');
             if(modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
             if (typeof window._showDay2Hook === 'function') window._showDay2Hook();
+            // Post-Workout Challenge Nudge
+            window._showPostWorkoutChallengeNudge();
+            // Anon Conversion Check
+            if(window._checkAnonConversion) window._checkAnonConversion();
+        };
+
+        window._showPostWorkoutChallengeNudge = function() {
+            if(!window._chList || !window._chGetUid) return;
+            var myUid = window._chGetUid();
+            if(!myUid) return;
+            window._chList(function(all) {
+                var now = new Date();
+                var activeChallenge = null;
+                all.forEach(function(ch) {
+                    if(new Date(ch.endDate) < now) return;
+                    var parts = ch.participants || [];
+                    if(parts.some(function(p) { return p.uid === myUid; })) { if(!activeChallenge) activeChallenge = ch; }
+                });
+                if(!activeChallenge) return;
+                var metricUnit = { volume: 'kg', weight: 'kg', distance: 'km', reps: 'Wdh', time: 'min' };
+                var unit = metricUnit[activeChallenge.metric] || activeChallenge.metric || '';
+                window.showToast('Dein Workout zählt für "' + activeChallenge.title + '"!', null, 'Fortschritt +', function() {
+                    window.addChallengeProgress(activeChallenge.id, unit);
+                }, 6000);
+            });
         };
 
         // ============================================================
@@ -4251,7 +4310,40 @@
         window.joinChallenge = function(challengeId) {
             var uid = window._chGetUid ? window._chGetUid() : null;
             var cname = window._chGetName ? window._chGetName() : 'Athlet';
-            if(!uid) { window.showToast(window.t('toastError', 'Bitte erst einloggen')); return; }
+            // Falls eingeloggt oder bereits anonym registriert: direkt beitreten
+            if(uid) {
+                window._doJoinChallenge(challengeId, uid, cname);
+                return;
+            }
+            // Nicht eingeloggt: Mini-Modal für anonyme Teilnahme
+            var overlay = document.createElement('div');
+            overlay.id = 'anonJoinOverlay';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:960;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(8px)';
+            overlay.innerHTML = '<div style="background:#18181b;border:1px solid rgba(245,158,11,0.2);border-radius:var(--ui-radius,1rem);padding:1.5rem;max-width:340px;width:100%">' +
+                '<h3 style="color:#fff;font-size:16px;font-weight:900;margin:0 0 4px 0;text-transform:uppercase;letter-spacing:-0.02em">Tritt der Challenge bei!</h3>' +
+                '<p style="color:#71717a;font-size:11px;margin:0 0 16px 0">Kein Account nötig — einfach loslegen.</p>' +
+                '<input id="anonJoinName" type="text" required placeholder="Wie sollen dich die anderen sehen?" style="width:100%;box-sizing:border-box;background:#09090b;border:1px solid #27272a;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:600;outline:none;margin-bottom:12px" />' +
+                '<button id="anonJoinBtn" style="width:100%;padding:14px;background:#84a98c;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer">Mitmachen</button>' +
+                '<p style="color:#52525b;font-size:10px;text-align:center;margin:12px 0 0 0">Optional: <a onclick="document.getElementById(\'anonJoinOverlay\').remove();window.toggleModal(\'authModal\')" style="color:#6366f1;cursor:pointer;text-decoration:underline">Account erstellen</a> für Cloud-Sync</p>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) { if(e.target === overlay) overlay.remove(); });
+            var nameInput = document.getElementById('anonJoinName');
+            var joinBtn = document.getElementById('anonJoinBtn');
+            if(nameInput) nameInput.focus();
+            joinBtn.onclick = function() {
+                var name = (nameInput.value || '').trim();
+                if(!name) { nameInput.style.borderColor = '#ef4444'; nameInput.focus(); return; }
+                var anonId = 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                localStorage.setItem('base_anon_challenge_id', anonId);
+                localStorage.setItem('base_anon_challenge_name', name);
+                overlay.remove();
+                window._doJoinChallenge(challengeId, anonId, name);
+            };
+            if(nameInput) nameInput.addEventListener('keydown', function(e) { if(e.key === 'Enter') joinBtn.click(); });
+        };
+
+        window._doJoinChallenge = function(challengeId, uid, cname) {
             window._chList(function(all) {
                 var found = null;
                 all.forEach(function(ch) { if(ch.id === challengeId) found = ch; });
@@ -4324,8 +4416,30 @@
 
         window.shareChallenge = function(id) {
             var url = window.location.origin + '/app.html?challenge=' + id;
-            if(navigator.share) { navigator.share({ title: 'BASE Challenge', text: 'Tritt meiner Challenge bei!', url: url }); }
-            else { navigator.clipboard.writeText(url).then(function() { window.showToast(window.t('toastCopied')); }); }
+            // Challenge-Titel nachschlagen für bessere Share-Nachricht
+            var doShare = function(challengeTitle) {
+                var shareText = '\uD83D\uDCAA Ich habe eine Challenge erstellt: "' + challengeTitle + '"\n\nSchaffst du es? Tritt bei und zeig was du kannst!\n\nKein Account nötig \u2014 einfach Name eingeben und loslegen.';
+                var shareData = { title: challengeTitle + ' \u2014 BASE Challenge', text: shareText, url: url };
+                if(navigator.share) {
+                    navigator.share(shareData).catch(function() {});
+                } else {
+                    // Desktop-Fallback: WhatsApp Direktlink
+                    var waLink = 'https://wa.me/?text=' + encodeURIComponent(shareText + '\n\n' + url);
+                    window.open(waLink, '_blank');
+                    navigator.clipboard.writeText(shareText + '\n\n' + url).then(function() {
+                        window.showToast('Link kopiert! Teile ihn per WhatsApp.');
+                    }).catch(function() {});
+                }
+            };
+            if(window._chList) {
+                window._chList(function(all) {
+                    var found = null;
+                    all.forEach(function(ch) { if(ch.id === id) found = ch; });
+                    doShare(found ? found.title : 'Challenge');
+                });
+            } else {
+                doShare('Challenge');
+            }
         };
 
         window.deleteChallenge = function(id) {
@@ -8585,6 +8699,8 @@
 
                     // Subscription-Status aus Firestore laden
                     window._loadSubscriptionStatus();
+                    // Anonyme Challenge-Teilnahme migrieren falls vorhanden
+                    if(!user.isAnonymous && localStorage.getItem('base_anon_challenge_id') && window._migrateAnonChallenge) { window._migrateAnonChallenge(); }
                 } else {
                     // Kein bestehender User → erst jetzt anonym einloggen
                     try { await signInAnonymously(auth); } catch(e) { console.error("Firebase Auth Error", e); }
@@ -8648,6 +8764,9 @@
             };
 
             // --- Challenges: gleiche Firestore-Funktionen wie Workouts ---
+            // WICHTIG: Firestore Rules müssen anonymen Schreibzugriff auf 'challenges' Collection erlauben,
+            // da User ohne Account (anon_ UIDs) als Participants hinzugefügt werden.
+            // Aktuell: Prüfe ob allow write für challenges auch ohne auth.uid funktioniert.
             window._chCreate = async (id, data) => {
                 try { await setDoc(doc(db, 'challenges', id), data); return true; } catch(e) { return e.message; }
             };
@@ -8662,8 +8781,29 @@
             window._chUpdate = async (id, data) => {
                 try { await setDoc(doc(db, 'challenges', id), data, { merge: true }); return true; } catch(e) { return e.message; }
             };
-            window._chGetUid = () => auth.currentUser ? auth.currentUser.uid : null;
-            window._chGetName = () => auth.currentUser && auth.currentUser.email ? auth.currentUser.email.split('@')[0] : 'Athlet';
+            window._chGetUid = () => auth.currentUser ? auth.currentUser.uid : (localStorage.getItem('base_anon_challenge_id') || null);
+            window._chGetName = () => auth.currentUser && auth.currentUser.email ? auth.currentUser.email.split('@')[0] : (localStorage.getItem('base_anon_challenge_name') || 'Athlet');
+            // Migration: Wenn ein anonymer User einen Account erstellt, seine Challenge-Teilnahme migrieren
+            window._migrateAnonChallenge = async function() {
+                var oldAnonId = localStorage.getItem('base_anon_challenge_id');
+                if(!oldAnonId || !auth.currentUser) return;
+                var newUid = auth.currentUser.uid;
+                var newName = auth.currentUser.email ? auth.currentUser.email.split('@')[0] : 'Athlet';
+                window._chList(function(all) {
+                    all.forEach(function(ch) {
+                        var parts = ch.participants || [];
+                        var idx = -1;
+                        parts.forEach(function(p, i) { if(p.uid === oldAnonId) idx = i; });
+                        if(idx === -1) return;
+                        var newParts = parts.slice();
+                        newParts[idx] = { uid: newUid, name: newName, progress: newParts[idx].progress || 0, lastUpdate: new Date().toISOString() };
+                        window._chUpdate(ch.id, { participants: newParts });
+                    });
+                });
+                localStorage.removeItem('base_anon_challenge_id');
+                localStorage.removeItem('base_anon_challenge_name');
+                localStorage.removeItem('base_anon_workout_count');
+            };
             window._chDelete = async (id) => {
                 try { await deleteDoc(doc(db, 'challenges', id)); return true; } catch(e) { return e.message; }
             };
