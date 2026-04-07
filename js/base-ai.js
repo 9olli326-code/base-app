@@ -114,6 +114,33 @@ window.checkOnlineForAI = function() {
     return true;
 };
 
+// Robuster Gemini Fetch-Wrapper mit Timeout, Error Handling, res.ok Check
+window._aiFetch = async function(body, opts) {
+    opts = opts || {};
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, opts.timeout || 30000);
+    try {
+        var res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal, body: JSON.stringify(body)
+        });
+        clearTimeout(timeout);
+        if(res.status === 429) {
+            try { var errData = await res.json(); window.showToast(errData.error || window.t('lblRateLimit','Tageslimit erreicht.'), 'error', 4000); } catch(e) { window.showToast(window.t('lblRateLimit','Tageslimit erreicht.'), 'error', 4000); }
+            return null;
+        }
+        if(!res.ok) { window.showToast(window.t('lblServerError','Server-Fehler. Bitte spaeter erneut versuchen.'), 'error', 4000); return null; }
+        var data = await res.json();
+        return data;
+    } catch(err) {
+        clearTimeout(timeout);
+        if(err.name === 'AbortError') window.showToast(window.t('lblTimeout','Zeitueberschreitung. Bitte erneut versuchen.'), 'error', 4000);
+        else if(!navigator.onLine) window.showToast(window.t('aiNoInternet','Kein Internet.'), 'error', 4000);
+        else window.showToast(window.t('lblError','Fehler') + ': ' + (err.message || ''), 'error', 4000);
+        return null;
+    }
+};
+
 window.getPromptLang = function() {
     const names = { de:'Deutsch', en:'English', fr:'Français', es:'Español', it:'Italiano', nl:'Nederlands', ar:'العربية' };
     return names[window.currentLang] || 'English';
@@ -250,9 +277,8 @@ AUFGABE:
 
 Max 180 Wörter. Antworte auf ${window.getPromptLang()}.`;
     try {
-        const res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        const data = await res.json();
+        const data = await window._aiFetch({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()});
+        if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
         if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
@@ -308,9 +334,8 @@ AUFGABE:
 
 Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
     try {
-        const res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        const data = await res.json();
+        const data = await window._aiFetch({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()});
+        if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
         if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
@@ -344,9 +369,8 @@ ${ctx.recentWorkouts || 'Keine Daten'}
 
 Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B. hohe RPE-Werte = mehr Mobilisation nötig, Laufdaten = Beinachsen-Aktivierung etc.). Gib: 1) 3-5 Aktivierungs-/Mobilisationsübungen mit Dauer/Wdh 2) Was heute unbedingt vermeiden 3) Spezifische Tipps basierend auf den Trainingsdaten. Max 220 Wörter. Antworte auf ${window.getPromptLang()}.`;
     try {
-        const res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        const data = await res.json();
+        const data = await window._aiFetch({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()});
+        if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
         if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
@@ -394,9 +418,8 @@ AUFGABE — PROGRESSIONSANALYSE:
 
 Max 320 Wörter, präzise und datenbasiert. Antworte auf ${window.getPromptLang()}.`;
     try {
-        const res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        const data = await res.json();
+        const data = await window._aiFetch({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()});
+        if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
         if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
@@ -483,14 +506,8 @@ Für Hyrox wären typische Felder: Gesamtzeit, Laufdistanz, Ski Erg (Zeit), Sled
 Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Training festhalten würde.`;
 
     try {
-        const res = await fetch('/.netlify/functions/gemini', {
-            method: 'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.2}, userId: window._getAiUserId() })
-        });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        if(!res.ok) throw new Error(window.t('aiServerError','Server Fehler') + ' ' + res.status);
-        const data = await res.json();
+        const data = await window._aiFetch({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.2}, userId: window._getAiUserId() });
+        if(!data) return;
         if(!data.reply) throw new Error(window.t('toastNoData','Keine Antwort'));
         let jsonStr = data.reply.replace(/```json/gi,'').replace(/```/g,'').trim();
         const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
@@ -707,7 +724,7 @@ window.generateTrainingPlan = async function() {
         return fetch('/.netlify/functions/gemini', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: p }] }], userId: window._getAiUserId() })
-        }).then(function(res) { if (res.status === 429) { try { if(typeof window.showToast==='function') window.showToast('Tageslimit erreicht.', 'error', 4000); } catch(e){} return null; } return res.text(); }).then(function(raw) {
+        }).then(function(res) { if(res.status === 429) { window.showToast(window.t('lblRateLimit','Tageslimit erreicht.'), 'error', 4000); return null; } if(!res.ok) { window.showToast(window.t('lblServerError','Server-Fehler.'), 'error', 4000); return null; } return res.text(); }).then(function(raw) {
             if(raw === null) return null;
             if(raw.charAt(0) === '<') return null;
             var resp = JSON.parse(raw);
@@ -841,15 +858,12 @@ Erstelle max 8 Aufwärmübungen. Antworte NUR als JSON Array (kein Markdown):
 Sprache für name und purpose: ${lang}`;
 
     try {
-        const res = await fetch('/.netlify/functions/gemini', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], userId: window._getAiUserId() })
-        });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        const data = await res.json();
+        const data = await window._aiFetch({ contents: [{ parts: [{ text: prompt }] }], userId: window._getAiUserId() });
+        if(!data) return;
         let jsonStr = (data.reply || '[]').replace(/```json/gi,'').replace(/```/g,'').trim();
         const arrMatch = jsonStr.match(/\[[\s\S]*\]/);
-        const exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr);
+        var exercises;
+        try { exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr); } catch(pe) { window.showToast(window.t('lblParseError','KI-Antwort konnte nicht verarbeitet werden.'), 'error', 4000); return; }
         window._renderWarmupList(exercises);
         if(window.awardXP) window.awardXP('scanAnalysis');
         if(typeof window._aiTrackCall === 'function') window._aiTrackCall();
@@ -906,15 +920,12 @@ Berücksichtige progressive Overload und Erholung. Antworte NUR als JSON Array:
 Sprache für name und reason: ${lang}`;
 
     try {
-        const res = await fetch('/.netlify/functions/gemini', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], userId: window._getAiUserId() })
-        });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
-        const data = await res.json();
+        const data = await window._aiFetch({ contents: [{ parts: [{ text: prompt }] }], userId: window._getAiUserId() });
+        if(!data) return;
         let jsonStr = (data.reply || '[]').replace(/```json/gi,'').replace(/```/g,'').trim();
         const arrMatch = jsonStr.match(/\[[\s\S]*\]/);
-        const exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr);
+        var exercises;
+        try { exercises = JSON.parse(arrMatch ? arrMatch[0] : jsonStr); } catch(pe) { window.showToast(window.t('lblParseError','KI-Antwort konnte nicht verarbeitet werden.'), 'error', 4000); return; }
         window._renderExerciseRecs(exercises);
         if(typeof window._aiTrackCall === 'function') window._aiTrackCall();
     } catch(e) {
@@ -996,13 +1007,8 @@ window.generateSmartWorkout = async function() {
     var btn = document.getElementById('smartWorkoutBtn');
     if(btn) btn.style.opacity = '0.5';
     try {
-        var res = await fetch('/.netlify/functions/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: userPrompt, systemPrompt: window._SMART_WORKOUT_SYSTEM_PROMPT, userId: window._getAiUserId() })
-        });
-        if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} if(btn) btn.style.opacity = '1'; return; }
-        var data = await res.json();
+        var data = await window._aiFetch({ prompt: userPrompt, systemPrompt: window._SMART_WORKOUT_SYSTEM_PROMPT, userId: window._getAiUserId() });
+        if(!data) { if(btn) btn.style.opacity = '1'; return; }
         var text = '';
         if(data.parts) { for(var i = data.parts.length - 1; i >= 0; i--) { if(data.parts[i].text) { text = data.parts[i].text; break; } } }
         else if(data.reply) text = data.reply;
