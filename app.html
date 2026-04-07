@@ -1091,6 +1091,13 @@
                                 <input type="date" id="dateInput" aria-label="Datum" required class="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm font-bold outline-none focus:border-primary cursor-pointer pointer-events-auto">
                             </div>
                             <div>
+                                <div id="exerciseImageContainer" class="hidden mb-3 flex items-center gap-4 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
+                                    <img id="exerciseImage" src="" alt="" class="w-16 h-16 rounded-lg object-cover" style="background:#1a1a1a" loading="lazy" onerror="this.parentElement.classList.add('hidden')">
+                                    <div>
+                                        <p id="exerciseImageName" class="text-sm font-bold text-white"></p>
+                                        <p id="exerciseImageMuscle" class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)"></p>
+                                    </div>
+                                </div>
                                 <div class="flex items-center justify-between mb-2">
                                     <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest" data-i18n="fEx">Aktivität</label>
                                     <button aria-label="Generieren" type="button" onclick="window.generatePreHab()" class="text-[10px] font-black text-emerald-950 bg-emerald-400 hover:bg-emerald-300 px-2.5 py-1 rounded-md uppercase tracking-widest flex items-center gap-1 transition-all cursor-pointer pointer-events-auto shadow-sm"><i data-lucide="shield-plus" class="w-3 h-3 pointer-events-none"></i> Armor</button>
@@ -2823,6 +2830,8 @@
                     <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
                 </button>
             </div>
+
+            <div id="exHistoryHero" class="hidden px-5 pt-3"></div>
 
             <div class="px-5 pt-4 pb-2">
                 <div class="h-[140px] relative">

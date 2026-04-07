@@ -1,3 +1,37 @@
+  // Exercise Image Helpers
+  window._getExerciseImageUrl = function(exerciseId) {
+    if (!exerciseId) return null;
+    return 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/' + exerciseId + '/0.jpg';
+  };
+  window._getExerciseGifUrl = function(exerciseId) {
+    if (!exerciseId) return null;
+    return 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/' + exerciseId + '/0.gif';
+  };
+  window._findExerciseInDB = function(exerciseName) {
+    if (!exerciseName) return null;
+    var db = window.EXERCISE_DB || [];
+    var q = exerciseName.toLowerCase().trim();
+    for (var i = 0; i < db.length; i++) {
+      if (db[i].n && db[i].n.toLowerCase() === q) return db[i];
+      if (db[i].de && db[i].de.toLowerCase() === q) return db[i];
+    }
+    return null;
+  };
+  window._showExerciseImage = function(exerciseName) {
+    var container = document.getElementById('exerciseImageContainer');
+    var img = document.getElementById('exerciseImage');
+    var nameEl = document.getElementById('exerciseImageName');
+    var muscleEl = document.getElementById('exerciseImageMuscle');
+    if (!container || !img) return;
+    var exercise = window._findExerciseInDB(exerciseName);
+    if (!exercise || !exercise.id) { container.classList.add('hidden'); return; }
+    img.src = window._getExerciseGifUrl(exercise.id);
+    img.alt = exerciseName;
+    if (nameEl) nameEl.textContent = exerciseName;
+    if (muscleEl) muscleEl.textContent = exercise.t || exercise.bp || '';
+    container.classList.remove('hidden');
+  };
+
   // Custom Input Modal (ersetzt native prompt())
   window.showInputModal = function(title, placeholder, callback, defaultValue) {
    var overlay = document.createElement('div');
@@ -2114,6 +2148,18 @@
    const stats = document.getElementById('exHistoryStats');
    if(title) title.textContent = exerciseName;
 
+   var _exHero = window._findExerciseInDB ? window._findExerciseInDB(exerciseName) : null;
+   var heroContainer = document.getElementById('exHistoryHero');
+   if (heroContainer) {
+    if (_exHero && _exHero.id) {
+     heroContainer.innerHTML = '<img src="' + window._getExerciseGifUrl(_exHero.id) + '" alt="" class="w-full h-32 object-cover rounded-xl" loading="lazy" onerror="this.parentElement.classList.add(\'hidden\')">';
+     heroContainer.classList.remove('hidden');
+    } else {
+     heroContainer.classList.add('hidden');
+     heroContainer.innerHTML = '';
+    }
+   }
+
    const entries = window.workouts
     .filter(w => w.exercise?.toLowerCase() === exerciseName.toLowerCase())
     .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -2780,10 +2826,12 @@
     if (dateObj.getTime() === today.getTime()) dateStr = 'Heute';
     else if (dateObj.getTime() === yesterday.getTime()) dateStr = 'Gestern';
 
+    var _exDb = window._findExerciseInDB ? window._findExerciseInDB(w.exercise) : null;
+    var _exThumb = (_exDb && _exDb.id) ? '<img src="' + window._getExerciseImageUrl(_exDb.id) + '" alt="" class="w-8 h-8 rounded-lg object-cover flex-shrink-0 inline-block mr-2 align-middle" loading="lazy" onerror="this.style.display=\'none\'">' : '';
     card.innerHTML = `
   <div class="flex justify-between items-start mb-3">
    <div class="flex-1 min-w-0">
-    <p onclick="event.stopPropagation(); window.openExerciseHistory('${w.exercise.replace(/'/g, "\\'")}')" class="font-bold text-white text-[15px] tracking-tight cursor-pointer pointer-events-auto hover:text-primary transition-colors" style="font-family:'Sora',sans-serif">${window._escapeHtml(w.exercise)}</p>
+    <p onclick="event.stopPropagation(); window.openExerciseHistory('${w.exercise.replace(/'/g, "\\'")}')" class="font-bold text-white text-[15px] tracking-tight cursor-pointer pointer-events-auto hover:text-primary transition-colors flex items-center" style="font-family:'Sora',sans-serif">${_exThumb}${window._escapeHtml(w.exercise)}</p>
     <p class="text-[11px] mt-1" style="color:var(--text-muted);font-family:'Outfit',sans-serif">${dateStr}${w.sessionDuration ? ' · ' + w.sessionDuration : ''}</p>
    </div>
    <div class="flex items-center gap-2 flex-shrink-0">
@@ -3213,8 +3261,9 @@
      clearTimeout(debounce);
      debounce = setTimeout(function() {
       var name = input.value.trim();
-      if(name.length < 2) { window._hideLastTime(); return; }
+      if(name.length < 2) { window._hideLastTime(); if(window._showExerciseImage) { var c = document.getElementById('exerciseImageContainer'); if(c) c.classList.add('hidden'); } return; }
       window._showLastTime(name);
+      if(window._showExerciseImage) window._showExerciseImage(name);
      }, 300);
     }
     input.addEventListener('input', onExerciseChange);
@@ -3356,6 +3405,7 @@
     var reps = parseInt(match[3]);
     var weight = parseFloat(match[4].replace(',', '.'));
     if(exerciseInput) exerciseInput.value = exercise;
+    if(window._showExerciseImage) window._showExerciseImage(exercise);
     var setsInput = document.getElementById('setsInput');
     if(setsInput && window.currentCategory === 'strength') {
      setsInput.value = sets;
@@ -3372,6 +3422,7 @@
     window.showToast(exercise + ': ' + sets + 'x' + reps + ' @ ' + weight + 'kg');
    } else {
     if(exerciseInput) exerciseInput.value = text.trim();
+    if(window._showExerciseImage) window._showExerciseImage(text.trim());
     window.showToast('"' + text.trim() + '" erkannt');
    }
   };
