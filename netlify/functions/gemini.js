@@ -149,6 +149,38 @@ function callGemini(prompt,temperature,jsonMode,systemPrompt){return new Promise
             if(!t&&parts.length>0)t=parts[0]?.text||'';if(!t)console.error('Gemini empty response:',d.substring(0,500));resolve(t);}catch(e){reject(new Error('Parse Error: '+e.message+' Raw: '+d.substring(0,200)));}});});req.on('error',reject);req.write(pd);req.end();});}
 
 // ============================================================
+// TRAINING DATA COLLECTOR (anonymisiert fuer eigenes KI-Modell)
+// ============================================================
+async function logTrainingData(type, promptText, responseText, lang, category) {
+    try {
+        const trainingStore = getStore('training-data');
+        const entryId = Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+        const entry = {
+            id: entryId,
+            timestamp: new Date().toISOString(),
+            type: type || 'unknown',
+            prompt: typeof promptText === 'string' ? promptText.substring(0, 2000) : '',
+            response: typeof responseText === 'string' ? responseText.substring(0, 2000) : '',
+            promptTokens: promptText ? promptText.length : 0,
+            responseTokens: responseText ? responseText.length : 0,
+            lang: lang || 'de',
+            category: category || 'unknown'
+        };
+        await trainingStore.set(entryId, JSON.stringify(entry));
+        // Counter
+        const countStore = getStore('training-stats');
+        try {
+            const raw = await countStore.get('total');
+            const count = raw ? parseInt(raw) + 1 : 1;
+            await countStore.set('total', String(count));
+            if (count % 100 === 0) console.log('Training data milestone:', count, 'entries');
+        } catch(e) {}
+    } catch(e) {
+        console.log('Training data log error:', e.message);
+    }
+}
+
+// ============================================================
 // HANDLER
 // ============================================================
 exports.handler=async function(event){const h={'Access-Control-Allow-Origin':'https://base-app.tech','Access-Control-Allow-Headers':'Content-Type','Content-Type':'application/json'};
@@ -178,10 +210,10 @@ if (!rateCheck.allowed) {
 }
 
 // === CONTENTS PASSTHROUGH ===
-if(body.contents&&Array.isArray(body.contents)){try{const pr=sanitizeForPrompt(body.contents[0]?.parts?.[0]?.text||'',3000);const tm=body.generationConfig?.temperature||0.3;const jm=body.generationConfig?.responseMimeType==='application/json';const sp=body.system_instruction?.parts?.[0]?.text||'';const reply=await callGemini(pr,tm,jm,sp);return{statusCode:200,headers:h,body:JSON.stringify({reply,limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
+if(body.contents&&Array.isArray(body.contents)){try{const pr=sanitizeForPrompt(body.contents[0]?.parts?.[0]?.text||'',3000);const tm=body.generationConfig?.temperature||0.3;const jm=body.generationConfig?.responseMimeType==='application/json';const sp=body.system_instruction?.parts?.[0]?.text||'';const reply=await callGemini(pr,tm,jm,sp);logTrainingData(rateLimitType,pr,reply,body.lang||'de','passthrough');return{statusCode:200,headers:h,body:JSON.stringify({reply,limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
 
 // === GENERIC PROMPT ===
-if(body.prompt&&!body.type){try{const safePrompt=sanitizeForPrompt(body.prompt,2000);const safeSystemPrompt=body.systemPrompt?sanitizeForPrompt(body.systemPrompt,1000):'';const reply=await callGemini(safePrompt,0.3,false,safeSystemPrompt);return{statusCode:200,headers:h,body:JSON.stringify({parts:[{text:reply}],limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
+if(body.prompt&&!body.type){try{const safePrompt=sanitizeForPrompt(body.prompt,2000);const safeSystemPrompt=body.systemPrompt?sanitizeForPrompt(body.systemPrompt,1000):'';const reply=await callGemini(safePrompt,0.3,false,safeSystemPrompt);logTrainingData('generic',safePrompt,reply,body.lang||'de','prompt');return{statusCode:200,headers:h,body:JSON.stringify({parts:[{text:reply}],limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
 
 // === TYPED REQUEST ===
 const{type,context}=body;if(!type||!context)return{statusCode:400,headers:h,body:JSON.stringify({error:'type und context erforderlich'})};
@@ -203,4 +235,4 @@ try{const as=buildAthleteSummary(context.workouts||[],context.profile||{});const
 };
 const tf=PT[type];if(!tf)return{statusCode:400,headers:h,body:JSON.stringify({error:'Unbekannter Typ: '+type})};
 const prompt=tf(ctx);const temp=type==='plan'?0.4:type==='builder'?0.2:0.3;const jm=type==='builder'&&context.jsonMode;
-const reply=await callGemini(prompt,temp,jm);return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as,limits:rateCheck.remaining})};}catch(e){console.error('AI Engine Error:',e);return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}};
+const reply=await callGemini(prompt,temp,jm);logTrainingData(type,prompt,reply,ctx.lang,type);return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as,limits:rateCheck.remaining})};}catch(e){console.error('AI Engine Error:',e);return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}};
