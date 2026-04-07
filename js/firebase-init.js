@@ -134,18 +134,19 @@
     const btn = document.getElementById('btnSubmitAuth');
     const switchLink = document.getElementById('authSwitchLink');
     const switchText = document.getElementById('authSwitchText');
+    var t = window.t || function(k,fb) { return fb; };
     if(mode === 'login') {
-     if(title) title.textContent = 'Einloggen';
-     if(subtitle) subtitle.textContent = 'Willkommen zurück';
-     if(btn) btn.textContent = 'Einloggen';
-     if(switchText) switchText.textContent = 'Noch kein Account?';
-     if(switchLink) switchLink.textContent = 'Jetzt registrieren';
+     if(title) title.textContent = t('lblLogin','Einloggen');
+     if(subtitle) subtitle.textContent = t('authWelcome','Willkommen zurueck');
+     if(btn) btn.textContent = t('lblLogin','Einloggen');
+     if(switchText) switchText.textContent = t('authNoAccount','Noch kein Account?');
+     if(switchLink) switchLink.textContent = t('authRegister','Jetzt registrieren');
     } else {
-     if(title) title.textContent = 'Account Erstellen';
-     if(subtitle) subtitle.textContent = 'Sichere deine Workouts für immer';
-     if(btn) btn.textContent = 'Account Verknüpfen';
-     if(switchText) switchText.textContent = 'Schon einen Account?';
-     if(switchLink) switchLink.textContent = 'Einloggen';
+     if(title) title.textContent = t('lblAuth','Account Erstellen');
+     if(subtitle) subtitle.textContent = t('authSecure','Sichere deine Workouts');
+     if(btn) btn.textContent = t('lblLinkAccount','Account Verknuepfen');
+     if(switchText) switchText.textContent = t('authHasAccount','Schon einen Account?');
+     if(switchLink) switchLink.textContent = t('lblLogin','Einloggen');
     }
    };
 
@@ -208,7 +209,8 @@
      });
      return;
     }
-    window.showModal('Account löschen?', 'Account und alle Daten dauerhaft löschen? Das kann NICHT rückgängig gemacht werden!', true, () => {
+    var t = window.t || function(k,fb) { return fb; };
+    window.showModal(t('authDeleteTitle','Account loeschen?'), t('authDeleteMsg','Account und alle Daten dauerhaft loeschen? Das kann NICHT rueckgaengig gemacht werden!'), true, () => {
     window.showModal('Bist du sicher?', 'Alle Workouts, Einstellungen und Daten werden unwiderruflich gelöscht.', true, async () => {
     try {
      if(window._db && window.firestoreLib) {

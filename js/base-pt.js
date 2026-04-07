@@ -655,7 +655,7 @@ window.shareClientPortal = function() {
     } else if(navigator.clipboard) {
         navigator.clipboard.writeText(url).then(() => window.showToast(window.t('toastCopied')));
     } else {
-        window.showToast('Link: ' + url);
+        window.showToast(window.t('toastCopied','Link kopiert!'));
     }
 };
 
@@ -1816,7 +1816,7 @@ window.showModal(window.t('btnCancel','Abbrechen?'), window.t('ptCancelSession',
 };
 
 window.saveQtAsTemplate = function() {
-    if(!_qtExercises || _qtExercises.length === 0) { window.showToast('Keine Übungen zum Speichern'); return; }
+    if(!_qtExercises || _qtExercises.length === 0) { window.showToast(window.t('toastError','Keine Uebungen')); return; }
     const s = window.getSessions().find(s => s.id === _qtSessionId);
     const name = s?.focus || window.t('ptQuickTrack','Quick-Track Vorlage');
     const templates = JSON.parse(localStorage.getItem('base_pt_session_templates') || '[]');
@@ -1830,7 +1830,7 @@ window.saveQtAsTemplate = function() {
         createdAt: new Date().toISOString()
     });
     localStorage.setItem('base_pt_session_templates', JSON.stringify(templates));
-    window.showToast('Vorlage gespeichert ✅');
+    window.showToast(window.t('toastSaved','Vorlage gespeichert!'));
 };
 
 window.finishQuickTrack = function() {
@@ -2458,7 +2458,7 @@ window.saveTrainerProfile = async function() {
         window._updateTrainerProfileUI();
     } catch(err) {
         console.error('Trainer-Profil Fehler:', err);
-        window.showToast('Fehler: ' + err.message);
+        window.showToast(window.t('lblError','Fehler') + ': ' + err.message);
     }
 };
 
@@ -2803,7 +2803,7 @@ window._setReviewRating = function(rating) {
 window.submitTrainerReview = async function() {
     const db = window._fbDb;
     const auth = window._fbAuth;
-    if(!db || !auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
+    if(!db || !auth || !auth.currentUser) { window.showToast(window.t('toastLoginRequired','Bitte zuerst einloggen!')); return; }
     if(_reviewRating < 1 || _reviewRating > 5) { window.showToast(window.t('toastError','Bitte Sterne auswählen!')); return; }
     if(!_reviewTrainerId) return;
 
@@ -2837,7 +2837,7 @@ window.submitTrainerReview = async function() {
         window.openTrainerDetail(_reviewTrainerId);
     } catch(err) {
         console.error('Review Fehler:', err);
-        window.showToast('Fehler: ' + err.message);
+        window.showToast(window.t('lblError','Fehler') + ': ' + err.message);
     }
 };
 
@@ -2940,7 +2940,7 @@ Antworte auf ${lang}.`;
         window.toggleModal('kiCheckInModal');
         window._refreshLucide();
     } catch(err) {
-        window.showToast('Fehler: ' + err.message);
+        window.showToast(window.t('lblError','Fehler') + ': ' + err.message);
     }
     if(btn) btn.innerHTML = '<i data-lucide="message-circle" class="w-3.5 h-3.5 pointer-events-none"></i> ' + window.t('ptKiCheckIn','KI Check-In');
     window._refreshLucide();
@@ -2962,7 +2962,7 @@ window._copyCheckInText = function() {
 // ============================================================
 window.shareTrainerBrandLink = function() {
     const auth = window._fbAuth;
-    if(!auth || !auth.currentUser) { window.showToast('Bitte zuerst einloggen!'); return; }
+    if(!auth || !auth.currentUser) { window.showToast(window.t('toastLoginRequired','Bitte zuerst einloggen!')); return; }
     const url = 'https://base-app.tech/app.html?brand=' + auth.currentUser.uid;
     if(navigator.share) {
         navigator.share({ title: 'BASE Fitness', text: 'Tracke dein Training mit meiner personalisierten App:', url: url });
