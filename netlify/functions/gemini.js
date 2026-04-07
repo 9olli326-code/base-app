@@ -14,6 +14,7 @@ const RATE_LIMITS = {
     plan:       3,
     builder:    5,
     report:    10,
+    scan:      10,
     generic:   20,
     raw:       20,
 };
@@ -143,7 +144,7 @@ function sanitizeForPrompt(str, maxLen) {
         .trim();
 }
 
-function callGemini(prompt,temperature,jsonMode,systemPrompt){return new Promise((resolve,reject)=>{const url=`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;const b={contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:temperature||0.3}};if(jsonMode)b.generationConfig.responseMimeType='application/json';if(systemPrompt)b.system_instruction={parts:[{text:systemPrompt}]};const pd=JSON.stringify(b);const u=new URL(url);const req=https.request({hostname:u.hostname,path:u.pathname+u.search,method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(pd)}},(res)=>{let d='';res.on('data',ch=>d+=ch);res.on('end',()=>{try{const p=JSON.parse(d);if(p.error){console.error('Gemini API Error:',JSON.stringify(p.error));reject(new Error(p.error.message||'Gemini API Error'));return;}const parts=p?.candidates?.[0]?.content?.parts||[];
+function callGemini(prompt,temperature,jsonMode,systemPrompt,contentsParts){return new Promise((resolve,reject)=>{const url=`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;const b={contents:contentsParts||[{parts:[{text:prompt}]}],generationConfig:{temperature:temperature||0.3}};if(jsonMode)b.generationConfig.responseMimeType='application/json';if(systemPrompt)b.system_instruction={parts:[{text:systemPrompt}]};const pd=JSON.stringify(b);const u=new URL(url);const req=https.request({hostname:u.hostname,path:u.pathname+u.search,method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(pd)}},(res)=>{let d='';res.on('data',ch=>d+=ch);res.on('end',()=>{try{const p=JSON.parse(d);if(p.error){console.error('Gemini API Error:',JSON.stringify(p.error));reject(new Error(p.error.message||'Gemini API Error'));return;}const parts=p?.candidates?.[0]?.content?.parts||[];
             let t='';
             for(const part of parts){if(part.text)t=part.text;}
             if(!t&&parts.length>0)t=parts[0]?.text||'';if(!t)console.error('Gemini empty response:',d.substring(0,500));resolve(t);}catch(e){reject(new Error('Parse Error: '+e.message+' Raw: '+d.substring(0,200)));}});});req.on('error',reject);req.write(pd);req.end();});}
@@ -207,6 +208,13 @@ if (!rateCheck.allowed) {
         headers: h,
         body: JSON.stringify({ error: rateCheck.reason, retryAfter: rateCheck.retryAfter, limit: true })
     };
+}
+
+// === IMAGE (FORM CHECK) ===
+if(body.image){
+    if(body.image.length>5500000)return{statusCode:413,headers:h,body:JSON.stringify({error:'Bild zu gross. Bitte unter 4MB.'})};
+    const imgParts=[{parts:[{inlineData:{mimeType:body.mimeType||'image/jpeg',data:body.image}},{text:sanitizeForPrompt(body.prompt||'',3000)}]}];
+    try{const reply=await callGemini('',0.3,false,'',imgParts);logTrainingData(rateLimitType,body.prompt||'image-analysis',reply,body.lang||'de','formcheck');return{statusCode:200,headers:h,body:JSON.stringify({candidates:[{content:{parts:[{text:reply}]}}],limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}
 }
 
 // === CONTENTS PASSTHROUGH ===

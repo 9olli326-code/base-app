@@ -5275,6 +5275,125 @@
   };
 
   // ============================================================
+  // KI FORM CHECK
+  // ============================================================
+  window._FORM_CHECK_DISCLAIMER = {
+   de: '\u26a0\ufe0f Dies ist eine KI-gestuetzte Einschaetzung und ersetzt keine professionelle Beratung durch einen Trainer oder Physiotherapeuten. Bei Schmerzen oder Unsicherheit konsultiere einen Fachmann.',
+   en: '\u26a0\ufe0f This is an AI-based assessment and does not replace professional advice from a trainer or physiotherapist. If you experience pain or uncertainty, consult a professional.',
+   fr: '\u26a0\ufe0f Ceci est une evaluation basee sur l\'IA et ne remplace pas les conseils professionnels. En cas de douleur, consultez un professionnel.',
+   es: '\u26a0\ufe0f Esta es una evaluacion basada en IA y no reemplaza el consejo profesional. Si sientes dolor, consulta a un profesional.',
+   it: '\u26a0\ufe0f Questa e una valutazione basata sull\'IA e non sostituisce la consulenza professionale. In caso di dolore, consulta un professionista.',
+   nl: '\u26a0\ufe0f Dit is een AI-gebaseerde beoordeling en vervangt geen professioneel advies. Bij pijn of twijfel, raadpleeg een professional.',
+   ar: '\u26a0\ufe0f هذا تقييم قائم على الذكاء الاصطناعي ولا يحل محل المشورة المهنية. في حالة الألم استشر متخصصاً.'
+  };
+  window._FORM_CHECK_EXERCISES = [
+   { id: 'squat', name: { de: 'Kniebeuge (Squat)', en: 'Squat' }, icon: '\ud83e\uddb5' },
+   { id: 'deadlift', name: { de: 'Kreuzheben (Deadlift)', en: 'Deadlift' }, icon: '\ud83c\udfcb\ufe0f' },
+   { id: 'bench', name: { de: 'Bankdruecken', en: 'Bench Press' }, icon: '\ud83d\udcaa' },
+   { id: 'ohp', name: { de: 'Schulterdruecken', en: 'Overhead Press' }, icon: '\ud83d\ude46' },
+   { id: 'row', name: { de: 'Rudern (Row)', en: 'Barbell Row' }, icon: '\ud83d\udea3' },
+   { id: 'pullup', name: { de: 'Klimmzug', en: 'Pull-Up' }, icon: '\ud83e\uddd7' },
+   { id: 'lunge', name: { de: 'Ausfallschritt', en: 'Lunge' }, icon: '\ud83e\uddbe' },
+   { id: 'plank', name: { de: 'Plank', en: 'Plank' }, icon: '\ud83e\uddd8' },
+   { id: 'pushup', name: { de: 'Liegestuetz', en: 'Push-Up' }, icon: '\ud83e\udef8' }
+  ];
+  window._selectedFormCheckExercise = null;
+
+  window.openFormCheck = function() {
+   if (!window.checkFeatureGate || !window.checkFeatureGate('scan')) return;
+   var lang = window.currentLang || 'de';
+   var disclaimer = window._FORM_CHECK_DISCLAIMER[lang] || window._FORM_CHECK_DISCLAIMER.de;
+   var exerciseHtml = window._FORM_CHECK_EXERCISES.map(function(ex) {
+    var name = ex.name[lang] || ex.name.en || ex.name.de;
+    return '<button onclick="window._selectFormCheckExercise(\'' + ex.id + '\')" class="flex items-center gap-3 w-full p-3 rounded-xl text-left cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" id="fcEx_' + ex.id + '"><span style="font-size:20px">' + ex.icon + '</span><span class="text-sm font-bold text-white">' + window._escapeHtml(name) + '</span></button>';
+   }).join('');
+   var content = document.getElementById('formCheckContent');
+   if (content) {
+    content.innerHTML = '<div class="mb-4 p-3 rounded-xl" style="background:rgba(232,138,138,0.08);border:1px solid rgba(232,138,138,0.15)"><p class="text-[10px] text-zinc-400 leading-relaxed">' + window._escapeHtml(disclaimer) + '</p></div>' +
+     '<p class="text-sm font-black text-white mb-3">' + window.t('fcSelectExercise', 'Welche Uebung moechtest du pruefen?') + '</p>' +
+     '<div class="grid grid-cols-2 gap-2 mb-4">' + exerciseHtml + '</div>';
+   }
+   window.toggleModal('formCheckModal');
+   window._refreshLucide();
+  };
+
+  window._selectFormCheckExercise = function(exerciseId) {
+   window._selectedFormCheckExercise = exerciseId;
+   window._FORM_CHECK_EXERCISES.forEach(function(ex) {
+    var el = document.getElementById('fcEx_' + ex.id);
+    if (el) { el.style.background = ex.id === exerciseId ? 'rgba(163,201,168,0.15)' : 'var(--inner-bg-hex)'; el.style.borderColor = ex.id === exerciseId ? 'rgba(163,201,168,0.3)' : 'var(--border-hex)'; }
+   });
+   var lang = window.currentLang || 'de';
+   var ex = window._FORM_CHECK_EXERCISES.find(function(e) { return e.id === exerciseId; });
+   var exName = ex ? (ex.name[lang] || ex.name.en) : exerciseId;
+   var old = document.getElementById('formCheckCameraSection');
+   if (old) old.remove();
+   var cam = document.createElement('div');
+   cam.id = 'formCheckCameraSection';
+   cam.innerHTML = '<div class="mt-4 p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-xs font-bold text-white mb-1">' + window._escapeHtml(exName) + '</p><p class="text-[10px] text-zinc-500 mb-4">' + window.t('fcInstructions', 'Filme dich von der Seite. Ganzer Koerper sichtbar. 1 Wiederholung reicht.') + '</p><div class="flex gap-3"><button onclick="window._captureFormCheck(\'camera\')" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.15);color:#a3c9a8;border:1px solid rgba(163,201,168,0.25)"><i data-lucide="camera" class="w-4 h-4 pointer-events-none"></i> ' + window.t('fcTakePhoto', 'Foto aufnehmen') + '</button><button onclick="window._captureFormCheck(\'upload\')" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);color:#ccc;border:1px solid var(--border-hex)"><i data-lucide="upload" class="w-4 h-4 pointer-events-none"></i> ' + window.t('fcUpload', 'Bild hochladen') + '</button></div><div id="formCheckPreview" class="hidden mt-4"></div><div id="formCheckResult" class="hidden mt-4"></div></div>';
+   var content = document.getElementById('formCheckContent');
+   if (content) content.appendChild(cam);
+   window._refreshLucide();
+  };
+
+  window._captureFormCheck = function(mode) {
+   var input = document.createElement('input');
+   input.type = 'file'; input.accept = 'image/*';
+   if (mode === 'camera') input.capture = 'environment';
+   input.onchange = function(e) {
+    var file = e.target.files[0]; if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { window.showToast(window.t('fcTooBig', 'Bild zu gross. Bitte unter 4MB.')); return; }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+     var base64 = ev.target.result;
+     var preview = document.getElementById('formCheckPreview');
+     if (preview) {
+      preview.classList.remove('hidden');
+      preview.innerHTML = '<img src="' + base64 + '" class="w-full rounded-xl mb-3" style="max-height:300px;object-fit:contain" alt="Form Check"><button onclick="window._analyzeFormCheck(\'' + window._selectedFormCheckExercise + '\')" class="w-full py-3 rounded-xl font-black text-sm uppercase tracking-widest cursor-pointer pointer-events-auto" style="background:#a3c9a8;color:#0f110f"><i data-lucide="sparkles" class="w-4 h-4 inline pointer-events-none"></i> ' + window.t('fcAnalyze', 'Form analysieren') + '</button>';
+      window._refreshLucide();
+     }
+     window._formCheckImageData = base64.split(',')[1];
+     window._formCheckMimeType = file.type || 'image/jpeg';
+    };
+    reader.readAsDataURL(file);
+   };
+   input.click();
+  };
+
+  window._analyzeFormCheck = async function(exerciseId) {
+   if (!exerciseId || !window._formCheckImageData) return;
+   var lang = window.currentLang || 'de';
+   var ex = window._FORM_CHECK_EXERCISES.find(function(e) { return e.id === exerciseId; });
+   var exName = ex ? (ex.name.en || ex.name.de) : exerciseId;
+   var resultEl = document.getElementById('formCheckResult');
+   if (resultEl) { resultEl.classList.remove('hidden'); resultEl.innerHTML = '<div class="flex items-center justify-center gap-2 py-6"><i data-lucide="loader-2" class="w-5 h-5 animate-spin" style="color:#a3c9a8"></i><span class="text-sm text-zinc-400">' + window.t('fcAnalyzing', 'Analysiere deine Form...') + '</span></div>'; window._refreshLucide(); }
+   var langName = { de: 'Deutsch', en: 'English', fr: 'Francais', es: 'Espanol', it: 'Italiano', nl: 'Nederlands', ar: 'العربية' }[lang] || 'Deutsch';
+   var prompt = 'Du bist ein erfahrener Strength & Conditioning Coach. Analysiere dieses Bild einer ' + exName + ' Uebung.\n\nWICHTIG: Du gibst NUR allgemeine Hinweise zur Uebungsform. Du stellst KEINE medizinischen Diagnosen.\n\nWenn das Bild KEINE erkennbare Uebungsausfuehrung zeigt, sage das klar.\n\nWenn du eine ' + exName + ' erkennst, analysiere:\n1. Koerperhaltung (Ruecken, Knie, Huefte)\n2. Bewegungstiefe\n3. Erkennbare Asymmetrien\n4. 2-3 konkrete Verbesserungsvorschlaege\n\nWenn du dir bei einem Aspekt NICHT sicher bist, sage "Aus diesem Winkel kann ich X nicht eindeutig beurteilen."\n\nMax 150 Woerter. Freundlich und motivierend.\n\nAntworte auf ' + langName + '.';
+   try {
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 30000);
+    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ image: window._formCheckImageData, mimeType: window._formCheckMimeType || 'image/jpeg', prompt: prompt, type: 'scan', userId: window._getAiUserId ? window._getAiUserId() : 'anon' }) });
+    clearTimeout(timeout);
+    if (res.status === 429) { try { var errData = await res.json(); window.showToast(errData.error || window.t('lblRateLimit', 'Tageslimit erreicht.'), 'error', 4000); } catch(e) {} if (resultEl) resultEl.classList.add('hidden'); return; }
+    if (!res.ok) { window.showToast(window.t('lblServerError', 'Server-Fehler.'), 'error', 4000); if (resultEl) resultEl.classList.add('hidden'); return; }
+    var raw = await res.text();
+    var responseText = '';
+    try { var parsed = JSON.parse(raw); if (parsed.candidates && parsed.candidates[0] && parsed.candidates[0].content && parsed.candidates[0].content.parts) { var parts = parsed.candidates[0].content.parts; for (var i = parts.length - 1; i >= 0; i--) { if (parts[i].text) { responseText = parts[i].text; break; } } } else if (parsed.reply) { responseText = parsed.reply; } else if (parsed.text) { responseText = parsed.text; } } catch(e) { responseText = raw; }
+    if (!responseText || responseText.trim().length === 0) { window.showToast(window.t('lblEmptyResponse', 'Keine Antwort erhalten.'), 'error'); if (resultEl) resultEl.classList.add('hidden'); return; }
+    if (window.awardXP) window.awardXP('scanAnalysis');
+    if (window._markFeatureUsed) window._markFeatureUsed('formcheck_used');
+    var disclaimer = window._FORM_CHECK_DISCLAIMER[lang] || window._FORM_CHECK_DISCLAIMER.de;
+    if (resultEl) { resultEl.innerHTML = '<div class="p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="flex items-center gap-2 mb-3"><i data-lucide="scan-eye" class="w-4 h-4" style="color:#a3c9a8"></i><p class="text-xs font-black uppercase tracking-widest" style="color:#a3c9a8">' + window.t('fcResultTitle', 'Form-Analyse') + ' (Beta)</p></div><div class="text-sm text-zinc-300 leading-relaxed mb-4">' + window._sanitizeAIHtml(responseText) + '</div><div class="p-3 rounded-lg" style="background:rgba(232,138,138,0.06);border:1px solid rgba(232,138,138,0.12)"><p class="text-[9px] text-zinc-500 leading-relaxed">' + window._escapeHtml(disclaimer) + '</p></div><div class="flex gap-2 mt-3"><button onclick="window._captureFormCheck(\'camera\')" class="flex-1 py-2.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);color:#a3c9a8;border:1px solid rgba(163,201,168,0.2)">' + window.t('fcRetry', 'Nochmal filmen') + '</button><button onclick="window.toggleModal(\'formCheckModal\')" class="flex-1 py-2.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);color:#888;border:1px solid var(--border-hex)">' + window.t('btnClose', 'Schliessen') + '</button></div></div>'; window._refreshLucide(); }
+   } catch(err) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') window.showToast(window.t('lblTimeout', 'Zeitueberschreitung.'), 'error', 4000);
+    else window.showToast(window.t('lblError', 'Fehler') + ': ' + err.message, 'error', 4000);
+    if (resultEl) resultEl.classList.add('hidden');
+   }
+   window._formCheckImageData = null; window._formCheckMimeType = null;
+  };
+
+  // ============================================================
   // MUSKELBALANCE ANALYSE
   // ============================================================
   window._computeMuscleBalance = function() {
