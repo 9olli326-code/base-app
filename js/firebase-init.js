@@ -239,7 +239,7 @@
    window.listenToWorkouts = function() {
     if(!auth.currentUser) return;
     if(window.unsubscribeSnapshot) window.unsubscribeSnapshot();
-    const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/window.workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/window.clients/${window.currentClient}/window.workouts`;
+    const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/clients/${window.currentClient}/workouts`;
     
     window.unsubscribeSnapshot = onSnapshot(collection(db, path), (snap) => {
      const cloudData = snap.docs.map(d => d.data());
@@ -324,13 +324,13 @@
    window.syncToCloud = async (e) => { 
     if(!navigator.onLine) { let q = JSON.parse(localStorage.getItem('beastmode_v2_offline_queue') || '[]'); q.push(e); localStorage.setItem('beastmode_v2_offline_queue', JSON.stringify(q)); return; }
     if(!auth.currentUser) return; 
-    const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/window.workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/window.clients/${window.currentClient}/window.workouts`; 
+    const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/clients/${window.currentClient}/workouts`; 
     try { await setDoc(doc(db, path, e.id.toString()), e); } catch(err) { console.log("Cloud Sync fehlerhaft -> Offline Queue"); }
    };
    
    window.removeFromCloud = async (id) => { 
     if(!auth.currentUser) return; 
-    const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/window.workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/window.clients/${window.currentClient}/window.workouts`; 
+    const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/clients/${window.currentClient}/workouts`; 
     try { await deleteDoc(doc(db, path, id.toString())); } catch(err) { console.log("Delete failed offline"); }
    };
 

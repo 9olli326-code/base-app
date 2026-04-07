@@ -10,3 +10,5 @@ android/app/build/
 # Signing keys (NEVER commit!)
 *.jks
 *.keystore
+firebase-admin-key.json
+beastmode-17f0d-firebase-adminsdk-fbsvc-2b5f41eea7.json

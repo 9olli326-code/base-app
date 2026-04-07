@@ -1,11 +1,10 @@
-  var _lucidePending = false;
+  var _lucideTimer = null;
   window._refreshLucide = function() {
-   if (_lucidePending) return;
-   _lucidePending = true;
-   requestAnimationFrame(function() {
-    window._refreshLucide();
-    _lucidePending = false;
-   });
+   if(_lucideTimer) clearTimeout(_lucideTimer);
+   _lucideTimer = setTimeout(function() {
+    if(window.lucide) window.lucide.createIcons();
+    _lucideTimer = null;
+   }, 50);
   };
 
   const appIdGlobal = "base-v2-beta-test";

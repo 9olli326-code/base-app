@@ -188,12 +188,7 @@ window._restoreMorphTheme = function() {
 const _clientWorkoutCache = {};
 const _clientProfileCache = {};
 
-window._escapeHtml = function(str) {
-if(!str) return '';
-const d = document.createElement('div');
-d.textContent = str;
-return d.innerHTML;
-};
+// _escapeHtml ist in app.html definiert (single source)
 
 // Sichere Photo-URL: nur data:image/ oder https:// erlauben
 window._safePhotoUrl = function(url) {
@@ -313,15 +308,7 @@ window._formatDuration = function(val) {
     return s > 0 ? m + ':' + String(s).padStart(2,'0') + ' min' : m + ' min';
 };
 
-// ── LUCIDE REFRESH (DRY — called from one place) ──────────
-var _lucideTimer = null;
-window._refreshLucide = function() {
-    if(_lucideTimer) clearTimeout(_lucideTimer);
-    _lucideTimer = setTimeout(function() {
-        if(window.lucide) window.lucide.createIcons();
-        _lucideTimer = null;
-    }, 50);
-};
+// _refreshLucide ist jetzt in app-core.js definiert (single source)
 
 // ── PT TAB SWITCHING ───────────────────────────────────────
 window.switchPTTab = function(tab) {

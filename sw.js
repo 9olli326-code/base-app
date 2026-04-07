@@ -1,4 +1,4 @@
-const CACHE_NAME = 'base-v2-cache-v138';
+const CACHE_NAME = 'base-v2-cache-v139';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -49,12 +49,12 @@ self.addEventListener('activate', function(event) {
     event.waitUntil(
         caches.keys().then(function(names) {
             return Promise.all(
-                names.map(function(name) {
+                names.filter(function(name) {
+                    return name !== CACHE_NAME;
+                }).map(function(name) {
                     return caches.delete(name);
                 })
             );
-        }).then(function() {
-            return caches.open(CACHE_NAME);
         })
     );
     self.clients.claim();
