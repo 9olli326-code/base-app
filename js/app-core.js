@@ -2906,7 +2906,7 @@
   document.body.addEventListener('click', function(e) { if(!e.target.closest('.workout-card-menu') && !e.target.closest('[onclick*="nextElementSibling"]')) { document.querySelectorAll('.workout-card-menu.show').forEach(m => m.classList.remove('show')); } });
   window.exportToCSV = () => { if(!Array.isArray(window.workouts) || window.workouts.length === 0) { window.showToast(window.t("toastNoData")); return; } let allDynamicKeys = new Set(); window.workouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allDynamicKeys.add(k)); }); const dynamicHeaders = Array.from(allDynamicKeys); let csv = "Datum;Kategorie;Sportart;Aktivitaet;Dauer;Notiz;" + dynamicHeaders.join(";") + "\n"; window.workouts.forEach(w => { let row = [ w.date || "", w.category || "", w.sportCategory || "", w.exercise || "", w.sessionDuration || "", (w.sessionComment || "").replace(/;/g, ',').replace(/\n/g, ' ') ]; dynamicHeaders.forEach(header => { let val = (w.data && w.data[header] !== undefined) ? w.data[header] : ""; row.push(String(val).replace(/;/g, ',')); }); csv += row.join(";") + "\n"; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `BASE_Export.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.showToast(window.t("toastExported")); };
 
-  window.initAnalytics = function() { if(!Array.isArray(window.workouts)) return; window._ensureChartJS().then(() => window._initAnalyticsCore()).catch(e => console.error('Chart.js laden fehlgeschlagen:', e)); };
+  window.initAnalytics = function() { if(!Array.isArray(window.workouts)) return; if(window._renderMuscleBalance) window._renderMuscleBalance(); window._ensureChartJS().then(() => window._initAnalyticsCore()).catch(e => console.error('Chart.js laden fehlgeschlagen:', e)); };
   window._initAnalyticsCore = function() { const exSelect = document.getElementById('analyticsExercise'); const uniqueExercises = [...new Set(window.workouts.map(w => w.exercise))].filter(Boolean); if (uniqueExercises.length === 0) { exSelect.innerHTML = '<option value="">' + window.t('toastNoData','Keine Daten') + '</option>'; document.getElementById('analyticsMetric').innerHTML = '<option value="">-</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentSelection = exSelect.value; exSelect.innerHTML = uniqueExercises.map(ex => `<option value="${window._escapeHtml(ex)}">${window._escapeHtml(ex)}</option>`).join(''); if (currentSelection && uniqueExercises.includes(currentSelection)) exSelect.value = currentSelection; window.updateAnalyticsMetrics(); }
   window.updateAnalyticsMetrics = function() { const selectedExercise = document.getElementById('analyticsExercise').value; const metricSelect = document.getElementById('analyticsMetric'); if(!selectedExercise || !Array.isArray(window.workouts)) return; const relevantWorkouts = window.workouts.filter(w => w.exercise === selectedExercise); let allKeys = new Set(); relevantWorkouts.forEach(w => { if(w.data) Object.keys(w.data).forEach(k => allKeys.add(k)); }); const keysArray = Array.from(allKeys); if (keysArray.length === 0) { metricSelect.innerHTML = '<option value="">' + window.t('noMetrics','Keine Metriken') + '</option>'; if(window.v2ChartInstance) window.v2ChartInstance.destroy(); return; } const currentMetric = metricSelect.value; metricSelect.innerHTML = keysArray.map(k => `<option value="${window._escapeHtml(k)}">${window._escapeHtml(k)}</option>`).join(''); if(currentMetric && keysArray.includes(currentMetric)) metricSelect.value = currentMetric; window.renderV2Chart(); };
   window.renderV2Chart = function() { const ex = document.getElementById('analyticsExercise').value; const metric = document.getElementById('analyticsMetric').value; if(!ex || !metric || !Array.isArray(window.workouts)) return; let chartData = window.workouts.filter(w => w.exercise === ex && w.data && w.data[metric] !== undefined).sort((a,b) => new Date(a.date) - new Date(b.date)); const labels = chartData.map(w => w.date.substring(5)); const dataPoints = chartData.map(w => { let val = String(w.data[metric]).replace(',', '.'); if(val.includes(':')) { const parts = val.split(':'); if(parts.length === 2) return parseInt(parts[0]) + (parseInt(parts[1])/60); } let floatVal = parseFloat(val); return isNaN(floatVal) ? 0 : floatVal; }); const ctx = document.getElementById('v2Chart').getContext('2d'); if(window.v2ChartInstance) window.v2ChartInstance.destroy(); const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-hex').trim() || '#06b6d4'; window.v2ChartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: metric, data: dataPoints, backgroundColor: primaryColor + '20', borderColor: primaryColor, borderWidth: 3, fill: true, tension: 0.4, pointBackgroundColor: primaryColor, pointBorderColor: '#000', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { color: '#a1a1aa', font: { family: 'Inter' } } }, x: { grid: { display: false }, ticks: { color: '#a1a1aa', font: { family: 'Inter', weight: 'bold' } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#18181b', titleColor: '#fff', bodyColor: primaryColor, bodyFont: { weight: 'bold', size: 14 }, borderColor: '#27272a', borderWidth: 1, padding: 12, cornerRadius: 12, displayColors: false } } } }); };
@@ -5223,6 +5223,113 @@
       '<i data-lucide="chevron-right" class="w-3 h-3 flex-shrink-0 pointer-events-none" style="color:#555"></i></div>';
     }).join('');
    window._refreshLucide();
+  };
+
+  // ============================================================
+  // MUSKELBALANCE ANALYSE
+  // ============================================================
+  window._computeMuscleBalance = function() {
+   var workouts = window.workouts || [];
+   var archived = workouts.filter(function(w) { return w.archived && w.category === 'strength'; });
+   if (archived.length < 5) return null;
+   var exDb = window.EXERCISE_DB || [];
+   var exMap = {};
+   for (var i = 0; i < exDb.length; i++) {
+    var ex = exDb[i];
+    if (ex.n) exMap[ex.n.toLowerCase()] = { bp: ex.bp || '', t: ex.t || '' };
+    if (ex.de) exMap[ex.de.toLowerCase()] = { bp: ex.bp || '', t: ex.t || '' };
+   }
+   var bodyPartCounts = {};
+   var targetCounts = {};
+   var totalSets = 0;
+   var last30 = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+   archived.forEach(function(w) {
+    if (w.date < last30) return;
+    var lookup = exMap[(w.exercise || '').toLowerCase()];
+    if (!lookup) return;
+    var sets = (w.setDetails && w.setDetails.length) || 1;
+    totalSets += sets;
+    if (lookup.bp) bodyPartCounts[lookup.bp] = (bodyPartCounts[lookup.bp] || 0) + sets;
+    if (lookup.t) targetCounts[lookup.t] = (targetCounts[lookup.t] || 0) + sets;
+   });
+   if (totalSets === 0) return null;
+   var bodyParts = Object.keys(bodyPartCounts).map(function(bp) {
+    return { name: bp, sets: bodyPartCounts[bp], pct: Math.round((bodyPartCounts[bp] / totalSets) * 100) };
+   }).sort(function(a, b) { return b.sets - a.sets; });
+   var targets = Object.keys(targetCounts).map(function(t) {
+    return { name: t, sets: targetCounts[t], pct: Math.round((targetCounts[t] / totalSets) * 100) };
+   }).sort(function(a, b) { return b.sets - a.sets; });
+   var bpMap = {};
+   bodyParts.forEach(function(bp) { bpMap[bp.name] = bp.pct; });
+   var warnings = [];
+   // Push/Pull: chest+shoulders vs back
+   var pushPct = (bpMap['chest'] || 0) + (bpMap['shoulders'] || 0);
+   var pullPct = bpMap['back'] || 0;
+   var ppRatio = pullPct > 0 ? (pushPct / pullPct) : null;
+   if (ppRatio && ppRatio > 1.8) {
+    warnings.push({ type: 'imbalance', text: window.t('balancePushHeavy', 'Push-Muskeln (Brust/Schultern) deutlich mehr als Pull (Ruecken). Kann zu Haltungsproblemen fuehren.'), suggestion: window.t('balancePushFix', 'Empfehlung: 2-3 Rueckenuebungen pro Woche (Rudern, Klimmzuege, Face Pulls)') });
+   } else if (ppRatio && ppRatio < 0.6) {
+    warnings.push({ type: 'imbalance', text: window.t('balancePullHeavy', 'Pull-Muskeln deutlich mehr als Push. Ergaenze Brust- und Schulteruebungen.'), suggestion: window.t('balancePullFix', 'Empfehlung: Bankdruecken, Schulterdruecken und Dips hinzufuegen') });
+   }
+   // Upper/Lower: chest+back+shoulders+arms vs legs
+   var upperPct = (bpMap['chest'] || 0) + (bpMap['back'] || 0) + (bpMap['shoulders'] || 0) + (bpMap['arms'] || 0);
+   var lowerPct = bpMap['legs'] || 0;
+   var ulRatio = lowerPct > 0 ? (upperPct / lowerPct) : null;
+   if (ulRatio && ulRatio > 3) {
+    warnings.push({ type: 'skip_leg_day', text: window.t('balanceLegs', 'Beine machen nur ' + lowerPct + '% deines Trainings aus. Never skip leg day!'), suggestion: window.t('balanceLegsFix', 'Empfehlung: Squats, Lunges und Romanian Deadlifts 2x pro Woche') });
+   }
+   // Neglected groups
+   var expected = ['chest', 'back', 'shoulders', 'legs', 'core'];
+   var bpLabels = { chest: 'Brust', back: 'Ruecken', shoulders: 'Schultern', legs: 'Beine', core: 'Core/Bauch', arms: 'Arme' };
+   expected.forEach(function(g) {
+    if (!bpMap[g] || bpMap[g] < 3) {
+     warnings.push({ type: 'neglected', text: (bpLabels[g] || g) + ' ' + window.t('balanceNeglected', 'wird kaum trainiert') + ' (' + (bpMap[g] || 0) + '%)' });
+    }
+   });
+   return { bodyParts: bodyParts, targets: targets, totalSets: totalSets, warnings: warnings, pushPullRatio: ppRatio ? ppRatio.toFixed(1) : null, upperLowerRatio: ulRatio ? ulRatio.toFixed(1) : null };
+  };
+
+  window._renderMuscleBalance = function() {
+   var container = document.getElementById('muscleBalanceContainer');
+   if (!container) return;
+   var data = window._computeMuscleBalance();
+   if (!data) { container.innerHTML = '<p class="text-xs text-zinc-600 text-center py-4">' + window.t('balanceNoData', 'Tracke mindestens 5 Kraft-Workouts fuer die Muskelbalance-Analyse') + '</p>'; return; }
+   var colors = { chest: '#e88a8a', back: '#8aafe8', shoulders: '#e8c86a', arms: '#a3c9a8', legs: '#e8b08a', core: '#a8a8e8', cardio: '#e88ab8' };
+   var bpLabels = { chest: 'Brust', back: 'Ruecken', shoulders: 'Schultern', arms: 'Arme', legs: 'Beine', core: 'Core/Bauch', cardio: 'Cardio' };
+   var html = '';
+   if (data.warnings.length > 0) {
+    html += '<div class="mb-4">';
+    data.warnings.slice(0, 3).forEach(function(w) {
+     var icon = w.type === 'skip_leg_day' ? '\ud83e\uddb5' : w.type === 'imbalance' ? '\u2696\ufe0f' : '\u26a0\ufe0f';
+     html += '<div class="p-3 rounded-xl mb-2" style="background:rgba(232,138,138,0.08);border:1px solid rgba(232,138,138,0.15)">';
+     html += '<p class="text-xs font-bold text-white flex items-center gap-2">' + icon + ' ' + window._escapeHtml(w.text) + '</p>';
+     if (w.suggestion) html += '<p class="text-[10px] mt-1" style="color:#a3c9a8">' + window._escapeHtml(w.suggestion) + '</p>';
+     html += '</div>';
+    });
+    html += '</div>';
+   }
+   if (data.pushPullRatio || data.upperLowerRatio) {
+    html += '<div class="grid grid-cols-2 gap-3 mb-4">';
+    if (data.pushPullRatio) {
+     var ppColor = parseFloat(data.pushPullRatio) > 1.5 || parseFloat(data.pushPullRatio) < 0.7 ? '#e88a8a' : '#a3c9a8';
+     html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Push/Pull</p><p class="text-xl font-black" style="color:' + ppColor + '">' + data.pushPullRatio + '</p><p class="text-[9px] text-zinc-600">' + window.t('balanceIdeal', 'Ideal: 1.0 - 1.5') + '</p></div>';
+    }
+    if (data.upperLowerRatio) {
+     var ulColor = parseFloat(data.upperLowerRatio) > 2.5 ? '#e88a8a' : '#a3c9a8';
+     html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Upper/Lower</p><p class="text-xl font-black" style="color:' + ulColor + '">' + data.upperLowerRatio + '</p><p class="text-[9px] text-zinc-600">' + window.t('balanceIdeal2', 'Ideal: 1.0 - 2.0') + '</p></div>';
+    }
+    html += '</div>';
+   }
+   html += '<p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">' + window.t('balanceDistribution', 'Verteilung (letzte 30 Tage)') + '</p>';
+   var maxPct = data.bodyParts.length > 0 ? data.bodyParts[0].pct : 100;
+   data.bodyParts.forEach(function(bp) {
+    var color = colors[bp.name] || '#888';
+    var barWidth = Math.max(4, Math.round((bp.pct / maxPct) * 100));
+    var label = bpLabels[bp.name] || bp.name;
+    html += '<div class="flex items-center gap-3 mb-2"><span class="text-[10px] font-bold text-zinc-400 w-20 text-right flex-shrink-0">' + window._escapeHtml(label) + '</span><div class="flex-1 h-5 rounded-md overflow-hidden" style="background:#1a1a1a"><div style="width:' + barWidth + '%;height:100%;background:' + color + ';border-radius:6px;transition:width 0.5s ease"></div></div><span class="text-[10px] font-black w-10 text-right flex-shrink-0" style="color:' + color + '">' + bp.pct + '%</span><span class="text-[9px] text-zinc-600 w-8 text-right flex-shrink-0">' + bp.sets + 'x</span></div>';
+   });
+   html += '<p class="text-[9px] text-zinc-600 text-center mt-3">' + data.totalSets + ' Sets total \u00b7 ' + window.t('balancePeriod', 'Letzte 30 Tage') + '</p>';
+   container.innerHTML = html;
   };
 
   // ============================================================
