@@ -329,6 +329,26 @@
   };
   setTimeout(function() { if (window._renderVoiceCoachIndicator) window._renderVoiceCoachIndicator(); }, 2000);
 
+  // === +/- INPUT HELPERS ===
+  window._adjustInput = function(inputId, delta) {
+   var input = document.getElementById(inputId);
+   if (!input) return;
+   var val = parseFloat(input.value) || 0;
+   var min = parseFloat(input.min) || 0;
+   var max = parseFloat(input.max) || 999;
+   val = Math.max(min, Math.min(max, val + delta));
+   if (delta % 1 !== 0) val = Math.round(val * 2) / 2;
+   input.value = val;
+   input.dispatchEvent(new Event('change'));
+  };
+  window._adjustRIR = function(delta) {
+   var input = document.getElementById('rirInput');
+   if (!input) return;
+   var val = parseInt(input.value) || 2;
+   val = Math.max(0, Math.min(5, val + delta));
+   input.value = val;
+  };
+
   window.DEFAULT_STRENGTH_SCHEMA = [ {"id": "saetze", "label": "Sätze", "type": "number", "placeholder": "z.B. 3"}, {"id": "wdh", "label": "Wiederholungen", "type": "number", "placeholder": "z.B. 10"}, {"id": "gewicht", "label": "Gewicht (kg)", "type": "number", "placeholder": "z.B. 80"} ]; // Note: labels translated at render time via schema_ keys
   window.DEFAULT_CARDIO_SCHEMA = [ {"id": "distanz", "label": "Distanz (km)", "type": "number", "placeholder": "z.B. 5.5"}, {"id": "dauer", "label": "Dauer (min)", "type": "number", "placeholder": "z.B. 30"}, {"id": "pace", "label": "Pace (min/km)", "type": "text", "placeholder": "z.B. 5:30"}, {"id": "puls", "label": "Ø Puls", "type": "number", "placeholder": "z.B. 140"} ];
   window.categorySchemas = { main: null, strength: { sportName: "Klassisches Krafttraining", schema: window.DEFAULT_STRENGTH_SCHEMA }, cardio: { sportName: "Ausdauersport", schema: window.DEFAULT_CARDIO_SCHEMA }, recovery: null };
@@ -649,13 +669,23 @@
     row.innerHTML = `
      <span class="zen-set-label pointer-events-none">${window.t('lblSet','Satz')} ${i}</span>
      <div class="zen-set-value-group">
-      <div class="zen-set-value">
+      <div class="zen-set-value" style="display:flex;align-items:center;gap:4px">
+       <button type="button" aria-label="Reps minus" onclick="window._adjustInput('wdh_s${i}',-1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">\u2212</button>
        <input type="number" id="wdh_s${i}" aria-label="${window.t('schema_wdh','Wiederholungen')} ${window.t('lblSet','Satz')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text">
+       <button type="button" aria-label="Reps plus" onclick="window._adjustInput('wdh_s${i}',1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">+</button>
        <span class="zen-set-unit">${window.t('lblReps','Wdh')}</span>
       </div>
-      <div class="zen-set-value">
+      <div class="zen-set-value" style="display:flex;align-items:center;gap:4px">
+       <button type="button" aria-label="Weight minus" onclick="window._adjustInput('weight_s${i}',-2.5)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">\u2212</button>
        <input type="number" step="any" id="weight_s${i}" aria-label="${window.t('schema_gewicht','Gewicht (kg)')} ${window.t('lblSet','Satz')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text">
+       <button type="button" aria-label="Weight plus" onclick="window._adjustInput('weight_s${i}',2.5)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">+</button>
        <span class="zen-set-unit">${window.t('lblWeight','Gewicht')}</span>
+      </div>
+      <div class="zen-set-value" style="display:flex;align-items:center;gap:4px;min-width:90px">
+       <button type="button" aria-label="RIR minus" onclick="window._adjustInput('rir_s${i}',-1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">\u2212</button>
+       <input type="number" id="rir_s${i}" aria-label="RIR ${window.t('lblSet','Satz')} ${i}" placeholder="--" min="0" max="5" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="width:40px">
+       <button type="button" aria-label="RIR plus" onclick="window._adjustInput('rir_s${i}',1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">+</button>
+       <span class="zen-set-unit" style="color:#a3c9a8">RIR</span>
       </div>
      </div>
     `;
@@ -684,11 +714,12 @@
      const sInput = document.getElementById('setsInput'); const count = sInput ? parseInt(sInput.value) : 0; let vol = 0, maxW = 0; let setsDisplay = [];
      
      for (let i = 1; i <= count; i++) {
-      const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`);
-      if (rEl && wEl && rEl.value && wEl.value) { 
-       let r = parseInt(rEl.value) || 0; let w = parseFloat(wEl.value) || 0; 
-       entry.setDetails.push({ reps: r, weight: w }); vol += (r * w); 
-       if (w > maxW) maxW = w; setsDisplay.push(`${r}x${w}kg`); 
+      const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); const rirEl = document.getElementById(`rir_s${i}`);
+      if (rEl && wEl && rEl.value && wEl.value) {
+       let r = parseInt(rEl.value) || 0; let w = parseFloat(wEl.value) || 0; let rir = (rirEl && rirEl.value !== '') ? parseInt(rirEl.value) : null;
+       var setObj = { reps: r, weight: w }; if (rir !== null && !isNaN(rir)) setObj.rir = rir;
+       entry.setDetails.push(setObj); vol += (r * w);
+       if (w > maxW) maxW = w; setsDisplay.push(`${r}x${w}kg`);
       }
      }
      entry.volume = vol; entry.maxWeight = maxW; entry.equipment = document.getElementById('equipmentInput')?.value || 'Standard';
@@ -2892,7 +2923,7 @@
    ['date','exercise','weight'].forEach(k => { const th = document.getElementById('sortTh_'+k); if(th) th.setAttribute('aria-sort', k === key ? (window._tableSortAsc ? 'ascending' : 'descending') : 'none'); });
    window.renderTable();
   };
-  window.renderTable = function() { const body = document.getElementById('historyTableBody'); const mobileList = document.getElementById('mobileCardList'); if(!body) return; body.innerHTML = ''; if(mobileList) mobileList.innerHTML = ''; if(!Array.isArray(window.workouts)) return; let preparedWorkouts = window.workouts.map(w => { if(w.id && String(w.id).startsWith('strava_')) w.category = 'cardio'; return w; }); let filteredWorkouts = preparedWorkouts; if (window.currentTableFilter !== 'all') filteredWorkouts = preparedWorkouts.filter(w => w.category === window.currentTableFilter); filteredWorkouts = filteredWorkouts.filter(w => window.currentView === 'active' ? !w.archived : w.archived); if(window._tableSortKey) { const dir = window._tableSortAsc ? 1 : -1; filteredWorkouts.sort((a, b) => { if(window._tableSortKey === 'date') { return dir * (a.date || '').localeCompare(b.date || ''); } else if(window._tableSortKey === 'exercise') { return dir * (a.exercise || '').localeCompare(b.exercise || ''); } else if(window._tableSortKey === 'weight') { return dir * ((a.maxWeight || 0) - (b.maxWeight || 0)); } return 0; }); } const reversed = window._tableSortKey ? filteredWorkouts : [...filteredWorkouts].reverse(); const hist = {}; reversed.forEach(w => { const k = w.category + '_' + w.exercise.toLowerCase(); w.progressBadge = ''; if(hist[k]) { const l = hist[k]; if (w.category === 'strength') { let curV = w.volume || 0, lastV = l.volume || 0; let curW = w.maxWeight || 0, lastW = l.maxWeight || 0; if (curW > lastW && lastW > 0) { const pct = (((curW - lastW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${pct}% kg</span>`; } else if (curW < lastW && lastW > 0) { const pct = (((lastW - curW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">-${pct}% kg</span>`; } } else if (w.category === 'cardio' && w.data && l.data) { let curDist = parseFloat((w.data['Distanz (km)'] || w.data['Distanz'] || '0').toString().replace(',','.')); let lastDist = parseFloat((l.data['Distanz (km)'] || l.data['Distanz'] || '0').toString().replace(',','.')); if(curDist > lastDist && lastDist > 0) { w.progressBadge = `<span class="bg-[#fc4c02]/10 text-[#fc4c02] border border-[#fc4c02]/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${(curDist - lastDist).toFixed(2)} km</span>`; } } } hist[k] = w; }); let lastSessionId = null; filteredWorkouts.forEach(w => { if (window.currentView === 'archive' && w.archived && w.sessionId && w.sessionId !== lastSessionId) { if (w.sessionDuration || w.sessionComment) { const sessionTr = document.createElement('tr'); sessionTr.className = "bg-primary/5 border-b border-primary/20"; sessionTr.innerHTML = `<td colspan="4" class="p-3 px-5 shadow-sm"><div class="flex items-center justify-between"><div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">${w.sessionDuration ? `<span class="text-[10px] font-black text-primary flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="timer" class="w-3.5 h-3.5"></i> ${w.sessionDuration}</span>` : ''}${w.sessionComment ? `<span class="text-[11px] text-zinc-300 italic flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-zinc-500"></i> "${window._escapeHtml(w.sessionComment)}"</span>` : ''}</div><button onclick="window.shareWorkout('${w.id}')" class="text-[10px] font-black bg-primary/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded uppercase tracking-widest hover:bg-primary/20 transition-colors flex items-center gap-1 shadow-sm cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-3 h-3"></i> Posten</button></div></td>`; body.appendChild(sessionTr); } lastSessionId = w.sessionId; } let dataHtml = ""; if (w.category === 'strength' && w.setDetails && w.setDetails.length > 0) { dataHtml = `<div class="flex flex-wrap gap-2">`; w.setDetails.forEach((s, i) => { dataHtml += `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${s.reps}x${s.weight}kg</span>`; }); dataHtml += `</div>`; } else if(w.data) { const keys = Object.keys(w.data); const det = keys.map(k => `<div class="flex flex-col mb-1 sm:mb-0 mr-4"><span class="text-[9px] text-zinc-500 uppercase font-black tracking-widest">${window._escapeHtml(k)}</span><span class="text-white font-bold text-xs">${window._escapeHtml(String(w.data[k]))}</span></div>`).join(''); dataHtml = `<div class="flex flex-wrap items-center">${det}</div>`; } let sportCatDisplay = w.sportCategory || 'Aktivität'; if(w.category === 'strength') sportCatDisplay = w.equipment || 'Krafttraining'; else if(w.category === 'cardio') sportCatDisplay = w.sportCategory || 'Ausdauer'; const cat = w.category || 'main'; const ui = window.CAT_UI[cat] || window.CAT_UI['main']; const isStrava = w.id && String(w.id).startsWith('strava_'); const stravaBadge = isStrava ? `<span class="bg-[#fc4c02]/20 text-[#fc4c02] text-[9px] uppercase font-black px-1.5 py-0.5 rounded ml-2">Strava</span>` : ''; const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 border-b border-zinc-800/40 transition-colors group"; tr.innerHTML = ` <td class="px-5 py-4 shadow-sm"><div class="flex flex-col gap-1"><span class="text-zinc-500 text-[10px] font-black italic">${w.date.substring(5)}</span><span class="inline-flex items-center justify-center w-6 h-6 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-3 h-3"></i></span></div></td> <td class="px-5 py-4 shadow-sm"><div class="flex flex-col"><span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5 flex items-center">${window._escapeHtml(sportCatDisplay)} ${stravaBadge}</span><span onclick="event.stopPropagation(); window.openExerciseHistory('${w.exercise.replace(/'/g, "\\'")}')" class="font-bold text-white text-sm tracking-tight flex items-center cursor-pointer pointer-events-auto hover:text-primary transition-colors">${window._escapeHtml(w.exercise)} ${w.progressBadge || ''}</span></div></td> <td class="px-5 py-4 shadow-sm">${dataHtml}</td> <td class="px-5 py-4 text-right whitespace-nowrap"><button aria-label="Teilen" onclick="window.shareWorkout('${w.id}')" class="text-zinc-600 hover:text-primary transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i></button>${!isStrava && !w.archived ? `<button aria-label="Edit 2" onclick="window.editEntry('${w.id}')" class="text-zinc-600 hover:text-primary transition-all p-2 opacity-0 group-hover:opacity-100 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>` : ''}<button aria-label="Löschen" onclick="window.deleteEntry('${w.id}')" class="text-zinc-600 hover:text-rose-500 transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button></td> `; body.appendChild(tr);
+  window.renderTable = function() { const body = document.getElementById('historyTableBody'); const mobileList = document.getElementById('mobileCardList'); if(!body) return; body.innerHTML = ''; if(mobileList) mobileList.innerHTML = ''; if(!Array.isArray(window.workouts)) return; let preparedWorkouts = window.workouts.map(w => { if(w.id && String(w.id).startsWith('strava_')) w.category = 'cardio'; return w; }); let filteredWorkouts = preparedWorkouts; if (window.currentTableFilter !== 'all') filteredWorkouts = preparedWorkouts.filter(w => w.category === window.currentTableFilter); filteredWorkouts = filteredWorkouts.filter(w => window.currentView === 'active' ? !w.archived : w.archived); if(window._tableSortKey) { const dir = window._tableSortAsc ? 1 : -1; filteredWorkouts.sort((a, b) => { if(window._tableSortKey === 'date') { return dir * (a.date || '').localeCompare(b.date || ''); } else if(window._tableSortKey === 'exercise') { return dir * (a.exercise || '').localeCompare(b.exercise || ''); } else if(window._tableSortKey === 'weight') { return dir * ((a.maxWeight || 0) - (b.maxWeight || 0)); } return 0; }); } const reversed = window._tableSortKey ? filteredWorkouts : [...filteredWorkouts].reverse(); const hist = {}; reversed.forEach(w => { const k = w.category + '_' + w.exercise.toLowerCase(); w.progressBadge = ''; if(hist[k]) { const l = hist[k]; if (w.category === 'strength') { let curV = w.volume || 0, lastV = l.volume || 0; let curW = w.maxWeight || 0, lastW = l.maxWeight || 0; if (curW > lastW && lastW > 0) { const pct = (((curW - lastW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${pct}% kg</span>`; } else if (curW < lastW && lastW > 0) { const pct = (((lastW - curW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">-${pct}% kg</span>`; } } else if (w.category === 'cardio' && w.data && l.data) { let curDist = parseFloat((w.data['Distanz (km)'] || w.data['Distanz'] || '0').toString().replace(',','.')); let lastDist = parseFloat((l.data['Distanz (km)'] || l.data['Distanz'] || '0').toString().replace(',','.')); if(curDist > lastDist && lastDist > 0) { w.progressBadge = `<span class="bg-[#fc4c02]/10 text-[#fc4c02] border border-[#fc4c02]/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${(curDist - lastDist).toFixed(2)} km</span>`; } } } hist[k] = w; }); let lastSessionId = null; filteredWorkouts.forEach(w => { if (window.currentView === 'archive' && w.archived && w.sessionId && w.sessionId !== lastSessionId) { if (w.sessionDuration || w.sessionComment) { const sessionTr = document.createElement('tr'); sessionTr.className = "bg-primary/5 border-b border-primary/20"; sessionTr.innerHTML = `<td colspan="4" class="p-3 px-5 shadow-sm"><div class="flex items-center justify-between"><div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">${w.sessionDuration ? `<span class="text-[10px] font-black text-primary flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="timer" class="w-3.5 h-3.5"></i> ${w.sessionDuration}</span>` : ''}${w.sessionComment ? `<span class="text-[11px] text-zinc-300 italic flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-zinc-500"></i> "${window._escapeHtml(w.sessionComment)}"</span>` : ''}</div><button onclick="window.shareWorkout('${w.id}')" class="text-[10px] font-black bg-primary/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded uppercase tracking-widest hover:bg-primary/20 transition-colors flex items-center gap-1 shadow-sm cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-3 h-3"></i> Posten</button></div></td>`; body.appendChild(sessionTr); } lastSessionId = w.sessionId; } let dataHtml = ""; if (w.category === 'strength' && w.setDetails && w.setDetails.length > 0) { dataHtml = `<div class="flex flex-wrap gap-2">`; w.setDetails.forEach((s, i) => { dataHtml += `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${s.reps}x${s.weight}kg${s.rir != null ? '<span class="ml-1 text-[8px]" style="color:#a3c9a8">R'+s.rir+'</span>' : ''}</span>`; }); dataHtml += `</div>`; } else if(w.data) { const keys = Object.keys(w.data); const det = keys.map(k => `<div class="flex flex-col mb-1 sm:mb-0 mr-4"><span class="text-[9px] text-zinc-500 uppercase font-black tracking-widest">${window._escapeHtml(k)}</span><span class="text-white font-bold text-xs">${window._escapeHtml(String(w.data[k]))}</span></div>`).join(''); dataHtml = `<div class="flex flex-wrap items-center">${det}</div>`; } let sportCatDisplay = w.sportCategory || 'Aktivität'; if(w.category === 'strength') sportCatDisplay = w.equipment || 'Krafttraining'; else if(w.category === 'cardio') sportCatDisplay = w.sportCategory || 'Ausdauer'; const cat = w.category || 'main'; const ui = window.CAT_UI[cat] || window.CAT_UI['main']; const isStrava = w.id && String(w.id).startsWith('strava_'); const stravaBadge = isStrava ? `<span class="bg-[#fc4c02]/20 text-[#fc4c02] text-[9px] uppercase font-black px-1.5 py-0.5 rounded ml-2">Strava</span>` : ''; const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 border-b border-zinc-800/40 transition-colors group"; tr.innerHTML = ` <td class="px-5 py-4 shadow-sm"><div class="flex flex-col gap-1"><span class="text-zinc-500 text-[10px] font-black italic">${w.date.substring(5)}</span><span class="inline-flex items-center justify-center w-6 h-6 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-3 h-3"></i></span></div></td> <td class="px-5 py-4 shadow-sm"><div class="flex flex-col"><span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5 flex items-center">${window._escapeHtml(sportCatDisplay)} ${stravaBadge}</span><span onclick="event.stopPropagation(); window.openExerciseHistory('${w.exercise.replace(/'/g, "\\'")}')" class="font-bold text-white text-sm tracking-tight flex items-center cursor-pointer pointer-events-auto hover:text-primary transition-colors">${window._escapeHtml(w.exercise)} ${w.progressBadge || ''}</span></div></td> <td class="px-5 py-4 shadow-sm">${dataHtml}</td> <td class="px-5 py-4 text-right whitespace-nowrap"><button aria-label="Teilen" onclick="window.shareWorkout('${w.id}')" class="text-zinc-600 hover:text-primary transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i></button>${!isStrava && !w.archived ? `<button aria-label="Edit 2" onclick="window.editEntry('${w.id}')" class="text-zinc-600 hover:text-primary transition-all p-2 opacity-0 group-hover:opacity-100 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>` : ''}<button aria-label="Löschen" onclick="window.deleteEntry('${w.id}')" class="text-zinc-600 hover:text-rose-500 transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button></td> `; body.appendChild(tr);
   if(mobileList) {
     const card = document.createElement('div');
     card.className = 'relative rounded-2xl p-5 transition-all group hover:-translate-y-0.5';
@@ -5273,6 +5304,68 @@
     }).join('');
    window._refreshLucide();
   };
+
+  // ============================================================
+  // EXERCISE SWAP
+  // ============================================================
+  window._findExerciseAlternatives = function(exerciseName, maxResults) {
+   maxResults = maxResults || 6;
+   var exDb = window.EXERCISE_DB || [];
+   var current = null;
+   for (var i = 0; i < exDb.length; i++) { if (exDb[i].n === exerciseName || exDb[i].de === exerciseName) { current = exDb[i]; break; } }
+   if (!current) return [];
+   var alts = [];
+   var lang = window.currentLang || 'de';
+   for (var j = 0; j < exDb.length; j++) {
+    var ex = exDb[j]; if (ex.n === current.n) continue;
+    var score = 0;
+    if (ex.bp && current.bp && ex.bp === current.bp) score += 50;
+    if (ex.t && current.t && ex.t === current.t) score += 30;
+    if (ex.bp === current.bp && ex.t === current.t) score += 20;
+    if (score > 0) alts.push({ name: lang === 'de' ? (ex.de || ex.n) : ex.n, bodyPart: ex.bp, target: ex.t, id: ex.id, matchScore: Math.min(score, 100) });
+   }
+   alts.sort(function(a, b) { return b.matchScore - a.matchScore; });
+   return alts.slice(0, maxResults);
+  };
+
+  window.openExerciseSwap = function(exerciseName) {
+   if (!exerciseName || !exerciseName.trim()) return;
+   var alts = window._findExerciseAlternatives(exerciseName);
+   if (alts.length === 0) { window.showToast(window.t('swapNoAlts', 'Keine Alternativen gefunden')); return; }
+   var html = '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">' + window.t('swapCurrent', 'Aktuelle Uebung') + '</p><p class="text-sm font-bold text-white">' + window._escapeHtml(exerciseName) + '</p></div>';
+   html += '<p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">' + window.t('swapChoose', 'Waehle eine Alternative') + '</p>';
+   alts.forEach(function(alt) {
+    var mc = alt.matchScore >= 80 ? '#a3c9a8' : alt.matchScore >= 60 ? '#e8c86a' : '#e88a8a';
+    var imgUrl = (alt.id && window._getExerciseImageUrl) ? window._getExerciseImageUrl(alt.id) : '';
+    var imgHtml = imgUrl ? '<img src="' + imgUrl + '" alt="" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" loading="lazy" onerror="this.style.display=\'none\'">' : '<div class="w-10 h-10 rounded-lg flex-shrink-0" style="background:var(--inner-bg-hex)"></div>';
+    html += '<div onclick="window._confirmSwap(\'' + window._escapeHtml(alt.name).replace(/'/g, "\\'") + '\')" class="flex items-center gap-3 p-3 rounded-xl mb-2 cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">' + imgHtml + '<div class="flex-1 min-w-0"><p class="text-sm font-bold text-white truncate">' + window._escapeHtml(alt.name) + '</p><p class="text-[8px] text-zinc-500">' + window._escapeHtml(alt.bodyPart || '') + ' \u00b7 ' + window._escapeHtml(alt.target || '') + '</p></div><div class="text-right flex-shrink-0"><p class="text-sm font-black" style="color:' + mc + '">' + alt.matchScore + '%</p><div class="w-12 h-1.5 rounded-full mt-1" style="background:#1a1a1a"><div class="h-full rounded-full" style="width:' + alt.matchScore + '%;background:' + mc + '"></div></div></div></div>';
+   });
+   html += '<button onclick="window.toggleModal(\'exerciseSwapModal\')" class="w-full mt-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:none;color:#888;border:1px solid var(--border-hex)">' + window.t('swapKeepOriginal', 'Original beibehalten') + '</button>';
+   var content = document.getElementById('exerciseSwapContent');
+   if (content) content.innerHTML = html;
+   window.toggleModal('exerciseSwapModal');
+  };
+
+  window._confirmSwap = function(newName) {
+   var input = document.getElementById('exerciseInput');
+   if (input) { input.value = newName; input.dispatchEvent(new Event('change')); }
+   if (window._showExerciseImage) window._showExerciseImage(newName);
+   window.toggleModal('exerciseSwapModal');
+   window.showToast(window.t('swapDone', 'Uebung getauscht!'));
+  };
+
+  // Swap button visibility
+  (function() {
+   function setupSwapBtn() {
+    var exInput = document.getElementById('exerciseInput');
+    var swapBtn = document.getElementById('btnSwapExercise');
+    if (!exInput || !swapBtn) return;
+    exInput.addEventListener('input', function() { swapBtn.style.display = exInput.value.trim() ? 'flex' : 'none'; });
+    exInput.addEventListener('change', function() { swapBtn.style.display = exInput.value.trim() ? 'flex' : 'none'; });
+   }
+   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function() { setTimeout(setupSwapBtn, 500); });
+   else setTimeout(setupSwapBtn, 500);
+  })();
 
   // ============================================================
   // KI FORM CHECK
