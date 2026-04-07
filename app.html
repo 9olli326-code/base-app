@@ -3286,7 +3286,96 @@
         };
 
         window.getStorageKey = function() { return window.currentClient === 'personal' ? 'beastmode_v2_cache' : `beastmode_v2_cache_${window.currentClient}`; };
-        window.saveWorkoutsForCurrentClient = function() { localStorage.setItem(window.getStorageKey(), JSON.stringify(window.workouts)); window.calculateStreak(); if(window._checkFirstWorkoutComplete) window._checkFirstWorkoutComplete(); };
+        window.saveWorkoutsForCurrentClient = function() { localStorage.setItem(window.getStorageKey(), JSON.stringify(window.workouts)); window.calculateStreak(); if(window._checkFirstWorkoutComplete) window._checkFirstWorkoutComplete(); if(window.currentClient && window.currentClient !== 'personal') { window._syncClientWorkoutsToCloud(window.currentClient); } };
+
+        // --- PT Cloud Sync Funktionen ---
+        window.syncClientsToCloud = async function() {
+            var auth = window._fbAuth;
+            if(!auth || !auth.currentUser || !window._fbDb) return;
+            try {
+                var ref = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'clients_list');
+                await window._fbSetDoc(ref, { clients: JSON.parse(localStorage.getItem('beastmode_v2_clients') || '[]'), updated: new Date().toISOString() });
+            } catch(e) { console.error('Client sync error:', e); }
+        };
+
+        window._syncClientWorkoutsToCloud = async function(clientId) {
+            var auth = window._fbAuth;
+            if(!auth || !auth.currentUser || !window._fbDb) return;
+            try {
+                var data = JSON.parse(localStorage.getItem('beastmode_v2_cache_' + clientId) || '[]');
+                var ref = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'client_workouts_' + clientId);
+                await window._fbSetDoc(ref, { workouts: data, updated: new Date().toISOString() });
+            } catch(e) { console.error('Client workout sync error:', e); }
+        };
+
+        window._syncClientProfileToCloud = async function(clientId, profile) {
+            var auth = window._fbAuth;
+            if(!auth || !auth.currentUser || !window._fbDb) return;
+            try {
+                var ref = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'client_profile_' + clientId);
+                await window._fbSetDoc(ref, { profile: profile, updated: new Date().toISOString() });
+            } catch(e) { console.error('Client profile sync error:', e); }
+        };
+
+        window._syncSessionsToCloud = async function() {
+            var auth = window._fbAuth;
+            if(!auth || !auth.currentUser || !window._fbDb) return;
+            try {
+                var data = JSON.parse(localStorage.getItem('base_pt_sessions') || '[]');
+                var ref = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'sessions');
+                await window._fbSetDoc(ref, { sessions: data, updated: new Date().toISOString() });
+            } catch(e) { console.error('Session sync error:', e); }
+        };
+
+        window.loadClientDataFromCloud = async function() {
+            var auth = window._fbAuth;
+            if(!auth || !auth.currentUser || !window._fbDb) return;
+            try {
+                // 1. Client-Liste laden
+                var listRef = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'clients_list');
+                var listSnap = await window._fbGetDoc(listRef);
+                if(listSnap.exists()) {
+                    var cloudClients = listSnap.data().clients || [];
+                    var localClients = JSON.parse(localStorage.getItem('beastmode_v2_clients') || '[]');
+                    var merged = cloudClients.slice();
+                    localClients.forEach(function(lc) {
+                        if(!merged.some(function(mc) { return mc.id === lc.id; })) { merged.push(lc); }
+                    });
+                    localStorage.setItem('beastmode_v2_clients', JSON.stringify(merged));
+                    if(window.clients) window.clients = merged;
+                    console.log('PT Clients synced from cloud:', merged.length);
+                }
+                // 2. Für jeden Client: Workouts + Profile laden
+                var clients = JSON.parse(localStorage.getItem('beastmode_v2_clients') || '[]');
+                for(var i = 0; i < clients.length; i++) {
+                    var cid = clients[i].id;
+                    try {
+                        var wRef = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'client_workouts_' + cid);
+                        var wSnap = await window._fbGetDoc(wRef);
+                        if(wSnap.exists() && wSnap.data().workouts) {
+                            var cloudW = wSnap.data().workouts;
+                            var localW = JSON.parse(localStorage.getItem('beastmode_v2_cache_' + cid) || '[]');
+                            if(cloudW.length >= localW.length) { localStorage.setItem('beastmode_v2_cache_' + cid, JSON.stringify(cloudW)); }
+                        }
+                    } catch(e) { console.log('Skip workout sync for', cid); }
+                    try {
+                        var pRef = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'client_profile_' + cid);
+                        var pSnap = await window._fbGetDoc(pRef);
+                        if(pSnap.exists() && pSnap.data().profile) { localStorage.setItem('base_client_profile_' + cid, JSON.stringify(pSnap.data().profile)); }
+                    } catch(e) { console.log('Skip profile sync for', cid); }
+                }
+                // 3. Sessions laden
+                var sRef = window._fbDoc(window._fbDb, 'artifacts', 'base-v2-beta-test', 'users', auth.currentUser.uid, 'pt_data', 'sessions');
+                var sSnap = await window._fbGetDoc(sRef);
+                if(sSnap.exists() && sSnap.data().sessions) {
+                    var cloudS = sSnap.data().sessions;
+                    var localS = JSON.parse(localStorage.getItem('base_pt_sessions') || '[]');
+                    if(cloudS.length >= localS.length) { localStorage.setItem('base_pt_sessions', JSON.stringify(cloudS)); }
+                }
+                // PT Dashboard aktualisieren falls sichtbar
+                if(typeof window.renderPTClientsDashboard === 'function') window.renderPTClientsDashboard();
+            } catch(e) { console.error('Cloud load error:', e); }
+        };
 
         window.addEventListener('load', () => {
             if (!localStorage.getItem('base_anonymous_id')) {
@@ -8699,6 +8788,8 @@
 
                     // Subscription-Status aus Firestore laden
                     window._loadSubscriptionStatus();
+                    // PT Client-Daten aus Cloud nachladen (3s Delay für Offline-First)
+                    if(window.loadClientDataFromCloud) { setTimeout(function() { window.loadClientDataFromCloud(); }, 3000); }
                     // Anonyme Challenge-Teilnahme migrieren falls vorhanden
                     if(!user.isAnonymous && localStorage.getItem('base_anon_challenge_id') && window._migrateAnonChallenge) { window._migrateAnonChallenge(); }
                 } else {

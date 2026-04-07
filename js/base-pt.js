@@ -227,6 +227,7 @@ return data;
 window.saveClientProfile = function(clientId, profile) {
 _clientProfileCache[clientId] = profile;
 localStorage.setItem(`base_client_profile_${clientId}`, JSON.stringify(profile));
+if(window._syncClientProfileToCloud) window._syncClientProfileToCloud(clientId, profile);
 };
 
 // ── SESSIONS DATA LAYER ────────────────────────────────────
@@ -237,6 +238,7 @@ return raw ? JSON.parse(raw) : [];
 
 window.saveSessions = function(sessions) {
 localStorage.setItem('base_pt_sessions', JSON.stringify(sessions));
+if(window._syncSessionsToCloud) window._syncSessionsToCloud();
 };
 
 // ── STATS (computed once, cached) ──────────────────────────
@@ -608,6 +610,7 @@ window.saveOnboardClient = function() {
 const client = { id: 'client_' + Date.now(), name: _onboardData.name };
 window.clients.push(client);
 localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+if(window.syncClientsToCloud) window.syncClientsToCloud();
 // Save profile
 const profile = {
     goal: _onboardData.goal || '',
@@ -632,6 +635,7 @@ if(!c) return;
 window.showModal(window.t('ptDeleteClient','Kunde löschen?'), `"${window._escapeHtml(c.name)}" ${window.t('ptDeleteClientConfirm','wirklich löschen? Alle Daten gehen verloren.')}`, true, () => {
     window.clients = window.clients.filter(c => c.id !== _activeClientDetailId);
     localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+    if(window.syncClientsToCloud) window.syncClientsToCloud();
     localStorage.removeItem(`beastmode_v2_cache_${_activeClientDetailId}`);
     localStorage.removeItem(`base_client_profile_${_activeClientDetailId}`);
     delete _clientWorkoutCache[_activeClientDetailId];
@@ -691,6 +695,7 @@ window.saveClientProfileFromModal = function() {
     if(newName) {
         c.name = newName;
         localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+        if(window.syncClientsToCloud) window.syncClientsToCloud();
     }
     profile.age = el('cpEditAge')?.value || '';
     profile.weight = el('cpEditWeight')?.value || '';
@@ -1889,6 +1894,7 @@ if(completedExercises.length > 0) {
     });
 
     localStorage.setItem(clientKey, JSON.stringify(existingWorkouts));
+    if(window._syncClientWorkoutsToCloud) window._syncClientWorkoutsToCloud(s.clientId);
     window.invalidateClientCache(s.clientId);
 }
 
