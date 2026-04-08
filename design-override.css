@@ -143,10 +143,10 @@
     background: rgba(15,17,15,0.6);
     border: 1px solid var(--cat-glow);
     border-radius: 12px;
-    padding: 16px 20px;
+    padding: 12px 12px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
     transition: border-color 0.3s ease;
 }
 #setsContainer .zen-set-row:focus-within {
@@ -163,7 +163,8 @@
 }
 #setsContainer .zen-set-value-group {
     display: flex;
-    gap: 32px;
+    gap: 8px;
+    width: 100%;
 }
 #setsContainer .zen-set-value {
     display: flex;
@@ -173,14 +174,15 @@
 }
 #setsContainer .zen-set-input {
     font-family: var(--ui-font-heading), 'Sora', sans-serif;
-    font-size: clamp(24px, 6vw, 36px);
+    font-size: clamp(16px, 4vw, 24px);
     font-weight: 800;
     color: var(--text-main, #d4ddd6);
     background: transparent;
     border: none;
     outline: none;
     text-align: center;
-    width: 80px;
+    width: auto;
+    min-width: 0;
     letter-spacing: -0.02em;
     -moz-appearance: textfield;
 }

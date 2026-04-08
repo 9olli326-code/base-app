@@ -332,11 +332,18 @@
   window._adjustInput = function(inputId, delta) {
    var input = document.getElementById(inputId);
    if (!input) return;
-   var val = parseFloat(input.value) || 0;
-   var min = parseFloat(input.min) || 0;
-   var max = parseFloat(input.max) || 999;
-   val = Math.max(min, Math.min(max, val + delta));
-   if (delta % 1 !== 0) val = Math.round(val * 2) / 2;
+   var raw = input.value;
+   var isWdh = inputId.indexOf('wdh') !== -1;
+   var isWeight = inputId.indexOf('weight') !== -1;
+   var isRir = inputId.indexOf('rir') !== -1;
+   var defaultVal = isWdh ? 8 : isWeight ? 20 : isRir ? 2 : 0;
+   var val = parseFloat(raw);
+   if (isNaN(val) || raw === '' || raw === '--') val = defaultVal;
+   val = val + delta;
+   var min = isRir ? 0 : isWeight ? 0 : 1;
+   var max = isRir ? 5 : isWeight ? 500 : 999;
+   val = Math.max(min, Math.min(max, val));
+   if (isWeight) val = Math.round(val * 2) / 2;
    input.value = val;
    input.dispatchEvent(new Event('change'));
   };
