@@ -681,28 +681,28 @@
    var container = document.getElementById('setsContainer');
    if(!container) return;
    container.innerHTML = '';
-   var _bs = 'background:#1a1c1a;border:1px solid #2a2a2e;color:var(--text-muted)';
-   var _is = 'background:transparent;border:none;color:#fff;-moz-appearance:textfield';
+   var _b = 'width:28px;height:36px;background:none;border:none;color:#666;font-size:18px;font-weight:900;line-height:1';
+   var _sep = '<div style="width:1px;height:32px;background:var(--border-hex);flex-shrink:0"></div>';
    for(var i = 1; i <= parseInt(count); i++) {
     var row = document.createElement('div');
     row.className = 'p-3 rounded-xl mb-2 pointer-events-auto';
     row.style.cssText = 'background:var(--inner-bg-hex);border:1px solid var(--border-hex)';
-    row.innerHTML = '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--cat-accent,#a3c9a8)">' + window.t('lblSet','Satz') + ' ' + i + '</div>' +
-     '<div class="grid grid-cols-3 gap-3">' +
-      '<div class="text-center"><div class="text-[8px] font-bold text-zinc-500 uppercase tracking-wider mb-1">' + window.t('lblReps','Wdh') + '</div><div class="flex items-center justify-center gap-1">' +
-       '<button type="button" aria-label="Wdh minus" onclick="window._adjustInput(\'wdh_s' + i + '\',-1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
-       '<input type="number" id="wdh_s' + i + '" placeholder="--" min="0" class="w-12 h-8 text-center rounded-lg text-base font-black outline-none pointer-events-auto" style="' + _is + '">' +
-       '<button type="button" aria-label="Wdh plus" onclick="window._adjustInput(\'wdh_s' + i + '\',1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
-      '</div></div>' +
-      '<div class="text-center"><div class="text-[8px] font-bold text-zinc-500 uppercase tracking-wider mb-1">kg</div><div class="flex items-center justify-center gap-1">' +
-       '<button type="button" aria-label="kg minus" onclick="window._adjustInput(\'weight_s' + i + '\',-2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
-       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" class="w-14 h-8 text-center rounded-lg text-sm font-black outline-none pointer-events-auto" style="' + _is + '">' +
-       '<button type="button" aria-label="kg plus" onclick="window._adjustInput(\'weight_s' + i + '\',2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
-      '</div></div>' +
-      '<div class="text-center"><div class="text-[8px] font-bold uppercase tracking-wider mb-1" style="color:#a3c9a8">RIR</div><div class="flex items-center justify-center gap-1">' +
-       '<button type="button" aria-label="RIR minus" onclick="window._adjustInput(\'rir_s' + i + '\',-1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
-       '<input type="number" id="rir_s' + i + '" placeholder="--" min="0" max="5" class="w-12 h-8 text-center rounded-lg text-base font-black outline-none pointer-events-auto" style="' + _is + '">' +
-       '<button type="button" aria-label="RIR plus" onclick="window._adjustInput(\'rir_s' + i + '\',1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
+    row.innerHTML = '<div class="text-[9px] font-black uppercase tracking-widest mb-3" style="color:var(--text-muted)">' + window.t('lblSet','Satz') + ' ' + i + '</div>' +
+     '<div style="display:flex;align-items:center;gap:4px">' +
+      '<div style="flex:1;text-align:center"><div class="text-[7px] font-bold uppercase tracking-wider mb-1" style="color:var(--text-muted)">' + window.t('lblReps','Wdh') + '</div><div style="display:flex;align-items:center;justify-content:center">' +
+       '<button type="button" onclick="window._adjustInput(\'wdh_s' + i + '\',-1)" class="pointer-events-auto cursor-pointer" style="' + _b + '">\u2212</button>' +
+       '<input type="number" id="wdh_s' + i + '" placeholder="--" min="0" class="pointer-events-auto outline-none" style="width:36px;height:36px;text-align:center;background:none;border:none;color:#fff;font-size:20px;font-weight:900">' +
+       '<button type="button" onclick="window._adjustInput(\'wdh_s' + i + '\',1)" class="pointer-events-auto cursor-pointer" style="' + _b + '">+</button>' +
+      '</div></div>' + _sep +
+      '<div style="flex:1;text-align:center"><div class="text-[7px] font-bold uppercase tracking-wider mb-1" style="color:var(--text-muted)">kg</div><div style="display:flex;align-items:center;justify-content:center">' +
+       '<button type="button" onclick="window._adjustInput(\'weight_s' + i + '\',-2.5)" class="pointer-events-auto cursor-pointer" style="' + _b + '">\u2212</button>' +
+       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" class="pointer-events-auto outline-none" style="width:44px;height:36px;text-align:center;background:none;border:none;color:#fff;font-size:20px;font-weight:900">' +
+       '<button type="button" onclick="window._adjustInput(\'weight_s' + i + '\',2.5)" class="pointer-events-auto cursor-pointer" style="' + _b + '">+</button>' +
+      '</div></div>' + _sep +
+      '<div style="flex:1;text-align:center"><div class="text-[7px] font-bold uppercase tracking-wider mb-1" style="color:#a3c9a8">RIR</div><div style="display:flex;align-items:center;justify-content:center">' +
+       '<button type="button" onclick="window._adjustInput(\'rir_s' + i + '\',-1)" class="pointer-events-auto cursor-pointer" style="' + _b + '">\u2212</button>' +
+       '<input type="number" id="rir_s' + i + '" placeholder="--" min="0" max="5" class="pointer-events-auto outline-none" style="width:28px;height:36px;text-align:center;background:none;border:none;color:#a3c9a8;font-size:20px;font-weight:900">' +
+       '<button type="button" onclick="window._adjustInput(\'rir_s' + i + '\',1)" class="pointer-events-auto cursor-pointer" style="' + _b + '">+</button>' +
       '</div></div>' +
      '</div>';
     container.appendChild(row);

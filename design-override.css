@@ -187,7 +187,9 @@
     -moz-appearance: textfield;
 }
 #setsContainer .zen-set-input::-webkit-inner-spin-button,
-#setsContainer .zen-set-input::-webkit-outer-spin-button {
+#setsContainer .zen-set-input::-webkit-outer-spin-button,
+#setsContainer input[type=number]::-webkit-inner-spin-button,
+#setsContainer input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
