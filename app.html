@@ -237,6 +237,7 @@
    color: var(--primary-hex) !important;
   }
   @keyframes spin { 100% { transform: rotate(360deg); } }
+  @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
   .ios-toggle { position: relative; display: inline-block; width: 50px; height: 28px; } 
   .ios-toggle input { opacity: 0; width: 0; height: 0; margin: 0; }
@@ -1165,6 +1166,14 @@
                         <div id="dynamicFieldsContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 hidden"></div>
                         <div id="addCustomFieldBtnContainer" class="hidden mb-4 justify-end"></div>
 
+                        <div class="mb-3">
+                            <button type="button" onclick="document.getElementById('exerciseNoteField').classList.toggle('hidden')" class="text-[9px] font-bold cursor-pointer pointer-events-auto flex items-center gap-1" style="color:#82828c" aria-label="Notiz hinzufuegen">
+                                <i data-lucide="file-text" class="w-3 h-3 pointer-events-none"></i>
+                                <span data-i18n="addNote">Notiz hinzuf&uuml;gen</span>
+                            </button>
+                            <textarea id="exerciseNoteField" class="hidden w-full mt-2 p-3 rounded-xl text-xs text-white outline-none pointer-events-auto resize-none" rows="2" placeholder="z.B. Griff enger, linke Schulter zwickt..." style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);font-family:Outfit,sans-serif" data-i18n-placeholder="notePlaceholder"></textarea>
+                        </div>
+
                         <div class="flex gap-3">
                             <button aria-label="Absenden" type="submit" id="btnSubmitWorkout" class="bg-primary flex-1 text-black font-black py-4 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 text-xs cursor-pointer pointer-events-auto"><i data-lucide="zap" id="btnSubmitIcon" class="w-4 h-4 fill-black/20 pointer-events-none"></i> <span id="btnSaveText" data-i18n="fSave" class="pointer-events-none">Speichern</span></button>
                             <button aria-label="Schließen" type="button" id="btnCancelEdit" onclick="window.cancelEdit()" class="hidden bg-zinc-800 text-zinc-400 font-black py-4 px-6 rounded-xl shadow-sm hover:text-white transition-all cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-4 h-4 pointer-events-none"></i></button>
@@ -1786,6 +1795,21 @@
             <button aria-label="Aktion" onclick="window.resetThemeToDefault()" class="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer pointer-events-auto transition-all" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block mr-1.5 pointer-events-none"></i> <span data-i18n="designReset">Zurücksetzen</span>
             </button>
+        </div>
+    </div>
+
+    <!-- Workout Comparison Modal -->
+    <div id="workoutCompModal" class="fixed inset-0 z-[700] hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.95)">
+        <div class="p-6 max-w-sm w-full shadow-2xl relative rounded-2xl" style="background:var(--surface-hex,#161816);border:1px solid var(--border-hex,#1e201e)">
+            <div id="workoutCompContent"></div>
+            <button onclick="window.toggleModal('workoutCompModal')" class="w-full mt-2 py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);color:#a3c9a8" aria-label="OK">OK</button>
+        </div>
+    </div>
+
+    <!-- Post-Workout Feedback Modal -->
+    <div id="wkFeedbackModal" class="fixed inset-0 z-[700] hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.95)">
+        <div class="p-6 max-w-sm w-full shadow-2xl relative rounded-2xl" style="background:var(--surface-hex,#161816);border:1px solid var(--border-hex,#1e201e)">
+            <div id="wkFeedbackContent"></div>
         </div>
     </div>
 

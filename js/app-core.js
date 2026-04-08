@@ -286,6 +286,9 @@
   window.editingWorkoutId = null; window.currentReadinessScore = 100; window.currentView = 'active';
   window.isWorkoutTimerRunning = false; window.workoutTimerSeconds = 0; window.workoutTimerInterval = null;
   window.selectedRestTime = 90; window.restTimerSeconds = 0; window.restTimerInterval = null;
+  window._exerciseRestTimes = JSON.parse(localStorage.getItem('base_exercise_rest_times') || '{}');
+  window._setExerciseRestTime = function(exName, secs) { window._exerciseRestTimes[exName] = secs; localStorage.setItem('base_exercise_rest_times', JSON.stringify(window._exerciseRestTimes)); };
+  window._getExerciseRestTime = function(exName) { return window._exerciseRestTimes[exName] || null; };
   window._currentSetIndex = 0; window._savedSets = [];
 
   // === VOICE COACH ===
@@ -736,7 +739,9 @@
     if (!exEl.value.trim()) { window.showToast(window.t("toastError", "Bitte eine Aktivität eingeben!")); exEl.focus(); return; }
     if (!dtEl.value) { window.showToast(window.t("toastError", "Bitte ein Datum wählen!")); return; }
     
+    var _noteVal = (document.getElementById('exerciseNoteField') || {}).value || '';
     let entry = { id: window.editingWorkoutId || Date.now().toString(), category: window.currentCategory, date: dtEl.value, exercise: exEl.value.trim().substring(0, 200), archived: window.editingWorkoutId ? (window.workouts.find(w => w.id === window.editingWorkoutId)?.archived || false) : false, data: {}, setDetails: [], volume: 0, maxWeight: 0 };
+    if (_noteVal.trim()) entry.note = _noteVal.trim().substring(0, 200);
     let isPR = false; let prType = ''; let prSubText = ''; let prValue = ''; let prUnit = ''; let prDiffText = '';
     const exName = exEl.value.trim().toLowerCase(); 
     const pastWorkouts = window.workouts.filter(w => w.category === window.currentCategory && w.exercise.toLowerCase() === exName && w.id !== window.editingWorkoutId);
@@ -833,7 +838,13 @@
     if (window._routineQueue) {
      window._advanceRoutineAfterSave(entry);
     } else if (!window.editingWorkoutId && entry.category === 'strength' && entry.setDetails && entry.setDetails.length > 0) {
-     setTimeout(function() { if (window._offerSaveAsRoutine) window._offerSaveAsRoutine(entry); }, 1500);
+     setTimeout(function() { if (window._showWorkoutComparison) window._showWorkoutComparison(entry); }, 500);
+     setTimeout(function() { if (window._offerSaveAsRoutine) window._offerSaveAsRoutine(entry); }, 2500);
+    }
+    // Achievements + Feedback
+    if (!window.editingWorkoutId) {
+     setTimeout(function() { if (window._checkAchievements) window._checkAchievements(); }, 1200);
+     if (!window._routineQueue) setTimeout(function() { if (window._showPostWorkoutFeedback) window._showPostWorkoutFeedback(); }, 3500);
     }
    } catch (err) { 
     console.error("Speicher-Fehler:", err); 
@@ -3542,12 +3553,21 @@
    if(category === 'strength' && last.setDetails && last.setDetails.length > 0) {
     window._lastTimeValues = last.setDetails.map(function(s) { return { reps: s.reps, weight: s.weight, rir: s.rir != null ? s.rir : null }; });
    } else { window._lastTimeValues = null; }
+   // Load exercise-specific rest timer
+   var _savedRest = window._getExerciseRestTime ? window._getExerciseRestTime(exerciseName) : null;
+   if (_savedRest) window.selectedRestTime = _savedRest;
    var daysDiff = Math.floor((Date.now() - new Date(last.date).getTime()) / 86400000);
    var dateStr = daysDiff === 0 ? 'Heute' : daysDiff === 1 ? 'Gestern' : daysDiff < 7 ? 'vor ' + daysDiff + ' Tagen' : daysDiff < 30 ? 'vor ' + Math.floor(daysDiff/7) + ' Wo' : new Date(last.date).toLocaleDateString('de-DE',{day:'numeric',month:'short'});
    dateEl.textContent = dateStr;
    var result = window._getProgressionData(last, matches, category);
+   var noteHtml = last.note ? '<div class="text-[9px] mt-1 italic" style="color:#a3c9a8">\uD83D\uDCDD ' + window._escapeHtml(last.note) + '</div>' : '';
    var applyBtn = (window._lastTimeValues && window._lastTimeValues.length > 0) ? '<button onclick="window._applyLastValues()" class="w-full mt-2 py-2 rounded-xl text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.25);color:#a3c9a8" aria-label="Letzte Werte uebernehmen">' + window.t('applyLast','Letzte Werte \u00fcbernehmen') + '</button>' : '';
-   valuesEl.innerHTML = result.display + applyBtn;
+   valuesEl.innerHTML = result.display + noteHtml + applyBtn;
+   // Progressive Overload check
+   if (window._checkProgressiveOverload) {
+    var plateau = window._checkProgressiveOverload(exerciseName, matches);
+    if (plateau) setTimeout(function() { window.showToast('\u26a0\ufe0f ' + window._escapeHtml(exerciseName) + ': ' + plateau.workouts + ' Workouts bei ' + plateau.weight + 'kg \u2014 ' + plateau.suggestion, null, null, null, 5000); }, 1500);
+   }
    if(result.suggestion) { suggestionEl.classList.remove('hidden'); sugTextEl.textContent = result.suggestion; }
    else { suggestionEl.classList.add('hidden'); }
    overlay.classList.remove('hidden');
@@ -5853,6 +5873,102 @@
 
   // ============================================================
   // EXERCISE SWAP
+  // === PROGRESSIVE OVERLOAD CHECK ===
+  window._checkProgressiveOverload = function(exerciseName, matches) {
+   if (!matches || matches.length < 3) return null;
+   var last3 = matches.slice(0, 3);
+   var maxW = last3.map(function(w) { return Math.max.apply(null, (w.setDetails || []).map(function(s) { return parseFloat(s.weight) || 0; })); });
+   if (maxW[0] === maxW[1] && maxW[1] === maxW[2] && maxW[0] > 0) {
+    var inc = maxW[0] < 40 ? '+1.25kg' : maxW[0] < 80 ? '+2.5kg' : '+5kg';
+    return { exercise: exerciseName, weight: maxW[0], workouts: 3, suggestion: inc + ' versuchen' };
+   }
+   return null;
+  };
+
+  // === WORKOUT COMPARISON ===
+  window._showWorkoutComparison = function(entry) {
+   if (entry.category !== 'strength' || !entry.setDetails || entry.setDetails.length === 0) return;
+   var prev = null;
+   for (var i = 0; i < (window.workouts || []).length; i++) {
+    var w = window.workouts[i];
+    if (w.exercise === entry.exercise && w.id !== entry.id && w.archived) { prev = w; break; }
+   }
+   if (!prev || !prev.setDetails) return;
+   var calcVol = function(s) { return (s || []).reduce(function(a, x) { return a + (parseFloat(x.reps)||0) * (parseFloat(x.weight)||0); }, 0); };
+   var calcMax = function(s) { return Math.max.apply(null, (s || []).map(function(x) { return parseFloat(x.weight)||0; })); };
+   var cV = calcVol(entry.setDetails), pV = calcVol(prev.setDetails);
+   var cM = calcMax(entry.setDetails), pM = calcMax(prev.setDetails);
+   var cS = entry.setDetails.length, pS = prev.setDetails.length;
+   var arrow = function(d, u) { if (d > 0) return '<span style="color:#a3c9a8">\u2191+' + (d%1===0?d:d.toFixed(1)) + (u||'') + '</span>'; if (d < 0) return '<span style="color:#e88a8a">\u2193' + (d%1===0?d:d.toFixed(1)) + (u||'') + '</span>'; return '<span style="color:#82828c">\u2192</span>'; };
+   var html = '<div class="text-center mb-3"><p class="text-sm font-bold text-white mb-1">' + window.t('vsLast','vs. letztes Mal') + '</p><p class="text-[9px] mb-3" style="color:#82828c">' + window._escapeHtml(entry.exercise) + ' \u00b7 ' + prev.date + '</p></div>';
+   html += '<div class="grid grid-cols-3 gap-3 mb-2">';
+   html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Volumen</div><div class="text-xs font-black">' + arrow(cV-pV,'kg') + '</div></div>';
+   html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Max kg</div><div class="text-xs font-black">' + arrow(cM-pM,'kg') + '</div></div>';
+   html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Sets</div><div class="text-xs font-black">' + arrow(cS-pS) + '</div></div>';
+   html += '</div>';
+   var c = document.getElementById('workoutCompContent');
+   if (c) { c.innerHTML = html; window.toggleModal('workoutCompModal'); }
+  };
+
+  // === ACHIEVEMENTS ===
+  window._ACHIEVEMENTS = [
+   { id:'first_workout', name:'First Blood', desc:'Erstes Workout', icon:'\uD83C\uDFAF', check:function(w){return w.length>=1;} },
+   { id:'ten_workouts', name:'Dedicated', desc:'10 Workouts', icon:'\uD83D\uDD25', check:function(w){return w.length>=10;} },
+   { id:'twentyfive', name:'Iron Will', desc:'25 Workouts', icon:'\uD83D\uDCAA', check:function(w){return w.length>=25;} },
+   { id:'first_pr', name:'New Heights', desc:'Erster PR', icon:'\uD83C\uDFC6', check:function(w,m){return m.hasPR;} },
+   { id:'streak7', name:'Unbreakable', desc:'7 Tage Streak', icon:'\u26A1', check:function(w,m){return m.streak>=7;} },
+   { id:'vol10k', name:'Volume King', desc:'10.000 kg Volumen', icon:'\uD83D\uDC51', check:function(w){return w.reduce(function(a,wo){return a+(wo.setDetails||[]).reduce(function(b,s){return b+((parseFloat(s.reps)||0)*(parseFloat(s.weight)||0));},0);},0)>=10000;} },
+   { id:'five_ex', name:'Variety Pack', desc:'5 verschiedene \u00dcbungen', icon:'\uD83C\uDFB2', check:function(w){return new Set(w.map(function(x){return x.exercise;})).size>=5;} },
+   { id:'consist4', name:'Machine', desc:'4 Wochen mit 3+ Workouts', icon:'\uD83E\uDD16', check:function(w){var wk={};w.forEach(function(wo){var d=new Date(wo.date);d.setDate(d.getDate()-d.getDay()+1);wk[d.toISOString().split('T')[0]]=(wk[d.toISOString().split('T')[0]]||0)+1;});return Object.values(wk).filter(function(c){return c>=3;}).length>=4;} }
+  ];
+
+  window._checkAchievements = function() {
+   var allW = (window.workouts || []).filter(function(w) { return w.archived; });
+   var unlocked = JSON.parse(localStorage.getItem('base_achievements') || '[]');
+   var streak = parseInt(localStorage.getItem('base_streak_count') || '0');
+   var meta = { hasPR: !!localStorage.getItem('base_1rm_data'), streak: streak };
+   var newU = [];
+   window._ACHIEVEMENTS.forEach(function(a) {
+    if (unlocked.indexOf(a.id) !== -1) return;
+    try { if (a.check(allW, meta)) { unlocked.push(a.id); newU.push(a); } } catch(e) {}
+   });
+   if (newU.length > 0) {
+    localStorage.setItem('base_achievements', JSON.stringify(unlocked));
+    window._showAchievementCelebration(newU[0]);
+    if (window.awardXP) window.awardXP('achievement');
+   }
+  };
+
+  window._showAchievementCelebration = function(ach) {
+   var ov = document.createElement('div');
+   ov.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.9)';
+   ov.innerHTML = '<div class="text-center" style="animation:scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1)"><div style="font-size:64px;margin-bottom:16px">' + ach.icon + '</div><div class="text-[10px] font-bold uppercase tracking-widest mb-2" style="color:#a3c9a8">Achievement Unlocked</div><div class="text-2xl font-black text-white mb-2">' + window._escapeHtml(ach.name) + '</div><div class="text-sm" style="color:#82828c">' + window._escapeHtml(ach.desc) + '</div></div>';
+   ov.onclick = function() { ov.remove(); };
+   document.body.appendChild(ov);
+   setTimeout(function() { if (ov.parentNode) ov.remove(); }, 4000);
+  };
+
+  // === POST-WORKOUT FEEDBACK ===
+  window._showPostWorkoutFeedback = function() {
+   var html = '<div class="text-center"><p class="text-sm font-bold text-white mb-3">' + window.t('howWasWorkout','Wie war dein Training?') + '</p><div class="flex justify-center gap-3 mb-2">';
+   [{v:1,e:'\uD83D\uDE2B',l:'Schlecht'},{v:2,e:'\uD83D\uDE10',l:'M\u00e4\u00dfig'},{v:3,e:'\uD83D\uDE42',l:'OK'},{v:4,e:'\uD83D\uDE0A',l:'Gut'},{v:5,e:'\uD83D\uDD25',l:'Hammer'}].forEach(function(f) {
+    html += '<button onclick="window._saveWorkoutFeedback(' + f.v + ')" class="flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);min-width:48px" aria-label="' + f.l + '"><span style="font-size:24px">' + f.e + '</span><span class="text-[7px] font-bold" style="color:#82828c">' + f.l + '</span></button>';
+   });
+   html += '</div></div>';
+   var c = document.getElementById('wkFeedbackContent');
+   if (c) { c.innerHTML = html; window.toggleModal('wkFeedbackModal'); }
+  };
+
+  window._saveWorkoutFeedback = function(rating) {
+   var today = new Date().toISOString().split('T')[0];
+   var fb = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
+   fb[today] = { rating: rating, ts: new Date().toISOString() };
+   localStorage.setItem('base_workout_feedback', JSON.stringify(fb));
+   window.toggleModal('wkFeedbackModal');
+   var msgs = ['','N\u00e4chstes Mal wird besser! \uD83D\uDCAA','Akzeptiert, weitermachen!','Solide Session! \u2705','Starke Leistung! \uD83C\uDFAF','BEAST MODE! \uD83D\uDD25'];
+   window.showToast(msgs[rating] || '\u2705');
+  };
+
   // ============================================================
   window._findExerciseAlternatives = function(exerciseName, maxResults) {
    maxResults = maxResults || 6;

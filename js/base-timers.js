@@ -208,7 +208,7 @@ document.addEventListener('visibilitychange', function() {
 
 // --- REST TIMER (Timestamp-basiert — Sperrbildschirm-fest) ---
 let _restEndTime = null;
-window.setAndStartRestTimer = function(secs) { window.selectedRestTime = secs; window.startRestCountdown(secs); };
+window.setAndStartRestTimer = function(secs) { window.selectedRestTime = secs; var ex = document.getElementById('exerciseInput'); if (ex && ex.value && window._setExerciseRestTime) window._setExerciseRestTime(ex.value.trim(), secs); window.startRestCountdown(secs); };
 window.startRestCountdown = function(secs) {
     if (!secs || secs <= 0) return;
     clearInterval(window.restTimerInterval);
