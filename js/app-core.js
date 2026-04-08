@@ -688,18 +688,18 @@
     row.style.cssText = 'background:var(--inner-bg-hex);border:1px solid var(--border-hex)';
     row.innerHTML =
      '<div class="flex items-center justify-between mb-3"><span class="text-[11px] font-black" style="color:#a3c9a8">' + window.t('lblSet','Satz') + ' ' + i + '</span></div>' +
-     '<div class="flex gap-2 mb-2">' +
-      '<div class="flex-1 flex items-center gap-1 p-2 rounded-xl" style="background:#0f110f;border:1px solid #252725">' +
-       '<span class="text-[8px] font-black uppercase tracking-wider w-7 flex-shrink-0" style="color:#555">' + window.t('lblReps','Wdh') + '</span>' +
-       '<button type="button" onclick="window._adjustInput(\'wdh_s' + i + '\',-1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-base font-black cursor-pointer pointer-events-auto" style="' + _bb + '" aria-label="Wdh minus">\u2212</button>' +
-       '<input type="number" id="wdh_s' + i + '" placeholder="--" min="0" class="flex-1 min-w-0 h-8 text-center text-white text-xl font-black outline-none pointer-events-auto" style="background:none;border:none">' +
-       '<button type="button" onclick="window._adjustInput(\'wdh_s' + i + '\',1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-base font-black cursor-pointer pointer-events-auto" style="' + _bb + '" aria-label="Wdh plus">+</button>' +
+     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div style="background:#0f110f;border:1px solid #252725;border-radius:12px;padding:8px;display:flex;align-items:center;gap:2px;overflow:hidden">' +
+       '<span style="font-size:8px;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:0.5px;width:24px;flex-shrink:0">' + window.t('lblReps','Wdh') + '</span>' +
+       '<button type="button" onclick="window._adjustInput(\'wdh_s' + i + '\',-1)" style="width:28px;height:32px;border-radius:8px;background:#1e201e;border:none;color:#888;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" class="pointer-events-auto" aria-label="Wdh minus">\u2212</button>' +
+       '<input type="number" id="wdh_s' + i + '" placeholder="--" min="0" style="width:100%;min-width:0;height:32px;text-align:center;background:none;border:none;color:#fff;font-size:20px;font-weight:900;font-family:Outfit,sans-serif;outline:none" class="pointer-events-auto">' +
+       '<button type="button" onclick="window._adjustInput(\'wdh_s' + i + '\',1)" style="width:28px;height:32px;border-radius:8px;background:#1e201e;border:none;color:#888;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" class="pointer-events-auto" aria-label="Wdh plus">+</button>' +
       '</div>' +
-      '<div class="flex-1 flex items-center gap-1 p-2 rounded-xl" style="background:#0f110f;border:1px solid #252725">' +
-       '<span class="text-[8px] font-black uppercase tracking-wider w-5 flex-shrink-0" style="color:#555">kg</span>' +
-       '<button type="button" onclick="window._adjustInput(\'weight_s' + i + '\',-2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-base font-black cursor-pointer pointer-events-auto" style="' + _bb + '" aria-label="kg minus">\u2212</button>' +
-       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" class="flex-1 min-w-0 h-8 text-center text-white text-xl font-black outline-none pointer-events-auto" style="background:none;border:none">' +
-       '<button type="button" onclick="window._adjustInput(\'weight_s' + i + '\',2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-base font-black cursor-pointer pointer-events-auto" style="' + _bb + '" aria-label="kg plus">+</button>' +
+      '<div style="background:#0f110f;border:1px solid #252725;border-radius:12px;padding:8px;display:flex;align-items:center;gap:2px;overflow:hidden">' +
+       '<span style="font-size:8px;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:0.5px;width:18px;flex-shrink:0">kg</span>' +
+       '<button type="button" onclick="window._adjustInput(\'weight_s' + i + '\',-2.5)" style="width:28px;height:32px;border-radius:8px;background:#1e201e;border:none;color:#888;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" class="pointer-events-auto" aria-label="kg minus">\u2212</button>' +
+       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" style="width:100%;min-width:0;height:32px;text-align:center;background:none;border:none;color:#fff;font-size:20px;font-weight:900;font-family:Outfit,sans-serif;outline:none" class="pointer-events-auto">' +
+       '<button type="button" onclick="window._adjustInput(\'weight_s' + i + '\',2.5)" style="width:28px;height:32px;border-radius:8px;background:#1e201e;border:none;color:#888;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" class="pointer-events-auto" aria-label="kg plus">+</button>' +
       '</div>' +
      '</div>' +
      '<div class="flex items-center gap-2 py-1.5 px-3 rounded-xl" style="background:rgba(163,201,168,0.05);border:1px solid rgba(163,201,168,0.1)">' +
