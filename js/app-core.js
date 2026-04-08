@@ -208,7 +208,7 @@
   window.addEventListener('load', () => {
    const form = document.getElementById('workoutForm');
    if (form) {
-    form.onsubmit = (e) => { e.preventDefault(); if(window.saveWorkout) window.saveWorkout(e); return false; };
+    form.onsubmit = (e) => { e.preventDefault(); if(window._saveCurrentSet) window._saveCurrentSet(); else if(window.saveWorkout) window.saveWorkout(e); return false; };
    }
    hideLoader(); 
    setTimeout(hideLoader, 2000);
@@ -281,6 +281,7 @@
   window.editingWorkoutId = null; window.currentReadinessScore = 100; window.currentView = 'active';
   window.isWorkoutTimerRunning = false; window.workoutTimerSeconds = 0; window.workoutTimerInterval = null;
   window.selectedRestTime = 90; window.restTimerSeconds = 0; window.restTimerInterval = null;
+  window._currentSetIndex = 0; window._savedSets = [];
 
   // === VOICE COACH ===
   window._voiceCoachEnabled = localStorage.getItem('base_voice_coach') === 'true';
@@ -678,6 +679,7 @@
   };
   
   window.generateSetFields = function(count) {
+   window._currentSetIndex = 0; window._savedSets = []; window._pendingSavedSets = null;
    var container = document.getElementById('setsContainer');
    if(!container) return;
    container.innerHTML = '';
@@ -734,14 +736,24 @@
      entry.sportCategory = window.categorySchemas['strength'] ? window.categorySchemas['strength'].sportName : 'Krafttraining';
      let previousMax = 0; if(pastWorkouts.length > 0) { previousMax = Math.max(...pastWorkouts.map(w => w.maxWeight || 0)); }
      const sInput = document.getElementById('setsInput'); const count = sInput ? parseInt(sInput.value) : 0; let vol = 0, maxW = 0; let setsDisplay = [];
-     
-     for (let i = 1; i <= count; i++) {
-      const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); const rirEl = document.getElementById(`rir_s${i}`);
-      if (rEl && wEl && rEl.value && wEl.value) {
-       let r = parseInt(rEl.value) || 0; let w = parseFloat(wEl.value) || 0; let rir = (rirEl && rirEl.value !== '') ? parseInt(rirEl.value) : null;
-       var setObj = { reps: r, weight: w }; if (rir !== null && !isNaN(rir)) setObj.rir = rir;
-       entry.setDetails.push(setObj); vol += (r * w);
-       if (w > maxW) maxW = w; setsDisplay.push(`${r}x${w}kg`);
+
+     var _usePending = window._pendingSavedSets && window._pendingSavedSets.length > 0;
+     if (_usePending) {
+      window._pendingSavedSets.forEach(function(s) {
+       var setObj = { reps: s.reps, weight: s.weight }; if (s.rir !== null) setObj.rir = s.rir;
+       entry.setDetails.push(setObj); vol += (s.reps * s.weight);
+       if (s.weight > maxW) maxW = s.weight; setsDisplay.push(s.reps + 'x' + s.weight + 'kg');
+      });
+      window._pendingSavedSets = null;
+     } else {
+      for (let i = 1; i <= count; i++) {
+       const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); const rirEl = document.getElementById(`rir_s${i}`);
+       if (rEl && wEl && rEl.value && wEl.value) {
+        let r = parseInt(rEl.value) || 0; let w = parseFloat(wEl.value) || 0; let rir = (rirEl && rirEl.value !== '') ? parseInt(rirEl.value) : null;
+        var setObj = { reps: r, weight: w }; if (rir !== null && !isNaN(rir)) setObj.rir = rir;
+        entry.setDetails.push(setObj); vol += (r * w);
+        if (w > maxW) maxW = w; setsDisplay.push(`${r}x${w}kg`);
+       }
       }
      }
      entry.volume = vol; entry.maxWeight = maxW; entry.equipment = document.getElementById('equipmentInput')?.value || 'Standard';
@@ -813,7 +825,50 @@
    }
   };
 
-  window.cancelEdit = () => { const savedDate = document.getElementById('dateInput').value; window.editingWorkoutId = null; document.getElementById('workoutForm').reset(); document.getElementById('dateInput').value = savedDate; if (window.currentCategory === 'strength') { const sInput = document.getElementById('setsInput'); if (sInput) { sInput.value = 3; window.generateSetFields(3); } } document.getElementById('btnSaveText').innerHTML = (i18nData[window.currentLang] && i18nData[window.currentLang].fSave) || "Speichern"; document.getElementById('btnSubmitWorkout').classList.replace('bg-primary', 'bg-primary'); document.getElementById('btnSubmitIcon').classList.replace('fill-white/20', 'fill-black/20'); document.getElementById('btnSubmitWorkout').classList.replace('text-white', 'text-black'); document.getElementById('btnCancelEdit').classList.add('hidden'); };
+  window._saveCurrentSet = function() {
+   var sInput = document.getElementById('setsInput');
+   var totalSets = sInput ? parseInt(sInput.value) : 1;
+   if (totalSets <= 1 || window.currentCategory !== 'strength') { window.saveWorkout(); return; }
+   var n = window._currentSetIndex + 1;
+   var rEl = document.getElementById('wdh_s' + n);
+   var wEl = document.getElementById('weight_s' + n);
+   var rirEl = document.getElementById('rir_s' + n);
+   var reps = rEl ? parseFloat(rEl.value) : NaN;
+   var weight = wEl ? parseFloat(wEl.value) : 0;
+   var rir = (rirEl && rirEl.value !== '') ? parseInt(rirEl.value) : null;
+   if (isNaN(reps) || reps <= 0) { window.showToast(window.t('enterReps', 'Bitte Wiederholungen eingeben')); return; }
+   window._savedSets.push({ reps: reps, weight: weight || 0, rir: (rir !== null && !isNaN(rir)) ? rir : null });
+   // Auto-start workout timer on first set
+   if (window._currentSetIndex === 0 && window._savedSets.length === 1 && !window.isWorkoutTimerRunning) {
+    if (typeof window.toggleWorkoutTimer === 'function') window.toggleWorkoutTimer();
+   }
+   var setRow = rEl ? rEl.closest('.p-3\\.5') : null;
+   if (setRow) {
+    setRow.style.opacity = '0.45';
+    setRow.style.borderColor = 'rgba(163,201,168,0.3)';
+    setRow.querySelectorAll('input,button').forEach(function(el) { el.style.pointerEvents = 'none'; });
+    var badge = document.createElement('div');
+    badge.style.cssText = 'position:absolute;top:8px;right:12px;font-size:10px;font-weight:800;color:#a3c9a8;text-transform:uppercase;letter-spacing:0.5px';
+    badge.textContent = '\u2713';
+    setRow.style.position = 'relative';
+    setRow.appendChild(badge);
+   }
+   window._currentSetIndex++;
+   if (window._currentSetIndex < totalSets) {
+    if (typeof window.startRestCountdown === 'function') window.startRestCountdown(window.selectedRestTime);
+    window.showToast(window.t('setSaved', 'Satz') + ' ' + n + ' \u2713 \u2014 ' + (totalSets - window._currentSetIndex) + ' ' + window.t('setsRemaining', 'übrig'));
+    var nextInput = document.getElementById('wdh_s' + (n + 1));
+    if (nextInput) setTimeout(function() { nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300);
+   } else {
+    window.showToast(window.t('lastSet', 'Letzter Satz! Wird gespeichert...'));
+    window._pendingSavedSets = window._savedSets;
+    window._savedSets = [];
+    window._currentSetIndex = 0;
+    window.saveWorkout();
+   }
+  };
+
+  window.cancelEdit = () => { window._currentSetIndex = 0; window._savedSets = []; window._pendingSavedSets = null; const savedDate = document.getElementById('dateInput').value; window.editingWorkoutId = null; document.getElementById('workoutForm').reset(); document.getElementById('dateInput').value = savedDate; if (window.currentCategory === 'strength') { const sInput = document.getElementById('setsInput'); if (sInput) { sInput.value = 3; window.generateSetFields(3); } } document.getElementById('btnSaveText').innerHTML = (i18nData[window.currentLang] && i18nData[window.currentLang].fSave) || "Speichern"; document.getElementById('btnSubmitWorkout').classList.replace('bg-primary', 'bg-primary'); document.getElementById('btnSubmitIcon').classList.replace('fill-white/20', 'fill-black/20'); document.getElementById('btnSubmitWorkout').classList.replace('text-white', 'text-black'); document.getElementById('btnCancelEdit').classList.add('hidden'); };
   window.editEntry = (id) => { const w = window.workouts.find(x => x.id === id); if(!w) return; if(window.currentCategory !== w.category) window.switchCategory(w.category); window.editingWorkoutId = id; document.getElementById('dateInput').value = w.date; document.getElementById('exerciseInput').value = w.exercise; if (w.category === 'strength') { const sInput = document.getElementById('setsInput'); if(sInput && w.setDetails) { sInput.value = w.setDetails.length || 3; window.generateSetFields(sInput.value); setTimeout(() => { w.setDetails.forEach((s, idx) => { const i = idx + 1; const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); if(rEl) rEl.value = s.reps; if(wEl) wEl.value = s.weight; }); }, 50); } const eqInput = document.getElementById('equipmentInput'); if(eqInput && w.equipment) eqInput.value = w.equipment; } else { if(window.categorySchemas[w.category] && window.categorySchemas[w.category].schema) { window.categorySchemas[w.category].schema.forEach(field => { const el = document.getElementById('dyn_' + field.id); if(el && w.data[field.label] !== undefined) { el.value = w.data[field.label]; } }); } } document.getElementById('btnSaveText').textContent = "Update"; document.getElementById('btnSubmitWorkout').classList.replace('bg-primary', 'bg-primary'); document.getElementById('btnSubmitIcon').classList.replace('fill-black/20', 'fill-white/20'); document.getElementById('btnSubmitWorkout').classList.replace('text-black', 'text-white'); document.getElementById('btnCancelEdit').classList.remove('hidden'); document.getElementById('workoutForm').scrollIntoView({behavior: 'smooth'}); };
   window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
@@ -3414,7 +3469,10 @@
       var name = input.value.trim();
       if(name.length < 2) { window._hideLastTime(); if(window._showExerciseImage) { var c = document.getElementById('exerciseImageContainer'); if(c) c.classList.add('hidden'); } return; }
       window._showLastTime(name);
-      if(window._showExerciseImage) window._showExerciseImage(name);
+      clearTimeout(window._exerciseImageTimeout);
+      window._exerciseImageTimeout = setTimeout(function() {
+       if(window._showExerciseImage) window._showExerciseImage(name);
+      }, 500);
      }, 300);
     }
     input.addEventListener('input', onExerciseChange);
