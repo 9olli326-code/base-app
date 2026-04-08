@@ -188,20 +188,18 @@ window.buildAIContext = function() {
 // --- ZNS READINESS ---
 window.calculateReadiness = function() {
     if (!Array.isArray(window.workouts)) return;
-    const today = new Date();
-    const allArchived = window.workouts.filter(w => w.archived);
-    const recent7 = allArchived.filter(w => {
-        const d = new Date(w.date);
-        return (today - d) / 86400000 <= 7;
-    });
-    const recent3 = allArchived.filter(w => {
-        const d = new Date(w.date);
-        return (today - d) / 86400000 <= 3;
-    });
-    let score = 100;
-    score -= recent7.length * 8;
-    score -= recent3.length * 5;
-    score = Math.min(100, Math.max(15, Math.round(score)));
+    // Use V2 calculation if available
+    var v2 = window._calculateReadinessV2 ? window._calculateReadinessV2() : null;
+    let score;
+    if (v2) {
+        score = v2.score;
+    } else {
+        const today = new Date();
+        const allArchived = window.workouts.filter(w => w.archived);
+        const recent7 = allArchived.filter(w => (today - new Date(w.date)) / 86400000 <= 7);
+        const recent3 = allArchived.filter(w => (today - new Date(w.date)) / 86400000 <= 3);
+        score = Math.min(100, Math.max(15, Math.round(100 - recent7.length * 8 - recent3.length * 5)));
+    }
     window.currentReadinessScore = score;
     const scoreEl = document.getElementById('readinessScoreVal');
     const barEl = document.getElementById('readinessBar');

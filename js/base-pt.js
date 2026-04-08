@@ -330,7 +330,7 @@ if(activeBtn) activeBtn.style.color = _a;
 if(activeIndicator) activeIndicator.style.opacity = '1';
 const activeIcon = activeBtn?.querySelector('div');
 if(activeIcon) activeIcon.style.background = _a + '26';
-if(tab === 'clients') window.renderPTClientsDashboard();
+if(tab === 'clients') { window.renderPTClientsDashboard(); if(window._renderRevenueDashboard) window._renderRevenueDashboard(); if(window._checkClientReminders) window._checkClientReminders(); }
 if(tab === 'plans') window.renderDayView();
 if(tab === 'mytraining') window.renderPTMyTraining();
 window._refreshLucide();
@@ -3345,6 +3345,73 @@ if (_origOpenSession2) {
         }
     });
 })();
+
+// === REVENUE DASHBOARD ===
+window._renderRevenueDashboard = function() {
+ var container = document.getElementById('revenueDashboard'); if (!container) return;
+ var totalMRR = 0; var cRevs = [];
+ (window.clients || []).forEach(function(c) {
+  if (c.status === 'inactive') return;
+  var rate = parseFloat(c.monthlyRate || 0);
+  totalMRR += rate;
+  var cw = window.getClientWorkouts ? window.getClientWorkouts(c.id) : [];
+  var lastW = cw.length > 0 ? cw[cw.length-1] : null;
+  var daysAgo = lastW ? Math.floor((new Date() - new Date(lastW.date)) / 86400000) : 999;
+  cRevs.push({ name: c.name, rate: rate, daysAgo: daysAgo, risk: daysAgo > 14 ? 'high' : daysAgo > 7 ? 'med' : 'low' });
+ });
+ var html = '<div class="text-[9px] font-black uppercase tracking-widest mb-3" style="color:var(--text-muted)">Revenue</div>';
+ html += '<div class="grid grid-cols-3 gap-2 mb-3">';
+ html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Aktiv</div><div class="text-xl font-black" style="color:#d4af37">' + cRevs.length + '</div></div>';
+ html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">MRR</div><div class="text-xl font-black" style="color:#d4af37">' + totalMRR.toFixed(0) + '\u20ac</div></div>';
+ html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Jahres-Prog.</div><div class="text-xl font-black" style="color:#d4af37">' + (totalMRR*12).toFixed(0) + '\u20ac</div></div></div>';
+ var atRisk = cRevs.filter(function(c) { return c.risk === 'high'; });
+ if (atRisk.length > 0) {
+  html += '<div class="p-3 rounded-xl mb-3" style="background:rgba(232,138,138,0.05);border:1px solid rgba(232,138,138,0.15)"><div class="text-[9px] font-bold mb-2" style="color:#e88a8a">\u26a0\ufe0f Churn-Risiko</div>';
+  atRisk.forEach(function(c) { html += '<div class="flex justify-between py-1"><span class="text-[10px] text-white">' + window._escapeHtml(c.name) + '</span><span class="text-[9px]" style="color:#e88a8a">' + c.daysAgo + 'd inaktiv</span></div>'; });
+  html += '</div>';
+ }
+ cRevs.sort(function(a,b){return b.rate-a.rate;}).forEach(function(c) {
+  var rc = c.risk==='high'?'#e88a8a':c.risk==='med'?'#e8c86a':'#a3c9a8';
+  html += '<div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border-hex)"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background:'+rc+'"></div><span class="text-[10px] text-white font-bold">' + window._escapeHtml(c.name) + '</span></div><span class="text-[10px] font-bold" style="color:#d4af37">' + c.rate.toFixed(0) + '\u20ac</span></div>';
+ });
+ container.innerHTML = html;
+};
+
+// === REMINDERS ===
+window._checkClientReminders = function() {
+ var reminders = [];
+ (window.clients || []).forEach(function(c) {
+  if (c.status === 'inactive') return;
+  var cw = window.getClientWorkouts ? window.getClientWorkouts(c.id) : [];
+  var lastW = cw.length > 0 ? cw[cw.length-1] : null;
+  var daysAgo = lastW ? Math.floor((new Date() - new Date(lastW.date)) / 86400000) : 999;
+  if (daysAgo >= 5 && daysAgo < 999) reminders.push({ client: c, type: 'inactive', days: daysAgo });
+ });
+ window._pendingReminders = reminders;
+ var badge = document.getElementById('reminderBadge');
+ if (badge) { if (reminders.length > 0) { badge.textContent = reminders.length; badge.style.display = 'flex'; } else badge.style.display = 'none'; }
+};
+
+window._showReminders = function() {
+ var rems = window._pendingReminders || [];
+ if (rems.length === 0) { window.showToast('Keine Erinnerungen'); return; }
+ var html = '';
+ rems.forEach(function(r) {
+  html += '<div class="p-3 rounded-xl mb-2" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="flex items-center justify-between"><div><span class="text-[10px] font-bold text-white">' + window._escapeHtml(r.client.name) + '</span><div class="text-[8px]" style="color:#e88a8a">' + r.days + ' Tage inaktiv</div></div>';
+  if (r.client.phone) html += '<button onclick="window._sendWhatsAppReminder(\'' + window._escapeHtml(r.client.id).replace(/'/g,'&#39;') + '\')" class="text-[9px] font-bold px-3 py-1.5 rounded-lg cursor-pointer pointer-events-auto" style="background:rgba(37,211,102,0.1);color:#25d366" aria-label="WhatsApp senden">WhatsApp</button>';
+  html += '</div></div>';
+ });
+ var content = document.getElementById('remindersContent');
+ if (content) content.innerHTML = html;
+ window.toggleModal('remindersModal');
+};
+
+window._sendWhatsAppReminder = function(clientId) {
+ var c = (window.clients||[]).find(function(x){return x.id===clientId;});
+ if (!c || !c.phone) { window.showToast('Keine Telefonnummer'); return; }
+ var text = 'Hey ' + (c.name||'') + '! Ich hab gesehen dass du ein paar Tage nicht trainiert hast. Alles gut? Lass uns einen Plan machen! \uD83D\uDCAA';
+ window.open('https://wa.me/' + c.phone.replace(/[^0-9]/g,'') + '?text=' + encodeURIComponent(text), '_blank');
+};
 
 // === WORKOUT DELIVERY ===
 window._openWorkoutDelivery = function(clientId) {

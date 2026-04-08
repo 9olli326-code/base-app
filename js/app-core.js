@@ -597,7 +597,7 @@
    window.setupInjuryChips(); window.populateProfile(); 
    const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
    
-   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout(); if(window._renderHabitTracker) window._renderHabitTracker(); if(window._renderProgressPhotos) window._renderProgressPhotos(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); if(window._checkDeloadReminder) window._checkDeloadReminder(); }, 4000);
+   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout(); if(window._renderHabitTracker) window._renderHabitTracker(); if(window._renderProgressPhotos) window._renderProgressPhotos(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); if(window._checkDeloadReminder) window._checkDeloadReminder(); if(window._checkWeeklyConsistencyXP) window._checkWeeklyConsistencyXP(); }, 4000);
    if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('init'); }, 3000);
    if (window.DESIGN_MORPH_ACTIVE && window._applyModeTheme) {
     var _dmInitMode = 'athlete';
@@ -650,6 +650,9 @@
    if(wrapper) { wrapper.classList.add('form-visible'); }
    if(prompt) { prompt.classList.add('hidden'); }
    if(typeof window.filterTable === 'function') window.filterTable(cat); window.updateExerciseAutocomplete(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout();
+   // Hold Timer for Mobility
+   var holdTimerEl = document.getElementById('holdTimerButtons');
+   if (holdTimerEl) { if (cat === 'recovery') holdTimerEl.classList.remove('hidden'); else holdTimerEl.classList.add('hidden'); }
    if(cat === 'main' && !localStorage.getItem('base_builder_used')) {
     const hasCustomSchemas = localStorage.getItem('beastmode_v2_multi_schemas');
     const parsed = hasCustomSchemas ? JSON.parse(hasCustomSchemas) : {};
@@ -841,9 +844,10 @@
      setTimeout(function() { if (window._showWorkoutComparison) window._showWorkoutComparison(entry); }, 500);
      setTimeout(function() { if (window._offerSaveAsRoutine) window._offerSaveAsRoutine(entry); }, 2500);
     }
-    // Achievements + Feedback
+    // Achievements + Feedback + Milestones
     if (!window.editingWorkoutId) {
      setTimeout(function() { if (window._checkAchievements) window._checkAchievements(); }, 1200);
+     setTimeout(function() { if (window._checkMilestones) window._checkMilestones(); }, 1500);
      if (!window._routineQueue) setTimeout(function() { if (window._showPostWorkoutFeedback) window._showPostWorkoutFeedback(); }, 3500);
     }
    } catch (err) { 
@@ -3386,6 +3390,7 @@
     if(btn) { btn.classList.add('bg-zinc-800','text-white','shadow-sm'); btn.classList.remove('text-zinc-500'); }
     window.renderMuscleHeatmap();
     if (window._renderMuscleDistributionChart) window._renderMuscleDistributionChart();
+    if (window._renderPRTimeline) window._renderPRTimeline();
     window._refreshLucide();
     return;
    }
@@ -5980,6 +5985,111 @@
    container.innerHTML = html;
   };
 
+  // === PR TIMELINE CHART ===
+  window._renderPRTimeline = function() {
+   var container = document.getElementById('prTimelineChart'); if (!container) return;
+   var kw = (window.workouts || []).filter(function(w) { return w.category === 'strength' && w.setDetails && w.archived; });
+   var ec = {}; kw.forEach(function(w) { ec[w.exercise] = (ec[w.exercise] || 0) + 1; });
+   var top5 = Object.entries(ec).sort(function(a,b) { return b[1]-a[1]; }).slice(0,5).map(function(e) { return e[0]; });
+   if (top5.length === 0) { container.innerHTML = ''; return; }
+   var colors = ['#a3c9a8','#e88a8a','#8aafe8','#e8c86a','#c9a3c9'];
+   var html = '<div class="mb-2"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">PR Verlauf</span></div>';
+   top5.forEach(function(ex, idx) {
+    var exW = kw.filter(function(w) { return w.exercise === ex; }).sort(function(a,b) { return new Date(a.date)-new Date(b.date); });
+    var mw = exW.map(function(w) { return Math.max.apply(null, (w.setDetails||[]).map(function(s) { return parseFloat(s.weight)||0; }).concat([0])); });
+    if (mw.length < 2) return;
+    var first = mw[0], last = mw[mw.length-1], diff = last - first;
+    var dc = diff > 0 ? '#a3c9a8' : diff < 0 ? '#e88a8a' : '#82828c';
+    var maxV = Math.max.apply(null, mw)||1, minV = Math.min.apply(null, mw)||0, range = maxV-minV||1;
+    var sw = 120, sh = 20;
+    var pts = mw.map(function(m, i) { return (i/(mw.length-1))*sw + ',' + (sh-((m-minV)/range)*sh); }).join(' ');
+    html += '<div class="flex items-center gap-3 py-1.5" style="border-bottom:1px solid var(--border-hex)"><div class="w-2 h-2 rounded-full flex-shrink-0" style="background:'+colors[idx]+'"></div><span class="text-[9px] font-bold text-white truncate" style="width:80px">'+window._escapeHtml(ex)+'</span><svg width="'+sw+'" height="'+sh+'" class="flex-shrink-0"><polyline points="'+pts+'" fill="none" stroke="'+colors[idx]+'" stroke-width="1.5"/></svg><span class="text-[9px] font-black" style="color:'+dc+'">'+(diff>0?'\u2191+':diff<0?'\u2193':'\u2192')+Math.abs(diff).toFixed(1)+'kg</span></div>';
+   });
+   container.innerHTML = html;
+  };
+
+  // === WEEKLY CONSISTENCY XP ===
+  window._checkWeeklyConsistencyXP = function() {
+   var now = new Date(); var ws = new Date(now); ws.setDate(ws.getDate()-ws.getDay()+1);
+   var wk = ws.toISOString().split('T')[0];
+   if (localStorage.getItem('base_consistency_week') === wk) return;
+   var lws = new Date(ws); lws.setDate(lws.getDate()-7);
+   var allW = (window.workouts||[]).filter(function(w) { var d = new Date(w.date); return d >= lws && d < ws; });
+   localStorage.setItem('base_consistency_week', wk);
+   if (allW.length >= 3) {
+    if (window.awardXP) window.awardXP('weeklyConsistency');
+    window.showToast('\uD83D\uDD25 +100 XP f\u00fcr 3+ Workouts letzte Woche!');
+   }
+  };
+
+  // === MILESTONES ===
+  window._checkMilestones = function() {
+   var allW = (window.workouts||[]).filter(function(w) { return w.archived; });
+   var count = allW.length;
+   var ms = [5,10,25,50,100,200,500];
+   var reached = JSON.parse(localStorage.getItem('base_milestones_reached') || '[]');
+   var msgs = {5:'5 Workouts! \uD83C\uDFAF',10:'10 Workouts! Gewohnheit! \uD83D\uDCAA',25:'25 Workouts! \uD83C\uDFC5',50:'50 Workouts! \uD83E\uDD47',100:'100 WORKOUTS! CENTURION! \uD83D\uDC51',200:'200 Workouts! Maschine! \uD83E\uDD16',500:'500 Workouts! LEGENDE! \uD83C\uDFC6'};
+   ms.forEach(function(m) {
+    if (count >= m && reached.indexOf(m) === -1) {
+     reached.push(m); localStorage.setItem('base_milestones_reached', JSON.stringify(reached));
+     setTimeout(function() { window.showToast(msgs[m] || '\uD83C\uDF89 ' + m + ' Workouts!', null, null, null, 4000); }, 1500);
+     if (window.awardXP) window.awardXP('milestone');
+    }
+   });
+  };
+
+  // === READINESS V2 ===
+  window._calculateReadinessV2 = function() {
+   var kw = (window.workouts||[]).filter(function(w) { return w.category === 'strength' && w.setDetails && w.archived; });
+   var now = new Date(); var score = 100;
+   var last7 = kw.filter(function(w) { return (now - new Date(w.date)) / 86400000 <= 7; });
+   last7.forEach(function(w) {
+    var daysAgo = Math.max(1, Math.floor((now - new Date(w.date)) / 86400000));
+    var sets = (w.setDetails||[]).length;
+    var maxW = Math.max.apply(null, (w.setDetails||[]).map(function(s){return parseFloat(s.weight)||0;}).concat([0]));
+    var mult = 1; if (sets >= 5) mult = 1.3; if (maxW >= 100) mult *= 1.2;
+    var rirsV = (w.setDetails||[]).filter(function(s){return s.rir!=null && !isNaN(s.rir);});
+    if (rirsV.length > 0) { var avgR = rirsV.reduce(function(a,s){return a+parseFloat(s.rir);},0)/rirsV.length; if (avgR <= 1) mult *= 1.3; }
+    score -= (sets * 1.5 * mult / daysAgo);
+   });
+   var fb = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
+   var yd = new Date(now); yd.setDate(yd.getDate()-1); var yk = yd.toISOString().split('T')[0];
+   if (fb[yk]) score += (fb[yk].rating - 3) * 5;
+   var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
+   if (habits[yk] && habits[yk].sleep) { if (habits[yk].sleep >= 8) score += 5; else if (habits[yk].sleep < 6) score -= 10; }
+   score = Math.max(0, Math.min(100, Math.round(score)));
+   return { score: score, label: score>=80?'Voll erholt':score>=60?'Bereit':score>=40?'Moderat':score>=20?'Erm\u00fcdet':'Risiko', color: score>=80?'#a3c9a8':score>=60?'#8aafe8':score>=40?'#e8c86a':'#e88a8a' };
+  };
+
+  // === HOLD TIMER (MOBILITY) ===
+  window._showHoldTimer = function(seconds) {
+   seconds = seconds || 30; var remaining = seconds;
+   var ov = document.createElement('div'); ov.id = 'holdTimerOverlay';
+   ov.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.95)';
+   var circ = 2 * Math.PI * 80;
+   var update = function() {
+    var pct = Math.round((1 - remaining/seconds)*100);
+    var dash = circ - (pct/100)*circ;
+    ov.innerHTML = '<svg width="200" height="200" style="transform:rotate(-90deg)"><circle cx="100" cy="100" r="80" fill="none" stroke="#1e201e" stroke-width="8"/><circle cx="100" cy="100" r="80" fill="none" stroke="#a3c9a8" stroke-width="8" stroke-dasharray="'+circ+'" stroke-dashoffset="'+dash+'" stroke-linecap="round" style="transition:stroke-dashoffset 1s linear"/></svg>' +
+     '<div style="position:absolute;font-size:48px;font-weight:900;color:#fff;font-family:Outfit,sans-serif">'+remaining+'</div>' +
+     '<div style="margin-top:80px;font-size:11px;font-weight:700;color:#a3c9a8">HALTEN</div>' +
+     '<button onclick="document.getElementById(\'holdTimerOverlay\').remove();clearInterval(window._holdTimerInt)" class="mt-6 px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(232,138,138,0.1);border:1px solid rgba(232,138,138,0.2);color:#e88a8a" aria-label="Abbrechen">Abbrechen</button>';
+   };
+   update(); document.body.appendChild(ov);
+   window._holdTimerInt = setInterval(function() {
+    remaining--;
+    if (remaining <= 0) {
+     clearInterval(window._holdTimerInt);
+     if (navigator.vibrate) navigator.vibrate([200,100,200]);
+     ov.innerHTML = '<div style="font-size:64px;margin-bottom:16px">\u2705</div><div style="font-size:24px;font-weight:900;color:#a3c9a8">Fertig!</div><div style="font-size:11px;color:#82828c;margin-top:8px">'+seconds+' Sekunden gehalten</div>';
+     setTimeout(function() { if (ov.parentNode) ov.remove(); }, 2000);
+    } else {
+     update();
+     if (remaining <= 3 && navigator.vibrate) navigator.vibrate(100);
+    }
+   }, 1000);
+  };
+
   // === PROGRESSIVE OVERLOAD CHECK ===
   window._checkProgressiveOverload = function(exerciseName, matches) {
    if (!matches || matches.length < 3) return null;
@@ -6230,7 +6340,12 @@
    var resultEl = document.getElementById('formCheckResult');
    if (resultEl) { resultEl.classList.remove('hidden'); resultEl.innerHTML = '<div class="flex items-center justify-center gap-2 py-6"><i data-lucide="loader-2" class="w-5 h-5 animate-spin" style="color:#a3c9a8"></i><span class="text-sm text-zinc-400">' + window.t('fcAnalyzing', 'Analysiere deine Form...') + '</span></div>'; window._refreshLucide(); }
    var langName = { de: 'Deutsch', en: 'English', fr: 'Francais', es: 'Espanol', it: 'Italiano', nl: 'Nederlands', ar: 'العربية' }[lang] || 'Deutsch';
-   var prompt = 'Du bist ein erfahrener Strength & Conditioning Coach. Analysiere dieses Bild einer ' + exName + ' Übung.\n\nWICHTIG: Du gibst NUR allgemeine Hinweise zur Übungsform. Du stellst KEINE medizinischen Diagnosen.\n\nWenn das Bild KEINE erkennbare Übungsausführung zeigt, sage das klar.\n\nWenn du eine ' + exName + ' erkennst, analysiere:\n1. Körperhaltung (Rücken, Knie, Hüfte)\n2. Bewegungstiefe\n3. Erkennbare Asymmetrien\n4. 2-3 konkrete Verbesserungsvorschläge\n\nWenn du dir bei einem Aspekt NICHT sicher bist, sage "Aus diesem Winkel kann ich X nicht eindeutig beurteilen."\n\nMax 150 Wörter. Freundlich und motivierend.\n\nAntworte auf ' + langName + '.';
+   var _fcProfile = window.userProfile || {};
+   var _fcInjCtx = '';
+   if (_fcProfile.injuries && _fcProfile.injuries.length > 0) _fcInjCtx += '\n\nWICHTIG: Der Athlet hat folgende Beschwerden: ' + _fcProfile.injuries.join(', ') + '. Achte besonders auf Bewegungsmuster die diese Bereiche belasten.';
+   if (_fcProfile.age) _fcInjCtx += '\nAlter: ' + _fcProfile.age;
+   if (_fcProfile.experience) _fcInjCtx += '\nErfahrungslevel: ' + _fcProfile.experience;
+   var prompt = 'Du bist ein erfahrener Strength & Conditioning Coach. Analysiere dieses Bild einer ' + exName + ' \u00dcbung.\n\nWICHTIG: Du gibst NUR allgemeine Hinweise zur \u00dcbungsform. Du stellst KEINE medizinischen Diagnosen.\n\nWenn das Bild KEINE erkennbare \u00dcbungsausf\u00fchrung zeigt, sage das klar.\n\nWenn du eine ' + exName + ' erkennst, analysiere:\n1. K\u00f6rperhaltung (R\u00fccken, Knie, H\u00fcfte)\n2. Bewegungstiefe\n3. Erkennbare Asymmetrien\n4. 2-3 konkrete Verbesserungsvorschl\u00e4ge\n\nWenn du dir bei einem Aspekt NICHT sicher bist, sage "Aus diesem Winkel kann ich X nicht eindeutig beurteilen."' + _fcInjCtx + '\n\nMax 150 W\u00f6rter. Freundlich und motivierend.\n\nAntworte auf ' + langName + '.';
    try {
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, 30000);

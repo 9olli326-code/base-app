@@ -705,6 +705,7 @@
                     <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)"data-i18n="ptViewAll">Alle ansehen</span>
                 </div>
 
+                <div id="revenueDashboard" class="mb-4"></div>
                 <div id="ptClientsList" class="space-y-3"></div>
                 <div id="ptClientsEmpty" class="hidden text-center py-12">
                     <i data-lucide="users-2" class="w-10 h-10 mx-auto mb-3" style="color:color-mix(in srgb, var(--primary-hex), transparent 70%)"></i>
@@ -1199,6 +1200,13 @@
                         </div>
                     </div>
 
+                    <div id="holdTimerButtons" class="hidden mb-3 flex items-center gap-2 flex-wrap">
+                        <span class="text-[8px] font-bold uppercase tracking-wider" style="color:#82828c">Hold Timer:</span>
+                        <button type="button" onclick="window._showHoldTimer(15)" class="px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8" aria-label="15 Sekunden">15s</button>
+                        <button type="button" onclick="window._showHoldTimer(30)" class="px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8" aria-label="30 Sekunden">30s</button>
+                        <button type="button" onclick="window._showHoldTimer(45)" class="px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8" aria-label="45 Sekunden">45s</button>
+                        <button type="button" onclick="window._showHoldTimer(60)" class="px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.15);color:#a3c9a8" aria-label="60 Sekunden">60s</button>
+                    </div>
                     <div id="meinSportSelector" class="hidden mb-4">
                         <div class="flex items-center justify-between mb-2">
                             <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500"data-i18n="lblSelectSport">Sportart wählen</p>
@@ -1309,6 +1317,7 @@
                 </div>
 
                 <div id="muscleSection" class="hidden p-5">
+                    <div id="prTimelineChart" class="p-4 rounded-xl mb-4" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"></div>
                     <div id="muscleDistChart" class="p-4 rounded-xl mb-5" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"></div>
                     <p class="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style="color:var(--text-muted);font-family:'DM Sans',sans-serif"data-i18n="lblLast7Days">Letzte 7 Tage</p>
                     <p class="text-[10px] uppercase tracking-widest mb-5" style="color:var(--border-hex);font-family:'DM Sans',sans-serif" data-i18n="heatmapLegend">Wärme = Trainingsvolumen</p>
@@ -1812,6 +1821,17 @@
     <div id="wkFeedbackModal" class="fixed inset-0 z-[700] hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.95)">
         <div class="p-6 max-w-sm w-full shadow-2xl relative rounded-2xl" style="background:var(--surface-hex,#161816);border:1px solid var(--border-hex,#1e201e)">
             <div id="wkFeedbackContent"></div>
+        </div>
+    </div>
+
+    <!-- Reminders Modal -->
+    <div id="remindersModal" class="fixed inset-0 z-[700] hidden items-start justify-center px-4 overflow-y-auto" style="background:rgba(0,0,0,0.95);-webkit-overflow-scrolling:touch">
+        <div class="p-6 max-w-md w-full shadow-2xl relative my-8 rounded-2xl" style="background:var(--surface-hex,#161816);border:1px solid var(--border-hex,#1e201e)">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-black text-white">Erinnerungen</h3>
+                <button aria-label="Schliessen" onclick="window.toggleModal('remindersModal')" class="text-zinc-500 cursor-pointer pointer-events-auto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div id="remindersContent"></div>
         </div>
     </div>
 
