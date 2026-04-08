@@ -332,20 +332,19 @@
   window._adjustInput = function(inputId, delta) {
    var input = document.getElementById(inputId);
    if (!input) return;
-   var raw = input.value;
+   var raw = String(input.value).trim();
    var isWdh = inputId.indexOf('wdh') !== -1;
    var isWeight = inputId.indexOf('weight') !== -1;
    var isRir = inputId.indexOf('rir') !== -1;
    var defaultVal = isWdh ? 8 : isWeight ? 20 : isRir ? 2 : 0;
    var val = parseFloat(raw);
-   if (isNaN(val) || raw === '' || raw === '--') val = defaultVal;
+   if (isNaN(val) || raw === '' || raw === '--') { input.value = defaultVal; return; }
    val = val + delta;
    var min = isRir ? 0 : isWeight ? 0 : 1;
    var max = isRir ? 5 : isWeight ? 500 : 999;
    val = Math.max(min, Math.min(max, val));
    if (isWeight) val = Math.round(val * 2) / 2;
    input.value = val;
-   input.dispatchEvent(new Event('change'));
   };
   window.DEFAULT_STRENGTH_SCHEMA = [ {"id": "saetze", "label": "Sätze", "type": "number", "placeholder": "z.B. 3"}, {"id": "wdh", "label": "Wiederholungen", "type": "number", "placeholder": "z.B. 10"}, {"id": "gewicht", "label": "Gewicht (kg)", "type": "number", "placeholder": "z.B. 80"} ]; // Note: labels translated at render time via schema_ keys
   window.DEFAULT_CARDIO_SCHEMA = [ {"id": "distanz", "label": "Distanz (km)", "type": "number", "placeholder": "z.B. 5.5"}, {"id": "dauer", "label": "Dauer (min)", "type": "number", "placeholder": "z.B. 30"}, {"id": "pace", "label": "Pace (min/km)", "type": "text", "placeholder": "z.B. 5:30"}, {"id": "puls", "label": "Ø Puls", "type": "number", "placeholder": "z.B. 140"} ];
@@ -679,36 +678,33 @@
   };
   
   window.generateSetFields = function(count) {
-   const container = document.getElementById('setsContainer');
+   var container = document.getElementById('setsContainer');
    if(!container) return;
    container.innerHTML = '';
-   for(let i = 1; i <= parseInt(count); i++) {
-    const row = document.createElement('div');
-    row.className = "zen-set-row animate-in fade-in slide-in-from-left-2 relative z-50 pointer-events-auto";
-    var _btnStyle = 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
-    row.innerHTML = `
-     <span class="zen-set-label pointer-events-none">${window.t('lblSet','Satz')} ${i}</span>
-     <div style="display:flex;gap:6px;align-items:stretch;width:100%">
-      <div style="flex:2;display:flex;align-items:center;gap:2px">
-       <button type="button" aria-label="Reps minus" onclick="window._adjustInput('wdh_s${i}',-1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">\u2212</button>
-       <input type="number" id="wdh_s${i}" aria-label="${window.t('schema_wdh','Wdh')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="flex:1;min-width:0;text-align:center">
-       <button type="button" aria-label="Reps plus" onclick="window._adjustInput('wdh_s${i}',1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">+</button>
-       <span class="text-[8px] font-bold uppercase" style="color:var(--text-muted);width:20px">${window.t('lblReps','Wdh')}</span>
-      </div>
-      <div style="flex:2;display:flex;align-items:center;gap:2px">
-       <button type="button" aria-label="Kg minus" onclick="window._adjustInput('weight_s${i}',-2.5)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">\u2212</button>
-       <input type="number" step="any" id="weight_s${i}" aria-label="${window.t('schema_gewicht','kg')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="flex:1;min-width:0;text-align:center">
-       <button type="button" aria-label="Kg plus" onclick="window._adjustInput('weight_s${i}',2.5)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">+</button>
-       <span class="text-[8px] font-bold uppercase" style="color:var(--text-muted);width:16px">kg</span>
-      </div>
-      <div style="flex:1;display:flex;align-items:center;gap:2px">
-       <button type="button" aria-label="RIR minus" onclick="window._adjustInput('rir_s${i}',-1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">\u2212</button>
-       <input type="number" id="rir_s${i}" aria-label="RIR ${i}" placeholder="--" min="0" max="5" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="flex:1;min-width:0;text-align:center;max-width:32px">
-       <button type="button" aria-label="RIR plus" onclick="window._adjustInput('rir_s${i}',1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">+</button>
-       <span class="text-[8px] font-bold uppercase" style="color:#a3c9a8;width:18px">RIR</span>
-      </div>
-     </div>
-    `;
+   var _bs = 'background:#1a1c1a;border:1px solid #2a2a2e;color:var(--text-muted)';
+   var _is = 'background:transparent;border:none;color:#fff;-moz-appearance:textfield';
+   for(var i = 1; i <= parseInt(count); i++) {
+    var row = document.createElement('div');
+    row.className = 'p-3 rounded-xl mb-2 pointer-events-auto';
+    row.style.cssText = 'background:var(--inner-bg-hex);border:1px solid var(--border-hex)';
+    row.innerHTML = '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--cat-accent,#a3c9a8)">' + window.t('lblSet','Satz') + ' ' + i + '</div>' +
+     '<div class="grid grid-cols-3 gap-3">' +
+      '<div class="text-center"><div class="text-[8px] font-bold text-zinc-500 uppercase tracking-wider mb-1">' + window.t('lblReps','Wdh') + '</div><div class="flex items-center justify-center gap-1">' +
+       '<button type="button" aria-label="Wdh minus" onclick="window._adjustInput(\'wdh_s' + i + '\',-1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
+       '<input type="number" id="wdh_s' + i + '" placeholder="--" min="0" class="w-12 h-8 text-center rounded-lg text-base font-black outline-none pointer-events-auto" style="' + _is + '">' +
+       '<button type="button" aria-label="Wdh plus" onclick="window._adjustInput(\'wdh_s' + i + '\',1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
+      '</div></div>' +
+      '<div class="text-center"><div class="text-[8px] font-bold text-zinc-500 uppercase tracking-wider mb-1">kg</div><div class="flex items-center justify-center gap-1">' +
+       '<button type="button" aria-label="kg minus" onclick="window._adjustInput(\'weight_s' + i + '\',-2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
+       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" class="w-12 h-8 text-center rounded-lg text-base font-black outline-none pointer-events-auto" style="' + _is + '">' +
+       '<button type="button" aria-label="kg plus" onclick="window._adjustInput(\'weight_s' + i + '\',2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
+      '</div></div>' +
+      '<div class="text-center"><div class="text-[8px] font-bold uppercase tracking-wider mb-1" style="color:#a3c9a8">RIR</div><div class="flex items-center justify-center gap-1">' +
+       '<button type="button" aria-label="RIR minus" onclick="window._adjustInput(\'rir_s' + i + '\',-1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
+       '<input type="number" id="rir_s' + i + '" placeholder="--" min="0" max="5" class="w-12 h-8 text-center rounded-lg text-base font-black outline-none pointer-events-auto" style="' + _is + '">' +
+       '<button type="button" aria-label="RIR plus" onclick="window._adjustInput(\'rir_s' + i + '\',1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
+      '</div></div>' +
+     '</div>';
     container.appendChild(row);
    }
   };
