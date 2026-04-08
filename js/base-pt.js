@@ -674,7 +674,7 @@ window.editClientProfile = function() {
     if(el('cpEditInjuries')) el('cpEditInjuries').value = profile.injuries || '';
     if(el('cpEditNotes')) el('cpEditNotes').value = profile.notes || '';
     window.toggleModal('clientProfileEditModal');
-    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 30);
 };
 
 window.saveClientProfileFromModal = function() {
@@ -2249,7 +2249,7 @@ try {
 } catch(e) {
     if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = 'Fehler: ' + e.message; }
 } finally {
-    if(btn) { btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> ' + window.t('ptWeeklyReport','Wochenbericht generieren'); if(window.lucide) lucide.createIcons(); }
+    if(btn) { btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> ' + window.t('ptWeeklyReport','Wochenbericht generieren'); if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons(); }
 }
 };
 
@@ -2344,7 +2344,7 @@ window.openTrainerProfileEditor = function() {
         window._renderContactChips();
     }
     window.toggleModal('trainerProfileModal');
-    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 30);
 };
 
 window._renderSpecChips = function() {
@@ -2536,7 +2536,7 @@ window._loadTrainerStats = async function() {
 
 window.openTrainerDirectory = async function() {
     window.toggleModal('trainerDirectoryModal');
-    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 30);
     window._renderTrainerSpecFilter();
     await window._loadAllTrainers();
 };
@@ -2605,7 +2605,7 @@ window._renderTrainerCards = function(trainers) {
             '<button onclick="window.searchTrainerGoogle(\'online\')" class="w-full bg-zinc-800 text-zinc-300 py-3 rounded-xl text-sm font-black uppercase tracking-widest pointer-events-auto cursor-pointer hover:bg-zinc-700 transition-all">Online Personal Trainer finden</button>' +
             '<p class="text-zinc-600 text-[10px] mt-6 uppercase tracking-widest">Bist du Trainer? <button onclick="window.toggleModal(\'trainerDirectoryModal\'); setTimeout(function() { window.switchMode(\'pt\'); window.activatePTMode(); }, 300);" class="text-indigo-400 font-black pointer-events-auto cursor-pointer">Profil erstellen</button></p>' +
             '</div>';
-        if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+        if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 30);
         return;
     }
     const esc = window._escapeHtml;
@@ -2631,7 +2631,7 @@ window._renderTrainerCards = function(trainers) {
         </div>`;
     }).join('');
     list.innerHTML += '<div class="col-span-full mt-4"><button onclick="window.searchTrainerGoogle()" class="w-full bg-zinc-800 text-zinc-400 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest pointer-events-auto cursor-pointer hover:bg-zinc-700 hover:text-white transition-all">Mehr Trainer auf Google Maps finden</button></div>';
-    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 30);
 };
 
 window.searchTrainerGoogle = function(type) {
@@ -2704,7 +2704,7 @@ window.openTrainerDetail = async function(uid) {
 
     window._renderTrainerDetail(trainer, reviews);
     window.toggleModal('trainerDetailModal');
-    if(window.lucide) setTimeout(() => lucide.createIcons(), 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 30);
 };
 
 window._renderTrainerDetail = function(t, reviews) {
@@ -3065,7 +3065,7 @@ window.openCustomSessionTypeModal = function() {
                 '<span class="text-[8px] font-bold uppercase tracking-wider pointer-events-none">' + item.label + '</span>' +
             '</button>';
         }).join('');
-        if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+        if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 50);
     }
 
     window.toggleModal('customSessionTypeModal');
@@ -3089,7 +3089,7 @@ window._cstPickIcon = function(icon) {
                 '<span class="text-[8px] font-bold uppercase tracking-wider pointer-events-none">' + item.label + '</span>' +
             '</button>';
         }).join('');
-        if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+        if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 50);
     }
 };
 
@@ -3200,7 +3200,7 @@ window._renderCustomSessionTypes = function() {
         }
     });
 
-    if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 50);
 };
 
 // Custom Schema-Felder rendern für Custom Session Types
@@ -3251,7 +3251,7 @@ window._renderCustomSessionFields = function() {
             return '<div><label class="block text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">' + window._escapeHtml(field.label) + '</label>' + inputHtml + '</div>';
         }).join('');
 
-    if (window.lucide) setTimeout(function() { lucide.createIcons(); }, 50);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function(){lucide.createIcons()}, 50);
 };
 
 // CSS für Custom Session Type (aktiver Zustand)

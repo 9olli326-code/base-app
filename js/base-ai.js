@@ -13,7 +13,7 @@ window.runDesignAI = async function() {
     var origHTML = btn.innerHTML;
     btn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> ' + window.t('aiGenerating','KI designt...');
     btn.disabled = true;
-    if(window.lucide) lucide.createIcons();
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 
     var sysPrompt = 'Du bist ein weltklasse UI/UX Designer fuer die Fitness-App BASE.\n\n' +
         'DESIGN-PRINZIPIEN:\n' +
@@ -93,7 +93,7 @@ window.runDesignAI = async function() {
     } finally {
         btn.innerHTML = origHTML;
         btn.disabled = false;
-        if(window.lucide) lucide.createIcons();
+        if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
     }
 };
 
@@ -216,7 +216,7 @@ window.calculateReadiness = function() {
         const icon = score >= 70 ? 'battery-full' : score >= 40 ? 'battery-medium' : 'battery-low';
         iconEl.setAttribute('data-lucide', icon);
         iconEl.style.color = color;
-        if (window.lucide) lucide.createIcons();
+        if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
     }
     // ✅ Tools-Tab ZNS Card mitaktualisieren
     const toolsScore = document.getElementById('toolsZnsScore');
@@ -226,22 +226,15 @@ window.calculateReadiness = function() {
     if(toolsScore) { toolsScore.textContent = score + '%'; toolsScore.style.color = color; }
     if(toolsBar) { toolsBar.style.width = score + '%'; toolsBar.style.backgroundColor = color; }
     if(toolsStatus) toolsStatus.textContent = score >= 70 ? window.t('znsFresh','Frisch & bereit') : score >= 40 ? window.t('znsModerate','Moderate Belastung') : window.t('znsFatigued','Erhöhte Müdigkeit');
-    if(toolsIcon) { toolsIcon.setAttribute('data-lucide', score >= 70 ? 'battery-full' : score >= 40 ? 'battery-medium' : 'battery-low'); toolsIcon.style.color = color; if(window.lucide) lucide.createIcons(); }
+    if(toolsIcon) { toolsIcon.setAttribute('data-lucide', score >= 70 ? 'battery-full' : score >= 40 ? 'battery-medium' : 'battery-low'); toolsIcon.style.color = color; if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons(); }
 };
 
 window.toggleZNS = function() {
     const widget = document.getElementById('readinessWidget');
-    const btn = document.getElementById('btnToggleZNS');
     if (!widget) return;
     const isHidden = widget.classList.contains('hidden');
-    if (isHidden) {
-        widget.classList.remove('hidden'); widget.classList.add('flex');
-        if (btn) { btn.classList.replace('bg-zinc-900','bg-green-500/10'); btn.classList.replace('border-zinc-800','border-green-500/20'); btn.classList.replace('text-zinc-400','text-green-400'); }
-        window.calculateReadiness();
-    } else {
-        widget.classList.add('hidden'); widget.classList.remove('flex');
-        if (btn) { btn.classList.replace('bg-green-500/10','bg-zinc-900'); btn.classList.replace('border-green-500/20','border-zinc-800'); btn.classList.replace('text-green-400','text-zinc-400'); }
-    }
+    if (isHidden) { widget.classList.remove('hidden'); widget.classList.add('flex'); window.calculateReadiness(); }
+    else { widget.classList.add('hidden'); widget.classList.remove('flex'); }
 };
 
 window.analyzeReadinessWithAI = async function() {
@@ -587,7 +580,7 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
             // Direkt zum neuen Sport-Tab wechseln
             window.renderDynamicSportTabs();
             window.switchCategory(sportId);
-            setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 50);
+            setTimeout(() => { if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons(); }, 50);
 
             window.showToast(`🏆 ${result.sportName || input} erstellt mit ${result.schema.length} Feldern!`);
 
@@ -611,7 +604,7 @@ Wähle für jeden Sport die 5-8 wichtigsten Metriken die ein Athlet nach dem Tra
             if(builderSection) { builderSection.classList.add('hidden'); builderSection.classList.remove('block'); }
 
             window.switchCategory(window.currentCategory);
-            setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 50);
+            setTimeout(() => { if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons(); }, 50);
 
             const count = result.schema.length;
             window.showToast(`✅ ${count} Feld${count > 1 ? 'er' : ''} hinzugefügt!`);
@@ -703,7 +696,7 @@ window.openTrainingPlanModal = function() {
         var inj = Array.from(window.selectedInjuries || []);
         injContainer.innerHTML = inj.length > 0 ? inj.map(function(v) { return '<span class="px-3 py-1.5 rounded-lg text-[10px] font-bold" style="background:rgba(232,138,138,0.1);border:1px solid rgba(232,138,138,0.2);color:#e88a8a">' + window._escapeHtml(v) + '</span>'; }).join('') : '<span class="text-[10px] text-zinc-600">' + window.t('lblNone','Keine') + '</span>';
     }
-    if(window.lucide) lucide.createIcons();
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 };
 
 window.generateTrainingPlan = async function() {
@@ -827,7 +820,7 @@ window.renderTrainingPlan = function(plan) {
 
     document.getElementById('planConfig')?.classList.add('hidden');
     document.getElementById('planResult')?.classList.remove('hidden');
-    if(window.lucide) lucide.createIcons();
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 };
 
 window.savePlanAsRoutines = function() {
@@ -874,7 +867,7 @@ window.getWarmupRecommendation = async function() {
     if(!modal || !list) return;
     list.innerHTML = '<div class="text-center py-8"><i data-lucide="loader-2" class="w-6 h-6 text-amber-400 animate-spin mx-auto"></i><p class="text-zinc-500 text-xs mt-2">KI erstellt Aufwärmprogramm...</p></div>';
     window.toggleModal('warmupModal');
-    if(window.lucide) lucide.createIcons();
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 
     const prompt = `Du bist ein Fitness-Coach. Erstelle ein 5-10 Minuten Aufwärmprogramm.
 Athlet: ${ctx.prof}. Verletzungen: ${ctx.injStr}.${ctx.medStr}
@@ -915,7 +908,7 @@ window._renderWarmupList = function(exercises) {
             '<p class="text-zinc-500 text-[10px] mt-0.5 truncate">' + window._escapeHtml(ex.purpose || '') + '</p></div>' +
             '<label class="flex-shrink-0 cursor-pointer"><input type="checkbox" class="w-5 h-5 accent-amber-500 cursor-pointer pointer-events-auto"></label></div>';
     }).join('');
-    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
 };
 
 // ============================================================
@@ -936,7 +929,7 @@ window.getExerciseRecommendation = async function() {
     if(!modal || !list) return;
     list.innerHTML = '<div class="text-center py-8"><i data-lucide="loader-2" class="w-6 h-6 text-cyan-400 animate-spin mx-auto"></i><p class="text-zinc-500 text-xs mt-2">KI analysiert dein Training...</p></div>';
     window.toggleModal('exerciseRecModal');
-    if(window.lucide) lucide.createIcons();
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 
     const prompt = `Du bist ein erfahrener Kraft- und Fitness-Coach. Empfehle 4-6 Übungen für heute.
 Athlet: ${ctx.prof}. Ziel: ${goal}. Verletzungen: ${ctx.injStr}.${ctx.medStr}
@@ -979,7 +972,7 @@ window._renderExerciseRecs = function(exercises) {
             '</div></div>';
     }).join('');
     window._exerciseRecs = exercises;
-    if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
+    if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) setTimeout(function() { lucide.createIcons(); }, 30);
 };
 
 window._exerciseRecs = [];

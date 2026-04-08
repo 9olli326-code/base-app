@@ -361,8 +361,7 @@ window.obFinish = function() {
             branding.name = ptName;
             localStorage.setItem('base_trainer_branding', JSON.stringify(branding));
         }
-        // Spezialisierungen speichern
-        if(_obPtSpecs.length > 0) localStorage.setItem('base_pt_onboard_specs', JSON.stringify(_obPtSpecs));
+        // Spezialisierungen (aktuell nicht gelesen, fuer zukuenftige Nutzung)
     } else {
         // Athlet: Module nach Fokus
         window.userProfile.modules = {
