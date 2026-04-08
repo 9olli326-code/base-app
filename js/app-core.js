@@ -591,7 +591,7 @@
    window.setupInjuryChips(); window.populateProfile(); 
    const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
    
-   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); }, 4000);
+   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); }, 4000);
    if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('init'); }, 3000);
    if (window.DESIGN_MORPH_ACTIVE && window._applyModeTheme) {
     var _dmInitMode = 'athlete';
@@ -643,7 +643,7 @@
    const wrapper = document.getElementById('formRevealWrapper'); if(wrapper) wrapper.setAttribute('data-cat', cat); const prompt = document.getElementById('categoryPrompt');
    if(wrapper) { wrapper.classList.add('form-visible'); }
    if(prompt) { prompt.classList.add('hidden'); }
-   if(typeof window.filterTable === 'function') window.filterTable(cat); window.updateExerciseAutocomplete();
+   if(typeof window.filterTable === 'function') window.filterTable(cat); window.updateExerciseAutocomplete(); if(window._renderRoutineCards) window._renderRoutineCards();
    if(cat === 'main' && !localStorage.getItem('base_builder_used')) {
     const hasCustomSchemas = localStorage.getItem('beastmode_v2_multi_schemas');
     const parsed = hasCustomSchemas ? JSON.parse(hasCustomSchemas) : {};
@@ -826,6 +826,12 @@
     if(window.syncToCloud) window.syncToCloud(entry);
     window._checkAuthSkippedBanner();
     if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-saved'); }, 2000);
+    // Routine: advance to next exercise or offer save
+    if (window._routineQueue) {
+     window._advanceRoutineAfterSave(entry);
+    } else if (!window.editingWorkoutId && entry.category === 'strength' && entry.setDetails && entry.setDetails.length > 0) {
+     setTimeout(function() { if (window._offerSaveAsRoutine) window._offerSaveAsRoutine(entry); }, 1500);
+    }
    } catch (err) { 
     console.error("Speicher-Fehler:", err); 
     window.showToast(window.t("toastError") + ": " + err.message); 
@@ -3630,6 +3636,203 @@
    }
    return { display: display || 'Keine Daten', suggestion: suggestion };
   };
+
+  // === WORKOUT ROUTINEN / TEMPLATES ===
+  window._routineQueue = null;
+  window._routineIndex = 0;
+  window._routineName = null;
+
+  window._renderRoutineCards = function() {
+   var container = document.getElementById('routinesList');
+   var section = document.getElementById('routinesSection');
+   if (!container || !section) return;
+   var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+   if (routines.length === 0 || window.currentCategory !== 'strength') { section.classList.add('hidden'); return; }
+   section.classList.remove('hidden');
+   routines.sort(function(a, b) { return new Date(b.lastUsed || 0) - new Date(a.lastUsed || 0); });
+   var show = routines.slice(0, 5);
+   container.innerHTML = show.map(function(r) {
+    var exCount = r.exercises ? r.exercises.length : 0;
+    var exNames = (r.exercises || []).slice(0, 3).map(function(e) { return window._escapeHtml(e.name); }).join(', ');
+    if (exCount > 3) exNames += ' +' + (exCount - 3);
+    var usedText = r.timesUsed ? r.timesUsed + 'x' : 'Neu';
+    return '<button onclick="window._loadRoutine(\'' + window._escapeHtml(r.id).replace(/'/g,'&#39;') + '\')" class="flex-shrink-0 p-3 rounded-xl text-left cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);min-width:200px;max-width:240px" aria-label="Routine laden">' +
+     '<div class="flex items-center justify-between mb-1">' +
+     '<span class="text-xs font-bold text-white truncate" style="max-width:150px">' + window._escapeHtml(r.name) + '</span>' +
+     '<span class="text-[8px] font-bold px-1.5 py-0.5 rounded" style="background:rgba(163,201,168,0.1);color:#a3c9a8">' + usedText + '</span>' +
+     '</div>' +
+     '<p class="text-[9px] truncate" style="color:#82828c">' + exCount + ' ' + window.t('lblExercises','\u00dcbungen') + ' \u00b7 ' + exNames + '</p>' +
+     '</button>';
+   }).join('');
+  };
+
+  window._loadRoutine = function(routineId) {
+   var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+   var routine = routines.find(function(r) { return r.id === routineId; });
+   if (!routine || !routine.exercises || routine.exercises.length === 0) return;
+   routine.lastUsed = new Date().toISOString();
+   routine.timesUsed = (routine.timesUsed || 0) + 1;
+   localStorage.setItem('base_routines', JSON.stringify(routines));
+   window._routineQueue = routine.exercises.slice();
+   window._routineName = routine.name;
+   window._routineIndex = 0;
+   window._loadNextRoutineExercise();
+   window.showToast(window.t('routineLoaded', 'Routine geladen') + ' \u2014 ' + routine.exercises.length + ' ' + window.t('lblExercises','\u00dcbungen'));
+  };
+
+  window._loadNextRoutineExercise = function() {
+   if (!window._routineQueue || window._routineIndex >= window._routineQueue.length) {
+    window._routineQueue = null; window._routineIndex = 0;
+    var badge = document.getElementById('routineProgressBadge');
+    if (badge) badge.style.display = 'none';
+    return;
+   }
+   var ex = window._routineQueue[window._routineIndex];
+   var nameInput = document.getElementById('exerciseInput');
+   if (nameInput) { nameInput.value = ex.name; nameInput.dispatchEvent(new Event('input')); nameInput.dispatchEvent(new Event('change')); }
+   var setsInput = document.getElementById('setsInput');
+   if (setsInput) { setsInput.value = ex.sets || 3; window.generateSetFields(ex.sets || 3); }
+   var eqInput = document.getElementById('equipmentInput');
+   if (eqInput && ex.equipment) eqInput.value = ex.equipment;
+   setTimeout(function() {
+    for (var i = 1; i <= (ex.sets || 3); i++) {
+     var rI = document.getElementById('wdh_s' + i);
+     var wI = document.getElementById('weight_s' + i);
+     var riI = document.getElementById('rir_s' + i);
+     if (rI) rI.value = ex.reps || 8;
+     if (wI && ex.weight) wI.value = ex.weight % 1 === 0 ? ex.weight.toFixed(0) : ex.weight.toFixed(1);
+     if (riI && ex.rir != null) riI.value = ex.rir;
+    }
+   }, 200);
+   var total = window._routineQueue.length;
+   var current = window._routineIndex + 1;
+   var badge = document.getElementById('routineProgressBadge');
+   if (!badge) {
+    var b = document.createElement('div'); b.id = 'routineProgressBadge';
+    b.style.cssText = 'position:fixed;top:110px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2)';
+    document.body.appendChild(b); badge = b;
+   }
+   badge.innerHTML = '<span style="font-size:9px;font-weight:800;color:#a3c9a8;letter-spacing:1px">' + window._escapeHtml(window._routineName || 'Routine') + '</span><span style="font-size:9px;color:#666">\u00b7</span><span style="font-size:9px;font-weight:700;color:#fff">' + window.t('lblExercise','\u00dcbung') + ' ' + current + '/' + total + '</span>';
+   badge.style.display = 'flex';
+  };
+
+  window._advanceRoutineAfterSave = function(entry) {
+   if (!window._routineQueue) return;
+   if (window._routineIndex < window._routineQueue.length - 1) {
+    window._routineIndex++;
+    setTimeout(function() { window._loadNextRoutineExercise(); }, 500);
+   } else {
+    var badge = document.getElementById('routineProgressBadge');
+    if (badge) badge.style.display = 'none';
+    var rName = window._routineName;
+    window._routineQueue = null; window._routineIndex = 0;
+    window.showToast(window.t('routineComplete', 'Routine abgeschlossen!'));
+    setTimeout(function() { window._offerUpdateRoutine(rName); }, 1000);
+   }
+  };
+
+  window._offerSaveAsRoutine = function(entry) {
+   var html = '<div class="text-center">';
+   html += '<div style="font-size:32px;margin-bottom:12px">\uD83D\uDCBE</div>';
+   html += '<p class="text-sm text-white font-bold mb-2">' + window.t('saveAsRoutine', 'Als Routine speichern?') + '</p>';
+   html += '<p class="text-[10px] mb-4" style="color:#82828c">' + window.t('saveAsRoutineSub', 'Beim n\u00e4chsten Mal mit einem Tap laden.') + '</p>';
+   html += '<input id="routineNameInput" type="text" placeholder="' + window.t('routineName', 'Name (z.B. Push Day)') + '" class="w-full px-3 py-2.5 rounded-xl text-sm text-white font-bold outline-none pointer-events-auto mb-3" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+   html += '<div class="flex gap-2">';
+   html += '<button onclick="window.toggleModal(\'routineSaveModal\')" class="flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:none;border:1px solid var(--border-hex);color:#888" aria-label="Nicht jetzt">' + window.t('notNow', 'Nicht jetzt') + '</button>';
+   html += '<button onclick="window._confirmSaveRoutine()" class="flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.25);color:#a3c9a8" aria-label="Routine speichern">' + window.t('saveRoutine', 'Speichern') + '</button>';
+   html += '</div></div>';
+   window._pendingRoutineEntry = entry;
+   var content = document.getElementById('routineSaveContent');
+   if (content) content.innerHTML = html;
+   window.toggleModal('routineSaveModal');
+  };
+
+  window._confirmSaveRoutine = function() {
+   var name = (document.getElementById('routineNameInput') || {}).value || '';
+   if (!name.trim()) { window.showToast(window.t('routineNeedName', 'Bitte Name eingeben')); return; }
+   var today = new Date().toISOString().split('T')[0];
+   var allW = (window.workouts || []).filter(function(w) { return w.date === today && w.category === 'strength' && w.archived; });
+   if (allW.length === 0 && window._pendingRoutineEntry) allW = [window._pendingRoutineEntry];
+   var routine = { id: crypto.randomUUID ? crypto.randomUUID() : 'r_' + Date.now(), name: name.trim(), category: 'strength', createdAt: new Date().toISOString(), lastUsed: new Date().toISOString(), timesUsed: 1, exercises: [] };
+   allW.forEach(function(w) {
+    var sets = w.setDetails || [];
+    var avgReps = 0, avgWeight = 0, avgRir = null;
+    if (sets.length > 0) {
+     avgReps = Math.round(sets.reduce(function(a, s) { return a + (parseFloat(s.reps) || 0); }, 0) / sets.length);
+     avgWeight = Math.round(sets.reduce(function(a, s) { return a + (parseFloat(s.weight) || 0); }, 0) / sets.length * 2) / 2;
+     var rirsV = sets.filter(function(s) { return s.rir != null && !isNaN(s.rir); });
+     if (rirsV.length > 0) avgRir = Math.round(rirsV.reduce(function(a, s) { return a + parseFloat(s.rir); }, 0) / rirsV.length);
+    }
+    routine.exercises.push({ name: w.exercise || '', sets: sets.length || 1, reps: avgReps || 8, weight: avgWeight || 0, rir: avgRir, equipment: w.equipment || '', restSeconds: 120, notes: '' });
+   });
+   var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+   routines.unshift(routine);
+   localStorage.setItem('base_routines', JSON.stringify(routines));
+   window._pendingRoutineEntry = null;
+   window.toggleModal('routineSaveModal');
+   window.showToast(window.t('routineSaved', 'Routine gespeichert!'));
+   window._renderRoutineCards();
+  };
+
+  window._offerUpdateRoutine = function(rName) {
+   if (!rName) return;
+   window.showModal(window.t('updateRoutineQ', 'Routine aktualisieren?'), window.t('updateRoutineText', 'Gewichte in "' + window._escapeHtml(rName) + '" mit heutigen Werten aktualisieren?'), true, function() {
+    var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+    var routine = routines.find(function(r) { return r.name === rName; });
+    if (!routine) return;
+    var today = new Date().toISOString().split('T')[0];
+    var todaysW = (window.workouts || []).filter(function(w) { return w.date === today && w.category === 'strength' && w.archived; });
+    todaysW.forEach(function(w, i) {
+     if (routine.exercises[i]) {
+      var sets = w.setDetails || [];
+      if (sets.length > 0) {
+       routine.exercises[i].sets = sets.length;
+       routine.exercises[i].reps = Math.round(sets.reduce(function(a, s) { return a + (parseFloat(s.reps) || 0); }, 0) / sets.length);
+       routine.exercises[i].weight = Math.round(sets.reduce(function(a, s) { return a + (parseFloat(s.weight) || 0); }, 0) / sets.length * 2) / 2;
+      }
+     }
+    });
+    localStorage.setItem('base_routines', JSON.stringify(routines));
+    window.showToast(window.t('routineUpdated', 'Routine aktualisiert!'));
+    window._renderRoutineCards();
+   });
+  };
+
+  window._showAllRoutines = function() {
+   var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+   var html = '';
+   if (routines.length === 0) {
+    html = '<div class="text-center py-8"><p class="text-sm" style="color:#82828c">' + window.t('noRoutines', 'Noch keine Routinen.') + '</p></div>';
+   } else {
+    routines.forEach(function(r) {
+     var exList = (r.exercises || []).map(function(e) {
+      return '<div class="flex items-center justify-between py-1"><span class="text-[10px] text-white">' + window._escapeHtml(e.name) + '</span><span class="text-[9px]" style="color:#82828c">' + e.sets + '\u00d7' + e.reps + ' \u00b7 ' + e.weight + 'kg</span></div>';
+     }).join('');
+     html += '<div class="p-4 rounded-xl mb-3" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+     html += '<div class="flex items-center justify-between mb-2">';
+     html += '<span class="text-sm font-bold text-white">' + window._escapeHtml(r.name) + '</span>';
+     html += '<div class="flex gap-2">';
+     html += '<button onclick="window._loadRoutine(\'' + window._escapeHtml(r.id).replace(/'/g,'&#39;') + '\');window.toggleModal(\'allRoutinesModal\')" class="text-[9px] font-bold px-2 py-1 rounded cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);color:#a3c9a8" aria-label="Laden">' + window.t('btnLoad','Laden') + '</button>';
+     html += '<button onclick="window._deleteRoutine(\'' + window._escapeHtml(r.id).replace(/'/g,'&#39;') + '\')" class="text-[9px] font-bold px-2 py-1 rounded cursor-pointer pointer-events-auto" style="color:#e88a8a" aria-label="L\u00f6schen">' + window.t('btnDelete','L\u00f6schen') + '</button>';
+     html += '</div></div>';
+     html += '<div class="text-[8px] mb-2" style="color:#82828c">' + (r.exercises||[]).length + ' ' + window.t('lblExercises','\u00dcbungen') + ' \u00b7 ' + (r.timesUsed || 0) + 'x</div>';
+     html += exList + '</div>';
+    });
+   }
+   var content = document.getElementById('allRoutinesContent');
+   if (content) content.innerHTML = html;
+   window.toggleModal('allRoutinesModal');
+  };
+
+  window._deleteRoutine = function(id) {
+   var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+   routines = routines.filter(function(r) { return r.id !== id; });
+   localStorage.setItem('base_routines', JSON.stringify(routines));
+   window._showAllRoutines();
+   window._renderRoutineCards();
+   window.showToast(window.t('routineDeleted', 'Routine gel\u00f6scht'));
+  };
+  // === END ROUTINEN ===
 
   window.startVoiceInput = function() {
    var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
