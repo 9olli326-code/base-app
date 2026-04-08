@@ -1051,6 +1051,7 @@
                     <p class="text-zinc-500 text-sm font-bold" data-i18n="pdPrompt">Wähle deine Kategorie um loszulegen</p>
                 </div>
 
+                <div id="todaysWorkoutSection" class="mb-3 hidden"></div>
                 <div id="routinesSection" class="mb-4 hidden">
                     <div class="flex items-center justify-between mb-2 px-1">
                         <span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)" data-i18n="myRoutines">Meine Routinen</span>
@@ -1298,6 +1299,7 @@
                 </div>
 
                 <div id="muscleSection" class="hidden p-5">
+                    <div id="muscleDistChart" class="p-4 rounded-xl mb-5" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"></div>
                     <p class="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style="color:var(--text-muted);font-family:'DM Sans',sans-serif"data-i18n="lblLast7Days">Letzte 7 Tage</p>
                     <p class="text-[10px] uppercase tracking-widest mb-5" style="color:var(--border-hex);font-family:'DM Sans',sans-serif" data-i18n="heatmapLegend">Wärme = Trainingsvolumen</p>
                     <div id="muscleGrid" class="grid grid-cols-2 gap-2.5 mb-6"></div>

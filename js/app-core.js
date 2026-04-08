@@ -266,8 +266,11 @@
       let cat = 'cardio'; let sportName = 'Strava Activity';
       if(act.type === 'Run') sportName = 'Laufen'; else if(act.type === 'Ride') sportName = 'Radfahren'; else if(act.type === 'Swim') sportName = 'Schwimmen'; else if(act.type === 'WeightTraining') { cat = 'strength'; sportName = 'Krafttraining'; } else if(act.type === 'Walk') { sportName = 'Gehen'; cat = 'recovery'; } else sportName = act.type;
       let dynData = { "Distanz (km)": (act.distance / 1000).toFixed(2), "Dauer (min)": Math.round(act.moving_time / 60) };
-      if(act.average_heartrate) dynData["Ø Puls"] = Math.round(act.average_heartrate);
+      if(act.average_heartrate) dynData["\u00d8 Puls"] = Math.round(act.average_heartrate);
       if(act.type === 'Run' && act.average_speed > 0) { const paceDec = (1000 / act.average_speed) / 60; const mins = Math.floor(paceDec); const secs = Math.round((paceDec - mins) * 60).toString().padStart(2, '0'); dynData["Pace (min/km)"] = `${mins}:${secs}`; }
+      if(act.total_elevation_gain) dynData["H\u00f6henmeter (m)"] = Math.round(act.total_elevation_gain);
+      if(act.calories) dynData["Kalorien (kcal)"] = Math.round(act.calories);
+      else if(act.kilojoules) dynData["Kalorien (kcal)"] = Math.round(act.kilojoules * 0.239);
       let entry = { id: mappedId, category: cat, sportCategory: sportName, date: act.start_date_local ? act.start_date_local.substring(0,10) : new Date().toISOString().substring(0,10), exercise: act.name || sportName, data: dynData, archived: true, sessionId: `strava_session_${act.id}`, sessionDuration: Math.round(act.moving_time / 60) + ' min', sessionComment: "Via Strava importiert" };
       window.workouts.push(entry); if(window.syncToCloud) window.syncToCloud(entry); importedCount++;
      }
@@ -350,7 +353,7 @@
    input.value = val;
   };
   window.DEFAULT_STRENGTH_SCHEMA = [ {"id": "saetze", "label": "Sätze", "type": "number", "placeholder": "z.B. 3"}, {"id": "wdh", "label": "Wiederholungen", "type": "number", "placeholder": "z.B. 10"}, {"id": "gewicht", "label": "Gewicht (kg)", "type": "number", "placeholder": "z.B. 80"} ]; // Note: labels translated at render time via schema_ keys
-  window.DEFAULT_CARDIO_SCHEMA = [ {"id": "distanz", "label": "Distanz (km)", "type": "number", "placeholder": "z.B. 5.5"}, {"id": "dauer", "label": "Dauer (min)", "type": "number", "placeholder": "z.B. 30"}, {"id": "pace", "label": "Pace (min/km)", "type": "text", "placeholder": "z.B. 5:30"}, {"id": "puls", "label": "Ø Puls", "type": "number", "placeholder": "z.B. 140"} ];
+  window.DEFAULT_CARDIO_SCHEMA = [ {"id": "distanz", "label": "Distanz (km)", "type": "number", "placeholder": "z.B. 5.5"}, {"id": "dauer", "label": "Dauer (min)", "type": "number", "placeholder": "z.B. 30"}, {"id": "pace", "label": "Pace (min/km)", "type": "text", "placeholder": "z.B. 5:30"}, {"id": "puls", "label": "\u00d8 Puls", "type": "number", "placeholder": "z.B. 140"}, {"id": "elevation", "label": "H\u00f6henmeter (m)", "type": "number", "placeholder": "z.B. 250"}, {"id": "calories", "label": "Kalorien (kcal)", "type": "number", "placeholder": "z.B. 400"} ];
   window.categorySchemas = { main: null, strength: { sportName: "Klassisches Krafttraining", schema: window.DEFAULT_STRENGTH_SCHEMA }, cardio: { sportName: "Ausdauersport", schema: window.DEFAULT_CARDIO_SCHEMA }, recovery: null };
   window._MOBILITY_EXERCISES = ['Hip Flexor Stretch','Pigeon Pose','90/90 Stretch','Cat-Cow','Thoracic Spine Rotation','Couch Stretch','World\'s Greatest Stretch','Shoulder Dislocates','Deep Squat Hold','Calf Stretch Wall','Hamstring Stretch','Child\'s Pose','Downward Dog','Supine Twist','Foam Roll Quads','Foam Roll IT-Band','Lacrosse Ball Shoulders','Ankle Circles','Wrist Circles','Neck Rolls'];
   window.CAT_UI = { main: { name: 'Mein Sport', nameKey: 'modCus', icon: 'trophy', color: 'text-amber-400', border: 'border-amber-400', bg: 'bg-amber-400/20' }, strength: { name: 'Kraft', nameKey: 'tabStr', icon: 'dumbbell', color: 'text-cyan-400', border: 'border-cyan-400', bg: 'bg-cyan-400/20' }, cardio: { name: 'Ausdauer', nameKey: 'modCar', icon: 'heart-pulse', color: 'text-rose-400', border: 'border-rose-400', bg: 'bg-rose-400/20' }, recovery: { name: 'Mobility', nameKey: 'tabRec', icon: 'stretch-horizontal', color: 'text-emerald-400', border: 'border-emerald-400', bg: 'bg-emerald-400/20' } };
@@ -591,7 +594,7 @@
    window.setupInjuryChips(); window.populateProfile(); 
    const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
    
-   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); }, 4000);
+   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); if(window._checkDeloadReminder) window._checkDeloadReminder(); }, 4000);
    if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('init'); }, 3000);
    if (window.DESIGN_MORPH_ACTIVE && window._applyModeTheme) {
     var _dmInitMode = 'athlete';
@@ -643,7 +646,7 @@
    const wrapper = document.getElementById('formRevealWrapper'); if(wrapper) wrapper.setAttribute('data-cat', cat); const prompt = document.getElementById('categoryPrompt');
    if(wrapper) { wrapper.classList.add('form-visible'); }
    if(prompt) { prompt.classList.add('hidden'); }
-   if(typeof window.filterTable === 'function') window.filterTable(cat); window.updateExerciseAutocomplete(); if(window._renderRoutineCards) window._renderRoutineCards();
+   if(typeof window.filterTable === 'function') window.filterTable(cat); window.updateExerciseAutocomplete(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout();
    if(cat === 'main' && !localStorage.getItem('base_builder_used')) {
     const hasCustomSchemas = localStorage.getItem('beastmode_v2_multi_schemas');
     const parsed = hasCustomSchemas ? JSON.parse(hasCustomSchemas) : {};
@@ -3371,6 +3374,7 @@
     const btn = document.getElementById('btnAnalyse-muscles');
     if(btn) { btn.classList.add('bg-zinc-800','text-white','shadow-sm'); btn.classList.remove('text-zinc-500'); }
     window.renderMuscleHeatmap();
+    if (window._renderMuscleDistributionChart) window._renderMuscleDistributionChart();
     window._refreshLucide();
     return;
    }
@@ -5741,17 +5745,110 @@
   // Mesocycle overview renderer
   window._renderMesoCycleOverview = function(plan) {
    if (!plan.mesoCycle || !plan.mesoCycle.phases) return '';
+   var _cw = window._getCurrentMesoWeek ? window._getCurrentMesoWeek() : 0;
    var html = '<div class="mb-4 p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-xs font-black text-white uppercase tracking-widest mb-3">' + window.t('mesoTitle', 'Mesozyklus') + '</p>';
    plan.mesoCycle.phases.forEach(function(phase, i) {
     var isDeload = phase.type === 'deload';
-    var bg = isDeload ? 'rgba(138,175,232,0.1)' : i === 0 ? 'rgba(163,201,168,0.1)' : 'var(--inner-bg-hex)';
-    var bc = isDeload ? 'rgba(138,175,232,0.25)' : i === 0 ? 'rgba(163,201,168,0.25)' : 'var(--border-hex)';
+    var isCurrent = i === _cw;
+    var bg = isDeload ? 'rgba(138,175,232,0.1)' : isCurrent ? 'rgba(163,201,168,0.1)' : 'var(--inner-bg-hex)';
+    var bc = isDeload ? 'rgba(138,175,232,0.25)' : isCurrent ? 'rgba(163,201,168,0.25)' : 'var(--border-hex)';
     var lc = isDeload ? '#8aafe8' : '#a3c9a8';
     var tl = { accumulation: window.t('mesoAccum', 'Akkumulation'), overreach: window.t('mesoOverreach', 'Overreach'), deload: 'Deload' }[phase.type] || phase.type;
-    html += '<div class="flex items-center gap-3 p-3 rounded-xl mb-2" style="background:' + bg + ';border:1px solid ' + bc + '"><span class="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black" style="background:' + (i === 0 ? 'rgba(163,201,168,0.2)' : 'var(--inner-bg-hex)') + ';color:' + lc + '">' + phase.week + '</span><div class="flex-1"><p class="text-xs font-bold text-white">' + window._escapeHtml(phase.name) + '</p><p class="text-[9px] text-zinc-500">Sets \u00d7' + phase.setsMultiplier + ' \u00b7 RIR ' + phase.targetRIR + '</p></div><span class="text-[8px] font-black uppercase px-2 py-1 rounded" style="color:' + lc + '">' + tl + (i === 0 ? ' \u00b7 ' + window.t('mesoCurrent', 'AKTUELL') : '') + '</span></div>';
+    html += '<div class="flex items-center gap-3 p-3 rounded-xl mb-2" style="background:' + bg + ';border:1px solid ' + bc + '"><span class="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black" style="background:' + (isCurrent ? 'rgba(163,201,168,0.2)' : 'var(--inner-bg-hex)') + ';color:' + lc + '">' + phase.week + '</span><div class="flex-1"><p class="text-xs font-bold text-white">' + window._escapeHtml(phase.name) + '</p><p class="text-[9px] text-zinc-500">Sets \u00d7' + phase.setsMultiplier + ' \u00b7 RIR ' + phase.targetRIR + '</p></div><span class="text-[8px] font-black uppercase px-2 py-1 rounded" style="color:' + lc + '">' + tl + (isCurrent ? ' \u00b7 ' + window.t('mesoCurrent', 'AKTUELL') : '') + '</span></div>';
    });
    html += '</div>';
    return html;
+  };
+
+  // === MESO WEEK TRACKING ===
+  window._getCurrentMesoWeek = function() {
+   var plan = null; try { plan = JSON.parse(localStorage.getItem('base_active_plan')); } catch(e) {}
+   if (!plan || !plan.startDate) return 0;
+   var diffDays = Math.floor((new Date() - new Date(plan.startDate)) / 86400000);
+   return Math.max(0, Math.min(Math.floor(diffDays / 7), (plan.totalWeeks || 4) - 1));
+  };
+
+  window._checkDeloadReminder = function() {
+   var plan = null; try { plan = JSON.parse(localStorage.getItem('base_active_plan')); } catch(e) {}
+   if (!plan || !plan.startDate) return;
+   var currentWeek = window._getCurrentMesoWeek();
+   if (currentWeek >= (plan.totalWeeks || 4) - 1) {
+    if (!localStorage.getItem('base_deload_dismissed_' + plan.startDate)) {
+     window.showToast(window.t('deloadReminder', 'Deload-Woche! Reduziere Volumen um 40%.'), null, null, null, 5000);
+     localStorage.setItem('base_deload_dismissed_' + plan.startDate, '1');
+    }
+   }
+  };
+
+  // === TODAY'S WORKOUT ===
+  window._getTodaysWorkout = function() {
+   var plan = null; try { plan = JSON.parse(localStorage.getItem('base_active_plan')); } catch(e) {}
+   if (!plan || !plan.planData || !plan.planData.weeks) return null;
+   var currentWeek = window._getCurrentMesoWeek();
+   var week = plan.planData.weeks[currentWeek];
+   if (!week || !week.sessions) return null;
+   var dayMap = {0:'So',1:'Mo',2:'Di',3:'Mi',4:'Do',5:'Fr',6:'Sa'};
+   var today = dayMap[new Date().getDay()];
+   return week.sessions.find(function(s) { return s.day && s.day.indexOf(today) !== -1; }) || null;
+  };
+
+  window._renderTodaysWorkout = function() {
+   var container = document.getElementById('todaysWorkoutSection');
+   if (!container) return;
+   var session = window._getTodaysWorkout();
+   if (!session) { container.classList.add('hidden'); return; }
+   container.classList.remove('hidden');
+   var plan = null; try { plan = JSON.parse(localStorage.getItem('base_active_plan')); } catch(e) {}
+   var cw = window._getCurrentMesoWeek() + 1;
+   var phase = plan && plan.planData && plan.planData.mesoCycle && plan.planData.mesoCycle.phases ? plan.planData.mesoCycle.phases[cw - 1] : null;
+   var phaseName = phase ? phase.name : 'Woche ' + cw;
+   var exList = (session.exercises || []).slice(0, 4).map(function(ex) { return window._escapeHtml(ex.name); }).join(', ');
+   container.innerHTML = '<button onclick="window._loadTodaysWorkout()" class="w-full p-4 rounded-xl text-left cursor-pointer pointer-events-auto" style="background:linear-gradient(135deg,rgba(163,201,168,0.08),rgba(163,201,168,0.02));border:1px solid rgba(163,201,168,0.15)" aria-label="Heutiges Workout laden">' +
+    '<div class="flex items-center justify-between mb-1">' +
+    '<span class="text-[9px] font-black uppercase tracking-widest" style="color:#a3c9a8">' + window.t('todaysWorkout','Heutiges Workout') + ' \u00b7 ' + window._escapeHtml(phaseName) + '</span>' +
+    '<span class="text-[8px] font-bold" style="color:#555">' + window.t('lblWeek','Woche') + ' ' + cw + '</span></div>' +
+    '<div class="text-sm font-bold text-white mb-1">' + window._escapeHtml(session.name || 'Training') + '</div>' +
+    '<div class="text-[9px]" style="color:#82828c">' + (session.exercises ? session.exercises.length : 0) + ' ' + window.t('lblExercises','\u00dcbungen') + ' \u00b7 ' + exList + '</div></button>';
+  };
+
+  window._loadTodaysWorkout = function() {
+   var session = window._getTodaysWorkout();
+   if (!session || !session.exercises) return;
+   window._routineQueue = session.exercises.map(function(ex) {
+    return { name: ex.name || '', sets: ex.sets || 3, reps: parseInt(ex.reps) || 8, weight: 0, rir: ex.rir != null ? ex.rir : 2, equipment: '', restSeconds: parseInt(ex.rest) || 120, notes: ex.notes || '' };
+   });
+   window._routineName = session.name || 'Workout';
+   window._routineIndex = 0;
+   window._loadNextRoutineExercise();
+   window.showToast(window.t('workoutLoaded', 'Workout geladen!'));
+  };
+
+  // === MUSCLE DISTRIBUTION CHART ===
+  window._renderMuscleDistributionChart = function() {
+   var container = document.getElementById('muscleDistChart');
+   if (!container) return;
+   var thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+   var kraftW = (window.workouts || []).filter(function(w) { return w.category === 'strength' && w.setDetails && w.archived && new Date(w.date) >= thirtyDaysAgo; });
+   if (kraftW.length < 2) { container.innerHTML = '<p class="text-[10px] text-center py-4" style="color:#555">' + window.t('needMoreData','Mindestens 2 Kraft-Workouts in 30 Tagen n\u00f6tig') + '</p>'; return; }
+   var muscleSets = {};
+   var exDb = window.exerciseDB || [];
+   kraftW.forEach(function(w) {
+    var ex = window._findExerciseInDB ? window._findExerciseInDB(w.exercise) : null;
+    var bp = ex ? (ex.bp || 'other') : 'other';
+    var sc = (w.setDetails || []).length;
+    muscleSets[bp] = (muscleSets[bp] || 0) + sc;
+   });
+   var total = Object.values(muscleSets).reduce(function(a, b) { return a + b; }, 0) || 1;
+   var sorted = Object.entries(muscleSets).sort(function(a, b) { return b[1] - a[1]; });
+   var colors = { chest:'#e88a8a', back:'#8aafe8', shoulders:'#e8c86a', 'upper legs':'#a3c9a8', 'lower legs':'#7aab82', 'upper arms':'#c9a3c9', 'lower arms':'#a3a3c9', waist:'#c9c9a3', cardio:'#e8b88a' };
+   var deLabels = { chest:'Brust', back:'R\u00fccken', shoulders:'Schultern', 'upper legs':'Oberschenkel', 'lower legs':'Unterschenkel', 'upper arms':'Oberarme', 'lower arms':'Unterarme', waist:'Core', cardio:'Cardio', other:'Sonstige' };
+   var barsHtml = sorted.map(function(e) {
+    var m = e[0], s = e[1], pct = Math.round(s / total * 100);
+    var c = colors[m] || '#82828c';
+    var l = (window.currentLang === 'de' && deLabels[m]) ? deLabels[m] : m.charAt(0).toUpperCase() + m.slice(1);
+    return '<div class="flex items-center gap-2 mb-1.5"><span class="text-[9px] font-bold w-20 text-right truncate" style="color:' + c + '">' + window._escapeHtml(l) + '</span><div style="flex:1;height:12px;background:#1a1c1a;border-radius:6px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:' + c + ';border-radius:6px;min-width:2px"></div></div><span class="text-[8px] font-bold w-8" style="color:' + c + '">' + pct + '%</span></div>';
+   }).join('');
+   container.innerHTML = '<div class="mb-2 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">' + window.t('muscleDistTitle','Muskelgruppen (30 Tage)') + '</span><span class="text-[8px]" style="color:#555">' + total + ' Sets</span></div>' + barsHtml;
   };
 
   // ============================================================

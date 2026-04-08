@@ -767,6 +767,7 @@ window.generateTrainingPlan = async function() {
         var _mesoPhases = allWeeks.map(function(w) { return { week: w.week, name: w.focus || ('Woche ' + w.week), type: w.phase || 'accumulation', setsMultiplier: w.setsMultiplier || 1.0, targetRIR: w.targetRIR != null ? w.targetRIR : 2 }; });
         var plan = { planName: totalWeeks + '-Wochen ' + planGoal, goal: planGoal, mesoCycle: { totalWeeks: totalWeeks, phases: _mesoPhases }, weeks: allWeeks, focusMuscles: Array.from(window._selectedFocusMuscles || []), injuries: window._getInjuriesForAI ? window._getInjuriesForAI() : 'keine', progressionNotes: 'Progressiver ' + totalWeeks + '-Wochen Mesozyklus mit Periodisierung und Deload.' };
         _generatedPlan = plan;
+        try { localStorage.setItem('base_active_plan', JSON.stringify({ planData: plan, startDate: new Date().toISOString().split('T')[0], totalWeeks: totalWeeks })); } catch(e) {}
         window.renderTrainingPlan(plan);
         if(window.awardXP) window.awardXP('planGenerated');
     } catch(e) {
