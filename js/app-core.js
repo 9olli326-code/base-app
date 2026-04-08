@@ -707,7 +707,7 @@
       '<span class="text-[7px] flex-shrink-0" style="color:#555">0 = Versagen</span>' +
       '<div class="flex items-center ml-auto">' +
        '<button type="button" onclick="window._adjustInput(\'rir_s' + i + '\',-1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bb + '" aria-label="RIR minus">\u2212</button>' +
-       '<input type="number" id="rir_s' + i + '" placeholder="--" min="0" max="5" class="w-8 h-7 text-center text-lg font-black outline-none pointer-events-auto" style="background:none;border:none;color:#a3c9a8">' +
+       '<input type="number" id="rir_s' + i + '" placeholder="--" min="0" max="5" style="width:36px;height:28px;text-align:center;background:none;border:none;color:#a3c9a8;font-size:20px;font-weight:900;font-family:Outfit,sans-serif;outline:none" class="pointer-events-auto">' +
        '<button type="button" onclick="window._adjustInput(\'rir_s' + i + '\',1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bb + '" aria-label="RIR plus">+</button>' +
       '</div>' +
      '</div>';
