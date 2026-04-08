@@ -678,26 +678,27 @@
    for(let i = 1; i <= parseInt(count); i++) {
     const row = document.createElement('div');
     row.className = "zen-set-row animate-in fade-in slide-in-from-left-2 relative z-50 pointer-events-auto";
+    var _btnStyle = 'background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)';
     row.innerHTML = `
      <span class="zen-set-label pointer-events-none">${window.t('lblSet','Satz')} ${i}</span>
-     <div class="zen-set-value-group">
-      <div class="zen-set-value" style="display:flex;align-items:center;gap:4px">
-       <button type="button" aria-label="Reps minus" onclick="window._adjustInput('wdh_s${i}',-1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">\u2212</button>
-       <input type="number" id="wdh_s${i}" aria-label="${window.t('schema_wdh','Wiederholungen')} ${window.t('lblSet','Satz')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text">
-       <button type="button" aria-label="Reps plus" onclick="window._adjustInput('wdh_s${i}',1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">+</button>
-       <span class="zen-set-unit">${window.t('lblReps','Wdh')}</span>
+     <div style="display:flex;gap:6px;align-items:stretch;width:100%">
+      <div style="flex:2;display:flex;align-items:center;gap:2px">
+       <button type="button" aria-label="Reps minus" onclick="window._adjustInput('wdh_s${i}',-1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">\u2212</button>
+       <input type="number" id="wdh_s${i}" aria-label="${window.t('schema_wdh','Wdh')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="flex:1;min-width:0;text-align:center">
+       <button type="button" aria-label="Reps plus" onclick="window._adjustInput('wdh_s${i}',1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">+</button>
+       <span class="text-[8px] font-bold uppercase" style="color:var(--text-muted);width:20px">${window.t('lblReps','Wdh')}</span>
       </div>
-      <div class="zen-set-value" style="display:flex;align-items:center;gap:4px">
-       <button type="button" aria-label="Weight minus" onclick="window._adjustInput('weight_s${i}',-2.5)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">\u2212</button>
-       <input type="number" step="any" id="weight_s${i}" aria-label="${window.t('schema_gewicht','Gewicht (kg)')} ${window.t('lblSet','Satz')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text">
-       <button type="button" aria-label="Weight plus" onclick="window._adjustInput('weight_s${i}',2.5)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">+</button>
-       <span class="zen-set-unit">${window.t('lblWeight','Gewicht')}</span>
+      <div style="flex:2;display:flex;align-items:center;gap:2px">
+       <button type="button" aria-label="Kg minus" onclick="window._adjustInput('weight_s${i}',-2.5)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">\u2212</button>
+       <input type="number" step="any" id="weight_s${i}" aria-label="${window.t('schema_gewicht','kg')} ${i}" placeholder="--" min="0" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="flex:1;min-width:0;text-align:center">
+       <button type="button" aria-label="Kg plus" onclick="window._adjustInput('weight_s${i}',2.5)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">+</button>
+       <span class="text-[8px] font-bold uppercase" style="color:var(--text-muted);width:16px">kg</span>
       </div>
-      <div class="zen-set-value" style="display:flex;align-items:center;gap:4px;min-width:90px">
-       <button type="button" aria-label="RIR minus" onclick="window._adjustInput('rir_s${i}',-1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">\u2212</button>
-       <input type="number" id="rir_s${i}" aria-label="RIR ${window.t('lblSet','Satz')} ${i}" placeholder="--" min="0" max="5" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="width:40px">
-       <button type="button" aria-label="RIR plus" onclick="window._adjustInput('rir_s${i}',1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">+</button>
-       <span class="zen-set-unit" style="color:#a3c9a8">RIR</span>
+      <div style="flex:1;display:flex;align-items:center;gap:2px">
+       <button type="button" aria-label="RIR minus" onclick="window._adjustInput('rir_s${i}',-1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">\u2212</button>
+       <input type="number" id="rir_s${i}" aria-label="RIR ${i}" placeholder="--" min="0" max="5" class="zen-set-input relative z-50 pointer-events-auto cursor-text" style="flex:1;min-width:0;text-align:center;max-width:32px">
+       <button type="button" aria-label="RIR plus" onclick="window._adjustInput('rir_s${i}',1)" class="w-6 h-8 rounded-md flex items-center justify-center text-xs font-black cursor-pointer pointer-events-auto flex-shrink-0" style="${_btnStyle}">+</button>
+       <span class="text-[8px] font-bold uppercase" style="color:#a3c9a8;width:18px">RIR</span>
       </div>
      </div>
     `;

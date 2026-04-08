@@ -1103,7 +1103,7 @@
                                     <button aria-label="Generieren" type="button" onclick="window.generatePreHab()" class="text-[10px] font-black text-emerald-950 bg-emerald-400 hover:bg-emerald-300 px-2.5 py-1 rounded-md uppercase tracking-widest flex items-center gap-1 transition-all cursor-pointer pointer-events-auto shadow-sm"><i data-lucide="shield-plus" class="w-3 h-3 pointer-events-none"></i> Armor</button>
                                 </div>
                                 <div class="flex gap-2 items-center">
-                                    <input type="text" id="exerciseInput" aria-label="Aktivität" list="exerciseListV2" data-i18n-placeholder="fExP" placeholder="z.B. Bench Press" required class="zen-exercise-input flex-1 text-white cursor-text pointer-events-auto">
+                                    <input type="text" id="exerciseInput" aria-label="Aktivität" list="exerciseListV2" data-i18n-placeholder="fExP" placeholder="Uebungsname..." required class="zen-exercise-input flex-1 text-white cursor-text pointer-events-auto">
                                     <button type="button" id="btnSwapExercise" aria-label="Uebung ersetzen" onclick="window.openExerciseSwap(document.getElementById('exerciseInput').value)" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted);display:none">
                                         <i data-lucide="repeat-2" class="w-4 h-4 pointer-events-none"></i>
                                     </button>
@@ -1459,7 +1459,7 @@
 
                 <button aria-label="Aktion" onclick="window.openTrainingPlanModal()" class="w-full bg-violet-500/5 hover:bg-violet-500/10 border border-violet-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
                     <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-days" class="w-6 h-6 text-violet-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="planTitle">Planner</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="planGoal">Periodisierter Plan per KI generieren</p></div>
+                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="planTitle">Planner</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Mesozyklus · Fokus-Muskeln · Wochentage</p></div>
                     <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
                 </button>
 
@@ -1700,7 +1700,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-[10px] font-black text-rose-500/80 uppercase mb-3 tracking-widest" data-i18n="lblMedical">Medical / Kontraindikationen</label>
+                    <label class="block text-[10px] font-black text-rose-500/80 uppercase mb-3 tracking-widest" data-i18n="lblMedical">Beschwerden</label>
                     <div class="flex flex-wrap gap-2 mb-4" id="injuryChips">
                         <button aria-label="injShoulder" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Schulter" onclick="window.toggleInjury(this)" data-i18n="injShoulder">Schulter</button>
                         <button aria-label="injKnee" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Knie" onclick="window.toggleInjury(this)" data-i18n="injKnee">Knie</button>
@@ -1708,6 +1708,12 @@
                         <button aria-label="injNeck" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Nacken (HWS)" onclick="window.toggleInjury(this)" data-i18n="injNeck">Nacken (HWS)</button>
                         <button aria-label="injWrist" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Handgelenke" onclick="window.toggleInjury(this)" data-i18n="injWrist">Handgelenke</button>
                         <button aria-label="injElbow" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Ellenbogen" onclick="window.toggleInjury(this)" data-i18n="injElbow">Ellenbogen</button>
+                        <button aria-label="injHip" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Hüfte" onclick="window.toggleInjury(this)" data-i18n="injHip">Hüfte</button>
+                        <button aria-label="injAnkle" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Sprunggelenk" onclick="window.toggleInjury(this)" data-i18n="injAnkle">Sprunggelenk</button>
+                        <button aria-label="injShin" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Schienbein" onclick="window.toggleInjury(this)" data-i18n="injShin">Schienbein</button>
+                        <button aria-label="injHamstring" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Hamstring" onclick="window.toggleInjury(this)" data-i18n="injHamstring">Hamstring</button>
+                        <button aria-label="injRotatorCuff" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Rotatorenmanschette" onclick="window.toggleInjury(this)" data-i18n="injRotatorCuff">Rotatorenmanschette</button>
+                        <button aria-label="injUpperBack" type="button" class="injury-chip px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-[10px] font-bold text-zinc-500 transition-all cursor-pointer pointer-events-auto" data-val="Oberer Rücken (BWS)" onclick="window.toggleInjury(this)" data-i18n="injUpperBack">Oberer Rücken (BWS)</button>
                     </div>
                     
                     <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 mt-4" data-i18n="lblMedical">Zusätzliche Details</label>
