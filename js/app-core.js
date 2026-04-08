@@ -129,7 +129,7 @@
 
    if(visitCount === 2 && !hasWorkout && dismissed.firstWorkout !== today) {
     setTimeout(function() { window._showRetentionModal('firstWorkout', {
-     emoji: '\uD83D\uDCAA', title: window.t('retFirstTitle','Bereit fuer dein erstes Workout?'),
+     emoji: '\uD83D\uDCAA', title: window.t('retFirstTitle','Bereit für dein erstes Workout?'),
      text: window.t('retFirstText','Starte jetzt und BASE lernt deine Staerken kennen. Nur 5 Minuten.'),
      btnText: window.t('retFirstBtn','Jetzt starten'), action: function() { window.switchView('active'); }
     }); }, 3000);
@@ -137,7 +137,7 @@
    }
    if(daysSinceFirst >= 1 && daysSinceFirst <= 2 && hasWorkout && visitCount <= 4 && dismissed.day2 !== today) {
     setTimeout(function() { window._showRetentionModal('day2', {
-     emoji: '\uD83D\uDD25', title: window.t('retDay2Title','Willkommen zurueck!'),
+     emoji: '\uD83D\uDD25', title: window.t('retDay2Title','Willkommen zurück!'),
      text: window.t('retDay2Text','Dein letztes Workout war stark. Schau dir an was dein KI Coach dazu sagt.'),
      btnText: window.t('retDay2Btn','KI Coach oeffnen'), action: function() { window.switchTab('tools'); }
     }); }, 2000);
@@ -343,7 +343,7 @@
    var min = isRir ? 0 : isWeight ? 0 : 1;
    var max = isRir ? 5 : isWeight ? 500 : 999;
    val = Math.max(min, Math.min(max, val));
-   if (isWeight) val = Math.round(val * 2) / 2;
+   if (isWeight) { val = Math.round(val * 2) / 2; input.value = (val % 1 === 0) ? val.toFixed(0) : val.toFixed(1); return; }
    input.value = val;
   };
   window.DEFAULT_STRENGTH_SCHEMA = [ {"id": "saetze", "label": "Sätze", "type": "number", "placeholder": "z.B. 3"}, {"id": "wdh", "label": "Wiederholungen", "type": "number", "placeholder": "z.B. 10"}, {"id": "gewicht", "label": "Gewicht (kg)", "type": "number", "placeholder": "z.B. 80"} ]; // Note: labels translated at render time via schema_ keys
@@ -696,7 +696,7 @@
       '</div></div>' +
       '<div class="text-center"><div class="text-[8px] font-bold text-zinc-500 uppercase tracking-wider mb-1">kg</div><div class="flex items-center justify-center gap-1">' +
        '<button type="button" aria-label="kg minus" onclick="window._adjustInput(\'weight_s' + i + '\',-2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">\u2212</button>' +
-       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" class="w-12 h-8 text-center rounded-lg text-base font-black outline-none pointer-events-auto" style="' + _is + '">' +
+       '<input type="number" id="weight_s' + i + '" placeholder="--" min="0" step="0.5" class="w-14 h-8 text-center rounded-lg text-sm font-black outline-none pointer-events-auto" style="' + _is + '">' +
        '<button type="button" aria-label="kg plus" onclick="window._adjustInput(\'weight_s' + i + '\',2.5)" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black cursor-pointer pointer-events-auto" style="' + _bs + '">+</button>' +
       '</div></div>' +
       '<div class="text-center"><div class="text-[8px] font-bold uppercase tracking-wider mb-1" style="color:#a3c9a8">RIR</div><div class="flex items-center justify-center gap-1">' +
@@ -779,7 +779,7 @@
         if(card) { card.classList.remove('pr-celebration-out'); card.classList.add('pr-celebration'); }
         prOverlay.classList.remove('hidden'); prOverlay.classList.add('flex');
         if(typeof window.playBeep === 'function') { window.playBeep(); setTimeout(window.playBeep, 200); }
-        if(window._speak) { var _prM = { de: 'Neuer persoenlicher Rekord! ' + prValue + ' ' + prUnit + '!', en: 'New personal record! ' + prValue + ' ' + prUnit + '!', fr: 'Nouveau record! ' + prValue + ' ' + prUnit + '!', es: 'Nuevo record! ' + prValue + ' ' + prUnit + '!', it: 'Nuovo record! ' + prValue + ' ' + prUnit + '!', nl: 'Nieuw record! ' + prValue + ' ' + prUnit + '!', ar: 'رقم قياسي جديد! ' + prValue + ' ' + prUnit + '!' }; window._speak(_prM[window.currentLang] || _prM.de, 'high'); }
+        if(window._speak) { var _prM = { de: 'Neuer persönlicher Rekord! ' + prValue + ' ' + prUnit + '!', en: 'New personal record! ' + prValue + ' ' + prUnit + '!', fr: 'Nouveau record! ' + prValue + ' ' + prUnit + '!', es: 'Nuevo record! ' + prValue + ' ' + prUnit + '!', it: 'Nuovo record! ' + prValue + ' ' + prUnit + '!', nl: 'Nieuw record! ' + prValue + ' ' + prUnit + '!', ar: 'رقم قياسي جديد! ' + prValue + ' ' + prUnit + '!' }; window._speak(_prM[window.currentLang] || _prM.de, 'high'); }
         setTimeout(() => { if(card) card.classList.add('pr-celebration-out'); setTimeout(() => { prOverlay.classList.add('hidden'); prOverlay.classList.remove('flex'); }, 300); }, 2000);
        } else {
         window.showToast(`Neuer PR: ${prValue}${prUnit} bei ${entry.exercise}!`);
@@ -811,7 +811,7 @@
   window.editEntry = (id) => { const w = window.workouts.find(x => x.id === id); if(!w) return; if(window.currentCategory !== w.category) window.switchCategory(w.category); window.editingWorkoutId = id; document.getElementById('dateInput').value = w.date; document.getElementById('exerciseInput').value = w.exercise; if (w.category === 'strength') { const sInput = document.getElementById('setsInput'); if(sInput && w.setDetails) { sInput.value = w.setDetails.length || 3; window.generateSetFields(sInput.value); setTimeout(() => { w.setDetails.forEach((s, idx) => { const i = idx + 1; const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); if(rEl) rEl.value = s.reps; if(wEl) wEl.value = s.weight; }); }, 50); } const eqInput = document.getElementById('equipmentInput'); if(eqInput && w.equipment) eqInput.value = w.equipment; } else { if(window.categorySchemas[w.category] && window.categorySchemas[w.category].schema) { window.categorySchemas[w.category].schema.forEach(field => { const el = document.getElementById('dyn_' + field.id); if(el && w.data[field.label] !== undefined) { el.value = w.data[field.label]; } }); } } document.getElementById('btnSaveText').textContent = "Update"; document.getElementById('btnSubmitWorkout').classList.replace('bg-primary', 'bg-primary'); document.getElementById('btnSubmitIcon').classList.replace('fill-black/20', 'fill-white/20'); document.getElementById('btnSubmitWorkout').classList.replace('text-black', 'text-white'); document.getElementById('btnCancelEdit').classList.remove('hidden'); document.getElementById('workoutForm').scrollIntoView({behavior: 'smooth'}); };
   window.deleteEntry = id => { window.showModal("Löschen?", "Diesen Eintrag wirklich löschen?", true, () => { const deleted = window.workouts.find(w => w.id === id); window.workouts = window.workouts.filter(w => w.id !== id); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(deleted) { window._undoDeletedCloudId = id; window.showToast('Eintrag gelöscht', null, 'Rückgängig', () => { window.workouts.push(deleted); window.saveWorkoutsForCurrentClient(); window.renderTable(); window.calculateReadiness(); if(window.currentView === 'chart') window.initAnalytics(); if(window.syncToCloud) window.syncToCloud(deleted); window._undoDeletedCloudId = null; window.showToast('Wiederhergestellt!'); }, 5000); setTimeout(() => { if(window._undoDeletedCloudId === id && window.removeFromCloud) { window.removeFromCloud(id); window._undoDeletedCloudId = null; } }, 5500); } else { if(window.removeFromCloud) window.removeFromCloud(id); } }); };
 
-  window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); window._lastWorkoutBrag = { category: window.currentCategory === 'strength' ? 'Krafttraining' : window.currentCategory === 'cardio' ? 'Ausdauer' : window.currentCategory === 'recovery' ? 'Regeneration' : 'Training', duration: durationDisplay || durationStr || 'Beendet', exercises: String(activeWorkouts.length || 0), sets: String(activeWorkouts.reduce(function(sum, w) { return sum + (w.setDetails ? w.setDetails.length : 1); }, 0)), volume: String(Math.round(sessionVolume || 0)), exerciseList: activeWorkouts.slice(0, 6).map(function(w) { var detail = ''; if(w.setDetails && w.setDetails.length > 0) { detail = w.setDetails.length + ' Sets'; if(w.setDetails[0].weight) detail += ' \u00d7 ' + w.setDetails[0].weight + 'kg'; } else if(w.data) { var keys = Object.keys(w.data).slice(0, 2); detail = keys.map(function(k) { return k + ': ' + w.data[k]; }).join(' | '); } return { name: w.exercise || 'Uebung', detail: detail }; }) }; setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(window.awardXP) window.awardXP('workout'); if(window._checkGoalProgress) window._checkGoalProgress(); if(window._trackActivity) window._trackActivity('workout'); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } if (window._speak) { var _eM = { de: 'Workout beendet! ' + (exerciseNames ? exerciseNames.size : 0) + ' Uebungen, ' + Math.round(sessionVolume || 0) + ' Kilo Volumen. Starke Leistung!', en: 'Workout complete! ' + (exerciseNames ? exerciseNames.size : 0) + ' exercises, ' + Math.round(sessionVolume || 0) + ' kilos volume. Great work!', fr: 'Entrainement termine! ' + (exerciseNames ? exerciseNames.size : 0) + ' exercices. Beau travail!', es: 'Entrenamiento completo! ' + (exerciseNames ? exerciseNames.size : 0) + ' ejercicios. Gran trabajo!', it: 'Allenamento completato! ' + (exerciseNames ? exerciseNames.size : 0) + ' esercizi. Ottimo lavoro!', nl: 'Workout voltooid! ' + (exerciseNames ? exerciseNames.size : 0) + ' oefeningen. Goed gedaan!', ar: 'انتهى التمرين! ' + (exerciseNames ? exerciseNames.size : 0) + ' تمارين. عمل رائع!' }; window._speak(_eM[window.currentLang] || _eM.de, 'high'); } setTimeout(function() { if (window._showPostWorkoutCoachNudge) { window._showPostWorkoutCoachNudge({ exercises: String(exerciseNames ? exerciseNames.size : 0), volume: String(Math.round(sessionVolume || 0)), duration: durationDisplay || durationStr || '' }); } }, 5000); }, true); };
+  window.archiveWorkouts = () => { if(!Array.isArray(window.workouts)) return; const activeWorkouts = window.workouts.filter(w => !w.archived); if(activeWorkouts.length === 0) return window.showToast("Nichts zum Beenden da!"); let durationStr = document.getElementById('workoutTimerDisplay').textContent; if (durationStr === "00:00" && !window.isWorkoutTimerRunning) durationStr = ""; const totalDurationSecs = window.workoutTimerSeconds || 0; window.showModal("Workout Beenden", `Dauer: ${durationStr}. Notiz hinzufügen?`, true, async (commentVal) => { if(window.isWorkoutTimerRunning) window.toggleWorkoutTimer(); window.resetWorkoutTimer(); const sessionId = Date.now().toString(); let sessionVolume = 0; let sessionDist = 0; let isCardio = false; let exerciseNames = new Set(); activeWorkouts.forEach(w => { w.archived = true; w.sessionId = sessionId; if(durationStr) w.sessionDuration = durationStr; if(totalDurationSecs > 0) w.workoutDuration = totalDurationSecs; if(commentVal && commentVal.trim() !== '') w.sessionComment = commentVal.trim(); if(w.volume) sessionVolume += w.volume; if(w.category === 'cardio' && w.data) { isCardio = true; if(w.data['Distanz (km)'] || w.data['Distanz']) sessionDist += parseFloat((w.data['Distanz (km)'] || w.data['Distanz']).toString().replace(',','.')); } if(w.exercise) exerciseNames.add(w.exercise); }); window.saveWorkoutsForCurrentClient(); window.switchView('archive'); window.calculateReadiness(); window.showToast(window.t("toastArchived")); if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('workout-archived'); }, 3500); let durationDisplay = ''; if(totalDurationSecs > 0) { if(totalDurationSecs < 3600) durationDisplay = Math.floor(totalDurationSecs/60) + ' MIN'; else durationDisplay = Math.floor(totalDurationSecs/3600) + ':' + String(Math.floor((totalDurationSecs%3600)/60)).padStart(2,'0') + ' STD'; } window.showWorkoutCelebration({ mainNumber: isCardio ? sessionDist.toFixed(1) + ' km' : (sessionVolume > 0 ? Math.round(sessionVolume).toLocaleString() + ' kg' : activeWorkouts.length + 'x'), mainUnit: isCardio ? 'Distanz' : (sessionVolume > 0 ? 'Volumen' : 'Übungen'), subText: (durationDisplay ? durationDisplay + ' · ' : durationStr ? durationStr + ' · ' : '') + exerciseNames.size + ' Übungen', hasPR: false }); window._lastWorkoutBrag = { category: window.currentCategory === 'strength' ? 'Krafttraining' : window.currentCategory === 'cardio' ? 'Ausdauer' : window.currentCategory === 'recovery' ? 'Regeneration' : 'Training', duration: durationDisplay || durationStr || 'Beendet', exercises: String(activeWorkouts.length || 0), sets: String(activeWorkouts.reduce(function(sum, w) { return sum + (w.setDetails ? w.setDetails.length : 1); }, 0)), volume: String(Math.round(sessionVolume || 0)), exerciseList: activeWorkouts.slice(0, 6).map(function(w) { var detail = ''; if(w.setDetails && w.setDetails.length > 0) { detail = w.setDetails.length + ' Sets'; if(w.setDetails[0].weight) detail += ' \u00d7 ' + w.setDetails[0].weight + 'kg'; } else if(w.data) { var keys = Object.keys(w.data).slice(0, 2); detail = keys.map(function(k) { return k + ': ' + w.data[k]; }).join(' | '); } return { name: w.exercise || 'Übung', detail: detail }; }) }; setTimeout(() => { let exString = Array.from(exerciseNames).join(', '); if(exString.length > 50) exString = exString.substring(0, 47) + '...'; window.showBragCard('workout', { duration: durationDisplay || durationStr || 'Beendet', volume: sessionVolume, distance: sessionDist.toFixed(2), category: isCardio ? 'cardio' : 'strength', exercises: exString }); }, 3500); if(window.syncToCloud) { for(const w of activeWorkouts) await window.syncToCloud(w); } if(window._updateChallengeProgress) window._updateChallengeProgress(); if(window._pushUpdateTrainingStats) window._pushUpdateTrainingStats(); window.checkReviewPrompt(); window.showPostWorkoutSocialProof(); if(window.awardXP) window.awardXP('workout'); if(window._checkGoalProgress) window._checkGoalProgress(); if(window._trackActivity) window._trackActivity('workout'); if(localStorage.getItem('base_anon_challenge_id') && !(window._chGetUid && window._chGetUid() && !window._chGetUid().startsWith('anon_'))) { var cnt = parseInt(localStorage.getItem('base_anon_workout_count') || '0') + 1; localStorage.setItem('base_anon_workout_count', cnt.toString()); } if (window._speak) { var _eM = { de: 'Workout beendet! ' + (exerciseNames ? exerciseNames.size : 0) + ' Übungen, ' + Math.round(sessionVolume || 0) + ' Kilo Volumen. Starke Leistung!', en: 'Workout complete! ' + (exerciseNames ? exerciseNames.size : 0) + ' exercises, ' + Math.round(sessionVolume || 0) + ' kilos volume. Great work!', fr: 'Entrainement termine! ' + (exerciseNames ? exerciseNames.size : 0) + ' exercices. Beau travail!', es: 'Entrenamiento completo! ' + (exerciseNames ? exerciseNames.size : 0) + ' ejercicios. Gran trabajo!', it: 'Allenamento completato! ' + (exerciseNames ? exerciseNames.size : 0) + ' esercizi. Ottimo lavoro!', nl: 'Workout voltooid! ' + (exerciseNames ? exerciseNames.size : 0) + ' oefeningen. Goed gedaan!', ar: 'انتهى التمرين! ' + (exerciseNames ? exerciseNames.size : 0) + ' تمارين. عمل رائع!' }; window._speak(_eM[window.currentLang] || _eM.de, 'high'); } setTimeout(function() { if (window._showPostWorkoutCoachNudge) { window._showPostWorkoutCoachNudge({ exercises: String(exerciseNames ? exerciseNames.size : 0), volume: String(Math.round(sessionVolume || 0)), duration: durationDisplay || durationStr || '' }); } }, 5000); }, true); };
   window._checkAnonConversion = function() {
    var anonId = localStorage.getItem('base_anon_challenge_id');
    if(!anonId) return;
@@ -1015,9 +1015,9 @@
    if (archived.length < 3) return;
    localStorage.setItem('base_coach_nudge_date', today);
    var messages = [
-    window.t('coachNudge1', 'Dein KI Coach hat dein Workout analysiert — tippe fuer Tipps'),
+    window.t('coachNudge1', 'Dein KI Coach hat dein Workout analysiert — tippe für Tipps'),
     window.t('coachNudge2', 'Basierend auf deinem Workout: Dein Coach hat Empfehlungen'),
-    window.t('coachNudge3', 'Starkes Workout! Dein KI Coach hat Verbesserungsvorschlaege')
+    window.t('coachNudge3', 'Starkes Workout! Dein KI Coach hat Verbesserungsvorschläge')
    ];
    var msg = messages[Math.floor(Math.random() * messages.length)];
    var exerciseCount = workoutData.exercises || '0';
@@ -1030,7 +1030,7 @@
     '<i data-lucide="sparkles" class="w-5 h-5 pointer-events-none" style="color:#a3c9a8"></i></div>' +
     '<div class="flex-1 min-w-0">' +
     '<p class="text-xs font-black text-white truncate">' + window._escapeHtml(msg) + '</p>' +
-    '<p class="text-[10px] font-bold uppercase tracking-widest" style="color:#a3c9a8">KI Coach' + (duration ? ' \u00b7 ' + window._escapeHtml(duration) : '') + ' \u00b7 ' + window._escapeHtml(exerciseCount) + ' ' + window.t('lblExercises', 'Uebungen') + '</p>' +
+    '<p class="text-[10px] font-bold uppercase tracking-widest" style="color:#a3c9a8">KI Coach' + (duration ? ' \u00b7 ' + window._escapeHtml(duration) : '') + ' \u00b7 ' + window._escapeHtml(exerciseCount) + ' ' + window.t('lblExercises', 'Übungen') + '</p>' +
     '</div>' +
     '<i data-lucide="chevron-right" class="w-4 h-4 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>' +
     '</div>';
@@ -1684,7 +1684,7 @@
   };
 
   window.addChallengeProgress = function(challengeId, unit) {
-   window.showInputModal('Fortschritt hinzufuegen (' + unit + ')', '0', function(val) {
+   window.showInputModal('Fortschritt hinzufügen (' + unit + ')', '0', function(val) {
    if(!val) return;
    var num = parseFloat(val.replace(',', '.'));
    if(isNaN(num) || num <= 0) { window.showToast(window.t('toastError', 'Bitte eine gueltige Zahl eingeben')); return; }
@@ -3929,7 +3929,7 @@
    ctx.fillStyle = '#333'; ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
    ctx.fillText('Tracked mit BASE \u2014 base-app.tech', 540, 1860);
    ctx.fillStyle = '#252525'; ctx.font = '400 16px sans-serif';
-   ctx.fillText('Kostenlos fuer alle Sportarten', 540, 1890);
+   ctx.fillText('Kostenlos für alle Sportarten', 540, 1890);
    ctx.textAlign = 'left';
    return canvas;
   };
@@ -5160,8 +5160,8 @@
     threshold: 3,
     flag: 'base_ki_hint_plan',
     icon: 'calendar-check',
-    get title() { return window.t('kiHintPlanTitle','Planner verfuegbar'); },
-    get text() { return window.t('kiHintPlanText','Mit 3 Workouts hat die KI genug Daten fuer einen intelligenten Trainingsplan.'); },
+    get title() { return window.t('kiHintPlanTitle','Planner verfügbar'); },
+    get text() { return window.t('kiHintPlanText','Mit 3 Workouts hat die KI genug Daten für einen intelligenten Trainingsplan.'); },
     get ctaText() { return window.t('planGenerate','Plan erstellen'); },
     ctaAction: function() {
      window.switchTab('tools');
@@ -5191,7 +5191,7 @@
     flag: 'base_ki_hint_prehab',
     icon: 'shield-check',
     get title() { return window.t('kiHintPrehabTitle','Armor: Verletzungen vorbeugen'); },
-    get text() { return window.t('kiHintPrehabText','Die KI erkennt einseitige Belastungen und schlaegt Aktivierungsuebungen vor.'); },
+    get text() { return window.t('kiHintPrehabText','Die KI erkennt einseitige Belastungen und schlägt Aktivierungsübungen vor.'); },
     get ctaText() { return window.t('toolPrehab','Armor starten'); },
     ctaAction: function() {
      window.switchTab('tools');
@@ -5206,7 +5206,7 @@
     flag: 'base_ki_hint_copilot',
     icon: 'cpu',
     get title() { return window.t('kiHintCopilotTitle','Spotter freigeschaltet'); },
-    get text() { return window.t('kiHintCopilotText','Der Spotter schlaegt dir fuer jede Uebung Saetze, Gewicht und RPE vor.'); },
+    get text() { return window.t('kiHintCopilotText','Der Spotter schlägt dir für jede Übung Sätze, Gewicht und RPE vor.'); },
     get ctaText() { return window.t('toolCopilot','Spotter testen'); },
     ctaAction: function() {
      window.switchTab('tools');
@@ -5217,7 +5217,7 @@
   const _kiOverviewHint = {
    flag: 'base_ki_hint_overview',
    icon: 'sparkles',
-   get title() { return window.t('kiHintOverviewTitle','5 KI-Werkzeuge fuer dein Training'); },
+   get title() { return window.t('kiHintOverviewTitle','5 KI-Werkzeuge für dein Training'); },
    get text() { return window.t('kiHintOverviewText','Scan, Planner, Battery, Armor und Spotter — alle arbeiten mit deinen echten Daten.'); },
    ctaText: null
   };
@@ -5305,9 +5305,9 @@
    if (!container) return;
    var usage = JSON.parse(localStorage.getItem('base_ki_discovery') || '{}');
    var hints = [];
-   if (!usage.coach_used) hints.push({ icon: 'brain', label: window.t('hintCoach', 'KI Coach'), desc: window.t('hintCoachDesc', 'Analysiert dein Training und gibt dir persoenliche Empfehlungen'), action: 'analyzeWithAI' });
+   if (!usage.coach_used) hints.push({ icon: 'brain', label: window.t('hintCoach', 'KI Coach'), desc: window.t('hintCoachDesc', 'Analysiert dein Training und gibt dir persönliche Empfehlungen'), action: 'analyzeWithAI' });
    if (!usage.plan_used) hints.push({ icon: 'calendar', label: window.t('hintPlan', 'Trainingsplan'), desc: window.t('hintPlanDesc', 'KI erstellt einen personalisierten Plan basierend auf deinen Daten'), action: 'openPlanBuilder' });
-   if (!usage.prehab_used) hints.push({ icon: 'shield', label: window.t('hintPrehab', 'Verletzungspraevention'), desc: window.t('hintPrehabDesc', 'Aktivierungsuebungen und Warm-Up basierend auf deinem Training'), action: 'generatePreHab' });
+   if (!usage.prehab_used) hints.push({ icon: 'shield', label: window.t('hintPrehab', 'Verletzungsprävention'), desc: window.t('hintPrehabDesc', 'Aktivierungsübungen und Warm-Up basierend auf deinem Training'), action: 'generatePreHab' });
    if (hints.length === 0) { container.classList.add('hidden'); return; }
    container.classList.remove('hidden');
    container.innerHTML = '<p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">' + window.t('hintTitle', 'Noch nicht entdeckt') + '</p>' +
@@ -5327,7 +5327,7 @@
   window._FOCUS_MUSCLES = {
    upper: [
     { id: 'chest', de: 'Brust', en: 'Chest' },
-    { id: 'upper_back', de: 'Ruecken (oben)', en: 'Upper Back' },
+    { id: 'upper_back', de: 'Rücken (oben)', en: 'Upper Back' },
     { id: 'lats', de: 'Latissimus', en: 'Lats' },
     { id: 'front_delts', de: 'Vordere Schulter', en: 'Front Delts' },
     { id: 'rear_delts', de: 'Hintere Schulter', en: 'Rear Delts' },
@@ -5345,7 +5345,7 @@
    core: [
     { id: 'abs', de: 'Bauch', en: 'Abs' },
     { id: 'obliques', de: 'Seitl. Bauch', en: 'Obliques' },
-    { id: 'lower_back_muscle', de: 'Unterer Ruecken', en: 'Lower Back' }
+    { id: 'lower_back_muscle', de: 'Unterer Rücken', en: 'Lower Back' }
    ]
   };
   window._selectedFocusMuscles = new Set();
@@ -5461,7 +5461,7 @@
    if (!exerciseName || !exerciseName.trim()) return;
    var alts = window._findExerciseAlternatives(exerciseName);
    if (alts.length === 0) { window.showToast(window.t('swapNoAlts', 'Keine Alternativen gefunden')); return; }
-   var html = '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">' + window.t('swapCurrent', 'Aktuelle Uebung') + '</p><p class="text-sm font-bold text-white">' + window._escapeHtml(exerciseName) + '</p></div>';
+   var html = '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">' + window.t('swapCurrent', 'Aktuelle Übung') + '</p><p class="text-sm font-bold text-white">' + window._escapeHtml(exerciseName) + '</p></div>';
    html += '<p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">' + window.t('swapChoose', 'Waehle eine Alternative') + '</p>';
    alts.forEach(function(alt) {
     var mc = alt.matchScore >= 80 ? '#a3c9a8' : alt.matchScore >= 60 ? '#e8c86a' : '#e88a8a';
@@ -5480,7 +5480,7 @@
    if (input) { input.value = newName; input.dispatchEvent(new Event('change')); }
    if (window._showExerciseImage) window._showExerciseImage(newName);
    window.toggleModal('exerciseSwapModal');
-   window.showToast(window.t('swapDone', 'Uebung getauscht!'));
+   window.showToast(window.t('swapDone', 'Übung getauscht!'));
   };
 
   // Swap button visibility
@@ -5511,13 +5511,13 @@
   window._FORM_CHECK_EXERCISES = [
    { id: 'squat', name: { de: 'Kniebeuge (Squat)', en: 'Squat' }, icon: '\ud83e\uddb5' },
    { id: 'deadlift', name: { de: 'Kreuzheben (Deadlift)', en: 'Deadlift' }, icon: '\ud83c\udfcb\ufe0f' },
-   { id: 'bench', name: { de: 'Bankdruecken', en: 'Bench Press' }, icon: '\ud83d\udcaa' },
-   { id: 'ohp', name: { de: 'Schulterdruecken', en: 'Overhead Press' }, icon: '\ud83d\ude46' },
+   { id: 'bench', name: { de: 'Bankdrücken', en: 'Bench Press' }, icon: '\ud83d\udcaa' },
+   { id: 'ohp', name: { de: 'Schulterdrücken', en: 'Overhead Press' }, icon: '\ud83d\ude46' },
    { id: 'row', name: { de: 'Rudern (Row)', en: 'Barbell Row' }, icon: '\ud83d\udea3' },
    { id: 'pullup', name: { de: 'Klimmzug', en: 'Pull-Up' }, icon: '\ud83e\uddd7' },
    { id: 'lunge', name: { de: 'Ausfallschritt', en: 'Lunge' }, icon: '\ud83e\uddbe' },
    { id: 'plank', name: { de: 'Plank', en: 'Plank' }, icon: '\ud83e\uddd8' },
-   { id: 'pushup', name: { de: 'Liegestuetz', en: 'Push-Up' }, icon: '\ud83e\udef8' }
+   { id: 'pushup', name: { de: 'Liegestütz', en: 'Push-Up' }, icon: '\ud83e\udef8' }
   ];
   window._selectedFormCheckExercise = null;
 
@@ -5532,7 +5532,7 @@
    var content = document.getElementById('formCheckContent');
    if (content) {
     content.innerHTML = '<div class="mb-4 p-3 rounded-xl" style="background:rgba(232,138,138,0.08);border:1px solid rgba(232,138,138,0.15)"><p class="text-[10px] text-zinc-400 leading-relaxed">' + window._escapeHtml(disclaimer) + '</p></div>' +
-     '<p class="text-sm font-black text-white mb-3">' + window.t('fcSelectExercise', 'Welche Uebung moechtest du pruefen?') + '</p>' +
+     '<p class="text-sm font-black text-white mb-3">' + window.t('fcSelectExercise', 'Welche Übung möchtest du prüfen?') + '</p>' +
      '<div class="grid grid-cols-2 gap-2 mb-4">' + exerciseHtml + '</div>';
    }
    window.toggleModal('formCheckModal');
@@ -5590,7 +5590,7 @@
    var resultEl = document.getElementById('formCheckResult');
    if (resultEl) { resultEl.classList.remove('hidden'); resultEl.innerHTML = '<div class="flex items-center justify-center gap-2 py-6"><i data-lucide="loader-2" class="w-5 h-5 animate-spin" style="color:#a3c9a8"></i><span class="text-sm text-zinc-400">' + window.t('fcAnalyzing', 'Analysiere deine Form...') + '</span></div>'; window._refreshLucide(); }
    var langName = { de: 'Deutsch', en: 'English', fr: 'Francais', es: 'Espanol', it: 'Italiano', nl: 'Nederlands', ar: 'العربية' }[lang] || 'Deutsch';
-   var prompt = 'Du bist ein erfahrener Strength & Conditioning Coach. Analysiere dieses Bild einer ' + exName + ' Uebung.\n\nWICHTIG: Du gibst NUR allgemeine Hinweise zur Uebungsform. Du stellst KEINE medizinischen Diagnosen.\n\nWenn das Bild KEINE erkennbare Uebungsausfuehrung zeigt, sage das klar.\n\nWenn du eine ' + exName + ' erkennst, analysiere:\n1. Koerperhaltung (Ruecken, Knie, Huefte)\n2. Bewegungstiefe\n3. Erkennbare Asymmetrien\n4. 2-3 konkrete Verbesserungsvorschlaege\n\nWenn du dir bei einem Aspekt NICHT sicher bist, sage "Aus diesem Winkel kann ich X nicht eindeutig beurteilen."\n\nMax 150 Woerter. Freundlich und motivierend.\n\nAntworte auf ' + langName + '.';
+   var prompt = 'Du bist ein erfahrener Strength & Conditioning Coach. Analysiere dieses Bild einer ' + exName + ' Übung.\n\nWICHTIG: Du gibst NUR allgemeine Hinweise zur Übungsform. Du stellst KEINE medizinischen Diagnosen.\n\nWenn das Bild KEINE erkennbare Übungsausführung zeigt, sage das klar.\n\nWenn du eine ' + exName + ' erkennst, analysiere:\n1. Körperhaltung (Rücken, Knie, Hüfte)\n2. Bewegungstiefe\n3. Erkennbare Asymmetrien\n4. 2-3 konkrete Verbesserungsvorschläge\n\nWenn du dir bei einem Aspekt NICHT sicher bist, sage "Aus diesem Winkel kann ich X nicht eindeutig beurteilen."\n\nMax 150 Wörter. Freundlich und motivierend.\n\nAntworte auf ' + langName + '.';
    try {
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, 30000);
@@ -5657,9 +5657,9 @@
    var pullPct = bpMap['back'] || 0;
    var ppRatio = pullPct > 0 ? (pushPct / pullPct) : null;
    if (ppRatio && ppRatio > 1.8) {
-    warnings.push({ type: 'imbalance', text: window.t('balancePushHeavy', 'Push-Muskeln (Brust/Schultern) deutlich mehr als Pull (Ruecken). Kann zu Haltungsproblemen fuehren.'), suggestion: window.t('balancePushFix', 'Empfehlung: 2-3 Rueckenuebungen pro Woche (Rudern, Klimmzuege, Face Pulls)') });
+    warnings.push({ type: 'imbalance', text: window.t('balancePushHeavy', 'Push-Muskeln (Brust/Schultern) deutlich mehr als Pull (Rücken). Kann zu Haltungsproblemen führen.'), suggestion: window.t('balancePushFix', 'Empfehlung: 2-3 Rückenübungen pro Woche (Rudern, Klimmzüge, Face Pulls)') });
    } else if (ppRatio && ppRatio < 0.6) {
-    warnings.push({ type: 'imbalance', text: window.t('balancePullHeavy', 'Pull-Muskeln deutlich mehr als Push. Ergaenze Brust- und Schulteruebungen.'), suggestion: window.t('balancePullFix', 'Empfehlung: Bankdruecken, Schulterdruecken und Dips hinzufuegen') });
+    warnings.push({ type: 'imbalance', text: window.t('balancePullHeavy', 'Pull-Muskeln deutlich mehr als Push. Ergänze Brust- und Schulterübungen.'), suggestion: window.t('balancePullFix', 'Empfehlung: Bankdrücken, Schulterdrücken und Dips hinzufügen') });
    }
    // Upper/Lower: chest+back+shoulders+arms vs legs
    var upperPct = (bpMap['chest'] || 0) + (bpMap['back'] || 0) + (bpMap['shoulders'] || 0) + (bpMap['arms'] || 0);
@@ -5670,7 +5670,7 @@
    }
    // Neglected groups
    var expected = ['chest', 'back', 'shoulders', 'legs', 'core'];
-   var bpLabels = { chest: 'Brust', back: 'Ruecken', shoulders: 'Schultern', legs: 'Beine', core: 'Core/Bauch', arms: 'Arme' };
+   var bpLabels = { chest: 'Brust', back: 'Rücken', shoulders: 'Schultern', legs: 'Beine', core: 'Core/Bauch', arms: 'Arme' };
    expected.forEach(function(g) {
     if (!bpMap[g] || bpMap[g] < 3) {
      warnings.push({ type: 'neglected', text: (bpLabels[g] || g) + ' ' + window.t('balanceNeglected', 'wird kaum trainiert') + ' (' + (bpMap[g] || 0) + '%)' });
@@ -5683,9 +5683,9 @@
    var container = document.getElementById('muscleBalanceContainer');
    if (!container) return;
    var data = window._computeMuscleBalance();
-   if (!data) { container.innerHTML = '<p class="text-xs text-zinc-600 text-center py-4">' + window.t('balanceNoData', 'Tracke mindestens 5 Kraft-Workouts fuer die Muskelbalance-Analyse') + '</p>'; return; }
+   if (!data) { container.innerHTML = '<p class="text-xs text-zinc-600 text-center py-4">' + window.t('balanceNoData', 'Tracke mindestens 5 Kraft-Workouts für die Muskelbalance-Analyse') + '</p>'; return; }
    var colors = { chest: '#e88a8a', back: '#8aafe8', shoulders: '#e8c86a', arms: '#a3c9a8', legs: '#e8b08a', core: '#a8a8e8', cardio: '#e88ab8' };
-   var bpLabels = { chest: 'Brust', back: 'Ruecken', shoulders: 'Schultern', arms: 'Arme', legs: 'Beine', core: 'Core/Bauch', cardio: 'Cardio' };
+   var bpLabels = { chest: 'Brust', back: 'Rücken', shoulders: 'Schultern', arms: 'Arme', legs: 'Beine', core: 'Core/Bauch', cardio: 'Cardio' };
    var html = '';
    if (data.warnings.length > 0) {
     html += '<div class="mb-4">';
@@ -5871,7 +5871,7 @@
 
   window.openCreateGoal = function() {
    var html = '<div><p class="text-sm font-bold text-zinc-300 mb-2">Was ist dein Ziel?</p>';
-   html += '<input id="goalTitle" type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="z.B. 100kg Bankdruecken, 5km unter 25min...">';
+   html += '<input id="goalTitle" type="text" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="z.B. 100kg Bankdrücken, 5km unter 25min...">';
    html += '<div class="grid grid-cols-2 gap-3 mb-4"><div><p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Zielwert</p>';
    html += '<input id="goalTarget" type="number" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="100"></div>';
    html += '<div><p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Einheit</p>';
@@ -5880,7 +5880,7 @@
    html += '<input id="goalCurrent" type="number" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto" placeholder="80">';
    html += '<p class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Deadline</p>';
    html += '<input id="goalDeadline" type="date" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm p-3 mb-4 outline-none focus:border-zinc-600 pointer-events-auto">';
-   html += '<div class="flex gap-3"><button onclick="window.openGoalModal()" class="flex-1 py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-bold cursor-pointer pointer-events-auto">Zurueck</button>';
+   html += '<div class="flex gap-3"><button onclick="window.openGoalModal()" class="flex-1 py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-bold cursor-pointer pointer-events-auto">Zurück</button>';
    html += '<button onclick="window.saveNewGoal()" class="flex-1 py-3 rounded-xl text-sm font-black cursor-pointer pointer-events-auto" style="background:#a3c9a8;color:#0f110f">Speichern</button></div></div>';
    var container = document.getElementById('goalModalContent');
    if(container) container.innerHTML = html;

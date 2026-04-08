@@ -1103,8 +1103,8 @@
                                     <button aria-label="Generieren" type="button" onclick="window.generatePreHab()" class="text-[10px] font-black text-emerald-950 bg-emerald-400 hover:bg-emerald-300 px-2.5 py-1 rounded-md uppercase tracking-widest flex items-center gap-1 transition-all cursor-pointer pointer-events-auto shadow-sm"><i data-lucide="shield-plus" class="w-3 h-3 pointer-events-none"></i> Armor</button>
                                 </div>
                                 <div class="flex gap-2 items-center">
-                                    <input type="text" id="exerciseInput" aria-label="Aktivität" list="exerciseListV2" data-i18n-placeholder="fExP" placeholder="Uebungsname..." required class="zen-exercise-input flex-1 text-white cursor-text pointer-events-auto">
-                                    <button type="button" id="btnSwapExercise" aria-label="Uebung ersetzen" onclick="window.openExerciseSwap(document.getElementById('exerciseInput').value)" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted);display:none">
+                                    <input type="text" id="exerciseInput" aria-label="Aktivität" list="exerciseListV2" data-i18n-placeholder="fExP" placeholder="Übungsname..." required class="zen-exercise-input flex-1 text-white cursor-text pointer-events-auto">
+                                    <button type="button" id="btnSwapExercise" aria-label="Übung ersetzen" onclick="window.openExerciseSwap(document.getElementById('exerciseInput').value)" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted);display:none">
                                         <i data-lucide="repeat-2" class="w-4 h-4 pointer-events-none"></i>
                                     </button>
                                     <button type="button" id="voiceInputBtn" onclick="window.startVoiceInput()" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all flex-shrink-0" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)" aria-label="Spracheingabe">
@@ -1447,7 +1447,7 @@
 
                 <button onclick="window.openFormCheck()" class="w-full flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all pointer-events-auto text-left" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2)"><i data-lucide="scan-eye" class="w-6 h-6" style="color:#a3c9a8"></i></div>
-                    <div class="flex-1"><p class="font-black text-white text-sm" data-i18n="fcTitle">Form Check</p><p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)" data-i18n="fcButtonDesc">KI analysiert deine Uebungsform (Beta)</p></div>
+                    <div class="flex-1"><p class="font-black text-white text-sm" data-i18n="fcTitle">Form Check</p><p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)" data-i18n="fcButtonDesc">KI analysiert deine Übungsform (Beta)</p></div>
                     <span class="text-[8px] font-black uppercase px-2 py-1 rounded" style="background:rgba(163,201,168,0.15);color:#a3c9a8;border:1px solid rgba(163,201,168,0.2)">NEU</span>
                 </button>
 
@@ -2885,7 +2885,7 @@
         <div class="p-6 max-w-md w-full shadow-2xl relative my-8 rounded-2xl" style="background:#1a1a1f;border:1px solid #2a2a30">
             <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h3 class="text-xl font-black text-white uppercase tracking-tighter" data-i18n="swapTitle">Uebung ersetzen</h3>
+                    <h3 class="text-xl font-black text-white uppercase tracking-tighter" data-i18n="swapTitle">Übung ersetzen</h3>
                     <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)" data-i18n="swapSub">Alternativen nach Muskelgruppe</p>
                 </div>
                 <button aria-label="Schliessen" onclick="window.toggleModal('exerciseSwapModal')" class="text-zinc-500 hover:text-white cursor-pointer pointer-events-auto"><i data-lucide="x" class="w-5 h-5 pointer-events-none"></i></button>
@@ -3105,7 +3105,7 @@
    '- Du sprichst wie ein kompetenter Trainingspartner, nicht wie ein Lehrbuch.\n' +
    '- Bei Unsicherheit sagst du ehrlich "Da bin ich nicht sicher, frag einen spezialisierten Trainer."\n\n' +
    'REGELN:\n' +
-   '- NUR Themen: Training, Uebungsausfuehrung, Sportart-Technik, Regeneration, Sporternaehrung, Verletzungspraevention, Trainingsplanung, Motivation.\n' +
+   '- NUR Themen: Training, Übungsausführung, Sportart-Technik, Regeneration, Sporternährung, Verletzungsprävention, Trainingsplanung, Motivation.\n' +
    '- Bei medizinischen Fragen (Schmerzen, Diagnosen): IMMER an Arzt/Physio verweisen. Keine Diagnosen stellen.\n' +
    '- NIEMALS konkrete Gewichtsempfehlungen ueber dem Niveau des Users geben.\n' +
    '- Frage nach dem Trainingsstand wenn der User keine Erfahrung angegeben hat.\n' +
@@ -3135,7 +3135,7 @@
   var msgContainer = document.getElementById('kiChatMessages');
   if (msgContainer && msgContainer.children.length === 0) {
    _addChatMessage('ai', window.t('kiChatWelcome',
-    'Hey! Ich bin Scan, dein KI Fitness-Assistent. Ich kenne dein Profil und deine Trainingsdaten. Frag mich alles \u2014 Uebungsausfuehrung, Trainingsplanung, Sportart-Tipps oder warum etwas nicht klappt.'
+    'Hey! Ich bin Scan, dein KI Fitness-Assistent. Ich kenne dein Profil und deine Trainingsdaten. Frag mich alles \u2014 Übungsausführung, Trainingsplanung, Sportart-Tipps oder warum etwas nicht klappt.'
    ));
   }
 
@@ -3286,7 +3286,7 @@
   var container = document.getElementById('kiChatMessages');
   if (container) container.innerHTML = '';
   _addChatMessage('ai', window.t('kiChatWelcome',
-   'Hey! Ich bin Scan, dein KI Fitness-Assistent. Ich kenne dein Profil und deine Trainingsdaten. Frag mich alles \u2014 Uebungsausfuehrung, Trainingsplanung, Sportart-Tipps oder warum etwas nicht klappt.'
+   'Hey! Ich bin Scan, dein KI Fitness-Assistent. Ich kenne dein Profil und deine Trainingsdaten. Frag mich alles \u2014 Übungsausführung, Trainingsplanung, Sportart-Tipps oder warum etwas nicht klappt.'
   ));
     };
     </script>
