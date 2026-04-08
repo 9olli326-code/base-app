@@ -769,6 +769,16 @@ window._renderClientSessionsList(id);
 // Compliance Rings
 window._renderComplianceRings(id);
 
+// PT Action Buttons
+var actionsEl = document.getElementById('clientDetailActions');
+if (actionsEl) {
+ actionsEl.innerHTML = '<div class="grid grid-cols-3 gap-2 mt-3">' +
+  '<button onclick="window._openWorkoutDelivery(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);color:#d4af37" aria-label="Plan senden">' + window.t('sendPlan','Plan senden') + '</button>' +
+  '<button onclick="window._sendCheckInForm(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8" aria-label="Check-In">' + window.t('checkIn','Check-In') + '</button>' +
+  '<button onclick="window._addProgressPhoto(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(138,175,232,0.1);border:1px solid rgba(138,175,232,0.2);color:#8aafe8" aria-label="Foto">' + window.t('photo','Foto') + '</button>' +
+  '</div>';
+}
+
 // Show profile tab by default
 window.switchClientTab('profile');
 
@@ -3335,4 +3345,89 @@ if (_origOpenSession2) {
         }
     });
 })();
+
+// === WORKOUT DELIVERY ===
+window._openWorkoutDelivery = function(clientId) {
+ var c = window.clients.find(function(x) { return x.id === clientId; });
+ if (!c) return;
+ var profile = window.getClientProfile ? window.getClientProfile(clientId) : {};
+ var html = '<h3 class="text-lg font-black text-white mb-1">' + window.t('deliverWorkout','Workout-Plan senden') + '</h3>';
+ html += '<p class="text-[10px] mb-4" style="color:#82828c">' + window.t('forClient','f\u00fcr') + ' ' + window._escapeHtml(c.name) + '</p>';
+ html += '<input id="deliveryPlanName" type="text" placeholder="Plan-Name (z.B. Hypertrophie Block 1)" class="w-full px-3 py-2.5 rounded-xl text-sm text-white font-bold outline-none pointer-events-auto mb-3" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+ html += '<div class="flex gap-2 mb-3"><div class="flex-1"><label class="text-[8px] font-bold uppercase block mb-1" style="color:#82828c">Wochen</label><select id="deliveryWeeks" class="w-full px-3 py-2 rounded-xl text-sm text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option></select></div>';
+ html += '<div class="flex-1"><label class="text-[8px] font-bold uppercase block mb-1" style="color:#82828c">Start</label><input id="deliveryStart" type="date" class="w-full px-3 py-2 rounded-xl text-sm text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" value="' + new Date(Date.now()+86400000).toISOString().split('T')[0] + '"></div></div>';
+ html += '<div class="flex gap-2"><button onclick="window._saveManualDelivery(\'' + clientId + '\')" class="flex-1 py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);color:#d4af37" aria-label="Plan senden">' + window.t('sendPlan','Plan senden') + '</button>';
+ html += '<button onclick="window.toggleModal(\'deliveryModal\')" class="flex-1 py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:#82828c" aria-label="Abbrechen">' + window.t('btnCanc','Abbrechen') + '</button></div>';
+ var content = document.getElementById('deliveryContent');
+ if (content) content.innerHTML = html;
+ window.toggleModal('deliveryModal');
+};
+
+window._saveManualDelivery = function(clientId) {
+ var name = (document.getElementById('deliveryPlanName') || {}).value || 'Trainingsplan';
+ var weeks = parseInt((document.getElementById('deliveryWeeks') || {}).value) || 4;
+ var start = (document.getElementById('deliveryStart') || {}).value || new Date().toISOString().split('T')[0];
+ var routines = JSON.parse(localStorage.getItem('base_routines') || '[]');
+ var sessions = routines.length > 0 ? routines.slice(0, 4).map(function(r, i) {
+  var days = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag'];
+  return { day: days[i] || days[0], week: 1, name: r.name, exercises: (r.exercises || []).map(function(e) { return { name: e.name, sets: e.sets, reps: e.reps, weight: e.weight, rir: e.rir, notes: '' }; }) };
+ }) : [];
+ var plan = { planId: 'plan_' + Date.now(), clientId: clientId, planName: name.trim(), startDate: start, weeks: weeks, createdAt: new Date().toISOString(), status: 'active', planData: { weeks: [{ sessions: sessions }] } };
+ var deliveries = JSON.parse(localStorage.getItem('base_pt_deliveries') || '[]');
+ deliveries.push(plan);
+ localStorage.setItem('base_pt_deliveries', JSON.stringify(deliveries));
+ localStorage.setItem('base_client_plan_' + clientId, JSON.stringify(plan));
+ window.toggleModal('deliveryModal');
+ window.showToast(window.t('planSent','Plan gesendet!'));
+};
+
+// === CHECK-IN FORMS ===
+window._sendCheckInForm = function(clientId) {
+ var c = window.clients.find(function(x) { return x.id === clientId; });
+ if (!c) return;
+ var fields = [
+  { id:'ci_energy', label:'Energie (1-10)', val:7 },
+  { id:'ci_sleep', label:'Schlaf (1-10)', val:7 },
+  { id:'ci_stress', label:'Stress (1-10)', val:5 },
+  { id:'ci_soreness', label:'Muskelkater (1-10)', val:4 },
+  { id:'ci_weight', label:'Gewicht (kg)', val:'' },
+  { id:'ci_pain', label:'Schmerzen', val:'' },
+  { id:'ci_notes', label:'Sonstiges', val:'' }
+ ];
+ var html = '<h3 class="text-lg font-black text-white mb-1">Check-In</h3>';
+ html += '<p class="text-[10px] mb-4" style="color:#82828c">' + window._escapeHtml(c.name) + '</p>';
+ fields.forEach(function(f) {
+  var isNum = f.id.indexOf('ci_energy') !== -1 || f.id.indexOf('ci_sleep') !== -1 || f.id.indexOf('ci_stress') !== -1 || f.id.indexOf('ci_soreness') !== -1;
+  html += '<div class="mb-3"><label class="text-[9px] font-bold uppercase tracking-wider block mb-1" style="color:#82828c">' + f.label + '</label>';
+  if (isNum) {
+   html += '<div class="flex items-center gap-2"><input type="range" id="' + f.id + '" min="1" max="10" value="' + f.val + '" class="flex-1 pointer-events-auto" style="accent-color:#d4af37" oninput="document.getElementById(\'' + f.id + '_v\').textContent=this.value"><span id="' + f.id + '_v" class="text-sm font-bold text-white w-6 text-center">' + f.val + '</span></div>';
+  } else {
+   html += '<input type="text" id="' + f.id + '" placeholder="' + f.label + '" class="w-full px-3 py-2 rounded-xl text-sm text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+  }
+  html += '</div>';
+ });
+ html += '<button onclick="window._saveCheckIn(\'' + clientId + '\')" class="w-full py-3 rounded-xl text-sm font-bold cursor-pointer pointer-events-auto" style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.25);color:#d4af37" aria-label="Check-In speichern">Check-In speichern</button>';
+ var content = document.getElementById('checkInContent');
+ if (content) content.innerHTML = html;
+ window.toggleModal('checkInModal');
+};
+
+window._saveCheckIn = function(clientId) {
+ var ci = {
+  date: new Date().toISOString().split('T')[0], ts: new Date().toISOString(),
+  energy: parseInt((document.getElementById('ci_energy')||{}).value) || 7,
+  sleep: parseInt((document.getElementById('ci_sleep')||{}).value) || 7,
+  stress: parseInt((document.getElementById('ci_stress')||{}).value) || 5,
+  soreness: parseInt((document.getElementById('ci_soreness')||{}).value) || 4,
+  weight: parseFloat((document.getElementById('ci_weight')||{}).value) || null,
+  pain: ((document.getElementById('ci_pain')||{}).value || '').trim(),
+  notes: ((document.getElementById('ci_notes')||{}).value || '').trim()
+ };
+ var key = 'base_client_checkins_' + clientId;
+ var cis = JSON.parse(localStorage.getItem(key) || '[]');
+ cis.push(ci);
+ localStorage.setItem(key, JSON.stringify(cis));
+ window.toggleModal('checkInModal');
+ window.showToast(window.t('checkInSaved','Check-In gespeichert!'));
+};
 

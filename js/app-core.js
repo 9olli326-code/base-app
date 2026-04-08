@@ -597,7 +597,7 @@
    window.setupInjuryChips(); window.populateProfile(); 
    const dateInput = document.getElementById('dateInput'); if (dateInput) dateInput.valueAsDate = new Date();
    
-   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); if(window._checkDeloadReminder) window._checkDeloadReminder(); }, 4000);
+   window.renderTableFilters(); window.filterTable(window.currentCategory); window.calculateReadiness(); window.calculateStreak(); window.checkFirstWorkoutBanner(); window.checkAnonRegisterBanner(); window.showSocialProof(); window.checkReviewPrompt(); window.checkWeeklyReview(); if(window._updateSmartWorkoutVisibility) window._updateSmartWorkoutVisibility(); if(window._renderXPBar) window._renderXPBar(); if(window._renderRoutineCards) window._renderRoutineCards(); if(window._renderTodaysWorkout) window._renderTodaysWorkout(); if(window._renderHabitTracker) window._renderHabitTracker(); if(window._renderProgressPhotos) window._renderProgressPhotos(); setTimeout(function() { if(window._checkRetentionHooks) window._checkRetentionHooks(); if(window._checkDeloadReminder) window._checkDeloadReminder(); }, 4000);
    if (window._checkKiDiscovery) setTimeout(function() { window._checkKiDiscovery('init'); }, 3000);
    if (window.DESIGN_MORPH_ACTIVE && window._applyModeTheme) {
     var _dmInitMode = 'athlete';
@@ -5873,6 +5873,113 @@
 
   // ============================================================
   // EXERCISE SWAP
+  // === HABIT TRACKING ===
+  window._HABITS = [
+   { id:'sleep', label:'Schlaf', icon:'\uD83D\uDE34', unit:'h', placeholder:'7.5' },
+   { id:'water', label:'Wasser', icon:'\uD83D\uDCA7', unit:'L', placeholder:'2.5' },
+   { id:'protein', label:'Protein', icon:'\uD83E\uDD69', unit:'g', placeholder:'140' },
+   { id:'steps', label:'Schritte', icon:'\uD83D\uDC5F', unit:'', placeholder:'8000' },
+   { id:'mood', label:'Stimmung', icon:'\uD83E\uDDE0', unit:'/5', placeholder:'4' }
+  ];
+
+  window._renderHabitTracker = function() {
+   var container = document.getElementById('habitTrackerSection');
+   if (!container) return;
+   var today = new Date().toISOString().split('T')[0];
+   var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
+   var td = habits[today] || {};
+   var html = '<div class="flex items-center justify-between mb-2 px-1"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">' + window.t('dailyHabits','T\u00e4gliche Habits') + '</span><span class="text-[8px]" style="color:#555">' + today.slice(5) + '</span></div>';
+   html += '<div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">';
+   window._HABITS.forEach(function(h) {
+    var val = td[h.id];
+    var filled = val !== undefined && val !== null && val !== '';
+    html += '<button onclick="window._editHabit(\'' + h.id + '\')" class="flex-shrink-0 flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer pointer-events-auto" style="background:' + (filled ? 'rgba(163,201,168,0.08)' : 'var(--inner-bg-hex)') + ';border:1px solid ' + (filled ? 'rgba(163,201,168,0.15)' : 'var(--border-hex)') + ';min-width:56px" aria-label="' + h.label + '">';
+    html += '<span style="font-size:18px">' + h.icon + '</span>';
+    if (filled) html += '<span class="text-[9px] font-bold" style="color:#a3c9a8">' + val + h.unit + '</span>';
+    else html += '<span class="text-[7px]" style="color:#555">' + h.label + '</span>';
+    html += '</button>';
+   });
+   html += '</div>';
+   container.innerHTML = html;
+  };
+
+  window._editHabit = function(habitId) {
+   var h = window._HABITS.find(function(x) { return x.id === habitId; });
+   if (!h) return;
+   var today = new Date().toISOString().split('T')[0];
+   var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
+   var cur = (habits[today] || {})[habitId] || '';
+   window.showInputModal(h.icon + ' ' + h.label + (h.unit ? ' (' + h.unit + ')' : ''), h.placeholder, function(val) {
+    if (!val) return;
+    var num = parseFloat(val);
+    if (isNaN(num)) return;
+    if (!habits[today]) habits[today] = {};
+    habits[today][habitId] = num;
+    localStorage.setItem('base_habits', JSON.stringify(habits));
+    window._renderHabitTracker();
+    window.showToast(h.icon + ' ' + num + (h.unit||''));
+   }, String(cur));
+  };
+
+  // === PROGRESS PHOTOS ===
+  window._addProgressPhoto = function(clientId) {
+   var input = document.createElement('input');
+   input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+   input.className = 'pointer-events-auto';
+   input.onchange = function(e) {
+    var file = e.target.files[0]; if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+     var img = new Image();
+     img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var s = Math.min(1, 800 / img.width);
+      canvas.width = img.width * s; canvas.height = img.height * s;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      var compressed = canvas.toDataURL('image/jpeg', 0.7);
+      window._saveProgressPhoto(clientId, compressed);
+     };
+     img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+   };
+   input.click();
+  };
+
+  window._saveProgressPhoto = function(clientId, dataUrl) {
+   var key = clientId ? 'base_progress_photos_' + clientId : 'base_progress_photos';
+   var photos = JSON.parse(localStorage.getItem(key) || '[]');
+   photos.push({ id: 'p_' + Date.now(), date: new Date().toISOString().split('T')[0], data: dataUrl });
+   if (photos.length > 20) photos = photos.slice(-20);
+   localStorage.setItem(key, JSON.stringify(photos));
+   window.showToast(window.t('photoSaved', 'Foto gespeichert!'));
+   if (window._renderProgressPhotos) window._renderProgressPhotos(clientId);
+  };
+
+  window._renderProgressPhotos = function(clientId) {
+   var key = clientId ? 'base_progress_photos_' + clientId : 'base_progress_photos';
+   var containerId = clientId ? 'clientPhotos_' + clientId : 'progressPhotosSection';
+   var container = document.getElementById(containerId);
+   if (!container) return;
+   var photos = JSON.parse(localStorage.getItem(key) || '[]');
+   if (photos.length === 0) {
+    container.innerHTML = '<button onclick="window._addProgressPhoto(\'' + (clientId || '') + '\')" class="w-full py-4 rounded-xl text-center cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px dashed var(--border-hex)" aria-label="Foto aufnehmen"><span style="font-size:24px">\uD83D\uDCF8</span><br><span class="text-[10px] font-bold" style="color:#82828c">' + window.t('firstPhoto','Erstes Progress-Foto aufnehmen') + '</span></button>';
+    return;
+   }
+   var html = '<div class="flex items-center justify-between mb-2"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Progress Fotos</span><button onclick="window._addProgressPhoto(\'' + (clientId || '') + '\')" class="text-[9px] font-bold cursor-pointer pointer-events-auto" style="color:#a3c9a8" aria-label="Neues Foto">+ Neu</button></div>';
+   html += '<div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar" style="-webkit-overflow-scrolling:touch">';
+   photos.slice().reverse().forEach(function(p) {
+    html += '<div class="flex-shrink-0 relative" style="width:90px"><img src="' + p.data + '" class="w-full h-24 object-cover rounded-xl" loading="lazy" alt="Progress"><div class="absolute bottom-1 left-1 px-1 py-0.5 rounded text-[7px] font-bold" style="background:rgba(0,0,0,0.7);color:#fff">' + p.date.slice(5) + '</div></div>';
+   });
+   html += '</div>';
+   if (photos.length >= 2) {
+    var first = photos[0], last = photos[photos.length - 1];
+    var dd = Math.round((new Date(last.date) - new Date(first.date)) / 86400000);
+    html += '<div class="mt-2 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[9px] font-bold text-center mb-2" style="color:#a3c9a8">Vorher / Nachher \u00b7 ' + dd + ' Tage</div><div class="flex gap-2"><div class="flex-1 text-center"><img src="' + first.data + '" class="w-full h-32 object-cover rounded-lg" alt="Vorher"><span class="text-[7px]" style="color:#555">' + first.date + '</span></div><div class="flex-1 text-center"><img src="' + last.data + '" class="w-full h-32 object-cover rounded-lg" alt="Nachher"><span class="text-[7px]" style="color:#555">' + last.date + '</span></div></div></div>';
+   }
+   container.innerHTML = html;
+  };
+
   // === PROGRESSIVE OVERLOAD CHECK ===
   window._checkProgressiveOverload = function(exerciseName, matches) {
    if (!matches || matches.length < 3) return null;
