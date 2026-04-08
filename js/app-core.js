@@ -352,6 +352,7 @@
   window.DEFAULT_STRENGTH_SCHEMA = [ {"id": "saetze", "label": "Sätze", "type": "number", "placeholder": "z.B. 3"}, {"id": "wdh", "label": "Wiederholungen", "type": "number", "placeholder": "z.B. 10"}, {"id": "gewicht", "label": "Gewicht (kg)", "type": "number", "placeholder": "z.B. 80"} ]; // Note: labels translated at render time via schema_ keys
   window.DEFAULT_CARDIO_SCHEMA = [ {"id": "distanz", "label": "Distanz (km)", "type": "number", "placeholder": "z.B. 5.5"}, {"id": "dauer", "label": "Dauer (min)", "type": "number", "placeholder": "z.B. 30"}, {"id": "pace", "label": "Pace (min/km)", "type": "text", "placeholder": "z.B. 5:30"}, {"id": "puls", "label": "Ø Puls", "type": "number", "placeholder": "z.B. 140"} ];
   window.categorySchemas = { main: null, strength: { sportName: "Klassisches Krafttraining", schema: window.DEFAULT_STRENGTH_SCHEMA }, cardio: { sportName: "Ausdauersport", schema: window.DEFAULT_CARDIO_SCHEMA }, recovery: null };
+  window._MOBILITY_EXERCISES = ['Hip Flexor Stretch','Pigeon Pose','90/90 Stretch','Cat-Cow','Thoracic Spine Rotation','Couch Stretch','World\'s Greatest Stretch','Shoulder Dislocates','Deep Squat Hold','Calf Stretch Wall','Hamstring Stretch','Child\'s Pose','Downward Dog','Supine Twist','Foam Roll Quads','Foam Roll IT-Band','Lacrosse Ball Shoulders','Ankle Circles','Wrist Circles','Neck Rolls'];
   window.CAT_UI = { main: { name: 'Mein Sport', nameKey: 'modCus', icon: 'trophy', color: 'text-amber-400', border: 'border-amber-400', bg: 'bg-amber-400/20' }, strength: { name: 'Kraft', nameKey: 'tabStr', icon: 'dumbbell', color: 'text-cyan-400', border: 'border-cyan-400', bg: 'bg-cyan-400/20' }, cardio: { name: 'Ausdauer', nameKey: 'modCar', icon: 'heart-pulse', color: 'text-rose-400', border: 'border-rose-400', bg: 'bg-rose-400/20' }, recovery: { name: 'Mobility', nameKey: 'tabRec', icon: 'stretch-horizontal', color: 'text-emerald-400', border: 'border-emerald-400', bg: 'bg-emerald-400/20' } };
 
   window.CATEGORY_THEMES = {
@@ -573,8 +574,10 @@
      sportName: 'Mobility',
      schema: [
       { id: 'dauer', label: 'Dauer (min)', type: 'number', placeholder: 'z.B. 30' },
-      { id: 'fokus', label: 'Fokusbereich', type: 'text', placeholder: 'z.B. Hüfte, Schultern' },
-      { id: 'dehnzeit', label: 'Dehnzeit (sek)', type: 'number', placeholder: 'z.B. 120' },
+      { id: 'fokus', label: 'Fokusbereich', type: 'text', placeholder: 'z.B. H\u00fcfte, Schultern' },
+      { id: 'dehnzeit', label: 'Dehnzeit pro \u00dcbung (sek)', type: 'number', placeholder: 'z.B. 30' },
+      { id: 'seite', label: 'Seite', type: 'text', placeholder: 'Beide / Links / Rechts' },
+      { id: 'intensitaet', label: 'Intensit\u00e4t', type: 'text', placeholder: 'Leicht / Mittel / Tief' },
       { id: 'bewertung', label: 'Bewertung (1-10)', type: 'number', placeholder: 'z.B. 7' }
      ]
     };
@@ -691,7 +694,8 @@
     row.className = 'p-3.5 rounded-xl mb-2 pointer-events-auto';
     row.style.cssText = 'background:var(--inner-bg-hex);border:1px solid var(--border-hex)';
     row.innerHTML =
-     '<div class="flex items-center justify-between mb-3"><span class="text-[11px] font-black" style="color:#a3c9a8">' + window.t('lblSet','Satz') + ' ' + i + '</span></div>' +
+     '<div class="flex items-center justify-between mb-3"><span class="text-[11px] font-black" style="color:#a3c9a8">' + window.t('lblSet','Satz') + ' ' + i + '</span>' +
+     '<select id="setType_s' + i + '" class="pointer-events-auto outline-none" style="background:#1a1c1a;border:1px solid #252725;border-radius:6px;padding:2px 6px;font-size:8px;font-weight:700;color:#666;font-family:Outfit,sans-serif" aria-label="Set Type"><option value="normal">Normal</option><option value="warmup" style="color:#e8c86a">Warmup</option><option value="dropset" style="color:#8aafe8">Drop-Set</option><option value="failure" style="color:#e88a8a">Failure</option></select></div>' +
      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
       '<div style="background:#0f110f;border:1px solid #252725;border-radius:12px;padding:8px;display:flex;align-items:center;gap:2px;overflow:hidden">' +
        '<span style="font-size:8px;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:0.5px;width:24px;flex-shrink:0">' + window.t('lblReps','Wdh') + '</span>' +
@@ -742,7 +746,7 @@
      var _usePending = window._pendingSavedSets && window._pendingSavedSets.length > 0;
      if (_usePending) {
       window._pendingSavedSets.forEach(function(s) {
-       var setObj = { reps: s.reps, weight: s.weight }; if (s.rir !== null) setObj.rir = s.rir;
+       var setObj = { reps: s.reps, weight: s.weight }; if (s.rir !== null) setObj.rir = s.rir; if (s.type && s.type !== 'normal') setObj.type = s.type;
        entry.setDetails.push(setObj); vol += (s.reps * s.weight);
        if (s.weight > maxW) maxW = s.weight; setsDisplay.push(s.reps + 'x' + s.weight + 'kg');
       });
@@ -752,7 +756,8 @@
        const rEl = document.getElementById(`wdh_s${i}`); const wEl = document.getElementById(`weight_s${i}`); const rirEl = document.getElementById(`rir_s${i}`);
        if (rEl && wEl && rEl.value && wEl.value) {
         let r = parseInt(rEl.value) || 0; let w = parseFloat(wEl.value) || 0; let rir = (rirEl && rirEl.value !== '') ? parseInt(rirEl.value) : null;
-        var setObj = { reps: r, weight: w }; if (rir !== null && !isNaN(rir)) setObj.rir = rir;
+        var _stEl = document.getElementById('setType_s' + i); var _st = _stEl ? _stEl.value : 'normal';
+        var setObj = { reps: r, weight: w }; if (rir !== null && !isNaN(rir)) setObj.rir = rir; if (_st !== 'normal') setObj.type = _st;
         entry.setDetails.push(setObj); vol += (r * w);
         if (w > maxW) maxW = w; setsDisplay.push(`${r}x${w}kg`);
        }
@@ -838,8 +843,11 @@
    var reps = rEl ? parseFloat(rEl.value) : NaN;
    var weight = wEl ? parseFloat(wEl.value) : 0;
    var rir = (rirEl && rirEl.value !== '') ? parseInt(rirEl.value) : null;
+   var _stEl2 = document.getElementById('setType_s' + n); var _st2 = _stEl2 ? _stEl2.value : 'normal';
    if (isNaN(reps) || reps <= 0) { window.showToast(window.t('enterReps', 'Bitte Wiederholungen eingeben')); return; }
-   window._savedSets.push({ reps: reps, weight: weight || 0, rir: (rir !== null && !isNaN(rir)) ? rir : null });
+   var _setData = { reps: reps, weight: weight || 0, rir: (rir !== null && !isNaN(rir)) ? rir : null };
+   if (_st2 !== 'normal') _setData.type = _st2;
+   window._savedSets.push(_setData);
    // Auto-start workout timer on first set
    if (window._currentSetIndex === 0 && window._savedSets.length === 1 && !window.isWorkoutTimerRunning) {
     if (typeof window.toggleWorkoutTimer === 'function') window.toggleWorkoutTimer();
@@ -2999,7 +3007,11 @@
    const filtered = window.currentCategory === 'all'
     ? window.workouts
     : window.workouts.filter(w => w.category === window.currentCategory);
-   const unique = [...new Set(filtered.map(w => w.exercise).filter(Boolean))].sort();
+   var unique = [...new Set(filtered.map(w => w.exercise).filter(Boolean))];
+   if (window.currentCategory === 'recovery' && window._MOBILITY_EXERCISES) {
+    window._MOBILITY_EXERCISES.forEach(function(ex) { if (unique.indexOf(ex) === -1) unique.push(ex); });
+   }
+   unique.sort();
    list.innerHTML = unique.map(ex => `<option value="${window._escapeHtml(ex)}">`).join('');
   };
   window._tableSortKey = null;
@@ -3010,7 +3022,7 @@
    ['date','exercise','weight'].forEach(k => { const th = document.getElementById('sortTh_'+k); if(th) th.setAttribute('aria-sort', k === key ? (window._tableSortAsc ? 'ascending' : 'descending') : 'none'); });
    window.renderTable();
   };
-  window.renderTable = function() { const body = document.getElementById('historyTableBody'); const mobileList = document.getElementById('mobileCardList'); if(!body) return; body.innerHTML = ''; if(mobileList) mobileList.innerHTML = ''; if(!Array.isArray(window.workouts)) return; let preparedWorkouts = window.workouts.map(w => { if(w.id && String(w.id).startsWith('strava_')) w.category = 'cardio'; return w; }); let filteredWorkouts = preparedWorkouts; if (window.currentTableFilter !== 'all') filteredWorkouts = preparedWorkouts.filter(w => w.category === window.currentTableFilter); filteredWorkouts = filteredWorkouts.filter(w => window.currentView === 'active' ? !w.archived : w.archived); if(window._tableSortKey) { const dir = window._tableSortAsc ? 1 : -1; filteredWorkouts.sort((a, b) => { if(window._tableSortKey === 'date') { return dir * (a.date || '').localeCompare(b.date || ''); } else if(window._tableSortKey === 'exercise') { return dir * (a.exercise || '').localeCompare(b.exercise || ''); } else if(window._tableSortKey === 'weight') { return dir * ((a.maxWeight || 0) - (b.maxWeight || 0)); } return 0; }); } const reversed = window._tableSortKey ? filteredWorkouts : [...filteredWorkouts].reverse(); const hist = {}; reversed.forEach(w => { const k = w.category + '_' + w.exercise.toLowerCase(); w.progressBadge = ''; if(hist[k]) { const l = hist[k]; if (w.category === 'strength') { let curV = w.volume || 0, lastV = l.volume || 0; let curW = w.maxWeight || 0, lastW = l.maxWeight || 0; if (curW > lastW && lastW > 0) { const pct = (((curW - lastW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${pct}% kg</span>`; } else if (curW < lastW && lastW > 0) { const pct = (((lastW - curW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">-${pct}% kg</span>`; } } else if (w.category === 'cardio' && w.data && l.data) { let curDist = parseFloat((w.data['Distanz (km)'] || w.data['Distanz'] || '0').toString().replace(',','.')); let lastDist = parseFloat((l.data['Distanz (km)'] || l.data['Distanz'] || '0').toString().replace(',','.')); if(curDist > lastDist && lastDist > 0) { w.progressBadge = `<span class="bg-[#fc4c02]/10 text-[#fc4c02] border border-[#fc4c02]/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${(curDist - lastDist).toFixed(2)} km</span>`; } } } hist[k] = w; }); let lastSessionId = null; filteredWorkouts.forEach(w => { if (window.currentView === 'archive' && w.archived && w.sessionId && w.sessionId !== lastSessionId) { if (w.sessionDuration || w.sessionComment) { const sessionTr = document.createElement('tr'); sessionTr.className = "bg-primary/5 border-b border-primary/20"; sessionTr.innerHTML = `<td colspan="4" class="p-3 px-5 shadow-sm"><div class="flex items-center justify-between"><div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">${w.sessionDuration ? `<span class="text-[10px] font-black text-primary flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="timer" class="w-3.5 h-3.5"></i> ${w.sessionDuration}</span>` : ''}${w.sessionComment ? `<span class="text-[11px] text-zinc-300 italic flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-zinc-500"></i> "${window._escapeHtml(w.sessionComment)}"</span>` : ''}</div><button onclick="window.shareWorkout(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-[10px] font-black bg-primary/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded uppercase tracking-widest hover:bg-primary/20 transition-colors flex items-center gap-1 shadow-sm cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-3 h-3"></i> Posten</button></div></td>`; body.appendChild(sessionTr); } lastSessionId = w.sessionId; } let dataHtml = ""; if (w.category === 'strength' && w.setDetails && w.setDetails.length > 0) { dataHtml = `<div class="flex flex-wrap gap-2">`; w.setDetails.forEach((s, i) => { dataHtml += `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${s.reps}x${s.weight}kg${s.rir != null ? '<span class="ml-1 text-[8px]" style="color:#a3c9a8">R'+s.rir+'</span>' : ''}</span>`; }); dataHtml += `</div>`; } else if(w.data) { const keys = Object.keys(w.data); const det = keys.map(k => `<div class="flex flex-col mb-1 sm:mb-0 mr-4"><span class="text-[9px] text-zinc-500 uppercase font-black tracking-widest">${window._escapeHtml(k)}</span><span class="text-white font-bold text-xs">${window._escapeHtml(String(w.data[k]))}</span></div>`).join(''); dataHtml = `<div class="flex flex-wrap items-center">${det}</div>`; } let sportCatDisplay = w.sportCategory || 'Aktivität'; if(w.category === 'strength') sportCatDisplay = w.equipment || 'Krafttraining'; else if(w.category === 'cardio') sportCatDisplay = w.sportCategory || 'Ausdauer'; const cat = w.category || 'main'; const ui = window.CAT_UI[cat] || window.CAT_UI['main']; const isStrava = w.id && String(w.id).startsWith('strava_'); const stravaBadge = isStrava ? `<span class="bg-[#fc4c02]/20 text-[#fc4c02] text-[9px] uppercase font-black px-1.5 py-0.5 rounded ml-2">Strava</span>` : ''; const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 border-b border-zinc-800/40 transition-colors group"; tr.innerHTML = ` <td class="px-5 py-4 shadow-sm"><div class="flex flex-col gap-1"><span class="text-zinc-500 text-[10px] font-black italic">${w.date.substring(5)}</span><span class="inline-flex items-center justify-center w-6 h-6 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-3 h-3"></i></span></div></td> <td class="px-5 py-4 shadow-sm"><div class="flex flex-col"><span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5 flex items-center">${window._escapeHtml(sportCatDisplay)} ${stravaBadge}</span><span onclick="event.stopPropagation(); window.openExerciseHistory('${window._escapeHtml(w.exercise).replace(/'/g, "&#39;")}')" class="font-bold text-white text-sm tracking-tight flex items-center cursor-pointer pointer-events-auto hover:text-primary transition-colors">${window._escapeHtml(w.exercise)} ${w.progressBadge || ''}</span></div></td> <td class="px-5 py-4 shadow-sm">${dataHtml}</td> <td class="px-5 py-4 text-right whitespace-nowrap"><button aria-label="Teilen" onclick="window.shareWorkout(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-zinc-600 hover:text-primary transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i></button>${!isStrava && !w.archived ? `<button aria-label="Edit 2" onclick="window.editEntry(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-zinc-600 hover:text-primary transition-all p-2 opacity-0 group-hover:opacity-100 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>` : ''}<button aria-label="Löschen" onclick="window.deleteEntry(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-zinc-600 hover:text-rose-500 transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button></td> `; body.appendChild(tr);
+  window.renderTable = function() { const body = document.getElementById('historyTableBody'); const mobileList = document.getElementById('mobileCardList'); if(!body) return; body.innerHTML = ''; if(mobileList) mobileList.innerHTML = ''; if(!Array.isArray(window.workouts)) return; let preparedWorkouts = window.workouts.map(w => { if(w.id && String(w.id).startsWith('strava_')) w.category = 'cardio'; return w; }); let filteredWorkouts = preparedWorkouts; if (window.currentTableFilter !== 'all') filteredWorkouts = preparedWorkouts.filter(w => w.category === window.currentTableFilter); filteredWorkouts = filteredWorkouts.filter(w => window.currentView === 'active' ? !w.archived : w.archived); if(window._tableSortKey) { const dir = window._tableSortAsc ? 1 : -1; filteredWorkouts.sort((a, b) => { if(window._tableSortKey === 'date') { return dir * (a.date || '').localeCompare(b.date || ''); } else if(window._tableSortKey === 'exercise') { return dir * (a.exercise || '').localeCompare(b.exercise || ''); } else if(window._tableSortKey === 'weight') { return dir * ((a.maxWeight || 0) - (b.maxWeight || 0)); } return 0; }); } const reversed = window._tableSortKey ? filteredWorkouts : [...filteredWorkouts].reverse(); const hist = {}; reversed.forEach(w => { const k = w.category + '_' + w.exercise.toLowerCase(); w.progressBadge = ''; if(hist[k]) { const l = hist[k]; if (w.category === 'strength') { let curV = w.volume || 0, lastV = l.volume || 0; let curW = w.maxWeight || 0, lastW = l.maxWeight || 0; if (curW > lastW && lastW > 0) { const pct = (((curW - lastW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${pct}% kg</span>`; } else if (curW < lastW && lastW > 0) { const pct = (((lastW - curW) / lastW) * 100).toFixed(1); w.progressBadge = `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">-${pct}% kg</span>`; } } else if (w.category === 'cardio' && w.data && l.data) { let curDist = parseFloat((w.data['Distanz (km)'] || w.data['Distanz'] || '0').toString().replace(',','.')); let lastDist = parseFloat((l.data['Distanz (km)'] || l.data['Distanz'] || '0').toString().replace(',','.')); if(curDist > lastDist && lastDist > 0) { w.progressBadge = `<span class="bg-[#fc4c02]/10 text-[#fc4c02] border border-[#fc4c02]/20 text-[10px] px-1.5 py-0.5 rounded-full shadow-sm ml-2">+${(curDist - lastDist).toFixed(2)} km</span>`; } } } hist[k] = w; }); let lastSessionId = null; filteredWorkouts.forEach(w => { if (window.currentView === 'archive' && w.archived && w.sessionId && w.sessionId !== lastSessionId) { if (w.sessionDuration || w.sessionComment) { const sessionTr = document.createElement('tr'); sessionTr.className = "bg-primary/5 border-b border-primary/20"; sessionTr.innerHTML = `<td colspan="4" class="p-3 px-5 shadow-sm"><div class="flex items-center justify-between"><div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">${w.sessionDuration ? `<span class="text-[10px] font-black text-primary flex items-center gap-1.5 uppercase tracking-widest"><i data-lucide="timer" class="w-3.5 h-3.5"></i> ${w.sessionDuration}</span>` : ''}${w.sessionComment ? `<span class="text-[11px] text-zinc-300 italic flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-zinc-500"></i> "${window._escapeHtml(w.sessionComment)}"</span>` : ''}</div><button onclick="window.shareWorkout(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-[10px] font-black bg-primary/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded uppercase tracking-widest hover:bg-primary/20 transition-colors flex items-center gap-1 shadow-sm cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-3 h-3"></i> Posten</button></div></td>`; body.appendChild(sessionTr); } lastSessionId = w.sessionId; } let dataHtml = ""; if (w.category === 'strength' && w.setDetails && w.setDetails.length > 0) { dataHtml = `<div class="flex flex-wrap gap-2">`; w.setDetails.forEach((s, i) => { var _tc = {warmup:'#e8c86a',dropset:'#8aafe8',failure:'#e88a8a'}; var _tb = (s.type && s.type !== 'normal') ? '<span style="font-size:7px;font-weight:800;color:'+(_tc[s.type]||'#666')+';margin-left:3px;text-transform:uppercase">'+s.type+'</span>' : ''; dataHtml += `<span class="bg-zinc-800 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-700">${s.reps}x${s.weight}kg${s.rir != null ? '<span class="ml-1 text-[8px]" style="color:#a3c9a8">R'+s.rir+'</span>' : ''}${_tb}</span>`; }); dataHtml += `</div>`; } else if(w.data) { const keys = Object.keys(w.data); const det = keys.map(k => `<div class="flex flex-col mb-1 sm:mb-0 mr-4"><span class="text-[9px] text-zinc-500 uppercase font-black tracking-widest">${window._escapeHtml(k)}</span><span class="text-white font-bold text-xs">${window._escapeHtml(String(w.data[k]))}</span></div>`).join(''); dataHtml = `<div class="flex flex-wrap items-center">${det}</div>`; } let sportCatDisplay = w.sportCategory || 'Aktivität'; if(w.category === 'strength') sportCatDisplay = w.equipment || 'Krafttraining'; else if(w.category === 'cardio') sportCatDisplay = w.sportCategory || 'Ausdauer'; const cat = w.category || 'main'; const ui = window.CAT_UI[cat] || window.CAT_UI['main']; const isStrava = w.id && String(w.id).startsWith('strava_'); const stravaBadge = isStrava ? `<span class="bg-[#fc4c02]/20 text-[#fc4c02] text-[9px] uppercase font-black px-1.5 py-0.5 rounded ml-2">Strava</span>` : ''; const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 border-b border-zinc-800/40 transition-colors group"; tr.innerHTML = ` <td class="px-5 py-4 shadow-sm"><div class="flex flex-col gap-1"><span class="text-zinc-500 text-[10px] font-black italic">${w.date.substring(5)}</span><span class="inline-flex items-center justify-center w-6 h-6 rounded border ${ui.bg} ${ui.border} ${ui.color}"><i data-lucide="${ui.icon}" class="w-3 h-3"></i></span></div></td> <td class="px-5 py-4 shadow-sm"><div class="flex flex-col"><span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5 flex items-center">${window._escapeHtml(sportCatDisplay)} ${stravaBadge}</span><span onclick="event.stopPropagation(); window.openExerciseHistory('${window._escapeHtml(w.exercise).replace(/'/g, "&#39;")}')" class="font-bold text-white text-sm tracking-tight flex items-center cursor-pointer pointer-events-auto hover:text-primary transition-colors">${window._escapeHtml(w.exercise)} ${w.progressBadge || ''}</span></div></td> <td class="px-5 py-4 shadow-sm">${dataHtml}</td> <td class="px-5 py-4 text-right whitespace-nowrap"><button aria-label="Teilen" onclick="window.shareWorkout(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-zinc-600 hover:text-primary transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="share-2" class="w-4 h-4 pointer-events-none"></i></button>${!isStrava && !w.archived ? `<button aria-label="Edit 2" onclick="window.editEntry(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-zinc-600 hover:text-primary transition-all p-2 opacity-0 group-hover:opacity-100 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>` : ''}<button aria-label="Löschen" onclick="window.deleteEntry(this.dataset.wid)" data-wid="${window._escapeHtml(w.id)}" class="text-zinc-600 hover:text-rose-500 transition-all p-2 cursor-pointer pointer-events-auto interactive-z"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button></td> `; body.appendChild(tr);
   if(mobileList) {
     const card = document.createElement('div');
     card.className = 'relative rounded-2xl p-5 transition-all group hover:-translate-y-0.5';
@@ -3498,6 +3510,7 @@
    if(el) el.classList.add('hidden');
   };
 
+  window._lastTimeValues = null;
   window._showLastTime = function(exerciseName) {
    var overlay = document.getElementById('lastTimeOverlay');
    var valuesEl = document.getElementById('lastTimeValues');
@@ -3511,18 +3524,45 @@
    if(matches.length === 0) {
     matches = workouts.filter(function(w) { return w.exercise && (w.exercise.toLowerCase().includes(nameLower) || nameLower.includes(w.exercise.toLowerCase())); });
    }
-   if(matches.length === 0) { window._hideLastTime(); return; }
+   if(matches.length === 0) { window._hideLastTime(); window._lastTimeValues = null; return; }
    matches.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
    var last = matches[0];
    var category = last.category || window.currentCategory || 'strength';
+   // Save last set values for auto-fill
+   if(category === 'strength' && last.setDetails && last.setDetails.length > 0) {
+    window._lastTimeValues = last.setDetails.map(function(s) { return { reps: s.reps, weight: s.weight, rir: s.rir != null ? s.rir : null }; });
+   } else { window._lastTimeValues = null; }
    var daysDiff = Math.floor((Date.now() - new Date(last.date).getTime()) / 86400000);
    var dateStr = daysDiff === 0 ? 'Heute' : daysDiff === 1 ? 'Gestern' : daysDiff < 7 ? 'vor ' + daysDiff + ' Tagen' : daysDiff < 30 ? 'vor ' + Math.floor(daysDiff/7) + ' Wo' : new Date(last.date).toLocaleDateString('de-DE',{day:'numeric',month:'short'});
    dateEl.textContent = dateStr;
    var result = window._getProgressionData(last, matches, category);
-   valuesEl.innerHTML = result.display;
+   var applyBtn = (window._lastTimeValues && window._lastTimeValues.length > 0) ? '<button onclick="window._applyLastValues()" class="w-full mt-2 py-2 rounded-xl text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.25);color:#a3c9a8" aria-label="Letzte Werte uebernehmen">' + window.t('applyLast','Letzte Werte \u00fcbernehmen') + '</button>' : '';
+   valuesEl.innerHTML = result.display + applyBtn;
    if(result.suggestion) { suggestionEl.classList.remove('hidden'); sugTextEl.textContent = result.suggestion; }
    else { suggestionEl.classList.add('hidden'); }
    overlay.classList.remove('hidden');
+  };
+
+  window._applyLastValues = function() {
+   if (!window._lastTimeValues || !window._lastTimeValues.length) return;
+   var sInput = document.getElementById('setsInput');
+   if (sInput && window._lastTimeValues.length !== parseInt(sInput.value)) {
+    sInput.value = window._lastTimeValues.length;
+    window.generateSetFields(window._lastTimeValues.length);
+   }
+   setTimeout(function() {
+    for (var i = 0; i < window._lastTimeValues.length; i++) {
+     var n = i + 1;
+     var last = window._lastTimeValues[i];
+     var repsInput = document.getElementById('wdh_s' + n);
+     var weightInput = document.getElementById('weight_s' + n);
+     var rirInput = document.getElementById('rir_s' + n);
+     if (repsInput && last.reps) repsInput.value = last.reps;
+     if (weightInput && last.weight) weightInput.value = last.weight % 1 === 0 ? last.weight.toFixed(0) : last.weight.toFixed(1);
+     if (rirInput && last.rir != null) rirInput.value = last.rir;
+    }
+    window.showToast(window.t('lastValuesApplied', 'Letzte Werte \u00fcbernommen!'));
+   }, 100);
   };
 
   window._getProgressionData = function(last, allMatches, category) {
