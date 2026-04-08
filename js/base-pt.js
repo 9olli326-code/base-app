@@ -1086,7 +1086,9 @@ window._initSessionDragDrop = function() {
         window._renderSessionExercises();
     }
 
-    // Touch
+    // Touch — guard against duplicate listeners
+    if (container._sessionDragAttached) return;
+    container._sessionDragAttached = true;
     container.addEventListener('touchstart', function(e) {
         var h = e.target.closest('.drag-handle');
         if(!h) return;
@@ -1113,12 +1115,15 @@ window._initSessionDragDrop = function() {
         dragIdx = parseInt(item.dataset.exIdx);
         item.style.opacity = '0.5';
     });
-    document.addEventListener('mousemove', function(e) {
-        if(dragIdx === null) return;
-        var targetIdx = getIdxFromY(e.clientY);
-        doSwap(targetIdx);
-    });
-    document.addEventListener('mouseup', function() { dragIdx = null; });
+    if (!document._sessionMouseDragAttached) {
+        document._sessionMouseDragAttached = true;
+        document.addEventListener('mousemove', function(e) {
+            if(dragIdx === null) return;
+            var targetIdx = getIdxFromY(e.clientY);
+            doSwap(targetIdx);
+        });
+        document.addEventListener('mouseup', function() { dragIdx = null; });
+    }
 };
 
 window.openSessionModal = function(preselectedClientId) {
