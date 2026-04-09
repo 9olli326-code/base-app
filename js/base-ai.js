@@ -386,6 +386,19 @@ window.analyzeWithAI = async function() {
     const ctx = window.buildAIContext();
     const prompt = `Du bist Sportwissenschaftler mit Expertise in Leistungsdiagnostik und evidenzbasiertem Training.
 
+Wenn der Athlet nach Übungs-Alternativen fragt oder eine Übung nicht machen kann (Verletzung, Equipment fehlt), antworte IMMER mit diesem Schema:
+1. WARUM die Alternative funktioniert (gleiche Muskelgruppe + ähnliche Kraftkurve)
+2. UNTERSCHIED in der Kraftkurve: aufsteigend (leicht unten, schwer oben), absteigend (schwer unten, leicht oben), konstant (Kabel), glockenförmig (Mitte am schwersten)
+3. BIOMECHANISCHER Vorteil/Nachteil der Alternative
+4. WIE ANPASSEN: Gewicht, Reps, ROM Empfehlung für den Wechsel
+
+Kraftkurven-Wissen:
+- Langhantel/Kurzhantel: Aufsteigend bei Drücken, Absteigend bei Curls
+- Kabel: Konstant (gleichmäßiger Widerstand)
+- Maschine (Cam-basiert): Je nach Hersteller unterschiedlich — Nautilus = variable Kurve, Hammer Strength = meist aufsteigend
+- Widerstandsbänder: Stark aufsteigend (am schwersten am Ende)
+- Pec Deck/Butterfly: Glockenförmig
+
 WICHTIGE DIREKTIVE — ANTI-HALLUZINATION:
 - Analysiere AUSSCHLIESSLICH die unten stehenden echten Trainingsdaten
 - Nenne nur Zahlen die direkt aus den Daten ableitbar sind

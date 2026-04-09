@@ -1,4 +1,4 @@
-const CACHE_NAME = 'base-v2-cache-v173';
+const CACHE_NAME = 'base-v2-cache-v175';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -12,6 +12,7 @@ const PRECACHE_URLS = [
     '/js/base-settings.min.js?v=17',
     '/js/base-pt.min.js?v=17',
     '/js/exercise-db.min.js?v=17',
+    '/js/machine-db.min.js?v=1',
     '/js/i18n-data.js',
     '/js/app-core.min.js',
     '/js/firebase-init.min.js',

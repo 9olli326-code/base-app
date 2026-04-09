@@ -3203,7 +3203,13 @@
 
    if(!date || !weight) { window.showToast('Bitte Datum und Gewicht eintragen!'); return; }
 
-   const entry = { id: Date.now().toString(), date, weight, fat, chest, waist, hip };
+   const bicep_left = parseFloat(document.getElementById('bodyBicepLeft')?.value) || null;
+   const bicep_right = parseFloat(document.getElementById('bodyBicepRight')?.value) || null;
+   const thigh_left = parseFloat(document.getElementById('bodyThighLeft')?.value) || null;
+   const thigh_right = parseFloat(document.getElementById('bodyThighRight')?.value) || null;
+   const calf_left = parseFloat(document.getElementById('bodyCalfLeft')?.value) || null;
+   const calf_right = parseFloat(document.getElementById('bodyCalfRight')?.value) || null;
+   const entry = { id: Date.now().toString(), date, weight, fat, chest, waist, hip, bicep_left, bicep_right, thigh_left, thigh_right, calf_left, calf_right };
    const existing = bodyMeasurements.findIndex(e => e.date === date);
    if(existing > -1) bodyMeasurements[existing] = entry;
    else bodyMeasurements.unshift(entry);
@@ -3212,7 +3218,7 @@
    window.saveBodyData();
    window.renderBodySection();
 
-   ['bodyWeight','bodyFat','bodyChest','bodyWaist','bodyHip'].forEach(id => {
+   ['bodyWeight','bodyFat','bodyChest','bodyWaist','bodyHip','bodyBicepLeft','bodyBicepRight','bodyThighLeft','bodyThighRight','bodyCalfLeft','bodyCalfRight'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
    });
    window.showToast('Messung gespeichert! ✅');
@@ -3391,6 +3397,9 @@
     window.renderMuscleHeatmap();
     if (window._renderMuscleDistributionChart) window._renderMuscleDistributionChart();
     if (window._renderPRTimeline) window._renderPRTimeline();
+    if (window._renderMuscleFrequencyHeatmap) window._renderMuscleFrequencyHeatmap();
+    if (window._renderVolumeLandmarks) window._renderVolumeLandmarks();
+    if (window._renderPeriodizationChart) window._renderPeriodizationChart();
     window._refreshLucide();
     return;
    }
@@ -3441,6 +3450,7 @@
     workoutPanels.forEach(p => p?.classList.add('hidden'));
     if(bodyPanel) { bodyPanel.classList.remove('hidden'); bodyPanel.classList.add('block'); }
     window.renderBodySection();
+    if (window._renderSymmetryCheck) window._renderSymmetryCheck();
    } else {
     workoutPanels.forEach(p => { if(p && p.id === 'viewTableContainer') p.classList.remove('hidden'); });
     if(bodyPanel) { bodyPanel.classList.add('hidden'); bodyPanel.classList.remove('block'); }
@@ -3480,6 +3490,7 @@
     if (window._renderKiDiscoveryHints) window._renderKiDiscoveryHints();
    }
    if(tab === 'analyse' && window.currentView === 'chart') window.initAnalytics();
+   if(tab === 'analyse') { if (window._renderVolumeLandmarks) window._renderVolumeLandmarks(); if (window._renderPeriodizationChart) window._renderPeriodizationChart(); }
    if(tab === 'menu') { setTimeout(() => { if(window.updatePushToggleUI) window.updatePushToggleUI(); }, 100); window.renderGoals && window.renderGoals(); }
    window._refreshLucide();
   };
@@ -6118,10 +6129,14 @@
    var cS = entry.setDetails.length, pS = prev.setDetails.length;
    var arrow = function(d, u) { if (d > 0) return '<span style="color:#a3c9a8">\u2191+' + (d%1===0?d:d.toFixed(1)) + (u||'') + '</span>'; if (d < 0) return '<span style="color:#e88a8a">\u2193' + (d%1===0?d:d.toFixed(1)) + (u||'') + '</span>'; return '<span style="color:#82828c">\u2192</span>'; };
    var html = '<div class="text-center mb-3"><p class="text-sm font-bold text-white mb-1">' + window.t('vsLast','vs. letztes Mal') + '</p><p class="text-[9px] mb-3" style="color:#82828c">' + window._escapeHtml(entry.exercise) + ' \u00b7 ' + prev.date + '</p></div>';
-   html += '<div class="grid grid-cols-3 gap-3 mb-2">';
+   var currEffective = window._calculateEffectiveReps ? window._calculateEffectiveReps(entry.setDetails) : null;
+   var prevEffective = prev && window._calculateEffectiveReps ? window._calculateEffectiveReps(prev.setDetails) : null;
+   var effDiff = (currEffective && prevEffective) ? currEffective.ratio - prevEffective.ratio : 0;
+   html += '<div class="grid grid-cols-4 gap-3 mb-2">';
    html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Volumen</div><div class="text-xs font-black">' + arrow(cV-pV,'kg') + '</div></div>';
    html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Max kg</div><div class="text-xs font-black">' + arrow(cM-pM,'kg') + '</div></div>';
    html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Sets</div><div class="text-xs font-black">' + arrow(cS-pS) + '</div></div>';
+   html += '<div class="text-center p-2.5 rounded-xl" style="background:var(--inner-bg-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Effective Reps</div><div class="text-xs font-black">' + arrow(effDiff) + '</div>' + (currEffective ? '<div class="text-[8px]" style="color:#555">' + currEffective.ratio + '% effektiv</div>' : '') + '</div>';
    html += '</div>';
    var c = document.getElementById('workoutCompContent');
    if (c) { c.innerHTML = html; window.toggleModal('workoutCompModal'); }
@@ -6184,6 +6199,246 @@
    window.toggleModal('wkFeedbackModal');
    var msgs = ['','N\u00e4chstes Mal wird besser! \uD83D\uDCAA','Akzeptiert, weitermachen!','Solide Session! \u2705','Starke Leistung! \uD83C\uDFAF','BEAST MODE! \uD83D\uDD25'];
    window.showToast(msgs[rating] || '\u2705');
+   setTimeout(function() { if (window._showPumpSorenessRating) window._showPumpSorenessRating(); }, 500);
+  };
+
+  // ============================================================
+  // MASCHINEN-BIBLIOTHEK UI
+  // ============================================================
+  window._openMachineLibrary = function() {
+   window._renderMachineCategories();
+   var det = document.getElementById('machineDetail');
+   var cat = document.getElementById('machineCategories');
+   var res = document.getElementById('machineSearchResults');
+   var inp = document.getElementById('machineSearchInput');
+   if (det) det.classList.add('hidden');
+   if (cat) cat.classList.remove('hidden');
+   if (res) res.innerHTML = '';
+   if (inp) inp.value = '';
+   window.toggleModal('machineLibModal');
+  };
+
+  window._onMachineSearch = function(query) {
+   var resultsC = document.getElementById('machineSearchResults');
+   var catC = document.getElementById('machineCategories');
+   var detC = document.getElementById('machineDetail');
+   if (!resultsC) return;
+   if (!query || query.length < 2) {
+    resultsC.innerHTML = '';
+    if (catC) catC.classList.remove('hidden');
+    if (detC) detC.classList.add('hidden');
+    return;
+   }
+   if (catC) catC.classList.add('hidden');
+   if (detC) detC.classList.add('hidden');
+   var results = window._searchMachines ? window._searchMachines(query) : [];
+   if (results.length === 0) {
+    var eq = window._escapeHtml(query);
+    resultsC.innerHTML = '<div class="text-center py-6"><p class="text-[10px]" style="color:#82828c">Keine Maschine gefunden</p><button onclick="window._askAIMachineInfo(\'' + eq.replace(/'/g,'') + '\')" class="mt-3 px-4 py-2 rounded-xl text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8">KI fragen</button></div>';
+    return;
+   }
+   var html = results.map(function(m) {
+    var muscles = (m.primaryMuscles || []).slice(0, 2).join(', ');
+    var sc = window._STRENGTH_CURVES || {};
+    var curveColor = m.strengthCurve === 'ascending' ? '#a3c9a8' : m.strengthCurve === 'descending' ? '#8aafe8' : m.strengthCurve === 'constant' ? '#e8c86a' : '#c9a3c9';
+    var curveName = sc[m.strengthCurve] ? sc[m.strengthCurve].de : (m.strengthCurve || '');
+    return '<button onclick="window._showMachineDetail(\'' + m.id + '\')" class="w-full p-3 rounded-xl text-left cursor-pointer pointer-events-auto mb-2 transition-colors" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="flex items-center justify-between mb-1"><span class="text-xs font-bold text-white">' + window._escapeHtml(m.name) + '</span><span class="text-[7px] font-bold px-2 py-0.5 rounded-full" style="background:' + curveColor + '22;color:' + curveColor + '">' + window._escapeHtml(curveName) + '</span></div><div class="text-[9px]" style="color:#82828c">' + window._escapeHtml(muscles) + ' \u00b7 ' + window._escapeHtml(m.manufacturer || '') + '</div></button>';
+   }).join('');
+   resultsC.innerHTML = html;
+  };
+
+  window._renderMachineCategories = function() {
+   var container = document.getElementById('machineCategories');
+   if (!container || !window._MACHINE_DB) return;
+   var categories = {};
+   window._MACHINE_DB.forEach(function(m) {
+    var muscle = (m.primaryMuscles || ['Sonstige'])[0];
+    var group = 'Sonstige';
+    if (/Brust|Pector/i.test(muscle)) group = 'Brust';
+    else if (/Lat|Rauten|Trapez/i.test(muscle)) group = 'R\u00fccken';
+    else if (/Quad|Hamstring|Glut|Gastro/i.test(muscle)) group = 'Beine';
+    else if (/Schulter|Delt/i.test(muscle)) group = 'Schultern';
+    else if (/Bizeps|Trizeps|Brachi/i.test(muscle)) group = 'Arme';
+    else if (/Obliq|Rectus|Transver/i.test(muscle)) group = 'Core';
+    else if (/Abh/i.test(muscle)) group = 'Sonstige';
+    if (!categories[group]) categories[group] = [];
+    categories[group].push(m);
+   });
+   var order = ['Brust', 'R\u00fccken', 'Beine', 'Schultern', 'Arme', 'Core', 'Sonstige'];
+   var html = '<div class="text-[9px] font-bold uppercase tracking-wider mb-3" style="color:#82828c">Nach Muskelgruppe (' + window._MACHINE_DB.length + ' Maschinen)</div>';
+   order.forEach(function(group) {
+    if (!categories[group]) return;
+    html += '<div class="mb-3"><div class="text-[10px] font-bold text-white mb-2">' + group + ' (' + categories[group].length + ')</div><div class="flex flex-wrap gap-1">';
+    categories[group].forEach(function(m) {
+     html += '<button onclick="window._showMachineDetail(\'' + m.id + '\')" class="px-2.5 py-1.5 rounded-lg text-[8px] font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:#ccc">' + window._escapeHtml(m.name.replace('Maschine','').replace('Machine','').trim().substring(0, 28)) + '</button>';
+    });
+    html += '</div></div>';
+   });
+   html += '<div class="mt-4 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[9px] font-bold uppercase tracking-wider mb-2" style="color:#82828c">Kraftkurven-Guide</div>';
+   var sc = window._STRENGTH_CURVES || {};
+   var colors = { ascending: '#a3c9a8', descending: '#8aafe8', constant: '#e8c86a', 'bell-shaped': '#c9a3c9' };
+   Object.keys(sc).forEach(function(key) {
+    html += '<div class="flex items-start gap-2 mb-2"><div class="w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background:' + (colors[key]||'#888') + '"></div><div><span class="text-[9px] font-bold" style="color:' + (colors[key]||'#888') + '">' + sc[key].de + '</span><div class="text-[8px]" style="color:#555">' + sc[key].desc + '</div></div></div>';
+   });
+   html += '</div>';
+   container.innerHTML = html;
+  };
+
+  window._showMachineDetail = function(machineId) {
+   var m = window._getMachineById ? window._getMachineById(machineId) : null;
+   if (!m) return;
+   var container = document.getElementById('machineDetail');
+   var catC = document.getElementById('machineCategories');
+   var resC = document.getElementById('machineSearchResults');
+   if (!container) return;
+   if (catC) catC.classList.add('hidden');
+   if (resC) resC.innerHTML = '';
+   container.classList.remove('hidden');
+   var sc = window._STRENGTH_CURVES || {};
+   var curveColor = m.strengthCurve === 'ascending' ? '#a3c9a8' : m.strengthCurve === 'descending' ? '#8aafe8' : m.strengthCurve === 'constant' ? '#e8c86a' : '#c9a3c9';
+   var curveName = sc[m.strengthCurve] ? sc[m.strengthCurve].de : (m.strengthCurve || '');
+   var h = '<button onclick="document.getElementById(\'machineDetail\').classList.add(\'hidden\');document.getElementById(\'machineCategories\').classList.remove(\'hidden\')" class="flex items-center gap-1 mb-3 text-[10px] font-bold cursor-pointer pointer-events-auto" style="color:#a3c9a8">\u2190 Zur\u00fcck</button>';
+   h += '<div class="mb-4"><h4 class="text-base font-black text-white mb-1">' + window._escapeHtml(m.name) + '</h4><div class="flex items-center gap-2 flex-wrap"><span class="text-[8px] font-bold px-2 py-0.5 rounded-full" style="background:' + curveColor + '22;color:' + curveColor + '">Kraftkurve: ' + window._escapeHtml(curveName) + '</span><span class="text-[8px] font-bold px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.05);color:#82828c">' + window._escapeHtml(m.manufacturer || '') + '</span><span class="text-[8px] font-bold px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.05);color:#82828c">' + window._escapeHtml(m.category || '') + '</span></div></div>';
+   h += '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold uppercase tracking-wider mb-2" style="color:#82828c">Muskelaktivierung</div><div class="mb-1">';
+   (m.primaryMuscles || []).forEach(function(p) { h += '<span class="inline-block text-[9px] font-bold mr-1 mb-1 px-2 py-0.5 rounded" style="background:rgba(163,201,168,0.15);color:#a3c9a8">' + window._escapeHtml(p) + '</span>'; });
+   h += '</div>';
+   if (m.secondaryMuscles && m.secondaryMuscles.length > 0) { (m.secondaryMuscles).forEach(function(s) { h += '<span class="inline-block text-[9px] mr-1 mb-1 px-2 py-0.5 rounded" style="background:rgba(255,255,255,0.03);color:#666">' + window._escapeHtml(s) + '</span>'; }); }
+   h += '</div>';
+   h += '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold uppercase tracking-wider mb-2" style="color:#82828c">Biomechanik</div><p class="text-[10px] leading-relaxed text-white">' + window._escapeHtml(m.biomechanics || '') + '</p></div>';
+   h += '<div class="mb-3 p-3 rounded-xl" style="background:' + curveColor + '08;border:1px solid ' + curveColor + '20"><div class="text-[8px] font-bold uppercase tracking-wider mb-1" style="color:' + curveColor + '">Kraftkurve: ' + window._escapeHtml(curveName) + '</div><p class="text-[9px]" style="color:#aaa">' + window._escapeHtml(m.strengthCurveDE || '') + '</p></div>';
+   h += '<div class="grid grid-cols-2 gap-2 mb-3"><div class="p-3 rounded-xl" style="background:rgba(163,201,168,0.05);border:1px solid rgba(163,201,168,0.1)"><div class="text-[8px] font-bold mb-1" style="color:#a3c9a8">Ideal f\u00fcr</div><p class="text-[9px]" style="color:#ccc">' + window._escapeHtml(m.bestFor || '') + '</p></div><div class="p-3 rounded-xl" style="background:rgba(232,138,138,0.05);border:1px solid rgba(232,138,138,0.1)"><div class="text-[8px] font-bold mb-1" style="color:#e88a8a">Weniger geeignet</div><p class="text-[9px]" style="color:#ccc">' + window._escapeHtml(m.notIdealFor || '') + '</p></div></div>';
+   h += '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold uppercase tracking-wider mb-2" style="color:#82828c">Tipps</div><p class="text-[10px] leading-relaxed" style="color:#ccc">' + window._escapeHtml(m.tips || '') + '</p></div>';
+   if (m.commonMistakes && m.commonMistakes.length > 0) {
+    h += '<div class="mb-3 p-3 rounded-xl" style="background:rgba(232,138,138,0.03);border:1px solid rgba(232,138,138,0.08)"><div class="text-[8px] font-bold uppercase tracking-wider mb-2" style="color:#e88a8a">H\u00e4ufige Fehler</div>';
+    m.commonMistakes.forEach(function(err) { h += '<div class="flex items-start gap-2 mb-1"><span class="text-[8px] mt-0.5" style="color:#e88a8a">\u2022</span><span class="text-[9px]" style="color:#ccc">' + window._escapeHtml(err) + '</span></div>'; });
+    h += '</div>';
+   }
+   if (m.alternatives && m.alternatives.length > 0) {
+    h += '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold uppercase tracking-wider mb-2" style="color:#82828c">Alternativen</div><div class="flex flex-wrap gap-1">';
+    m.alternatives.forEach(function(alt) { h += '<span class="text-[9px] px-2 py-1 rounded-lg" style="background:rgba(163,201,168,0.08);color:#a3c9a8">' + window._escapeHtml(alt) + '</span>'; });
+    h += '</div></div>';
+   }
+   h += '<button onclick="window._askAIMachineInfo(\'' + window._escapeHtml(m.name).replace(/'/g,'') + '\')" class="w-full py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto flex items-center justify-center gap-2" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8"><i data-lucide="sparkles" class="w-3.5 h-3.5 pointer-events-none"></i> KI Coach zu dieser Maschine fragen</button>';
+   container.innerHTML = h;
+   container.scrollTop = 0;
+   window._refreshLucide();
+  };
+
+  window._askAIMachineInfo = function(machineName) {
+   window.toggleModal('machineLibModal');
+   if (typeof window.switchTab === 'function') window.switchTab('tools');
+   setTimeout(function() {
+    var chatInput = document.getElementById('coachInput') || document.getElementById('chatInput');
+    if (chatInput) {
+     chatInput.value = 'Erkl\u00e4re mir die Maschine "' + machineName + '": Welche Muskeln trainiert sie, Kraftkurve, Biomechanik, h\u00e4ufige Fehler, und Alternativen?';
+     chatInput.focus();
+    }
+   }, 500);
+  };
+
+  // ============================================================
+  // PUMP & SORENESS RATING
+  // ============================================================
+  window._showPumpSorenessRating = function() {
+   var today = new Date().toISOString().split('T')[0];
+   var sk = window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache';
+   var allW = JSON.parse(localStorage.getItem(sk) || '[]');
+   var todaysW = allW.filter(function(w) { return w.date === today && w.category === 'strength'; });
+   if (todaysW.length === 0) return;
+   var exDb = window.EXERCISE_DB || [];
+   var muscleGroups = {};
+   var deLabels = { 'chest': 'Brust', 'back': 'R\u00fccken', 'shoulders': 'Schultern', 'upper legs': 'Beine', 'lower legs': 'Waden', 'upper arms': 'Arme', 'lower arms': 'Unterarme', 'waist': 'Core', 'cardio': 'Cardio' };
+   todaysW.forEach(function(w) {
+    for (var i = 0; i < exDb.length; i++) { if (exDb[i].n === w.exercise || exDb[i].de === w.exercise) { var g = deLabels[exDb[i].bp] || exDb[i].bp; muscleGroups[g] = true; break; } }
+   });
+   var muscles = Object.keys(muscleGroups);
+   if (muscles.length === 0) return;
+   var html = '<div class="text-center mb-3"><p class="text-sm font-bold text-white mb-1">' + window.t('pumpSorenessTitle', 'Pump & Muskelgef\u00fchl') + '</p><p class="text-[9px] mb-4" style="color:#82828c">Rate jede trainierte Muskelgruppe</p></div>';
+   muscles.forEach(function(muscle) {
+    var mid = muscle.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    html += '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" data-muscle="' + window._escapeHtml(muscle) + '">';
+    html += '<div class="text-[10px] font-bold text-white mb-2">' + window._escapeHtml(muscle) + '</div>';
+    html += '<div class="flex items-center justify-between mb-1"><span class="text-[8px]" style="color:#82828c">Pump</span><div class="flex gap-1" id="pump_' + mid + '">';
+    for (var p = 1; p <= 5; p++) { html += '<button onclick="window._setPumpBtn(this,' + p + ')" data-val="' + p + '" class="w-7 h-7 rounded text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);color:#555;border:1px solid var(--border-hex)">' + p + '</button>'; }
+    html += '</div></div>';
+    html += '<div class="flex items-center justify-between"><span class="text-[8px]" style="color:#82828c">Soreness</span><div class="flex gap-1" id="sore_' + mid + '">';
+    for (var s = 1; s <= 5; s++) { html += '<button onclick="window._setSoreBtn(this,' + s + ')" data-val="' + s + '" class="w-7 h-7 rounded text-[10px] font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);color:#555;border:1px solid var(--border-hex)">' + s + '</button>'; }
+    html += '</div></div></div>';
+   });
+   html += '<button onclick="window._savePumpSoreness()" class="w-full py-3 rounded-xl text-sm font-bold cursor-pointer pointer-events-auto mt-2" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.25);color:#a3c9a8" aria-label="Speichern">Speichern</button>';
+   var content = document.getElementById('pumpSorenessContent');
+   if (content) { content.innerHTML = html; window.toggleModal('pumpSorenessModal'); }
+  };
+
+  window._setPumpBtn = function(btn, val) {
+   var par = btn.parentElement;
+   par.dataset.pump = val;
+   par.querySelectorAll('button').forEach(function(b) { var v = parseInt(b.dataset.val); b.style.background = v <= val ? 'rgba(163,201,168,0.3)' : 'var(--inner-bg-hex)'; b.style.color = v <= val ? '#a3c9a8' : '#555'; });
+  };
+  window._setSoreBtn = function(btn, val) {
+   var par = btn.parentElement;
+   par.dataset.soreness = val;
+   par.querySelectorAll('button').forEach(function(b) { var v = parseInt(b.dataset.val); b.style.background = v <= val ? 'rgba(232,138,138,0.3)' : 'var(--inner-bg-hex)'; b.style.color = v <= val ? '#e88a8a' : '#555'; });
+  };
+
+  window._savePumpSoreness = function() {
+   var today = new Date().toISOString().split('T')[0];
+   var data = JSON.parse(localStorage.getItem('base_pump_soreness') || '{}');
+   if (!data[today]) data[today] = {};
+   document.querySelectorAll('#pumpSorenessContent [data-muscle]').forEach(function(el) {
+    var muscle = el.dataset.muscle;
+    var pumpEl = el.querySelector('[id^="pump_"]');
+    var soreEl = el.querySelector('[id^="sore_"]');
+    data[today][muscle] = { pump: parseInt(pumpEl ? pumpEl.dataset.pump || 0 : 0), soreness: parseInt(soreEl ? soreEl.dataset.soreness || 0 : 0) };
+   });
+   localStorage.setItem('base_pump_soreness', JSON.stringify(data));
+   window.toggleModal('pumpSorenessModal');
+   window.showToast('Pump & Soreness gespeichert!');
+  };
+
+  // ============================================================
+  // MUSCLE FREQUENCY HEATMAP (4 Wochen)
+  // ============================================================
+  window._renderMuscleFrequencyHeatmap = function(containerId) {
+   var container = document.getElementById(containerId || 'muscleFreqHeatmap');
+   if (!container) return;
+   var sk = window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache';
+   var allW = JSON.parse(localStorage.getItem(sk) || '[]');
+   var kraftW = allW.filter(function(w) { return w.category === 'strength' && w.setDetails; });
+   if (kraftW.length < 5) { container.innerHTML = '<p class="text-[10px] text-center py-4" style="color:#555">Mindestens 5 Kraft-Workouts n\u00f6tig</p>'; return; }
+   var exDb = window.EXERCISE_DB || [];
+   var deMap = { 'chest': 'Brust', 'back': 'R\u00fccken', 'shoulders': 'Schultern', 'upper legs': 'Beine', 'lower legs': 'Beine', 'upper arms': 'Arme', 'lower arms': 'Arme', 'waist': 'Core' };
+   var now = new Date(); var weeks = [];
+   for (var w = 0; w < 4; w++) {
+    var ws = new Date(now); ws.setDate(ws.getDate() - ws.getDay() + 1 - (w * 7)); var we = new Date(ws); we.setDate(we.getDate() + 7);
+    weeks.push({ start: ws, end: we, label: w === 0 ? 'Aktuell' : 'W-' + w });
+   }
+   weeks.reverse();
+   var muscles = ['Brust', 'R\u00fccken', 'Schultern', 'Beine', 'Arme', 'Core'];
+   var heatData = {}; muscles.forEach(function(m) { heatData[m] = [0, 0, 0, 0]; });
+   kraftW.forEach(function(wo) {
+    var woDate = new Date(wo.date);
+    var weekIdx = -1; for (var i = 0; i < weeks.length; i++) { if (woDate >= weeks[i].start && woDate < weeks[i].end) { weekIdx = i; break; } }
+    if (weekIdx === -1) return;
+    for (var j = 0; j < exDb.length; j++) { if (exDb[j].n === wo.exercise || exDb[j].de === wo.exercise) { var group = deMap[exDb[j].bp] || 'Sonstige'; if (heatData[group] !== undefined) heatData[group][weekIdx]++; break; } }
+   });
+   var html = '<div class="mb-2"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Trainingsfrequenz / Muskelgruppe</span></div>';
+   html += '<div class="flex mb-1"><div style="width:60px"></div>';
+   weeks.forEach(function(w) { html += '<div class="flex-1 text-center text-[7px] font-bold" style="color:#555">' + w.label + '</div>'; });
+   html += '</div>';
+   muscles.forEach(function(muscle) {
+    html += '<div class="flex items-center mb-1"><div class="text-[8px] font-bold" style="width:60px;color:#82828c">' + muscle + '</div>';
+    heatData[muscle].forEach(function(count) {
+     var intensity = Math.min(count / 3, 1);
+     var bg = count === 0 ? '#0f110f' : 'rgba(163,201,168,' + (0.15 + intensity * 0.45) + ')';
+     var tc = count === 0 ? '#333' : count >= 3 ? '#fff' : '#a3c9a8';
+     html += '<div class="flex-1 text-center py-2 mx-0.5 rounded text-[10px] font-bold" style="background:' + bg + ';color:' + tc + '">' + count + '</div>';
+    });
+    html += '</div>';
+   });
+   var lowFreq = muscles.filter(function(m) { return heatData[m].reduce(function(a,b){return a+b;},0) < 4; });
+   if (lowFreq.length > 0) { html += '<div class="mt-3 p-2 rounded-lg text-[9px]" style="background:rgba(232,138,138,0.05);border:1px solid rgba(232,138,138,0.1);color:#e88a8a">Untertrainiert: ' + lowFreq.join(', ') + ' \u2014 empfohlen: min. 2x/Woche</div>'; }
+   container.innerHTML = html;
   };
 
   // ============================================================
@@ -6707,3 +6962,334 @@
    window.saveGoals(goals);
   };
 
+
+  // === VOLUME LANDMARKS (MEV/MAV/MRV) ===
+  window._VOLUME_LANDMARKS = {
+    'chest':      { mev: 8,  mav: 14, mrv: 22, de: 'Brust' },
+    'back':       { mev: 10, mav: 16, mrv: 24, de: 'R\u00fccken' },
+    'shoulders':  { mev: 6,  mav: 12, mrv: 20, de: 'Schultern' },
+    'upper legs': { mev: 8,  mav: 14, mrv: 22, de: 'Oberschenkel' },
+    'lower legs': { mev: 6,  mav: 10, mrv: 16, de: 'Waden' },
+    'upper arms': { mev: 4,  mav: 10, mrv: 18, de: 'Oberarme' },
+    'lower arms': { mev: 2,  mav: 6,  mrv: 12, de: 'Unterarme' },
+    'waist':      { mev: 0,  mav: 8,  mrv: 16, de: 'Core' }
+  };
+
+  window._renderVolumeLandmarks = function(containerId) {
+    var container = document.getElementById(containerId || 'volumeLandmarksChart');
+    if (!container) return;
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var now = new Date();
+    var weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    var weekWorkouts = allWorkouts.filter(function(w) {
+      return w.category === 'strength' && w.setDetails && new Date(w.date) >= weekAgo;
+    });
+    if (weekWorkouts.length < 2) {
+      container.innerHTML = '<p class="text-[10px] text-center py-4" style="color:#555">Mindestens 2 Kraft-Workouts diese Woche n\u00f6tig</p>';
+      return;
+    }
+    var exDb = window.exerciseDB || window._exerciseDB || [];
+    if (typeof exDb === 'function') exDb = exDb();
+    var setsPerMuscle = {};
+    weekWorkouts.forEach(function(w) {
+      var ex = exDb.find(function(e) { return e.n === w.exercise || e.de === w.exercise; });
+      var bp = ex ? ex.bp : null;
+      if (!bp) return;
+      if (!setsPerMuscle[bp]) setsPerMuscle[bp] = 0;
+      setsPerMuscle[bp] += (w.setDetails || []).filter(function(s) { return s.type !== 'warmup'; }).length;
+    });
+    var html = '<div class="mb-3 flex items-center justify-between">';
+    html += '<span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Volumen-Landmarks (diese Woche)</span>';
+    html += '</div>';
+    html += '<div class="flex gap-3 mb-3 text-[7px] font-bold">';
+    html += '<span style="color:#e88a8a">\u25a0 Unter MEV</span>';
+    html += '<span style="color:#a3c9a8">\u25a0 Optimal (MEV-MAV)</span>';
+    html += '<span style="color:#e8c86a">\u25a0 Hoch (MAV-MRV)</span>';
+    html += '<span style="color:#e88a8a">\u25a0 \u00dcber MRV</span>';
+    html += '</div>';
+    Object.keys(window._VOLUME_LANDMARKS).forEach(function(bp) {
+      var lm = window._VOLUME_LANDMARKS[bp];
+      var current = setsPerMuscle[bp] || 0;
+      var maxDisplay = Math.max(lm.mrv + 4, current + 2);
+      var zone, zoneColor, zoneLabel;
+      if (current < lm.mev) { zone = 'under'; zoneColor = '#e88a8a'; zoneLabel = 'Unter MEV'; }
+      else if (current <= lm.mav) { zone = 'optimal'; zoneColor = '#a3c9a8'; zoneLabel = 'Optimal'; }
+      else if (current <= lm.mrv) { zone = 'high'; zoneColor = '#e8c86a'; zoneLabel = 'Hoch'; }
+      else { zone = 'over'; zoneColor = '#e88a8a'; zoneLabel = '\u00dcber MRV!'; }
+      var mevPct = (lm.mev / maxDisplay * 100).toFixed(1);
+      var mavPct = (lm.mav / maxDisplay * 100).toFixed(1);
+      var mrvPct = (lm.mrv / maxDisplay * 100).toFixed(1);
+      var currentPct = Math.min(100, (current / maxDisplay * 100)).toFixed(1);
+      html += '<div class="mb-3">';
+      html += '<div class="flex items-center justify-between mb-1">';
+      html += '<span class="text-[9px] font-bold" style="color:#ccc">' + window._escapeHtml(lm.de) + '</span>';
+      html += '<div class="flex items-center gap-2">';
+      html += '<span class="text-[10px] font-black" style="color:' + zoneColor + '">' + current + ' Sets</span>';
+      html += '<span class="text-[7px] font-bold px-1.5 py-0.5 rounded" style="background:' + zoneColor + '22;color:' + zoneColor + '">' + zoneLabel + '</span>';
+      html += '</div></div>';
+      html += '<div style="position:relative;height:16px;background:#0f110f;border-radius:8px;overflow:hidden">';
+      html += '<div style="position:absolute;left:' + mevPct + '%;width:' + (mavPct - mevPct) + '%;height:100%;background:rgba(163,201,168,0.08)"></div>';
+      html += '<div style="position:absolute;left:' + mavPct + '%;width:' + (mrvPct - mavPct) + '%;height:100%;background:rgba(232,200,106,0.06)"></div>';
+      html += '<div style="position:absolute;left:' + mevPct + '%;width:1px;height:100%;background:rgba(163,201,168,0.3)"></div>';
+      html += '<div style="position:absolute;left:' + mavPct + '%;width:1px;height:100%;background:rgba(232,200,106,0.3)"></div>';
+      html += '<div style="position:absolute;left:' + mrvPct + '%;width:1px;height:100%;background:rgba(232,138,138,0.4)"></div>';
+      html += '<div style="position:absolute;left:0;width:' + currentPct + '%;height:100%;background:' + zoneColor + ';border-radius:8px;opacity:0.4"></div>';
+      html += '<div style="position:absolute;left:calc(' + currentPct + '% - 4px);top:2px;width:8px;height:12px;background:' + zoneColor + ';border-radius:4px;box-shadow:0 0 6px ' + zoneColor + '"></div>';
+      html += '</div>';
+      html += '<div style="position:relative;height:12px;margin-top:2px">';
+      html += '<span class="text-[6px]" style="position:absolute;left:' + mevPct + '%;transform:translateX(-50%);color:#555">MEV ' + lm.mev + '</span>';
+      html += '<span class="text-[6px]" style="position:absolute;left:' + mavPct + '%;transform:translateX(-50%);color:#555">MAV ' + lm.mav + '</span>';
+      html += '<span class="text-[6px]" style="position:absolute;left:' + mrvPct + '%;transform:translateX(-50%);color:#555">MRV ' + lm.mrv + '</span>';
+      html += '</div></div>';
+    });
+    var underMev = Object.keys(setsPerMuscle).length > 0 ? Object.keys(window._VOLUME_LANDMARKS).filter(function(bp) {
+      return (setsPerMuscle[bp] || 0) < window._VOLUME_LANDMARKS[bp].mev;
+    }) : [];
+    var overMrv = Object.keys(window._VOLUME_LANDMARKS).filter(function(bp) {
+      return (setsPerMuscle[bp] || 0) > window._VOLUME_LANDMARKS[bp].mrv;
+    });
+    if (underMev.length > 0) {
+      html += '<div class="p-2 rounded-lg mt-2 text-[9px]" style="background:rgba(232,138,138,0.05);border:1px solid rgba(232,138,138,0.1);color:#e88a8a">';
+      html += '\ud83d\udcc9 Unter MEV: ' + underMev.map(function(bp) { return window._VOLUME_LANDMARKS[bp].de; }).join(', ') + ' \u2014 mehr Sets n\u00f6tig f\u00fcr Wachstum';
+      html += '</div>';
+    }
+    if (overMrv.length > 0) {
+      html += '<div class="p-2 rounded-lg mt-2 text-[9px]" style="background:rgba(232,138,138,0.05);border:1px solid rgba(232,138,138,0.1);color:#e88a8a">';
+      html += '\ud83d\udcc8 \u00dcber MRV: ' + overMrv.map(function(bp) { return window._VOLUME_LANDMARKS[bp].de; }).join(', ') + ' \u2014 Volumen reduzieren oder Deload einplanen';
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  };
+
+  // === DELOAD AUTO-DETECTION ===
+  window._checkDeloadNeeded = function() {
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var kraftWorkouts = allWorkouts.filter(function(w) { return w.category === 'strength' && w.setDetails; });
+    if (kraftWorkouts.length < 10) return null;
+    var signals = { score: 0, reasons: [] };
+    var exDb = window.exerciseDB || window._exerciseDB || [];
+    if (typeof exDb === 'function') exDb = exDb();
+    var exercises = {};
+    kraftWorkouts.forEach(function(w) {
+      if (!exercises[w.exercise]) exercises[w.exercise] = [];
+      var maxW = Math.max.apply(null, (w.setDetails || []).map(function(s) { return parseFloat(s.weight) || 0; }));
+      exercises[w.exercise].push({ date: w.date, max: maxW });
+    });
+    var decliningExercises = [];
+    Object.keys(exercises).forEach(function(ex) {
+      var data = exercises[ex].sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+      if (data.length < 3) return;
+      var last3 = data.slice(-3);
+      if (last3[2].max < last3[0].max && last3[2].max < last3[1].max) { decliningExercises.push(ex); }
+    });
+    if (decliningExercises.length >= 2) {
+      signals.score += 3;
+      signals.reasons.push('Gewicht sinkt bei ' + decliningExercises.slice(0, 3).join(', '));
+    }
+    var readiness = window._calculateReadinessV2 ? window._calculateReadinessV2() : null;
+    if (readiness && readiness.score < 40) {
+      signals.score += 2;
+      signals.reasons.push('Readiness nur ' + readiness.score + '% (' + readiness.label + ')');
+    }
+    var pumpData = JSON.parse(localStorage.getItem('base_pump_soreness') || '{}');
+    var recentDates = Object.keys(pumpData).sort().slice(-3);
+    if (recentDates.length >= 2) {
+      var highSoreness = recentDates.filter(function(d) {
+        var day = pumpData[d];
+        return Object.values(day).some(function(m) { return m.soreness >= 4; });
+      });
+      if (highSoreness.length >= 2) {
+        signals.score += 2;
+        signals.reasons.push('Hohe Soreness in ' + highSoreness.length + ' der letzten ' + recentDates.length + ' Trainings');
+      }
+    }
+    var feedback = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
+    var recentFeedback = Object.keys(feedback).sort().slice(-3);
+    var lowFeedback = recentFeedback.filter(function(d) { return feedback[d].rating <= 2; });
+    if (lowFeedback.length >= 2) {
+      signals.score += 2;
+      signals.reasons.push('Schlechtes Workout-Feedback (' + lowFeedback.length + 'x unter 3)');
+    }
+    var now = new Date();
+    var weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    var weekWorkouts = kraftWorkouts.filter(function(w) { return new Date(w.date) >= weekAgo; });
+    var setsPerMuscle = {};
+    weekWorkouts.forEach(function(w) {
+      var ex = exDb.find(function(e) { return e.n === w.exercise || e.de === w.exercise; });
+      var bp = ex ? ex.bp : null;
+      if (!bp) return;
+      setsPerMuscle[bp] = (setsPerMuscle[bp] || 0) + (w.setDetails || []).length;
+    });
+    var overMrv = Object.keys(setsPerMuscle).filter(function(bp) {
+      return window._VOLUME_LANDMARKS[bp] && setsPerMuscle[bp] > window._VOLUME_LANDMARKS[bp].mrv;
+    });
+    if (overMrv.length > 0) {
+      signals.score += 1;
+      signals.reasons.push('\u00dcber MRV bei ' + overMrv.map(function(bp) { return window._VOLUME_LANDMARKS[bp].de; }).join(', '));
+    }
+    if (signals.score >= 4) return signals;
+    return null;
+  };
+
+  window._showDeloadWarning = function() {
+    var dismissed = localStorage.getItem('base_deload_auto_dismissed');
+    if (dismissed) {
+      var dismissDate = new Date(dismissed);
+      var daysSince = (new Date() - dismissDate) / (1000 * 60 * 60 * 24);
+      if (daysSince < 7) return;
+    }
+    var signals = window._checkDeloadNeeded();
+    if (!signals) return;
+    var html = '<div class="p-4 rounded-xl mb-4" style="background:rgba(232,200,106,0.06);border:1px solid rgba(232,200,106,0.15)">';
+    html += '<div class="flex items-center justify-between mb-2">';
+    html += '<div class="flex items-center gap-2"><span style="font-size:18px">\u26a0\ufe0f</span><span class="text-sm font-bold" style="color:#e8c86a">Deload empfohlen</span></div>';
+    html += '<button onclick="localStorage.setItem(\'base_deload_auto_dismissed\',new Date().toISOString());this.closest(\'[id=deloadWarning]\').remove()" class="text-[9px] font-bold cursor-pointer pointer-events-auto" style="color:#555" aria-label="Ignorieren">Ignorieren</button>';
+    html += '</div>';
+    html += '<div class="text-[10px] mb-2" style="color:#ccc">Mehrere Signale deuten auf \u00dcbertraining hin:</div>';
+    signals.reasons.forEach(function(r) {
+      html += '<div class="flex items-start gap-2 mb-1"><span class="text-[8px] mt-0.5" style="color:#e8c86a">\u2022</span><span class="text-[9px]" style="color:#aaa">' + window._escapeHtml(r) + '</span></div>';
+    });
+    html += '<div class="text-[10px] mt-3 p-2 rounded-lg" style="background:rgba(163,201,168,0.05);color:#a3c9a8"><strong>Empfehlung:</strong> Diese Woche Volumen um 40% reduzieren, Gewichte bei 60% halten, RIR 4+ anstreben. Fokus auf Recovery: Schlaf, Ern\u00e4hrung, leichte Mobility.</div>';
+    html += '</div>';
+    var warning = document.getElementById('deloadWarning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.id = 'deloadWarning';
+      warning.className = 'px-4';
+      var target = document.getElementById('todaysWorkoutSection') || document.getElementById('routinesSection');
+      if (target) target.parentNode.insertBefore(warning, target);
+    }
+    warning.innerHTML = html;
+  };
+
+  // === EFFECTIVE REPS COUNTER ===
+  window._calculateEffectiveReps = function(setDetails) {
+    if (!setDetails || setDetails.length === 0) return { total: 0, effective: 0, ratio: 0 };
+    var totalReps = 0;
+    var effectiveReps = 0;
+    setDetails.forEach(function(s) {
+      if (s.type === 'warmup') return;
+      var reps = parseFloat(s.reps) || 0;
+      var rir = s.rir != null ? parseFloat(s.rir) : 3;
+      totalReps += reps;
+      var effectiveInSet = Math.max(0, Math.min(5, reps) - rir);
+      effectiveReps += effectiveInSet;
+    });
+    return { total: totalReps, effective: effectiveReps, ratio: totalReps > 0 ? Math.round(effectiveReps / totalReps * 100) : 0 };
+  };
+
+  // === BODY SYMMETRY TRACKING ===
+  window._renderSymmetryCheck = function(containerId) {
+    var container = document.getElementById(containerId || 'symmetryCheck');
+    if (!container) return;
+    var measurements = JSON.parse(localStorage.getItem('beastmode_v2_body') || '[]');
+    if (measurements.length === 0) { container.innerHTML = ''; return; }
+    var latest = measurements[measurements.length - 1] || measurements[0];
+    var pairs = [
+      { name: 'Oberarm', left: latest.bicep_left, right: latest.bicep_right },
+      { name: 'Oberschenkel', left: latest.thigh_left, right: latest.thigh_right },
+      { name: 'Wade', left: latest.calf_left, right: latest.calf_right }
+    ];
+    var hasData = pairs.some(function(p) { return p.left && p.right; });
+    if (!hasData) { container.innerHTML = ''; return; }
+    var html = '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--text-muted)">Symmetrie-Check</div>';
+    pairs.forEach(function(p) {
+      if (!p.left || !p.right) return;
+      var l = parseFloat(p.left);
+      var r = parseFloat(p.right);
+      var diff = Math.abs(l - r);
+      var avg = (l + r) / 2;
+      var pct = avg > 0 ? (diff / avg * 100) : 0;
+      var color, label;
+      if (pct < 3) { color = '#a3c9a8'; label = 'Symmetrisch'; }
+      else if (pct < 5) { color = '#e8c86a'; label = 'Leichte Imbalance'; }
+      else { color = '#e88a8a'; label = 'Imbalance'; }
+      var bigger = l > r ? 'Links' : l < r ? 'Rechts' : '-';
+      html += '<div class="flex items-center justify-between py-2" style="border-bottom:1px solid var(--border-hex)">';
+      html += '<span class="text-[10px] font-bold text-white">' + p.name + '</span>';
+      html += '<div class="flex items-center gap-2">';
+      html += '<span class="text-[9px]" style="color:#82828c">L ' + l.toFixed(1) + ' | R ' + r.toFixed(1) + '</span>';
+      html += '<span class="text-[8px] font-bold px-1.5 py-0.5 rounded" style="background:' + color + '22;color:' + color + '">' + (pct < 0.5 ? '\u2713' : diff.toFixed(1) + 'cm \u00b7 ' + bigger) + '</span>';
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
+  };
+
+  // === PERIODISIERUNGS-VISUALISIERUNG ===
+  window._renderPeriodizationChart = function(containerId) {
+    var container = document.getElementById(containerId || 'periodizationChart');
+    if (!container) return;
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var kraftWorkouts = allWorkouts.filter(function(w) { return w.category === 'strength' && w.setDetails; });
+    if (kraftWorkouts.length < 10) {
+      container.innerHTML = '<p class="text-[10px] text-center py-4" style="color:#555">Mindestens 10 Kraft-Workouts n\u00f6tig</p>';
+      return;
+    }
+    var exDb = window.exerciseDB || window._exerciseDB || [];
+    if (typeof exDb === 'function') exDb = exDb();
+    var muscleSets = {};
+    kraftWorkouts.forEach(function(w) {
+      var ex = exDb.find(function(e) { return e.n === w.exercise || e.de === w.exercise; });
+      var bp = ex ? ex.bp : null;
+      if (!bp || !window._VOLUME_LANDMARKS[bp]) return;
+      muscleSets[bp] = (muscleSets[bp] || 0) + (w.setDetails || []).length;
+    });
+    var topMuscles = Object.entries(muscleSets).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 3).map(function(e) { return e[0]; });
+    if (topMuscles.length === 0) { container.innerHTML = ''; return; }
+    var now = new Date();
+    var weeks = [];
+    for (var wi = 7; wi >= 0; wi--) {
+      var weekStart = new Date(now);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1 - (wi * 7));
+      var weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      weeks.push({ start: weekStart, end: weekEnd, label: 'W' + (8 - wi) });
+    }
+    var colors = ['#a3c9a8', '#8aafe8', '#e8c86a'];
+    var html = '<div class="mb-2"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Periodisierung \u2014 Volumen \u00fcber Zeit</span></div>';
+    topMuscles.forEach(function(bp, idx) {
+      var lm = window._VOLUME_LANDMARKS[bp];
+      var weeklyData = weeks.map(function(week) {
+        var ww = kraftWorkouts.filter(function(wo) { var d = new Date(wo.date); return d >= week.start && d < week.end; });
+        var sets = 0;
+        ww.forEach(function(wo) {
+          var ex = exDb.find(function(e) { return e.n === wo.exercise || e.de === wo.exercise; });
+          if (ex && ex.bp === bp) sets += (wo.setDetails || []).filter(function(s) { return s.type !== 'warmup'; }).length;
+        });
+        return sets;
+      });
+      var maxSets = Math.max(lm.mrv + 4, Math.max.apply(null, weeklyData) + 2);
+      var svgW = 280;
+      var svgH = 60;
+      var points = weeklyData.map(function(sets, i) {
+        var x = (i / (weeklyData.length - 1)) * svgW;
+        var y = svgH - (sets / maxSets) * svgH;
+        return x + ',' + y;
+      }).join(' ');
+      var mevY = svgH - (lm.mev / maxSets) * svgH;
+      var mavY = svgH - (lm.mav / maxSets) * svgH;
+      var mrvY = svgH - (lm.mrv / maxSets) * svgH;
+      html += '<div class="mb-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+      html += '<div class="flex items-center justify-between mb-1">';
+      html += '<span class="text-[9px] font-bold" style="color:' + colors[idx] + '">' + lm.de + '</span>';
+      html += '<span class="text-[7px]" style="color:#555">MEV ' + lm.mev + ' \u00b7 MAV ' + lm.mav + ' \u00b7 MRV ' + lm.mrv + '</span>';
+      html += '</div>';
+      html += '<svg width="100%" viewBox="0 0 ' + svgW + ' ' + svgH + '" style="overflow:visible">';
+      html += '<rect x="0" y="' + mavY + '" width="' + svgW + '" height="' + (mevY - mavY) + '" fill="rgba(163,201,168,0.06)"/>';
+      html += '<line x1="0" y1="' + mrvY + '" x2="' + svgW + '" y2="' + mrvY + '" stroke="rgba(232,138,138,0.2)" stroke-dasharray="4,4"/>';
+      html += '<line x1="0" y1="' + mevY + '" x2="' + svgW + '" y2="' + mevY + '" stroke="rgba(163,201,168,0.2)" stroke-dasharray="4,4"/>';
+      html += '<polyline points="' + points + '" fill="none" stroke="' + colors[idx] + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      weeklyData.forEach(function(sets, i) {
+        var x = (i / (weeklyData.length - 1)) * svgW;
+        var y = svgH - (sets / maxSets) * svgH;
+        html += '<circle cx="' + x + '" cy="' + y + '" r="3" fill="' + colors[idx] + '"/>';
+      });
+      html += '</svg></div>';
+    });
+    container.innerHTML = html;
+  };
+
+  // Deload check on startup
+  setTimeout(function() { if (window._showDeloadWarning) window._showDeloadWarning(); }, 4000);
