@@ -182,7 +182,9 @@ window.buildAIContext = function() {
         return `[${w.date}] ${w.exercise} (${w.category}): ${dataStr || 'keine Daten'}`;
     }).join('\n');
 
-    return { prof, injStr, medStr, schemaLines: schemaLines.join('; '), recentWorkouts };
+    var habitSummary = window._getHabitSummaryForAI ? window._getHabitSummaryForAI() : '';
+
+    return { prof, injStr, medStr, schemaLines: schemaLines.join('; '), recentWorkouts: (recentWorkouts || '') + habitSummary };
 };
 
 // --- ZNS READINESS ---

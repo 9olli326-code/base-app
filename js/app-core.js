@@ -643,6 +643,7 @@
    window.renderDynamicSportTabs();
    if(window._renderCustomTabs) window._renderCustomTabs();
    if(window._applySavedTabOrder) window._applySavedTabOrder();
+   var sfp = document.getElementById('stretchFlowPicker'); if(sfp) { if(cat === 'recovery' && window._showStretchFlowPicker) { sfp.classList.remove('hidden'); window._showStretchFlowPicker(); } else sfp.classList.add('hidden'); }
    const stravaContainer = document.getElementById('stravaActionContainer'); if(stravaContainer) { if(cat === 'cardio') stravaContainer.classList.remove('hidden'); else stravaContainer.classList.add('hidden'); }
    const hiitContainer = document.getElementById('hiitTimerContainer');
    if(hiitContainer) { if(cat === 'cardio') hiitContainer.classList.remove('hidden'); else { hiitContainer.classList.add('hidden'); window.resetHiit && window.resetHiit(); } } const catData = window.categorySchemas[cat]; const titleMap = { main: window.t('modCus','Mein Sport'), strength: window.t('modStr','Krafttraining'), cardio: window.t('modCar','Ausdauersport'), recovery: window.t('tabRec','Mobility') }; const fallbackTitle = i18nData[window.currentLang] ? (i18nData[window.currentLang][`mod${cat.charAt(0).toUpperCase() + cat.slice(1,3)}`] || titleMap[cat]) : titleMap[cat]; if(catData && catData.schema && catData.schema.length > 0) { window.renderDynamicForm(catData.sportName, catData.schema, cat); } else { document.getElementById('workoutForm').classList.add('hidden'); document.getElementById('restTimerSection').classList.add('hidden'); document.getElementById('noFormState').classList.remove('hidden'); document.getElementById('noFormState').classList.add('block'); const ui = window.CAT_UI[cat]; const iconContainer = document.getElementById('formCatIcon'); if(iconContainer && ui) { iconContainer.className = 'w-7 h-7 rounded-lg flex items-center justify-center border'; iconContainer.style.color = 'var(--cat-accent)'; iconContainer.style.borderColor = 'var(--cat-accent)'; iconContainer.style.backgroundColor = 'var(--cat-glow-10)'; iconContainer.innerHTML = `<i data-lucide="${ui.icon}" class="w-3.5 h-3.5"></i>`; } const titleEl = document.getElementById('formSportTitle'); if(titleEl) titleEl.textContent = fallbackTitle; const _olEl1 = document.getElementById('formCatOverline'); if(_olEl1) { const _olMap1 = { strength: window.t('modStr','Kraft Modul'), cardio: window.t('modCar','Ausdauer Modul'), recovery: window.t('tabRec','Mobility'), main: window.t('modCus','Mein Sport') }; _olEl1.textContent = _olMap1[cat] || cat; } const placeholders = { main: `z.B. Tennis`, strength: "z.B. Squats", cardio: window.t('phCardio','z.B. 10k Lauf'), recovery: "z.B. Yoga, Stretching" }; const sportInput = document.getElementById('sportTypeInput'); if(sportInput) sportInput.placeholder = placeholders[cat] || window.t('obFocS','Was trackst du?'); } // Reveal form (Progressive Disclosure)
@@ -3490,7 +3491,7 @@
     if (window._renderKiDiscoveryHints) window._renderKiDiscoveryHints();
    }
    if(tab === 'analyse' && window.currentView === 'chart') window.initAnalytics();
-   if(tab === 'analyse') { if (window._renderVolumeLandmarks) window._renderVolumeLandmarks(); if (window._renderPeriodizationChart) window._renderPeriodizationChart(); }
+   if(tab === 'analyse') { if (window._renderVolumeLandmarks) window._renderVolumeLandmarks(); if (window._renderPeriodizationChart) window._renderPeriodizationChart(); if (window._renderHRZonesWidget) window._renderHRZonesWidget(); if (window._renderPlanAdherence) window._renderPlanAdherence(); if (window._renderMonthlySummary) window._renderMonthlySummary(); }
    if(tab === 'menu') { setTimeout(() => { if(window.updatePushToggleUI) window.updatePushToggleUI(); }, 100); window.renderGoals && window.renderGoals(); }
    window._refreshLucide();
   };
@@ -6811,7 +6812,8 @@
     '<span style="font-size:10px;font-weight:800;color:#a3c9a8;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap">' + rank.name + ' \u00b7 Lv ' + info.level + '</span>' +
     '<div style="flex:1;height:4px;background:#1e201e;border-radius:99px;overflow:hidden">' +
     '<div style="height:100%;width:' + pct + '%;background:#a3c9a8;border-radius:99px;transition:width 0.5s ease"></div></div>' +
-    '<span style="font-size:9px;color:#82828c;white-space:nowrap">' + info.currentXP + '/' + info.nextLevelXP + ' XP</span></div>';
+    '<span style="font-size:9px;color:#82828c;white-space:nowrap">' + info.currentXP + '/' + info.nextLevelXP + ' XP</span>' +
+    '<button onclick="if(window._showAchievementGallery)window._showAchievementGallery()" style="font-size:9px;font-weight:700;color:#a3c9a8;cursor:pointer;pointer-events:auto;background:none;border:none;white-space:nowrap" aria-label="Achievements">\ud83c\udfc6</button></div>';
   };
 
   window._showLevelUp = function(level, rank) {
@@ -7448,3 +7450,373 @@
 
   // Deload check on startup
   setTimeout(function() { if (window._showDeloadWarning) window._showDeloadWarning(); }, 4000);
+
+  // === HR-ZONEN ANALYSE (Karvonen-Formel) ===
+  window._calculateHRZones = function() {
+    var profile = JSON.parse(localStorage.getItem('base_athlete_profile') || '{}');
+    var age = parseInt(profile.age) || 30;
+    var restHR = parseInt(profile.restingHR) || 60;
+    var maxHR = parseInt(profile.maxHR) || (220 - age);
+    var reserve = maxHR - restHR;
+    return {
+      maxHR: maxHR, restHR: restHR,
+      zones: [
+        { zone: 1, name: 'Recovery', de: 'Erholung', min: Math.round(restHR + reserve * 0.50), max: Math.round(restHR + reserve * 0.60), color: '#8aafe8', benefit: 'Aktive Erholung, Fettstoffwechsel' },
+        { zone: 2, name: 'Aerobic Base', de: 'Grundlage', min: Math.round(restHR + reserve * 0.60), max: Math.round(restHR + reserve * 0.70), color: '#a3c9a8', benefit: 'Ausdauer aufbauen, l\u00e4ngere Einheiten' },
+        { zone: 3, name: 'Tempo', de: 'Tempo', min: Math.round(restHR + reserve * 0.70), max: Math.round(restHR + reserve * 0.80), color: '#e8c86a', benefit: 'Laktatschwelle verbessern' },
+        { zone: 4, name: 'Threshold', de: 'Schwelle', min: Math.round(restHR + reserve * 0.80), max: Math.round(restHR + reserve * 0.90), color: '#e8a86a', benefit: 'VO2max steigern, Wettkampftempo' },
+        { zone: 5, name: 'Max Effort', de: 'Maximum', min: Math.round(restHR + reserve * 0.90), max: maxHR, color: '#e88a8a', benefit: 'Sprintf\u00e4higkeit, anaerobe Kapazit\u00e4t' }
+      ]
+    };
+  };
+
+  window._getHRZone = function(hr) {
+    var zones = window._calculateHRZones().zones;
+    for (var i = zones.length - 1; i >= 0; i--) { if (hr >= zones[i].min) return zones[i]; }
+    return zones[0];
+  };
+
+  window._renderHRZonesWidget = function(containerId) {
+    var container = document.getElementById(containerId || 'hrZonesWidget');
+    if (!container) return;
+    var hrData = window._calculateHRZones();
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    var cardioWorkouts = allWorkouts.filter(function(w) {
+      if (new Date(w.date) < thirtyDaysAgo) return false;
+      var hr = w.averageHeartRate || w.avg_hr || (w.data ? (w.data.puls || w.data.heartrate || w.data['\u00d8 Puls']) : null);
+      return hr && parseFloat(hr) > 40;
+    });
+    var zoneMinutes = [0, 0, 0, 0, 0]; var totalMinutes = 0;
+    cardioWorkouts.forEach(function(w) {
+      var hr = parseFloat(w.averageHeartRate || w.avg_hr || (w.data ? (w.data.puls || w.data.heartrate || w.data['\u00d8 Puls']) : 0));
+      var duration = parseFloat(w.duration || w.sessionDuration || (w.data ? (w.data.dauer || w.data.duration || w.data['Dauer (min)']) : 0)) || 30;
+      if (hr < 40) return;
+      var zone = window._getHRZone(hr);
+      zoneMinutes[zone.zone - 1] += duration; totalMinutes += duration;
+    });
+    var html = '<div class="mb-3 flex items-center justify-between">';
+    html += '<span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Herzfrequenz-Zonen (30 Tage)</span>';
+    html += '<span class="text-[8px]" style="color:#555">Max HR: ' + hrData.maxHR + ' bpm</span></div>';
+    hrData.zones.forEach(function(z, idx) {
+      var minutes = zoneMinutes[idx];
+      var pct = totalMinutes > 0 ? Math.round(minutes / totalMinutes * 100) : 0;
+      var barWidth = totalMinutes > 0 ? Math.max(2, Math.round(minutes / totalMinutes * 100)) : 0;
+      html += '<div class="flex items-center gap-2 mb-2">';
+      html += '<div class="flex-shrink-0" style="width:14px"><span class="text-[10px] font-black" style="color:' + z.color + '">Z' + z.zone + '</span></div>';
+      html += '<div class="flex-shrink-0" style="width:55px"><span class="text-[8px] font-bold" style="color:#ccc">' + z.de + '</span></div>';
+      html += '<div style="flex:1;height:20px;background:#0f110f;border-radius:6px;overflow:hidden;position:relative">';
+      html += '<div style="width:' + barWidth + '%;height:100%;background:' + z.color + ';opacity:0.35;border-radius:6px"></div>';
+      html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">';
+      if (minutes > 0) html += '<span class="text-[8px] font-bold" style="color:' + z.color + '">' + Math.round(minutes) + ' min (' + pct + '%)</span>';
+      html += '</div></div>';
+      html += '<div class="flex-shrink-0 text-right" style="width:55px"><span class="text-[7px]" style="color:#555">' + z.min + '-' + z.max + '</span></div></div>';
+    });
+    if (totalMinutes > 0) {
+      var z2pct = (zoneMinutes[1] / totalMinutes * 100);
+      var z4z5pct = ((zoneMinutes[3] + zoneMinutes[4]) / totalMinutes * 100);
+      html += '<div class="mt-3 p-2 rounded-lg text-[9px]" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+      html += '<div class="text-[8px] font-bold mb-1" style="color:#82828c">\ud83d\udca1 80/20 Analyse</div>';
+      if (z2pct >= 70 && z4z5pct >= 10 && z4z5pct <= 25) {
+        html += '<span style="color:#a3c9a8">\u2705 Perfekte Verteilung! ~' + Math.round(z2pct) + '% niedrige Intensit\u00e4t, ~' + Math.round(z4z5pct) + '% hohe Intensit\u00e4t.</span>';
+      } else if (z4z5pct > 30) {
+        html += '<span style="color:#e8c86a">\u26a0\ufe0f Zu viel hochintensives Training (' + Math.round(z4z5pct) + '% in Zone 4-5). Mehr Zone 2 einbauen.</span>';
+      } else if (z2pct < 50) {
+        html += '<span style="color:#e8c86a">\u26a0\ufe0f Zu wenig Grundlagentraining (' + Math.round(z2pct) + '% Zone 2). L\u00e4ngere lockere Einheiten einbauen.</span>';
+      } else {
+        html += '<span style="color:#82828c">Zone 2: ' + Math.round(z2pct) + '% \u00b7 Zone 4-5: ' + Math.round(z4z5pct) + '%. Ziel: 80/20.</span>';
+      }
+      html += '</div>';
+    }
+    html += '<div class="mt-3 flex gap-2">';
+    html += '<div class="flex-1"><label class="text-[7px] font-bold uppercase tracking-wider block mb-1" style="color:#555">Ruhe-HR (bpm)</label>';
+    html += '<input type="number" id="hrZoneRestHR" value="' + hrData.restHR + '" placeholder="60" class="w-full px-2 py-1.5 rounded-lg text-[10px] text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" onchange="window._saveHRProfile()" aria-label="Ruhe-Herzfrequenz"></div>';
+    html += '<div class="flex-1"><label class="text-[7px] font-bold uppercase tracking-wider block mb-1" style="color:#555">Max HR (bpm)</label>';
+    html += '<input type="number" id="hrZoneMaxHR" value="' + hrData.maxHR + '" placeholder="190" class="w-full px-2 py-1.5 rounded-lg text-[10px] text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" onchange="window._saveHRProfile()" aria-label="Maximale Herzfrequenz"></div></div>';
+    container.innerHTML = html;
+  };
+
+  window._saveHRProfile = function() {
+    var profile = JSON.parse(localStorage.getItem('base_athlete_profile') || '{}');
+    var restHR = document.getElementById('hrZoneRestHR');
+    var maxHR = document.getElementById('hrZoneMaxHR');
+    if (restHR) profile.restingHR = parseInt(restHR.value) || 60;
+    if (maxHR) profile.maxHR = parseInt(maxHR.value) || 190;
+    localStorage.setItem('base_athlete_profile', JSON.stringify(profile));
+    window._renderHRZonesWidget();
+  };
+
+  // === HABITS SUMMARY FÜR KI ===
+  window._getHabitSummaryForAI = function() {
+    var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
+    var dates = Object.keys(habits).sort().slice(-7);
+    if (dates.length === 0) return '';
+    var summary = '\nT\u00c4GLICHE HABITS (letzte ' + dates.length + ' Tage):\n';
+    var avgSleep = 0, avgWater = 0, avgProtein = 0, avgSteps = 0, avgMood = 0;
+    var count = { sleep: 0, water: 0, protein: 0, steps: 0, mood: 0 };
+    dates.forEach(function(d) {
+      var h = habits[d];
+      if (h.sleep) { avgSleep += h.sleep; count.sleep++; }
+      if (h.water) { avgWater += h.water; count.water++; }
+      if (h.protein) { avgProtein += h.protein; count.protein++; }
+      if (h.steps) { avgSteps += h.steps; count.steps++; }
+      if (h.mood) { avgMood += h.mood; count.mood++; }
+    });
+    if (count.sleep > 0) summary += '- Schlaf \u00d8: ' + (avgSleep / count.sleep).toFixed(1) + 'h/Nacht\n';
+    if (count.water > 0) summary += '- Wasser \u00d8: ' + (avgWater / count.water).toFixed(1) + 'L/Tag\n';
+    if (count.protein > 0) summary += '- Protein \u00d8: ' + (avgProtein / count.protein).toFixed(0) + 'g/Tag\n';
+    if (count.steps > 0) summary += '- Schritte \u00d8: ' + Math.round(avgSteps / count.steps) + '/Tag\n';
+    if (count.mood > 0) summary += '- Stimmung \u00d8: ' + (avgMood / count.mood).toFixed(1) + '/5\n';
+    var feedback = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
+    var recentFB = Object.keys(feedback).sort().slice(-5);
+    if (recentFB.length > 0) {
+      var avgFB = recentFB.reduce(function(a, d) { return a + feedback[d].rating; }, 0) / recentFB.length;
+      summary += '- Workout-Gef\u00fchl \u00d8: ' + avgFB.toFixed(1) + '/5 (letzte ' + recentFB.length + ' Workouts)\n';
+    }
+    return summary;
+  };
+
+  // === PLAN ADHERENCE TRACKING ===
+  window._checkPlanAdherence = function() {
+    var plan = JSON.parse(localStorage.getItem('base_active_plan') || 'null');
+    if (!plan || !plan.planData) return null;
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var weeks = plan.planData.weeks || [];
+    var adherenceData = [];
+    for (var w = 0; w < weeks.length; w++) {
+      var weekData = weeks[w];
+      if (!weekData || !weekData.sessions) continue;
+      var weekStart = new Date(plan.startDate || plan.created);
+      weekStart.setDate(weekStart.getDate() + (w * 7));
+      var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
+      if (weekEnd > new Date()) { if (weekStart > new Date()) break; }
+      var plannedSessions = weekData.sessions.length;
+      var actualWorkouts = allWorkouts.filter(function(wo) {
+        var d = new Date(wo.date); return d >= weekStart && d < weekEnd && wo.category === 'strength';
+      });
+      var completedSessions = actualWorkouts.length;
+      var plannedExercises = [];
+      weekData.sessions.forEach(function(s) { (s.exercises || []).forEach(function(ex) { plannedExercises.push((ex.name || '').toLowerCase()); }); });
+      var matchedExercises = 0;
+      actualWorkouts.forEach(function(wo) {
+        var woEx = (wo.exercise || '').toLowerCase();
+        if (plannedExercises.indexOf(woEx) !== -1) matchedExercises++;
+      });
+      var sessionAdherence = plannedSessions > 0 ? Math.min(100, Math.round(completedSessions / plannedSessions * 100)) : 0;
+      var exerciseAdherence = plannedExercises.length > 0 ? Math.min(100, Math.round(matchedExercises / plannedExercises.length * 100)) : 0;
+      adherenceData.push({ week: w + 1, planned: plannedSessions, completed: completedSessions, sessionAdherence: sessionAdherence, exerciseAdherence: exerciseAdherence, overall: Math.round((sessionAdherence + exerciseAdherence) / 2) });
+    }
+    return adherenceData.length > 0 ? adherenceData : null;
+  };
+
+  window._renderPlanAdherence = function(containerId) {
+    var container = document.getElementById(containerId || 'planAdherenceWidget');
+    if (!container) return;
+    var data = window._checkPlanAdherence();
+    if (!data || data.length === 0) { container.innerHTML = ''; return; }
+    var avgAdherence = Math.round(data.reduce(function(a, d) { return a + d.overall; }, 0) / data.length);
+    var adherenceColor = avgAdherence >= 80 ? '#a3c9a8' : avgAdherence >= 60 ? '#e8c86a' : '#e88a8a';
+    var adherenceLabel = avgAdherence >= 80 ? 'Exzellent' : avgAdherence >= 60 ? 'Gut' : avgAdherence >= 40 ? 'Ausbauf\u00e4hig' : 'Kritisch';
+    var html = '<div class="mb-3 flex items-center justify-between">';
+    html += '<span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Plan-Adherence</span>';
+    html += '<div class="flex items-center gap-2"><span class="text-lg font-black" style="color:' + adherenceColor + '">' + avgAdherence + '%</span>';
+    html += '<span class="text-[8px] font-bold px-1.5 py-0.5 rounded" style="background:' + adherenceColor + '22;color:' + adherenceColor + '">' + adherenceLabel + '</span></div></div>';
+    html += '<div class="flex gap-1 mb-2">';
+    data.forEach(function(d) {
+      var color = d.overall >= 80 ? '#a3c9a8' : d.overall >= 60 ? '#e8c86a' : '#e88a8a';
+      var height = Math.max(8, Math.round(d.overall / 100 * 40));
+      html += '<div class="flex-1 flex flex-col items-center gap-1">';
+      html += '<div class="w-full rounded" style="height:' + height + 'px;background:' + color + ';opacity:0.5"></div>';
+      html += '<span class="text-[7px] font-bold" style="color:' + color + '">' + d.overall + '%</span>';
+      html += '<span class="text-[6px]" style="color:#555">W' + d.week + '</span></div>';
+    });
+    html += '</div>';
+    var lastWeek = data[data.length - 1];
+    html += '<div class="flex gap-2 text-[8px]"><span style="color:#82828c">Letzte Woche: ' + lastWeek.completed + '/' + lastWeek.planned + ' Sessions</span>';
+    html += '<span style="color:#82828c">\u00b7</span><span style="color:#82828c">' + lastWeek.exerciseAdherence + '% \u00dcbungs-Match</span></div>';
+    container.innerHTML = html;
+  };
+
+  // === ACHIEVEMENT GALLERY ===
+  window._showAchievementGallery = function() {
+    var unlocked = JSON.parse(localStorage.getItem('base_achievements') || '[]');
+    var html = '';
+    (window._ACHIEVEMENTS || []).forEach(function(ach) {
+      var isUnlocked = unlocked.indexOf(ach.id) !== -1;
+      html += '<div class="flex items-center gap-3 p-3 rounded-xl mb-2" style="background:' + (isUnlocked ? 'rgba(163,201,168,0.06)' : 'var(--inner-bg-hex)') + ';border:1px solid ' + (isUnlocked ? 'rgba(163,201,168,0.15)' : 'var(--border-hex)') + ';' + (isUnlocked ? '' : 'opacity:0.5') + '">';
+      html += '<div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style="background:' + (isUnlocked ? 'rgba(163,201,168,0.1)' : '#0f110f') + ';font-size:20px">' + (isUnlocked ? ach.icon : '\ud83d\udd12') + '</div>';
+      html += '<div class="flex-1 min-w-0"><div class="text-[11px] font-bold ' + (isUnlocked ? 'text-white' : '') + '" style="' + (isUnlocked ? '' : 'color:#555') + '">' + window._escapeHtml(ach.name) + '</div>';
+      html += '<div class="text-[9px]" style="color:#82828c">' + window._escapeHtml(ach.desc) + '</div></div>';
+      if (isUnlocked) html += '<span class="flex-shrink-0 text-[8px] font-bold px-2 py-0.5 rounded" style="background:rgba(163,201,168,0.1);color:#a3c9a8">\u2713</span>';
+      html += '</div>';
+    });
+    html += '<div class="mt-4 p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+    html += '<span class="text-sm font-black" style="color:#a3c9a8">' + unlocked.length + '/' + (window._ACHIEVEMENTS || []).length + '</span>';
+    html += '<span class="text-[10px] ml-1" style="color:#82828c">Achievements freigeschaltet</span></div>';
+    var content = document.getElementById('achievementGalleryContent');
+    if (content) { content.innerHTML = html; window.toggleModal('achievementGalleryModal'); }
+  };
+
+  // === GUIDED STRETCH FLOWS ===
+  window._STRETCH_FLOWS = {
+    'H\u00fcft\u00f6ffner': {
+      duration: '8 min',
+      exercises: [
+        { name: 'Hip Flexor Stretch (Links)', holdSeconds: 45, transition: 5 },
+        { name: 'Hip Flexor Stretch (Rechts)', holdSeconds: 45, transition: 5 },
+        { name: 'Pigeon Pose (Links)', holdSeconds: 60, transition: 5 },
+        { name: 'Pigeon Pose (Rechts)', holdSeconds: 60, transition: 5 },
+        { name: '90/90 Stretch (Links)', holdSeconds: 45, transition: 5 },
+        { name: '90/90 Stretch (Rechts)', holdSeconds: 45, transition: 5 },
+        { name: 'Deep Squat Hold', holdSeconds: 60, transition: 0 }
+      ]
+    },
+    'Oberk\u00f6rper Mobility': {
+      duration: '7 min',
+      exercises: [
+        { name: 'Thoracic Spine Rotation (Links)', holdSeconds: 30, transition: 5 },
+        { name: 'Thoracic Spine Rotation (Rechts)', holdSeconds: 30, transition: 5 },
+        { name: 'Shoulder Dislocates', holdSeconds: 45, transition: 5 },
+        { name: 'Cat-Cow', holdSeconds: 60, transition: 5 },
+        { name: "Child's Pose", holdSeconds: 45, transition: 5 },
+        { name: 'Thread the Needle (Links)', holdSeconds: 30, transition: 5 },
+        { name: 'Thread the Needle (Rechts)', holdSeconds: 30, transition: 0 }
+      ]
+    },
+    'Ganzk\u00f6rper (Post-Workout)': {
+      duration: '10 min',
+      exercises: [
+        { name: 'Standing Quad Stretch (Links)', holdSeconds: 30, transition: 5 },
+        { name: 'Standing Quad Stretch (Rechts)', holdSeconds: 30, transition: 5 },
+        { name: 'Hamstring Stretch (Links)', holdSeconds: 30, transition: 5 },
+        { name: 'Hamstring Stretch (Rechts)', holdSeconds: 30, transition: 5 },
+        { name: 'Pigeon Pose (Links)', holdSeconds: 45, transition: 5 },
+        { name: 'Pigeon Pose (Rechts)', holdSeconds: 45, transition: 5 },
+        { name: "World's Greatest Stretch (Links)", holdSeconds: 30, transition: 5 },
+        { name: "World's Greatest Stretch (Rechts)", holdSeconds: 30, transition: 5 },
+        { name: 'Chest Doorway Stretch', holdSeconds: 30, transition: 5 },
+        { name: 'Downward Dog', holdSeconds: 45, transition: 5 },
+        { name: "Child's Pose", holdSeconds: 60, transition: 0 }
+      ]
+    },
+    'Unterk\u00f6rper (Leg Day)': {
+      duration: '8 min',
+      exercises: [
+        { name: 'Couch Stretch (Links)', holdSeconds: 45, transition: 5 },
+        { name: 'Couch Stretch (Rechts)', holdSeconds: 45, transition: 5 },
+        { name: 'Calf Stretch Wall (Links)', holdSeconds: 30, transition: 5 },
+        { name: 'Calf Stretch Wall (Rechts)', holdSeconds: 30, transition: 5 },
+        { name: 'Hamstring Stretch (Links)', holdSeconds: 45, transition: 5 },
+        { name: 'Hamstring Stretch (Rechts)', holdSeconds: 45, transition: 5 },
+        { name: 'Deep Squat Hold', holdSeconds: 60, transition: 0 }
+      ]
+    }
+  };
+
+  window._showStretchFlowPicker = function() {
+    var html = '<div class="text-[9px] font-black uppercase tracking-widest mb-3" style="color:var(--text-muted)">Gef\u00fchrte Stretch-Flows</div>';
+    Object.keys(window._STRETCH_FLOWS).forEach(function(name) {
+      var flow = window._STRETCH_FLOWS[name];
+      var safeName = window._escapeHtml(name).replace(/'/g, '&#39;');
+      html += '<button onclick="window._startStretchFlow(\'' + safeName + '\')" class="w-full p-3 rounded-xl text-left cursor-pointer pointer-events-auto mb-2 transition-colors" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" aria-label="' + safeName + ' starten">';
+      html += '<div class="flex items-center justify-between"><div>';
+      html += '<span class="text-xs font-bold text-white">' + window._escapeHtml(name) + '</span>';
+      html += '<div class="text-[9px]" style="color:#82828c">' + flow.exercises.length + ' \u00dcbungen \u00b7 ' + flow.duration + '</div>';
+      html += '</div><span class="text-[9px] font-bold" style="color:#a3c9a8">Starten \u2192</span></div></button>';
+    });
+    var container = document.getElementById('stretchFlowPicker');
+    if (container) container.innerHTML = html;
+  };
+
+  window._startStretchFlow = function(flowName) {
+    // Decode HTML entities back
+    var decoded = flowName.replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+    var flow = window._STRETCH_FLOWS[decoded];
+    if (!flow) { Object.keys(window._STRETCH_FLOWS).forEach(function(k) { if (window._escapeHtml(k).replace(/'/g, '&#39;') === flowName) flow = window._STRETCH_FLOWS[k]; }); }
+    if (!flow) return;
+    window._currentFlow = { name: decoded, exercises: flow.exercises.slice(), currentIndex: 0, isTransition: false };
+    window._runFlowStep();
+  };
+
+  window._runFlowStep = function() {
+    var flow = window._currentFlow; if (!flow) return;
+    if (flow.currentIndex >= flow.exercises.length) { window._showFlowComplete(flow.name, flow.exercises.length); return; }
+    var ex = flow.exercises[flow.currentIndex];
+    if (flow.isTransition && ex.transition > 0) {
+      window._showFlowTimer(ex.transition, '\u27a1\ufe0f N\u00e4chste: ' + ex.name, '#e8c86a', function() { flow.isTransition = false; window._runFlowStep(); });
+    } else {
+      flow.isTransition = true;
+      var progress = (flow.currentIndex + 1) + '/' + flow.exercises.length;
+      window._showFlowTimer(ex.holdSeconds, ex.name + ' (' + progress + ')', '#a3c9a8', function() { flow.currentIndex++; window._runFlowStep(); });
+    }
+  };
+
+  window._showFlowTimer = function(seconds, label, color, onComplete) {
+    var overlay = document.getElementById('flowTimerOverlay');
+    if (!overlay) { overlay = document.createElement('div'); overlay.id = 'flowTimerOverlay'; overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.97)'; document.body.appendChild(overlay); }
+    var remaining = seconds; var total = seconds;
+    var updateDisplay = function() {
+      var pct = (1 - remaining / total);
+      var circ = 2 * Math.PI * 80;
+      var dash = circ - pct * circ;
+      overlay.innerHTML = '<div class="text-center" style="position:relative;width:200px;height:200px">' +
+        '<svg width="200" height="200" style="transform:rotate(-90deg)"><circle cx="100" cy="100" r="80" fill="none" stroke="#1e201e" stroke-width="8"/>' +
+        '<circle cx="100" cy="100" r="80" fill="none" stroke="' + color + '" stroke-width="8" stroke-dasharray="' + circ + '" stroke-dashoffset="' + dash + '" stroke-linecap="round" style="transition:stroke-dashoffset 0.3s linear"/></svg>' +
+        '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">' +
+        '<div style="font-size:48px;font-weight:900;color:#fff;font-family:Outfit,sans-serif">' + remaining + '</div>' +
+        '<div style="font-size:10px;font-weight:700;color:' + color + ';margin-top:4px">HALTEN</div></div></div>' +
+        '<div class="mt-8 text-center"><div class="text-sm font-bold text-white mb-1">' + window._escapeHtml(label) + '</div>' +
+        '<div class="text-[9px]" style="color:#82828c">' + window._escapeHtml(window._currentFlow ? window._currentFlow.name : '') + '</div></div>' +
+        '<button onclick="clearInterval(window._flowTimerInterval);document.getElementById(\'' + 'flowTimerOverlay' + '\').remove();window._currentFlow=null" class="mt-6 px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(232,138,138,0.1);border:1px solid rgba(232,138,138,0.2);color:#e88a8a" aria-label="Flow beenden">Flow beenden</button>';
+    };
+    updateDisplay();
+    window._flowTimerInterval = setInterval(function() {
+      remaining--;
+      if (remaining <= 0) { clearInterval(window._flowTimerInterval); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); setTimeout(onComplete, 300); }
+      else { updateDisplay(); if (remaining <= 3 && navigator.vibrate) navigator.vibrate(100); }
+    }, 1000);
+  };
+
+  window._showFlowComplete = function(flowName, exerciseCount) {
+    var overlay = document.getElementById('flowTimerOverlay');
+    if (overlay) {
+      overlay.innerHTML = '<div class="text-center"><div style="font-size:64px;margin-bottom:16px">\ud83e\uddd8</div>' +
+        '<div class="text-2xl font-black text-white mb-2">Flow komplett!</div>' +
+        '<div class="text-sm" style="color:#82828c">' + window._escapeHtml(flowName) + ' \u00b7 ' + exerciseCount + ' \u00dcbungen</div>' +
+        '<button onclick="document.getElementById(\'' + 'flowTimerOverlay' + '\').remove()" class="mt-6 px-8 py-3 rounded-xl text-sm font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.25);color:#a3c9a8" aria-label="Fertig">Fertig \u2705</button></div>';
+      if (window.awardXP) window.awardXP('workout');
+    }
+  };
+
+  // === MONTHLY SUMMARY ===
+  window._renderMonthlySummary = function(containerId) {
+    var container = document.getElementById(containerId || 'monthlySummaryWidget');
+    if (!container) return;
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var now = new Date();
+    var thisMonth = now.getMonth(); var thisYear = now.getFullYear();
+    var lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+    var lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+    var thisMonthWorkouts = allWorkouts.filter(function(w) { var d = new Date(w.date); return d.getMonth() === thisMonth && d.getFullYear() === thisYear; });
+    var lastMonthWorkouts = allWorkouts.filter(function(w) { var d = new Date(w.date); return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear; });
+    if (thisMonthWorkouts.length === 0 && lastMonthWorkouts.length === 0) { container.innerHTML = ''; return; }
+    var calcVolume = function(wk) { return wk.reduce(function(a, w) { return a + (w.setDetails || []).reduce(function(b, s) { return b + ((parseFloat(s.reps) || 0) * (parseFloat(s.weight) || 0)); }, 0); }, 0); };
+    var thisCount = thisMonthWorkouts.length; var lastCount = lastMonthWorkouts.length;
+    var thisVol = calcVolume(thisMonthWorkouts); var lastVol = calcVolume(lastMonthWorkouts);
+    var monthNames = ['Januar', 'Februar', 'M\u00e4rz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    var arrow = function(curr, prev) { var diff = curr - prev; if (diff > 0) return '<span style="color:#a3c9a8">\u2191' + Math.abs(diff) + '</span>'; if (diff < 0) return '<span style="color:#e88a8a">\u2193' + Math.abs(diff) + '</span>'; return '<span style="color:#82828c">\u2192</span>'; };
+    var volLabel = function(v) { return v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v); };
+    var html = '<div class="mb-3 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest" style="color:var(--text-muted)">Monats-Zusammenfassung \u00b7 ' + monthNames[thisMonth] + '</span></div>';
+    html += '<div class="grid grid-cols-3 gap-2">';
+    html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Workouts</div><div class="text-lg font-black text-white">' + thisCount + '</div><div class="text-[8px]">' + arrow(thisCount, lastCount) + ' <span style="color:#555">vs. ' + monthNames[lastMonth] + '</span></div></div>';
+    html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Volumen</div><div class="text-lg font-black text-white">' + volLabel(thisVol) + ' kg</div>';
+    var volDiffPct = lastVol > 0 ? Math.round((thisVol - lastVol) / lastVol * 100) : 0;
+    html += '<div class="text-[8px]">' + (volDiffPct >= 0 ? '<span style="color:#a3c9a8">\u2191' + volDiffPct + '%</span>' : '<span style="color:#e88a8a">\u2193' + Math.abs(volDiffPct) + '%</span>') + '</div></div>';
+    // Unique categories this month
+    var categories = {};
+    thisMonthWorkouts.forEach(function(w) { categories[w.category] = (categories[w.category] || 0) + 1; });
+    var catCount = Object.keys(categories).length;
+    html += '<div class="p-3 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[8px] font-bold mb-1" style="color:#82828c">Kategorien</div><div class="text-lg font-black" style="color:#e8c86a">' + catCount + '</div><div class="text-[8px]" style="color:#555">aktiv</div></div>';
+    html += '</div>';
+    container.innerHTML = html;
+  };
