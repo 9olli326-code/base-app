@@ -6963,21 +6963,161 @@
   };
 
 
-  // === VOLUME LANDMARKS (MEV/MAV/MRV) ===
-  window._VOLUME_LANDMARKS = {
-    'chest':      { mev: 8,  mav: 14, mrv: 22, de: 'Brust' },
-    'back':       { mev: 10, mav: 16, mrv: 24, de: 'R\u00fccken' },
-    'shoulders':  { mev: 6,  mav: 12, mrv: 20, de: 'Schultern' },
-    'upper legs': { mev: 8,  mav: 14, mrv: 22, de: 'Oberschenkel' },
-    'lower legs': { mev: 6,  mav: 10, mrv: 16, de: 'Waden' },
-    'upper arms': { mev: 4,  mav: 10, mrv: 18, de: 'Oberarme' },
-    'lower arms': { mev: 2,  mav: 6,  mrv: 12, de: 'Unterarme' },
-    'waist':      { mev: 0,  mav: 8,  mrv: 16, de: 'Core' }
+  // === VOLUME LANDMARKS (MEV/MAV/MRV) — DYNAMISCH ===
+  window._BASE_VOLUME_LANDMARKS = {
+    'chest':      { mev: 8,  mav: 14, mrv: 22 },
+    'back':       { mev: 10, mav: 16, mrv: 24 },
+    'shoulders':  { mev: 6,  mav: 12, mrv: 20 },
+    'upper legs': { mev: 8,  mav: 14, mrv: 22 },
+    'lower legs': { mev: 6,  mav: 10, mrv: 16 },
+    'upper arms': { mev: 4,  mav: 10, mrv: 18 },
+    'lower arms': { mev: 2,  mav: 6,  mrv: 12 },
+    'waist':      { mev: 0,  mav: 8,  mrv: 16 }
   };
+
+  window._deLabels = {
+    'chest': 'Brust', 'back': 'R\u00fccken', 'shoulders': 'Schultern',
+    'upper legs': 'Oberschenkel', 'lower legs': 'Waden',
+    'upper arms': 'Oberarme', 'lower arms': 'Unterarme', 'waist': 'Core'
+  };
+
+  window._getVolumeLandmarks = function() {
+    var base = window._BASE_VOLUME_LANDMARKS;
+    var profile = JSON.parse(localStorage.getItem('base_athlete_profile') || '{}');
+
+    // === FAKTOR 1: Erfahrungslevel ===
+    var experience = (profile.experience || profile.erfahrung || 'mittel').toLowerCase();
+    var expMultiplier = 1.0;
+    if (experience.indexOf('anf\u00e4nger') !== -1 || experience.indexOf('beginner') !== -1 || experience === '<1') {
+      expMultiplier = 0.65;
+    } else if (experience.indexOf('leicht fortgeschritten') !== -1 || experience === '1-2') {
+      expMultiplier = 0.80;
+    } else if (experience.indexOf('fortgeschritten') !== -1 || experience.indexOf('intermediate') !== -1 || experience === '2-5') {
+      expMultiplier = 1.0;
+    } else if (experience.indexOf('weit fortgeschritten') !== -1 || experience.indexOf('advanced') !== -1 || experience === '5+') {
+      expMultiplier = 1.15;
+    } else if (experience.indexOf('profi') !== -1 || experience.indexOf('elite') !== -1 || experience === '10+') {
+      expMultiplier = 1.25;
+    }
+
+    // Trainings-Historie als Proxy falls kein explizites Level
+    var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+    var kraftWorkouts = allWorkouts.filter(function(w) { return w.category === 'strength'; });
+    if (kraftWorkouts.length > 0 && expMultiplier === 1.0) {
+      var firstDate = new Date(kraftWorkouts[kraftWorkouts.length - 1].date || kraftWorkouts[0].date);
+      var monthsTraining = Math.floor((new Date() - firstDate) / (1000 * 60 * 60 * 24 * 30));
+      var totalWorkouts = kraftWorkouts.length;
+      if (totalWorkouts < 20 || monthsTraining < 3) expMultiplier = 0.70;
+      else if (totalWorkouts < 50 || monthsTraining < 6) expMultiplier = 0.85;
+      else if (totalWorkouts < 150 || monthsTraining < 18) expMultiplier = 1.0;
+      else if (totalWorkouts < 400 || monthsTraining < 36) expMultiplier = 1.15;
+      else expMultiplier = 1.25;
+    }
+
+    // === FAKTOR 2: Alter ===
+    var age = parseInt(profile.age || profile.alter) || 28;
+    var ageMultiplier = 1.0;
+    if (age < 20) ageMultiplier = 0.90;
+    else if (age <= 30) ageMultiplier = 1.0;
+    else if (age <= 40) ageMultiplier = 0.95;
+    else if (age <= 50) ageMultiplier = 0.85;
+    else if (age <= 60) ageMultiplier = 0.75;
+    else ageMultiplier = 0.65;
+
+    // === FAKTOR 3: Schlaf ===
+    var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
+    var sleepDays = Object.keys(habits).sort().slice(-7);
+    var avgSleep = 7.5;
+    var sleepCount = 0;
+    sleepDays.forEach(function(d) {
+      if (habits[d] && habits[d].sleep) {
+        avgSleep = (avgSleep * sleepCount + habits[d].sleep) / (sleepCount + 1);
+        sleepCount++;
+      }
+    });
+    var sleepMultiplier = 1.0;
+    if (sleepCount > 0) {
+      if (avgSleep >= 8.5) sleepMultiplier = 1.10;
+      else if (avgSleep >= 7.5) sleepMultiplier = 1.0;
+      else if (avgSleep >= 6.5) sleepMultiplier = 0.90;
+      else if (avgSleep >= 5.5) sleepMultiplier = 0.75;
+      else sleepMultiplier = 0.60;
+    }
+
+    // === FAKTOR 4: Pump/Soreness ===
+    var pumpData = JSON.parse(localStorage.getItem('base_pump_soreness') || '{}');
+    var recentPumpDates = Object.keys(pumpData).sort().slice(-5);
+    var recoveryMultiplier = 1.0;
+    if (recentPumpDates.length >= 3) {
+      var totalSoreness = 0;
+      var totalPump = 0;
+      var dataPoints = 0;
+      recentPumpDates.forEach(function(d) {
+        var day = pumpData[d];
+        Object.values(day).forEach(function(muscle) {
+          if (muscle.soreness) { totalSoreness += muscle.soreness; dataPoints++; }
+          if (muscle.pump) totalPump += muscle.pump;
+        });
+      });
+      if (dataPoints > 0) {
+        var avgSoreness = totalSoreness / dataPoints;
+        var avgPump = totalPump / dataPoints;
+        if (avgSoreness >= 4 && avgPump <= 2) recoveryMultiplier = 0.80;
+        else if (avgSoreness <= 2 && avgPump >= 4) recoveryMultiplier = 1.05;
+        else if (avgSoreness >= 3.5) recoveryMultiplier = 0.85;
+      }
+    }
+
+    // === FAKTOR 5: Workout-Feedback ===
+    var feedback = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
+    var recentFB = Object.keys(feedback).sort().slice(-5);
+    var feedbackMultiplier = 1.0;
+    if (recentFB.length >= 3) {
+      var avgFB = recentFB.reduce(function(a, d) { return a + feedback[d].rating; }, 0) / recentFB.length;
+      if (avgFB <= 2) feedbackMultiplier = 0.85;
+      else if (avgFB >= 4.5) feedbackMultiplier = 1.05;
+    }
+
+    // === GESAMT-MULTIPLIKATOR ===
+    var mrvFactor = expMultiplier * ageMultiplier * sleepMultiplier * recoveryMultiplier * feedbackMultiplier;
+    var mavFactor = expMultiplier * ageMultiplier * ((sleepMultiplier + 1) / 2) * ((recoveryMultiplier + 1) / 2);
+    var mevFactor = expMultiplier * ((ageMultiplier + 1) / 2);
+    mevFactor = Math.max(0.5, Math.min(1.3, mevFactor));
+    mavFactor = Math.max(0.6, Math.min(1.4, mavFactor));
+    mrvFactor = Math.max(0.5, Math.min(1.5, mrvFactor));
+
+    var result = {};
+    Object.keys(base).forEach(function(bp) {
+      var b = base[bp];
+      result[bp] = {
+        mev: Math.max(2, Math.round(b.mev * mevFactor)),
+        mav: Math.max(4, Math.round(b.mav * mavFactor)),
+        mrv: Math.max(6, Math.round(b.mrv * mrvFactor)),
+        de: window._deLabels[bp] || bp
+      };
+      if (result[bp].mav <= result[bp].mev) result[bp].mav = result[bp].mev + 2;
+      if (result[bp].mrv <= result[bp].mav) result[bp].mrv = result[bp].mav + 4;
+    });
+
+    result._factors = {
+      experience: expMultiplier.toFixed(2) + 'x (' + experience + ')',
+      age: ageMultiplier.toFixed(2) + 'x (' + age + ' Jahre)',
+      sleep: sleepMultiplier.toFixed(2) + 'x (\u00d8 ' + avgSleep.toFixed(1) + 'h)',
+      recovery: recoveryMultiplier.toFixed(2) + 'x (Pump/Soreness)',
+      feedback: feedbackMultiplier.toFixed(2) + 'x (Workout-Gef\u00fchl)',
+      totalMRV: mrvFactor.toFixed(2) + 'x'
+    };
+    return result;
+  };
+
+  // Initialisiere dynamisch
+  window._VOLUME_LANDMARKS = window._getVolumeLandmarks();
 
   window._renderVolumeLandmarks = function(containerId) {
     var container = document.getElementById(containerId || 'volumeLandmarksChart');
     if (!container) return;
+    // Refresh dynamische Werte
+    if (window._getVolumeLandmarks) window._VOLUME_LANDMARKS = window._getVolumeLandmarks();
     var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
     var now = new Date();
     var weekAgo = new Date(now);
@@ -7057,6 +7197,21 @@
     if (overMrv.length > 0) {
       html += '<div class="p-2 rounded-lg mt-2 text-[9px]" style="background:rgba(232,138,138,0.05);border:1px solid rgba(232,138,138,0.1);color:#e88a8a">';
       html += '\ud83d\udcc8 \u00dcber MRV: ' + overMrv.map(function(bp) { return window._VOLUME_LANDMARKS[bp].de; }).join(', ') + ' \u2014 Volumen reduzieren oder Deload einplanen';
+      html += '</div>';
+    }
+    var factors = window._VOLUME_LANDMARKS._factors;
+    if (factors) {
+      html += '<div class="mt-3 p-3 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+      html += '<div class="text-[8px] font-bold uppercase tracking-wider mb-2" style="color:#82828c">Deine pers\u00f6nlichen Faktoren</div>';
+      html += '<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[8px]">';
+      html += '<span style="color:#82828c">Erfahrung:</span><span style="color:#ccc">' + window._escapeHtml(factors.experience) + '</span>';
+      html += '<span style="color:#82828c">Alter:</span><span style="color:#ccc">' + window._escapeHtml(factors.age) + '</span>';
+      html += '<span style="color:#82828c">Schlaf:</span><span style="color:#ccc">' + window._escapeHtml(factors.sleep) + '</span>';
+      html += '<span style="color:#82828c">Recovery:</span><span style="color:#ccc">' + window._escapeHtml(factors.recovery) + '</span>';
+      html += '<span style="color:#82828c">Workout-Gef\u00fchl:</span><span style="color:#ccc">' + window._escapeHtml(factors.feedback) + '</span>';
+      html += '<span style="color:#82828c">Gesamt MRV-Faktor:</span><span class="font-bold" style="color:#a3c9a8">' + window._escapeHtml(factors.totalMRV) + '</span>';
+      html += '</div>';
+      html += '<div class="text-[7px] mt-2" style="color:#555">Basierend auf Israetel/Schoenfeld Richtlinien, angepasst an dein Profil und aktuelle Recovery-Daten.</div>';
       html += '</div>';
     }
     container.innerHTML = html;
