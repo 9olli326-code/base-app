@@ -884,9 +884,14 @@ window.getWarmupRecommendation = async function() {
     if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 
     const prompt = `Du bist ein Fitness-Coach. Erstelle ein 5-10 Minuten Aufwärmprogramm.
+
+WICHTIG: Basiere deine Antwort AUSSCHLIESSLICH auf den bereitgestellten Athletendaten. Erfinde KEINE Trainingswerte. Wenn Daten fehlen, nutze konservative Standardwerte.
+
+<user_data>
 Athlet: ${ctx.prof}. Verletzungen: ${ctx.injStr}.${ctx.medStr}
 Heutige Kategorie: ${catName}. ZNS Readiness: ${zns}%.
 Letzte Workouts:\n${ctx.recentWorkouts}
+</user_data>
 Erstelle max 8 Aufwärmübungen. Antworte NUR als JSON Array (kein Markdown):
 [{"name":"Übungsname","nameEN":"English name","duration":"30s oder 10 Wdh","purpose":"Warum diese Übung","bodyPart":"chest/back/legs/shoulders/arms/core/cardio"}]
 Sprache für name und purpose: ${lang}`;
@@ -946,9 +951,14 @@ window.getExerciseRecommendation = async function() {
     if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons();
 
     const prompt = `Du bist ein erfahrener Kraft- und Fitness-Coach. Empfehle 4-6 Übungen für heute.
+
+WICHTIG: Basiere deine Empfehlungen AUSSCHLIESSLICH auf den bereitgestellten Athletendaten und der Trainingshistorie. Erfinde KEINE Trainingswerte oder Übungshistorien.
+
+<user_data>
 Athlet: ${ctx.prof}. Ziel: ${goal}. Verletzungen: ${ctx.injStr}.${ctx.medStr}
 Kategorie: ${catName}. ZNS Readiness: ${zns}%.
 Trainingshistorie:\n${ctx.recentWorkouts}
+</user_data>
 Berücksichtige progressive Overload und Erholung. Antworte NUR als JSON Array:
 [{"name":"Übungsname","nameEN":"English name","sets":4,"reps":8,"weight":"80kg oder Körpergewicht","reason":"Kurze Begründung","bodyPart":"chest/back/legs/shoulders/arms/core","category":"strength"}]
 Sprache für name und reason: ${lang}`;

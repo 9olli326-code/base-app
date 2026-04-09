@@ -6054,23 +6054,77 @@
   window._calculateReadinessV2 = function() {
    var kw = (window.workouts||[]).filter(function(w) { return w.category === 'strength' && w.setDetails && w.archived; });
    var now = new Date(); var score = 100;
+   // 1RM-Sch\u00e4tzungen f\u00fcr relative Intensit\u00e4t
+   var estimated1RMs = {};
+   kw.forEach(function(w) {
+    (w.setDetails||[]).forEach(function(s) {
+     var reps = parseFloat(s.reps)||0; var weight = parseFloat(s.weight)||0;
+     if (reps > 0 && weight > 0 && reps <= 12) {
+      var est1RM = weight * (1 + reps / 30);
+      if (!estimated1RMs[w.exercise] || est1RM > estimated1RMs[w.exercise]) estimated1RMs[w.exercise] = est1RM;
+     }
+    });
+   });
    var last7 = kw.filter(function(w) { return (now - new Date(w.date)) / 86400000 <= 7; });
    last7.forEach(function(w) {
     var daysAgo = Math.max(1, Math.floor((now - new Date(w.date)) / 86400000));
-    var sets = (w.setDetails||[]).length;
-    var maxW = Math.max.apply(null, (w.setDetails||[]).map(function(s){return parseFloat(s.weight)||0;}).concat([0]));
-    var mult = 1; if (sets >= 5) mult = 1.3; if (maxW >= 100) mult *= 1.2;
-    var rirsV = (w.setDetails||[]).filter(function(s){return s.rir!=null && !isNaN(s.rir);});
-    if (rirsV.length > 0) { var avgR = rirsV.reduce(function(a,s){return a+parseFloat(s.rir);},0)/rirsV.length; if (avgR <= 1) mult *= 1.3; }
-    score -= (sets * 1.5 * mult / daysAgo);
+    var recencyFactor = 1 / daysAgo;
+    var sets = (w.setDetails||[]).filter(function(s) { return s.type !== 'warmup'; });
+    var setCount = sets.length;
+    var maxW = Math.max.apply(null, sets.map(function(s){return parseFloat(s.weight)||0;}).concat([0]));
+    // Relative Intensit\u00e4t basierend auf 1RM
+    var est1RM = estimated1RMs[w.exercise] || maxW;
+    var relativeIntensity = est1RM > 0 ? maxW / est1RM : 0.5;
+    var intensityMult = 1.0;
+    if (relativeIntensity > 0.90) intensityMult = 1.6;
+    else if (relativeIntensity > 0.85) intensityMult = 1.4;
+    else if (relativeIntensity > 0.75) intensityMult = 1.2;
+    else if (relativeIntensity > 0.65) intensityMult = 1.0;
+    else intensityMult = 0.8;
+    if (setCount >= 6) intensityMult *= 1.2;
+    else if (setCount >= 4) intensityMult *= 1.1;
+    // RIR-Staffelung
+    var rirsV = sets.filter(function(s){return s.rir!=null && !isNaN(parseFloat(s.rir));});
+    var avgRir = 3;
+    if (rirsV.length > 0) avgRir = rirsV.reduce(function(a,s){return a+parseFloat(s.rir);},0)/rirsV.length;
+    var rirMult = 1.0;
+    if (avgRir <= 0) rirMult = 1.4;
+    else if (avgRir <= 1) rirMult = 1.3;
+    else if (avgRir <= 2) rirMult = 1.15;
+    else if (avgRir <= 3) rirMult = 1.0;
+    else rirMult = 0.85;
+    score -= (setCount * 1.5 * intensityMult * rirMult * recencyFactor);
    });
-   var fb = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
-   var yd = new Date(now); yd.setDate(yd.getDate()-1); var yk = yd.toISOString().split('T')[0];
-   if (fb[yk]) score += (fb[yk].rating - 3) * 5;
+   // Schlaf: 7-Tage-Durchschnitt
    var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
-   if (habits[yk] && habits[yk].sleep) { if (habits[yk].sleep >= 8) score += 5; else if (habits[yk].sleep < 6) score -= 10; }
+   var sleepDays = Object.keys(habits).sort().slice(-7);
+   var sleepSum = 0; var sleepCount = 0;
+   sleepDays.forEach(function(d) { if (habits[d] && habits[d].sleep && habits[d].sleep > 0) { sleepSum += habits[d].sleep; sleepCount++; } });
+   if (sleepCount >= 3) {
+    var avgSleep = sleepSum / sleepCount;
+    if (avgSleep >= 8.5) score += 8;
+    else if (avgSleep >= 7.5) score += 3;
+    else if (avgSleep >= 6.5) score -= 5;
+    else if (avgSleep >= 5.5) score -= 12;
+    else score -= 20;
+   }
+   // Workout-Feedback: Rolling Window
+   var fb = JSON.parse(localStorage.getItem('base_workout_feedback') || '{}');
+   var recentFB = Object.keys(fb).sort().slice(-5);
+   if (recentFB.length >= 2) {
+    var avgFB = recentFB.reduce(function(a,d){return a+fb[d].rating;},0)/recentFB.length;
+    score += (avgFB - 3) * 4;
+   }
+   // Pump/Soreness
+   var pumpData = JSON.parse(localStorage.getItem('base_pump_soreness') || '{}');
+   var recentPump = Object.keys(pumpData).sort().slice(-3);
+   if (recentPump.length >= 2) {
+    var totalSoreness = 0; var sorenessCount = 0;
+    recentPump.forEach(function(d) { Object.values(pumpData[d]).forEach(function(m) { if (m.soreness) { totalSoreness += m.soreness; sorenessCount++; } }); });
+    if (sorenessCount > 0) { var avgSoreness = totalSoreness / sorenessCount; if (avgSoreness >= 4) score -= 10; else if (avgSoreness >= 3) score -= 5; }
+   }
    score = Math.max(0, Math.min(100, Math.round(score)));
-   return { score: score, label: score>=80?'Voll erholt':score>=60?'Bereit':score>=40?'Moderat':score>=20?'Erm\u00fcdet':'Risiko', color: score>=80?'#a3c9a8':score>=60?'#8aafe8':score>=40?'#e8c86a':'#e88a8a' };
+   return { score: score, label: score>=80?'Voll erholt':score>=60?'Bereit':score>=40?'Moderat':score>=20?'Erm\u00fcdet':'\u00dcbertraining-Risiko', color: score>=80?'#a3c9a8':score>=60?'#8aafe8':score>=40?'#e8c86a':'#e88a8a', emoji: score>=80?'\ud83d\udfe2':score>=60?'\ud83d\udfe2':score>=40?'\ud83d\udfe1':'\ud83d\udd34' };
   };
 
   // === HOLD TIMER (MOBILITY) ===
@@ -6105,6 +6159,9 @@
   // === PROGRESSIVE OVERLOAD CHECK ===
   window._checkProgressiveOverload = function(exerciseName, matches) {
    if (!matches || matches.length < 3) return null;
+   // Kein Plateau-Alert w\u00e4hrend Deload
+   var _plan = JSON.parse(localStorage.getItem('base_active_plan') || 'null');
+   if (_plan && _plan.planData) { var _cw = window._getCurrentMesoWeek ? window._getCurrentMesoWeek() : 0; var _wks = _plan.planData.weeks || []; if (_wks[_cw]) { var _wn = (_wks[_cw].name || _wks[_cw].focus || '').toLowerCase(); if (_wn.indexOf('deload') !== -1) return null; } }
    var last3 = matches.slice(0, 3);
    var maxW = last3.map(function(w) { return Math.max.apply(null, (w.setDetails || []).map(function(s) { return parseFloat(s.weight) || 0; })); });
    if (maxW[0] === maxW[1] && maxW[1] === maxW[2] && maxW[0] > 0) {
@@ -6150,7 +6207,7 @@
    { id:'twentyfive', name:'Iron Will', desc:'25 Workouts', icon:'\uD83D\uDCAA', check:function(w){return w.length>=25;} },
    { id:'first_pr', name:'New Heights', desc:'Erster PR', icon:'\uD83C\uDFC6', check:function(w,m){return m.hasPR;} },
    { id:'streak7', name:'Unbreakable', desc:'7 Tage Streak', icon:'\u26A1', check:function(w,m){return m.streak>=7;} },
-   { id:'vol10k', name:'Volume King', desc:'10.000 kg Volumen', icon:'\uD83D\uDC51', check:function(w){return w.reduce(function(a,wo){return a+(wo.setDetails||[]).reduce(function(b,s){return b+((parseFloat(s.reps)||0)*(parseFloat(s.weight)||0));},0);},0)>=10000;} },
+   { id:'vol10k', name:'Volume King', desc:'10.000 kg Volumen', icon:'\uD83D\uDC51', check:function(w){return w.reduce(function(a,wo){return a+(wo.setDetails||[]).filter(function(s){return s.type!=='warmup';}).reduce(function(b,s){return b+((parseFloat(s.reps)||0)*(parseFloat(s.weight)||0));},0);},0)>=10000;} },
    { id:'five_ex', name:'Variety Pack', desc:'5 verschiedene \u00dcbungen', icon:'\uD83C\uDFB2', check:function(w){return new Set(w.map(function(x){return x.exercise;})).size>=5;} },
    { id:'consist4', name:'Machine', desc:'4 Wochen mit 3+ Workouts', icon:'\uD83E\uDD16', check:function(w){var wk={};w.forEach(function(wo){var d=new Date(wo.date);d.setDate(d.getDate()-d.getDay()+1);wk[d.toISOString().split('T')[0]]=(wk[d.toISOString().split('T')[0]]||0)+1;});return Object.values(wk).filter(function(c){return c>=3;}).length>=4;} }
   ];
@@ -7224,6 +7281,13 @@
     var allWorkouts = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
     var kraftWorkouts = allWorkouts.filter(function(w) { return w.category === 'strength' && w.setDetails; });
     if (kraftWorkouts.length < 10) return null;
+    // Pr\u00fcfe ob User bereits in Deload-Woche ist
+    var plan = JSON.parse(localStorage.getItem('base_active_plan') || 'null');
+    if (plan && plan.planData) {
+      var cw = window._getCurrentMesoWeek ? window._getCurrentMesoWeek() : 0;
+      var planWeeks = plan.planData.weeks || [];
+      if (planWeeks[cw]) { var wn = (planWeeks[cw].name || planWeeks[cw].focus || '').toLowerCase(); if (wn.indexOf('deload') !== -1 || wn.indexOf('erholung') !== -1) return null; }
+    }
     var signals = { score: 0, reasons: [] };
     var exDb = window.exerciseDB || window._exerciseDB || [];
     if (typeof exDb === 'function') exDb = exDb();
@@ -7238,7 +7302,8 @@
       var data = exercises[ex].sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
       if (data.length < 3) return;
       var last3 = data.slice(-3);
-      if (last3[2].max < last3[0].max && last3[2].max < last3[1].max) { decliningExercises.push(ex); }
+      var dropPct = last3[0].max > 0 ? (last3[0].max - last3[2].max) / last3[0].max : 0;
+      if (dropPct > 0.05) { decliningExercises.push(ex); }
     });
     if (decliningExercises.length >= 2) {
       signals.score += 3;
@@ -7456,7 +7521,7 @@
     var profile = JSON.parse(localStorage.getItem('base_athlete_profile') || '{}');
     var age = parseInt(profile.age) || 30;
     var restHR = parseInt(profile.restingHR) || 60;
-    var maxHR = parseInt(profile.maxHR) || (220 - age);
+    var maxHR = parseInt(profile.maxHR) || Math.round(208 - (0.7 * age)); // Tanaka-Formel
     var reserve = maxHR - restHR;
     return {
       maxHR: maxHR, restHR: restHR,
@@ -7538,10 +7603,14 @@
 
   window._saveHRProfile = function() {
     var profile = JSON.parse(localStorage.getItem('base_athlete_profile') || '{}');
-    var restHR = document.getElementById('hrZoneRestHR');
-    var maxHR = document.getElementById('hrZoneMaxHR');
-    if (restHR) profile.restingHR = parseInt(restHR.value) || 60;
-    if (maxHR) profile.maxHR = parseInt(maxHR.value) || 190;
+    var restVal = parseInt((document.getElementById('hrZoneRestHR') || {}).value);
+    var maxVal = parseInt((document.getElementById('hrZoneMaxHR') || {}).value);
+    if (restVal && restVal >= 30 && restVal <= 120) profile.restingHR = restVal;
+    if (maxVal && maxVal >= 120 && maxVal <= 230) profile.maxHR = maxVal;
+    if (profile.restingHR && profile.maxHR && profile.restingHR >= profile.maxHR) {
+      window.showToast('\u26a0\ufe0f Ruhepuls muss unter dem Maximalpuls liegen', 'error');
+      return;
+    }
     localStorage.setItem('base_athlete_profile', JSON.stringify(profile));
     window._renderHRZonesWidget();
   };
@@ -7573,6 +7642,39 @@
       var avgFB = recentFB.reduce(function(a, d) { return a + feedback[d].rating; }, 0) / recentFB.length;
       summary += '- Workout-Gef\u00fchl \u00d8: ' + avgFB.toFixed(1) + '/5 (letzte ' + recentFB.length + ' Workouts)\n';
     }
+    // Pump/Soreness Daten
+    var pumpData = JSON.parse(localStorage.getItem('base_pump_soreness') || '{}');
+    var recentPumpDates = Object.keys(pumpData).sort().slice(-3);
+    if (recentPumpDates.length > 0) {
+      summary += '\nPUMP & SORENESS (letzte ' + recentPumpDates.length + ' Trainings):\n';
+      recentPumpDates.forEach(function(d) {
+        var muscles = pumpData[d]; var parts = [];
+        Object.keys(muscles).forEach(function(m) {
+          var md = muscles[m];
+          if (md.pump || md.soreness) parts.push(m + ': Pump ' + (md.pump || '-') + '/5, Soreness ' + (md.soreness || '-') + '/5');
+        });
+        if (parts.length > 0) summary += d + ': ' + parts.join('; ') + '\n';
+      });
+    }
+    // Volume Landmarks Status
+    if (window._VOLUME_LANDMARKS) {
+      var _now = new Date(); var _wa = new Date(_now); _wa.setDate(_wa.getDate() - 7);
+      var _allWo = JSON.parse(localStorage.getItem(window._getStorageKey ? window._getStorageKey() : 'beastmode_v2_cache') || '[]');
+      var _weekWo = _allWo.filter(function(w) { return w.category === 'strength' && w.setDetails && new Date(w.date) >= _wa; });
+      var _exDb = window.exerciseDB || window._exerciseDB || []; if (typeof _exDb === 'function') _exDb = _exDb();
+      var _spm = {};
+      _weekWo.forEach(function(w) {
+        var ex = _exDb.find(function(e) { return e.n === w.exercise || e.de === w.exercise; });
+        if (ex && ex.bp) _spm[ex.bp] = (_spm[ex.bp] || 0) + (w.setDetails || []).filter(function(s) { return s.type !== 'warmup'; }).length;
+      });
+      var _vs = [];
+      Object.keys(window._VOLUME_LANDMARKS).forEach(function(bp) {
+        if (bp === '_factors') return; var lm = window._VOLUME_LANDMARKS[bp]; var cur = _spm[bp] || 0;
+        var zone = cur < lm.mev ? 'UNTER MEV' : cur <= lm.mav ? 'optimal' : cur <= lm.mrv ? 'hoch' : '\u00dcBER MRV';
+        if (cur > 0) _vs.push(lm.de + ': ' + cur + '/' + lm.mav + ' Sets (' + zone + ')');
+      });
+      if (_vs.length > 0) { summary += '\nVOLUMEN-STATUS DIESE WOCHE:\n'; _vs.forEach(function(v) { summary += '- ' + v + '\n'; }); }
+    }
     return summary;
   };
 
@@ -7600,7 +7702,15 @@
       var matchedExercises = 0;
       actualWorkouts.forEach(function(wo) {
         var woEx = (wo.exercise || '').toLowerCase();
-        if (plannedExercises.indexOf(woEx) !== -1) matchedExercises++;
+        var isMatched = plannedExercises.some(function(planned) {
+          if (planned === woEx) return true;
+          if (woEx.indexOf(planned) !== -1 || planned.indexOf(woEx) !== -1) return true;
+          var planWords = planned.split(/[\s\-\/]+/);
+          var woWords = woEx.split(/[\s\-\/]+/);
+          var overlap = planWords.filter(function(pw) { return woWords.some(function(ww) { return ww.indexOf(pw) !== -1 || pw.indexOf(ww) !== -1; }); });
+          return overlap.length >= Math.ceil(planWords.length * 0.5);
+        });
+        if (isMatched) matchedExercises++;
       });
       var sessionAdherence = plannedSessions > 0 ? Math.min(100, Math.round(completedSessions / plannedSessions * 100)) : 0;
       var exerciseAdherence = plannedExercises.length > 0 ? Math.min(100, Math.round(matchedExercises / plannedExercises.length * 100)) : 0;
