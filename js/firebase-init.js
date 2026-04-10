@@ -209,8 +209,7 @@
      });
      return;
     }
-    var t = window.t || function(k,fb) { return fb; };
-    window.showModal(t('authDeleteTitle','Account loeschen?'), t('authDeleteMsg','Account und alle Daten dauerhaft loeschen? Das kann NICHT rueckgaengig gemacht werden!'), true, () => {
+    window.showModal('Account löschen?', 'Account und alle Daten dauerhaft löschen? Das kann NICHT rückgängig gemacht werden!', true, () => {
     window.showModal('Bist du sicher?', 'Alle Workouts, Einstellungen und Daten werden unwiderruflich gelöscht.', true, async () => {
     try {
      if(window._db && window.firestoreLib) {
@@ -334,6 +333,16 @@
     if(!auth.currentUser) return; 
     const path = window.currentMode === 'personal' ? `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/workouts` : `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/clients/${window.currentClient}/workouts`; 
     try { await deleteDoc(doc(db, path, id.toString())); } catch(err) { console.log("Delete failed offline"); }
+   };
+
+   window._syncAppData = async (key, data) => {
+    if (!auth.currentUser || !navigator.onLine) return;
+    try { await setDoc(doc(db, `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/app_data`, key), { data: JSON.stringify(data), updatedAt: new Date().toISOString() }); } catch(e) { console.warn('App data sync failed:', e); }
+   };
+
+   window._loadAppData = async (key) => {
+    if (!auth.currentUser) return null;
+    try { const snap = await getDoc(doc(db, `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/app_data`, key)); if (snap.exists() && snap.data().data) return JSON.parse(snap.data().data); return null; } catch(e) { return null; }
    };
 
    window._chCreate = async (id, data) => {

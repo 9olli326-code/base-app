@@ -223,10 +223,13 @@ window.startRestCountdown = function(secs) {
         const s = String(remaining % 60).padStart(2, '0');
         const d = document.getElementById('restDisplay');
         if (d) { d.textContent = m + ':' + s; d.classList.add('timer-active'); }
-        if (window._speak && window._voiceCoachEnabled) {
-            if (remaining === 30) window._speak(window.t('voice30sec', '30 Sekunden Pause'));
-            if (remaining === 10) window._speak(window.t('voice10sec', '10 Sekunden. Mach dich bereit!'), 'high');
-            if (remaining === 3) window._speak(window.t('voice3sec', '3... 2... 1... Los!'), 'high');
+        if (window._voiceCoachEnabled) {
+            var _vs = window._voiceCoachSpeak || window._speak;
+            if (_vs) {
+                if (remaining === 30) _vs(window.t('voice30sec', '30 Sekunden Pause'));
+                if (remaining === 10) _vs(window.t('voice10sec', '10 Sekunden. Mach dich bereit!'), 'high');
+                if (remaining === 3) _vs(window.t('voice3sec', '3... 2... 1... Los!'), 'high');
+            }
         }
         if (remaining <= 0) {
             clearInterval(window.restTimerInterval); _restEndTime = null;

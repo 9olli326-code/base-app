@@ -217,11 +217,19 @@ if(body.image){
     try{const reply=await callGemini('',0.3,false,'',imgParts);logTrainingData(rateLimitType,body.prompt||'image-analysis',reply,body.lang||'de','formcheck');return{statusCode:200,headers:h,body:JSON.stringify({candidates:[{content:{parts:[{text:reply}]}}],limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}
 }
 
-// === CONTENTS PASSTHROUGH ===
-if(body.contents&&Array.isArray(body.contents)){try{const pr=sanitizeForPrompt(body.contents[0]?.parts?.[0]?.text||'',3000);const tm=body.generationConfig?.temperature||0.3;const jm=body.generationConfig?.responseMimeType==='application/json';const sp=body.system_instruction?.parts?.[0]?.text||'';const reply=await callGemini(pr,tm,jm,sp);logTrainingData(rateLimitType,pr,reply,body.lang||'de','passthrough');return{statusCode:200,headers:h,body:JSON.stringify({reply,limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
+// === CONTENTS PASSTHROUGH (enhanced with server-side summary) ===
+if(body.contents&&Array.isArray(body.contents)){try{let pr=sanitizeForPrompt(body.contents[0]?.parts?.[0]?.text||'',3000);const tm=body.generationConfig?.temperature||0.3;const jm=body.generationConfig?.responseMimeType==='application/json';let sp=body.system_instruction?.parts?.[0]?.text||'';
+// Enhance with server-side athlete summary if workouts provided
+let as='';if(body.workouts&&Array.isArray(body.workouts)&&body.workouts.length>2){try{as=buildAthleteSummary(body.workouts,body.profile||{});pr+='\n\n<server_analysis>\n'+as+'\n</server_analysis>';}catch(e2){}}
+// Apply System Directive if not already present
+if(sp&&sp.indexOf('ANTI-HALLUZINATION')===-1&&SD){sp=SD+'\n\n'+sp;}
+const reply=await callGemini(pr,tm,jm,sp);logTrainingData(rateLimitType,pr,reply,body.lang||'de','passthrough');return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as||undefined,limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
 
-// === GENERIC PROMPT ===
-if(body.prompt&&!body.type){try{const safePrompt=sanitizeForPrompt(body.prompt,2000);const safeSystemPrompt=body.systemPrompt?sanitizeForPrompt(body.systemPrompt,1000):'';const reply=await callGemini(safePrompt,0.3,false,safeSystemPrompt);logTrainingData('generic',safePrompt,reply,body.lang||'de','prompt');return{statusCode:200,headers:h,body:JSON.stringify({parts:[{text:reply}],limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
+// === GENERIC PROMPT (enhanced with server-side summary) ===
+if(body.prompt&&!body.type){try{let safePrompt=sanitizeForPrompt(body.prompt,2000);let safeSystemPrompt=body.systemPrompt?sanitizeForPrompt(body.systemPrompt,1000):'';
+let as='';if(body.workouts&&Array.isArray(body.workouts)&&body.workouts.length>2){try{as=buildAthleteSummary(body.workouts,body.profile||{});safePrompt+='\n\n<server_analysis>\n'+as+'\n</server_analysis>';}catch(e2){}}
+if(safeSystemPrompt&&safeSystemPrompt.indexOf('ANTI-HALLUZINATION')===-1&&SD){safeSystemPrompt=SD+'\n\n'+safeSystemPrompt;}
+const reply=await callGemini(safePrompt,0.3,false,safeSystemPrompt);logTrainingData('generic',safePrompt,reply,body.lang||'de','prompt');return{statusCode:200,headers:h,body:JSON.stringify({parts:[{text:reply}],athleteSummary:as||undefined,limits:rateCheck.remaining})};}catch(e){return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}}
 
 // === TYPED REQUEST ===
 const{type,context}=body;if(!type||!context)return{statusCode:400,headers:h,body:JSON.stringify({error:'type und context erforderlich'})};

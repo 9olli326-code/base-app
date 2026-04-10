@@ -700,3 +700,71 @@ button {
 
 #kiChatInput:focus { border-color: var(--cat-accent, #a3c9a8) !important; }
 
+/* ══════════════════════════════════════════════════════════
+   UX BLOCK 4-6 — Skeleton, Modal Animation, Reduced Motion
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Skeleton Screen Pulse ─────────────────────────────── */
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.15; }
+}
+.skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    margin-bottom: 8px;
+}
+.skeleton-line.w-3\/4 { width: 75%; }
+.skeleton-line.w-1\/2 { width: 50%; }
+.skeleton-line.w-full { width: 100%; }
+.skeleton-block {
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+/* ── Unified Modal Slide-Up ────────────────────────────── */
+@keyframes modalSlideUp {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+[id$="Modal"] > div,
+[id$="Overlay"] > div {
+    animation: modalSlideUp 0.25s ease-out;
+}
+[id$="Modal"],
+[id$="Overlay"] {
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+/* ── Prefers Reduced Motion ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .skeleton-line, .skeleton-block {
+        animation: none !important;
+        opacity: 0.1;
+    }
+    [id$="Modal"] > div,
+    [id$="Overlay"] > div {
+        animation: none !important;
+    }
+}
+
+/* ── CSS Token: text-dim and text-faint ────────────────── */
+:root {
+    --text-dim: #9898a2;
+    --text-faint: #737373;
+    --surface-light: color-mix(in srgb, var(--bg-hex, #0f110f), white 8%);
+}
+

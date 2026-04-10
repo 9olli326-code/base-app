@@ -65,6 +65,7 @@ window.saveModules = function() {
         ptMode: !!(document.getElementById('mod_ptMode')?.checked),
     };
     localStorage.setItem('beastmode_v2_profile', JSON.stringify(window.userProfile));
+    if (window._syncAppData) window._syncAppData('beastmode_v2_profile', window.userProfile);
     window.applyModules();
     window.renderWidgetStoreUI();
     window.toggleModal('widgetStoreModal');
@@ -100,6 +101,7 @@ window.saveProfile = function(e) {
     window.userProfile.medicalDetails = document.getElementById('profMedicalDetails')?.value || '';
     window.userProfile.injuries = Array.from(window.selectedInjuries);
     localStorage.setItem('beastmode_v2_profile', JSON.stringify(window.userProfile));
+    if (window._syncAppData) window._syncAppData('beastmode_v2_profile', window.userProfile);
     window.toggleModal('profileModal');
     window.showToast(window.t("profileSaved","Profil gespeichert! ✅"));
 };
@@ -374,6 +376,7 @@ window.obFinish = function() {
     }
     window.userProfile.onboardingDone = true;
     localStorage.setItem('beastmode_v2_profile', JSON.stringify(window.userProfile));
+    if (window._syncAppData) window._syncAppData('beastmode_v2_profile', window.userProfile);
     window.toggleModal('onboardingModal');
     window.applyModules();
     if(typeof window.renderWidgetStoreUI === 'function') window.renderWidgetStoreUI();

@@ -4,6 +4,22 @@
 // Ausgelagert aus app.html für Modularisierung
 // ============================================================
 
+// --- AI HTML Sanitizer (Markdown → safe HTML) ---
+window._sanitizeAIHtml = function(text) {
+    if (!text) return '';
+    var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    s = s.replace(/^### (.+)$/gm, '<h4 style="font-size:13px;font-weight:800;color:var(--primary-hex);margin:12px 0 4px">$1</h4>');
+    s = s.replace(/^## (.+)$/gm, '<h3 style="font-size:14px;font-weight:800;color:var(--primary-hex);margin:14px 0 6px">$1</h3>');
+    s = s.replace(/^# (.+)$/gm, '<h3 style="font-size:15px;font-weight:900;color:var(--primary-hex);margin:14px 0 6px">$1</h3>');
+    s = s.replace(/^\d+\.\s+(.+)$/gm, '<div style="padding:2px 0 2px 16px">• $1</div>');
+    s = s.replace(/^[-•]\s+(.+)$/gm, '<div style="padding:2px 0 2px 16px">• $1</div>');
+    s = s.replace(/\n{2,}/g, '<br><br>');
+    s = s.replace(/\n/g, '<br>');
+    return s;
+};
+
 // --- 4. DESIGN KI (Design Studio) ---
 window.runDesignAI = async function() {
     if(!window.checkOnlineForAI()) return;
@@ -117,6 +133,16 @@ window.checkOnlineForAI = function() {
 // Robuster Gemini Fetch-Wrapper mit Timeout, Error Handling, res.ok Check
 window._aiFetch = async function(body, opts) {
     opts = opts || {};
+    // Attach workout data for server-side analysis (buildAthleteSummary)
+    if (!body.workouts && !body.type && Array.isArray(window.workouts)) {
+        var _archived = window.workouts.filter(function(w) { return w.archived; });
+        if (_archived.length > 2) {
+            body.workouts = _archived.slice(-30).map(function(w) {
+                return { date: w.date, exercise: w.exercise, category: w.category, setDetails: w.setDetails, maxWeight: w.maxWeight, volume: w.volume, data: w.data };
+            });
+            body.profile = { age: (window.userProfile||{}).age, weight: (window.userProfile||{}).weight, experience: (window.userProfile||{}).experience };
+        }
+    }
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, opts.timeout || 30000);
     try {
@@ -148,8 +174,9 @@ window.getPromptLang = function() {
 
 window.buildAIContext = function() {
     // 1. Athletenprofil
-    const prof = `Alter: ${window.userProfile.age||'?'}, Gewicht: ${window.userProfile.weight||'?'}kg, Größe: ${window.userProfile.height||'?'}cm, Geschlecht: ${window.userProfile.gender||'?'}, Erfahrung: ${window.userProfile.experience||'?'}`;
-    const injuries = Array.from(window.selectedInjuries);
+    var _prof = window.userProfile || {};
+    const prof = `Alter: ${_prof.age||'?'}, Gewicht: ${_prof.weight||'?'}kg, Größe: ${_prof.height||'?'}cm, Geschlecht: ${_prof.gender||'?'}, Erfahrung: ${_prof.experience||'?'}`;
+    const injuries = Array.from(window.selectedInjuries || []);
     const injStr = injuries.length > 0 ? injuries.join(', ') : 'keine bekannt';
     const medStr = window.userProfile.medicalDetails ? ` Weitere Details: ${window.userProfile.medicalDetails}.` : '';
 
@@ -166,7 +193,7 @@ window.buildAIContext = function() {
     });
 
     // 3. Letzte 20 Workouts mit ALLEN Werten (inkl. Custom-Felder)
-    const recentWorkouts = window.workouts.slice(0, 20).map(w => {
+    const recentWorkouts = (window.workouts || []).slice(0, 20).map(w => {
         let dataStr = '';
         if(w.category === 'strength' && w.setDetails && w.setDetails.length > 0) {
             dataStr = w.setDetails.map(s => `${s.reps}Wdh×${s.weight}kg`).join(', ');
@@ -184,7 +211,27 @@ window.buildAIContext = function() {
 
     var habitSummary = window._getHabitSummaryForAI ? window._getHabitSummaryForAI() : '';
 
-    return { prof, injStr, medStr, schemaLines: schemaLines.join('; '), recentWorkouts: (recentWorkouts || '') + habitSummary };
+    // Aktiver Mesozyklus-Plan
+    var planSummary = '';
+    try {
+        var activePlan = JSON.parse(localStorage.getItem('base_active_plan') || 'null');
+        if (activePlan && activePlan.planData) {
+            var currentWeek = window._getCurrentMesoWeek ? window._getCurrentMesoWeek() : 0;
+            var totalWeeks = activePlan.totalWeeks || (activePlan.planData.weeks ? activePlan.planData.weeks.length : 4);
+            var phases = activePlan.planData.mesoCycle ? activePlan.planData.mesoCycle.phases : null;
+            var currentPhase = phases ? phases[currentWeek] : null;
+            planSummary = '\n\nAKTIVER TRAININGSPLAN:';
+            planSummary += '\n- Woche ' + (currentWeek + 1) + ' von ' + totalWeeks;
+            if (currentPhase) {
+                planSummary += '\n- Phase: ' + (currentPhase.name || currentPhase.type || 'Unbekannt');
+                planSummary += '\n- Sets-Multiplikator: ' + (currentPhase.setsMultiplier || '1.0') + 'x';
+                planSummary += '\n- Ziel-RIR: ' + (currentPhase.targetRIR != null ? currentPhase.targetRIR : '2-3');
+            }
+            planSummary += '\nBerücksichtige die aktuelle Mesozyklus-Phase bei Empfehlungen.';
+        }
+    } catch(e) {}
+
+    return { prof, injStr, medStr, schemaLines: schemaLines.join('; '), recentWorkouts: (recentWorkouts || '') + habitSummary + planSummary };
 };
 
 // --- ZNS READINESS ---
@@ -240,9 +287,12 @@ window.toggleZNS = function() {
 window.analyzeReadinessWithAI = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('scan')) return;
+    var _archived = (window.workouts || []).filter(function(w) { return w.archived; });
+    if(_archived.length < 1) { window.showToast(window.t('aiNeedData','Tracke mindestens 1 Workout für KI-Analyse.'), 'error'); return; }
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
+    if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('znsTitle','ZNS Readiness');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('znsAnalyze','Erholung & Bereitschaft');
     const ctx = window.buildAIContext();
@@ -274,7 +324,7 @@ Max 180 Wörter. Antworte auf ${window.getPromptLang()}.`;
         if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.innerHTML = window._sanitizeAIHtml(data.reply || window.t('toastNoData','Keine Antwort.')); }
         if(window.awardXP) window.awardXP('coachChat');
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
@@ -286,16 +336,19 @@ Max 180 Wörter. Antworte auf ${window.getPromptLang()}.`;
 // --- AI CO-PILOT ---
 window.triggerCopilot = async function() {
     if(!window.checkOnlineForAI()) return;
+    var _archived = (window.workouts || []).filter(function(w) { return w.archived; });
+    if(_archived.length < 1) { window.showToast(window.t('aiNeedData','Tracke mindestens 1 Workout für KI-Analyse.'), 'error'); return; }
     if(!window.checkFeatureGate('coach')) return;
     const exercise = document.getElementById('exerciseInput')?.value?.trim();
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
+    if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('copilotTitle','AI Co-Pilot');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('copilotSub','Smarte Trainingsempfehlung');
     const ctx = window.buildAIContext();
     // Letzte Einheiten der gewünschten Übung herausfiltern für direkten Vergleich
-    const exHistory = exercise ? window.workouts.filter(w => w.exercise.toLowerCase() === exercise.toLowerCase()).slice(0,5).map(w => {
+    const exHistory = exercise ? (window.workouts || []).filter(w => w.exercise && w.exercise.toLowerCase() === exercise.toLowerCase()).slice(0,5).map(w => {
         let d = w.setDetails ? w.setDetails.map(s=>`${s.reps}×${s.weight}kg`).join(', ') : '';
         const extras = w.data ? Object.entries(w.data).filter(([k])=>!['Sätze','Volumen (kg)'].includes(k)).map(([k,v])=>`${k}:${v}`).join(' | ') : '';
         return `${w.date}: ${d}${extras ? ' — '+extras : ''}`;
@@ -331,7 +384,7 @@ Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
         if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.innerHTML = window._sanitizeAIHtml(data.reply || window.t('toastNoData','Keine Antwort.')); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
@@ -343,10 +396,13 @@ Max 200 Wörter. Antworte auf ${window.getPromptLang()}.`;
 window.generatePreHab = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('scan')) return;
+    var _archived = (window.workouts || []).filter(function(w) { return w.archived; });
+    if(_archived.length < 1) { window.showToast(window.t('aiNeedData','Tracke mindestens 1 Workout für KI-Analyse.'), 'error'); return; }
     if(window._markFeatureUsed) window._markFeatureUsed('prehab_used');
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
+    if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('prehabTitle','Pre-Hab');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('prehabSub','Verletzungsprävention');
     const exercise = document.getElementById('exerciseInput')?.value?.trim();
@@ -367,7 +423,7 @@ Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B
         if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.innerHTML = window._sanitizeAIHtml(data.reply || window.t('toastNoData','Keine Antwort.')); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
@@ -379,10 +435,13 @@ Erstelle ein gezieltes Pre-Hab Programm. Berücksichtige alle Custom-Felder (z.B
 window.analyzeWithAI = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('scan')) return;
+    var _archived = (window.workouts || []).filter(function(w) { return w.archived; });
+    if(_archived.length < 1) { window.showToast(window.t('aiNeedData','Tracke mindestens 1 Workout für KI-Analyse.'), 'error'); return; }
     if(window._markFeatureUsed) window._markFeatureUsed('coach_used');
     window.toggleModal('aiModal');
     document.getElementById('aiLoadingState')?.classList.remove('hidden');
     document.getElementById('aiResultText')?.classList.add('hidden');
+    if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('aiCoachTitle','AI Coach');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('aiCoachSub','Progression Analyse');
     const ctx = window.buildAIContext();
@@ -430,7 +489,7 @@ Max 320 Wörter, präzise und datenbasiert. Antworte auf ${window.getPromptLang(
         if(!data) { document.getElementById('aiLoadingState')?.classList.add('hidden'); return; }
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
-        if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = data.reply || window.t('toastNoData','Keine Antwort.'); }
+        if(rEl){ rEl.classList.remove('hidden'); rEl.innerHTML = window._sanitizeAIHtml(data.reply || window.t('toastNoData','Keine Antwort.')); }
     } catch(e) {
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
@@ -750,6 +809,10 @@ window.generateTrainingPlan = async function() {
         p += 'Athlet: ' + (profile.experience || 'Anfaenger') + ', ' + (profile.weight || '?') + 'kg. ';
         if(orms) p += '1RMs: ' + orms + '. ';
         p += 'Letzte Workouts: ' + (recent || 'keine Daten') + '. ';
+        var _habitPlan = window._getHabitSummaryForAI ? window._getHabitSummaryForAI() : '';
+        if (_habitPlan) p += 'RECOVERY/HABITS: ' + _habitPlan + '. ';
+        var _planLang = window.getPromptLang ? window.getPromptLang() : 'Deutsch';
+        p += 'Antworte auf ' + _planLang + '. ';
         p += 'Antworte NUR mit kompaktem JSON: {"week":' + weekNum + ',"focus":"kurzer Fokus","phase":"' + (weekNum === totalWeeks ? 'deload' : weekNum <= Math.ceil(totalWeeks*0.4) ? 'accumulation' : weekNum <= Math.ceil(totalWeeks*0.8) ? 'accumulation' : 'overreach') + '","targetRIR":' + mesoRIR + ',"setsMultiplier":' + mesoSets + ',"sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Uebung","sets":3,"reps":"8-10","rir":' + mesoRIR + ',"intensity":"RPE 7","notes":""}]}]}';
         return fetch('/.netlify/functions/gemini', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -819,7 +882,7 @@ window.renderTrainingPlan = function(plan) {
                                         ${ex.notes ? `<p class="text-zinc-600 text-[10px]">${esc(ex.notes)}</p>` : ''}
                                     </div>
                                     <div class="text-right flex-shrink-0">
-                                        <p class="text-primary text-[11px] font-black">${esc(String(ex.sets))}\u00d7${esc(String(ex.reps))}${ex.rir != null ? '<span class="ml-1 text-[8px]" style="color:#a3c9a8">RIR '+ex.rir+'</span>' : ''}</p>
+                                        <p class="text-primary text-[11px] font-black">${esc(String(ex.sets))}\u00d7${esc(String(ex.reps))}${ex.rir != null ? '<span class="ml-1 text-[8px]" style="color:var(--primary-hex)">RIR '+ex.rir+'</span>' : ''}</p>
                                         <p class="text-zinc-500 text-[10px] font-bold">${esc(ex.intensity || '')}</p>
                                     </div>
                                 </div>`).join('')}
@@ -1046,7 +1109,11 @@ window.generateSmartWorkout = async function() {
     var last48h = archived.filter(function(w) { return w.date >= twoDaysAgo; }).map(function(w) { return w.exercise; });
     var dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
     var today = dayNames[new Date().getDay()];
-    var userPrompt = 'Erstelle mein Workout für heute (' + today + ').\n\nATHLETEN-PROFIL:\nAlter: ' + (profile.age || '?') + '\nGewicht: ' + (profile.weight || '?') + ' kg\nLevel: ' + (profile.experience || 'Anfänger') + '\n\nTRAININGSHISTORIE (letzte 30):\n' + recent + '\n\nDIESE WOCHE TRAINIERT:\n' + (thisWeek.length > 0 ? thisWeek.join(', ') : 'Noch nichts') + '\n\nLETZTE 48H:\n' + (last48h.length > 0 ? last48h.join(', ') : 'Nichts') + '\n\nErstelle 5-7 Übungen. JSON Array.';
+    var habitData = window._getHabitSummaryForAI ? window._getHabitSummaryForAI() : '';
+    var langName = window.getPromptLang ? window.getPromptLang() : 'Deutsch';
+    var userPrompt = 'Erstelle mein Workout für heute (' + today + ').\n\nATHLETEN-PROFIL:\nAlter: ' + (profile.age || '?') + '\nGewicht: ' + (profile.weight || '?') + ' kg\nLevel: ' + (profile.experience || 'Anfänger') + '\n\nTRAININGSHISTORIE (letzte 30):\n' + recent + '\n\nDIESE WOCHE TRAINIERT:\n' + (thisWeek.length > 0 ? thisWeek.join(', ') : 'Noch nichts') + '\n\nLETZTE 48H:\n' + (last48h.length > 0 ? last48h.join(', ') : 'Nichts');
+    if (habitData) userPrompt += '\n\nHABITS & RECOVERY:\n' + habitData;
+    userPrompt += '\n\nErstelle 5-7 Übungen. JSON Array. Antworte auf ' + langName + '.';
     window.showToast(window.t('aiGenerating','Dein Workout wird geplant...'));
     var btn = document.getElementById('smartWorkoutBtn');
     if(btn) btn.style.opacity = '0.5';

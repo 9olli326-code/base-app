@@ -1,109 +1,443 @@
-# BASE — Projekt-Kontext für Claude Code
+# BASE — Projekt-Kontext für Claude Code (Stand: April 2026)
 
 ## Was ist BASE?
-BASE ist eine KI-getriebene Progressive Web App (PWA) für universelles Sport-Tracking. Alles läuft als Single-Page-App ohne Framework — reines HTML, CSS (Tailwind Production Build), und Vanilla JavaScript. Gehostet auf Netlify, Backend via Firebase + Netlify Functions.
+BASE ist eine KI-getriebene All-in-One Fitness PWA für alle Sportarten. 86 Sportarten, 882 Übungen, 11 KI-Features, PT Business Mode, 7 Sprachen. Solo-Founder Projekt von Oliver Angermann.
+
+**Domain:** base-app.tech
+**Firebase:** beastmode-17f0d
+**App-ID:** base-v2-beta-test
+**GitHub:** github.com/9olli326-code/base-app
+**Netlify:** base-tracker
+**TikTok:** @basetracker1
+
+---
 
 ## Tech-Stack
-- **Frontend:** Vanilla JS, Tailwind CSS (Production Build in `tailwind-production.css`), Lucide Icons
-- **Backend:** Firebase Auth + Firestore (Cloud Sync), Netlify Serverless Functions
-- **KI:** Google Gemini 2.5 Flash via Netlify Function (`gemini.js`) — Server-Side Prompts
-- **PWA:** Service Worker (`sw.js`), Manifest (`manifest.json`), Offline-Modus
-- **Push:** Web Push via VAPID (`push.js` + `push-scheduler` Netlify Scheduled Function)
-- **Strava:** OAuth Integration via Netlify Function (`strava-token.js`)
+- **Frontend:** Vanilla JS, Tailwind CSS (Production Build), Lucide Icons
+- **Backend:** Firebase Auth + Firestore, Netlify Serverless Functions
+- **KI:** Google Gemini 2.5 Flash via Netlify Function (gemini.js) — Server-Side Prompts
+- **PWA:** Service Worker (sw.js), Manifest, Offline-Modus
+- **Push:** Web Push via VAPID (push.js + push-scheduler)
+- **Strava:** OAuth via Netlify Function (strava-token.js)
+- **Payments:** Stripe Checkout + Webhook (stripe-checkout.js, stripe-webhook.js)
+- **Monitoring:** Sentry (lazy loaded), Google Analytics
 
-## Dateistruktur
-```
-app.html          — Die GESAMTE App (~8.400 Zeilen) — HTML + CSS + JS in einer Datei
-index.html         — Landing Page (Marketing)
-firebaselogic.js   — Firebase Auth + Firestore Sync (separates ES Module)
-gemini.js          — Netlify Function: Gemini KI Proxy
-push.js            — Netlify Function: Web Push Senden
-strava-token.js    — Netlify Function: Strava OAuth Token Exchange
-sw.js              — Service Worker (Caching + Push Handler)
-manifest.json      — PWA Manifest
-tailwind-production.css — Kompiliertes Tailwind CSS
-netlify.toml       — Netlify Config (Redirects, Functions)
-```
+---
 
-## Architektur-Problem
-`app.html` ist ein Monolith mit ~8.400 Zeilen. Alles ist in einer Datei: HTML, CSS-Overrides, und ~6.000 Zeilen JavaScript. Das macht Wartung, Debugging und Zusammenarbeit schwierig.
+## Dateistruktur & Größen
 
-### Geplante Modularisierung (siehe `BASE_Architektur_Migration.md`):
+### Frontend (App)
 ```
-app.html            → ~1.500 Zeilen (nur HTML + CSS + State-Init)
-js/base-state.js    → Shared State, Konstanten, Globale Variablen
-js/base-ui.js       → Modals, Tabs, Toasts, Navigation
-js/base-ai.js       → AI Coach, Co-Pilot, PreHab, Builder
-js/base-workouts.js → Tracking, Tabelle, Filter, Formulare
-js/base-analytics.js → Charts, Body Tracker, PRs, Kalender
-js/base-pt.js       → PT Business Modus (Kunden, Sessions, Kalender, Quick-Track)
-js/base-settings.js → Profil, i18n, Design, Onboarding
-js/base-social.js   → Brag Cards, Share, Invite, Challenges
-js/base-timers.js   → Rest Timer, Workout Timer, HIIT
-js/base-nutrition.js → Ernährungstracking (NEU)
-firebaselogic.js    → Auth + Cloud Sync (bleibt)
+app.html                    343 KB   HTML + CSS + kleine inline Scripts, 38 Modals
+js/app-core.js              380 KB   Haupt-Logik (132 window.* Funktionen)
+js/app-core.min.js          291 KB   Minified
+js/base-ai.js                66 KB   KI-Features (24 Funktionen)
+js/base-ai.min.js            49 KB   Minified
+js/base-pt.js               175 KB   PT Business Mode (81 Funktionen)
+js/base-pt.min.js           128 KB   Minified
+js/base-settings.js          31 KB   Profil, Module, Onboarding
+js/base-settings.min.js      23 KB   Minified
+js/base-timers.js             13 KB   Rest/Workout/HIIT Timer
+js/base-timers.min.js          9 KB   Minified
+js/exercise-db.js            114 KB   882 Übungen (DE+EN, bodyPart, target)
+js/exercise-db.min.js        112 KB   Minified
+js/firebase-init.js           25 KB   Firebase Auth + Cloud Sync + Google Sign-In
+js/firebase-init.min.js       18 KB   Minified
+js/i18n-data.js              203 KB   7 Sprachen (de, en, fr, es, it, nl, ar)
+design-override.css           33 KB   Custom Styles, CSS Variables, Zen Flow + Carbon Elite
 ```
 
-## Wichtige Patterns
-- **Alle Funktionen auf `window.*`** — Kein Modul-System, alles global via `window.functionName = function() {...}`
-- **Shared State:** Variablen wie `workouts`, `clients`, `currentMode`, `currentClient`, `currentCategory` sind global im Haupt-Script-Block deklariert
-- **i18n:** 7 Sprachen (DE, EN, FR, ES, IT, NL, AR) als `i18nData`-Objekt inline
-- **localStorage Keys:**
-  - `beastmode_v2_cache` — Persönliche Workouts
-  - `beastmode_v2_cache_${clientId}` — Kunden-Workouts
-  - `beastmode_v2_clients` — Kundenliste
-  - `base_pt_sessions` — PT Session-Planer
-  - `base_client_profile_${clientId}` — Kundenprofile
-  - `beastmode_v2_multi_schemas` — Custom Sport-Schemas
-  - `base_trainer_logo` — Trainer Logo (Base64)
-  - `base_trainer_branding` — Trainer Name/Farbe/Tagline
-- **Firebase:** ES Modules via CDN, Auth + Firestore in `<script type="module">` am Ende von `app.html`
-- **Lucide Icons:** `lucide.createIcons()` muss nach jedem DOM-Update aufgerufen werden
+### Frontend (Landing + SEO)
+```
+index.html                  426 KB   Landing Page (Stitch Design + Screenshots)
+datenschutz.html                     GDPR Privacy Policy
+impressum.html                       TMG §5 Impressum
+blog/                                SEO Blog-Seiten
+sport/                               15 Sport-spezifische SEO-Seiten
+```
 
-## Coding-Regeln
+### Backend (Netlify Functions)
+```
+netlify/functions/gemini.js          Gemini API Proxy + Rate Limiting (@netlify/blobs) + Training Data Collector
+netlify/functions/push.js            Web Push senden
+netlify/functions/push-scheduler.js  Scheduled Push (Cron)
+netlify/functions/strava-token.js    Strava OAuth Token Exchange
+netlify/functions/stripe-checkout.js Stripe Checkout Session erstellen
+netlify/functions/stripe-webhook.js  Stripe Webhook Handler
+netlify/functions/usercount.js       User Counter
+```
+
+### PWA + Config
+```
+sw.js                       Service Worker (Cache v152, Stale-While-Revalidate)
+manifest.json               PWA Manifest
+netlify.toml                Redirects, Functions, Headers
+robots.txt                  SEO
+sitemap.xml                 SEO
+```
+
+### Android
+```
+android/                    Capacitor TWA Wrapper für Google Play Store
+BASE-Android.apk            Signed APK
+```
+
+---
+
+## Script-Ladereihenfolge (WICHTIG!)
+
+```html
+1. <script> inline          Kleine Blöcke: Theme-Apply, Design Morph Flag
+2. js/i18n-data.js          Synchron — muss vor app-core.js geladen sein
+3. js/app-core.min.js       Synchron — Haupt-Logik, definiert alle window.* Funktionen
+4. js/exercise-db.min.js    defer — Übungsdatenbank
+5. js/base-timers.min.js    defer — Timer
+6. js/base-ai.min.js        defer — KI Features
+7. js/base-settings.min.js  defer — Settings + Onboarding
+8. js/base-pt.min.js        defer — PT Business Mode (überschreibt einige Funktionen wie switchPTTab)
+9. js/firebase-init.min.js  type="module" — Firebase Auth (läuft immer NACH defer Scripts)
+```
+
+**Regel:** Funktionen die in mehreren Dateien definiert werden: Die LETZTE geladene Definition gewinnt. base-pt.js überschreibt z.B. switchPTTab und switchMode aus app-core.js.
+
+---
+
+## Design System
+
+### Zwei visuelle Modi:
+- **Zen Flow (Athlet):** Sage Green #a3c9a8, Dark Forest #0f110f, 18px Radius, Sora/Outfit Fonts
+- **Carbon Elite (PT):** Gold #d4af37, Pure Black #0a0a0a, 8px Radius, Sora/Outfit Fonts
+
+### CSS Variables (in :root):
+```css
+--primary-hex: #a3c9a8;
+--secondary-hex: #7aab82;
+--bg-hex: #0f110f;
+--surface-hex: color-mix(in srgb, var(--bg-hex), white 5%);
+--inner-bg-hex: color-mix(in srgb, var(--bg-hex), black 30%);
+--border-hex: color-mix(in srgb, var(--bg-hex), white 10%);
+--text-main: #f4f4f5;
+--text-muted: #82828c;
+```
+
+### Kategorie-Farben:
+- Kraft: Sage Green #a3c9a8
+- Ausdauer: Coral #e88a8a
+- Mobility: Blue #8aafe8
+- Mein Sport: Gold #e8c86a
+
+---
+
+## Features (vollständig implementiert)
+
+### Workout Tracking
+- 86 Sportarten mit dynamischen KI-Formularen
+- 882 Kraft-Übungen mit Bildern (CDN), DE+EN, Autocomplete
+- Sets/Reps/Gewicht + RIR (Reps in Reserve) + +/- Buttons
+- Satz-Markierungen (Warmup, Failure, Drop-Set)
+- Übung ersetzen mit Match-% (basierend auf bodyPart + target)
+- PR-Tracking mit Celebration Animation
+- Auto Rest-Timer, Workout-Timer, HIIT Timer
+- Strava Integration (OAuth Import)
+- Voice Input (Web Speech API)
+- CSV Export
+
+### KI Features (11 Funktionen via Gemini 2.5 Flash)
+- Coach (Trainingsanalyse)
+- Copilot (Übungsspezifische Empfehlungen)
+- Scan (Progressionsanalyse)
+- Plan (Trainingsplan-Generator mit Mesozyklus-Periodisierung)
+- PreHab (Verletzungsprävention)
+- Warmup Generator
+- Exercise Recommendation
+- Smart Workout Generator
+- Form Builder (dynamische Sport-Formulare)
+- Form Check (Kamera → Gemini Vision, Beta + Disclaimer)
+- KI Chat (15 free/Tag, Coach Nudge nach Workout)
+
+### Plan Generator (erweitert)
+- Mesozyklus-Periodisierung (Akkumulation → Overreach → Deload)
+- Sets-Multiplikator pro Woche (×1.0, ×1.1, ×1.2, ×0.6)
+- Fokus-Muskelgruppen wählen (Ober-/Unterkörper/Core)
+- Schmerzbereiche als klickbare Chips
+- Wochentag-Zuweisung mit "Gleichmäßig verteilen"
+
+### Analytics
+- Progress Charts (Chart.js)
+- Body Tracker
+- Heatmap (Trainings-Häufigkeit)
+- Kalender
+- 1RM Calculator
+- Muscle Balance Analyse (Push/Pull Ratio, Upper/Lower, Verteilung)
+- Streak Tracking
+
+### PT Business Mode (81 Funktionen in base-pt.js)
+- Design Morphing (Zen Flow ↔ Carbon Elite)
+- Client Management (CRUD, Onboarding-Wizard, Profile)
+- Session Planner (Kalender, Templates, Custom Types mit Icon-Picker)
+- Quick Track (6 Metrik-Typen: setsRepsWeight, distanceDuration, holdRounds etc.)
+- Compliance Tracking (SVG-Ringe, Woche/Monat/Gesamt)
+- Client Portal (Token-basiert via crypto.randomUUID)
+- KI Wochenbericht pro Kunde
+- KI Check-In mit WhatsApp-Sharing
+- PDF Export (jsPDF, Branding, Charts)
+- Trainer Directory (Firestore, Reviews, Google Maps Fallback)
+- Trainer Branding (Logo, Name, Farbe, Tagline)
+
+### Gamification
+- XP System (50 XP/Workout, 15 Coach, 25 Scan, 40 Plan, 30 Challenge, 500 Goal)
+- Level 1-99 mit 5 Rängen (Rookie → Contender → Veteran → Elite → Legend)
+- XP-Bar unter Header (Sage Green)
+- Level-Up Fullscreen Animation
+- Persönliche Ziele ("100kg Bankdrücken bis Juli") mit 500 XP Bonus
+- Streak-Bonus (7 Tage = 200 XP, 30 Tage = 1000 XP)
+
+### Social
+- Challenges (CRUD, Anonym beitreten, Leaderboard, Share)
+- Brag Cards (Canvas 1080×1920, Share API, "base-app.tech" Watermark)
+- WhatsApp Sharing
+
+### Voice Coach (optional, Toggle in Settings)
+- Web Speech Synthesis API (kostenlos, offline)
+- 7 Sprachen
+- Ansagen bei: Set-Completion, PR, Rest-Timer (30s, 10s, 3-2-1), Workout-Ende
+- Visueller "VOICE" Indikator oben rechts
+
+### Retention
+- 5 Hooks: First Workout, Day 2, Streak, Win-Back (7+ Tage), Challenge Suggest
+- Activity Tracking (Visits, Workouts, Zeitstempel)
+- Streak Warning ("Deine 12-Tage Streak endet bald!")
+- KI Coach Nudge nach jedem Workout
+- KI Discovery Hints im Tools-Tab
+
+### Monetarisierung (vorbereitet, INAKTIV)
+- Feature-Gating: window._GATING_ACTIVE = false (Master-Switch)
+- Aktivierung per Firebase Console: artifacts/base-v2-beta-test/public/config → gatingActive: true
+- Free Limits: Coach 3x/Tag, Plan 1x/Monat, Scan 1x/Woche, Challenge 1x/Tag, PT max 2 Kunden
+- Stripe Checkout + Webhook deployed
+- Pricing: Athlete PRO 4,99€/Mo, PT Elite 19,99€/Mo
+
+### Security
+- Gemini Rate Limiting: @netlify/blobs, Multi-Tier (Coach 15, Plan 3, Global 60/Tag)
+- Prompt Injection: User-Daten in <user_data> XML-Tags, System Directive
+- XSS: _escapeHtml() + _sanitizeAIHtml() auf allen User-Inputs
+- Client Portal: crypto.randomUUID Token mit Validierung
+- Firebase Rules: Alle Pfade geschützt (eigene Daten nur für eigenen User)
+- CORS: Netlify Functions Origin-Check
+
+### Accessibility
+- aria-label auf allen Buttons
+- Focus-Styles (outline: 2px solid #a3c9a8)
+- prompt() durch Custom Modals ersetzt
+
+### i18n
+- 7 Sprachen: de, en, fr, es, it, nl, ar
+- 773+ Keys in i18n-data.js
+- window.t('key', 'fallback') für dynamische Texte
+- data-i18n Attribute für statische HTML-Texte
+- Monatsnamen + Wochentage internationalisiert
+
+---
+
+## Firebase Firestore Pfade
+
+```
+artifacts/base-v2-beta-test/users/{uid}/workouts/{id}          Persönliche Workouts
+artifacts/base-v2-beta-test/users/{uid}/clients/{cid}/workouts  Kunden-Workouts
+artifacts/base-v2-beta-test/users/{uid}/pt_data/clients_list   Kundenliste
+artifacts/base-v2-beta-test/users/{uid}/pt_data/client_workouts_{cid}
+artifacts/base-v2-beta-test/users/{uid}/pt_data/client_profile_{cid}
+artifacts/base-v2-beta-test/users/{uid}/pt_data/sessions       PT Sessions
+artifacts/base-v2-beta-test/users/{uid}/pt_data/xp_progress    XP + Level
+artifacts/base-v2-beta-test/users/{uid}/pt_data/goals          Persönliche Ziele
+artifacts/base-v2-beta-test/public/stats                       User Counter
+artifacts/base-v2-beta-test/public/config                      Remote Config (Feature-Gating)
+challenges/{id}                                                 Challenges
+trainer_profiles/{uid}                                          Trainer Directory
+trainer_reviews/{id}                                            Reviews
+push_subscriptions/{uid}                                        Push Tokens
+ai_usage/{uid}                                                  KI Usage Counter
+```
+
+---
+
+## localStorage Keys (40+)
+
+### Workouts & Tracking
+- `beastmode_v2_cache` — Persönliche Workouts
+- `beastmode_v2_cache_${clientId}` — Kunden-Workouts
+- `beastmode_v2_clients` — Kundenliste
+- `beastmode_v2_multi_schemas` — Custom Sport-Schemas
+
+### PT Business
+- `base_pt_sessions` — Session Planner
+- `base_pt_session_templates` — Session Templates
+- `base_pt_custom_session_types` — Custom Session Typen
+- `base_pt_onboard_specs` — PT Onboarding Daten
+- `base_client_profile_${clientId}` — Kundenprofile
+- `base_portal_token_${clientId}` — Client Portal Tokens
+- `base_trainer_logo` — Trainer Logo (Base64)
+- `base_trainer_branding` — Trainer Name/Farbe/Tagline
+
+### Gamification & Goals
+- `base_xp_data` — XP, Level, History, Daily Counts
+- `base_goals` — Persönliche Ziele
+- `base_streak_count` / `base_streak_last_date` — Streak
+
+### Retention & Activity
+- `base_activity_log` — Letzte 30 Aktivitäten
+- `base_first_visit` / `base_last_active` / `base_last_workout`
+- `base_visit_count` — Besuchszähler
+- `base_retention_dismissed` — Welche Hooks dismissed wurden
+- `base_coach_nudge_date` — Letzter Coach Nudge
+- `base_ki_discovery` — Welche KI-Features schon genutzt wurden
+
+### Feature Gating
+- `base_gate_${feature}` — Usage Counter pro Feature
+- `base_plan` — Aktueller Plan (free/pro/elite)
+- `base_usage` — Feature Usage Tracking
+
+### Settings & UI
+- `beastmode_v2_theme` — Theme Farben
+- `beastmode_lang` — Sprache
+- `base_voice_coach` — Voice Coach Toggle (true/false)
+- `base_onboarding_done` — Onboarding abgeschlossen
+- `base_custom_tabs` / `base_tab_order` — Tab-Konfiguration
+- `base_default_mode` — personal oder pt
+
+---
+
+## Coding-Regeln (PFLICHT)
+
+### Grundregeln
 1. **Kein Framework** — Kein React, Vue, Svelte. Reines Vanilla JS.
-2. **Kein Build-Tool** — Kein Webpack, Vite, Rollup. Einfache `<script src="..." defer>` Tags.
-3. **Alle Funktionen auf `window.*`** — Damit sie aus HTML-onclick und anderen Modulen erreichbar sind.
-4. **XSS-Schutz** — `window._escapeHtml()` für alle User-Inputs bevor sie in innerHTML landen.
-5. **DRY** — Keine doppelten Funktionen. Zentrale Data Layer (`getClientWorkouts()`, `computeClientStats()`).
-6. **Mobile First** — Alles muss auf iPhone SE (375px) gut aussehen.
-7. **Offline-fähig** — Kritische Daten in localStorage. Firebase ist optional (Cloud Sync).
-8. **Tailwind Klassen** — Nur Klassen aus `tailwind-production.css` verwenden. Keine CDN.
-9. **Design-System:** Dark Theme, Indigo (#6366f1) als PT-Farbe, Cyan (#06b6d4) als Primary.
-10. **Performance:** `_refreshLucide()` statt überall `lucide.createIcons()`. Client-Workout-Cache nutzen.
+2. **Kein Build-Tool** — Kein Webpack, Vite. Einfache `<script src="..." defer>` Tags.
+3. **Alle Funktionen auf `window.*`** — Damit HTML onclick und andere Module sie erreichen.
+4. **Mobile First** — Alles muss auf iPhone SE (375px) funktionieren.
+5. **Offline-fähig** — Kritische Daten in localStorage. Firebase ist Cloud-Backup.
 
-## Sicherheits-Hinweise
-- Strava Client Secret ist noch im Browser-Code (muss in Netlify Function verschoben werden)
-- KI-Calls haben kein Rate Limiting (max 20/Tag pro User fehlt noch)
-- Push-Subscriptions werden in Firestore unter `push_subscriptions/{uid}` gespeichert
+### Security-Regeln
+6. **XSS-Schutz** — `window._escapeHtml()` für ALLE User-Inputs in innerHTML.
+7. **KI-Antworten** — `window._sanitizeAIHtml()` für alle Gemini-Responses in innerHTML.
+8. **Kein Raten** — "Hinterfrage deine Antwort, kein Raten" — immer im Code verifizieren.
 
-## Deploy
-- Netlify Auto-Deploy via Git Push
-- Netlify Functions in `/netlify/functions/` (oder Root für legacy)
-- Domain: base-app.tech
+### UI-Regeln
+9. **pointer-events-auto** — Auf JEDEM klickbaren Element (Buttons, Labels, Inputs). iOS Safari Touch-Bug.
+10. **aria-label** — Auf JEDEM Button. Accessibility.
+11. **Lucide Icons** — `window._refreshLucide()` statt direkt `lucide.createIcons()`. Debounced.
+12. **Tailwind** — Nur Klassen aus `tailwind-production.css`. Keine CDN.
 
-## Sprache
-Der Entwickler spricht Deutsch. Code-Kommentare und Commit-Messages auf Deutsch.
+### Performance-Regeln
+13. **Min-Dateien** — Nach JEDER JS-Änderung: `npx terser js/datei.js -o js/datei.min.js --compress --mangle`
+14. **SW Cache** — Version in sw.js nach JEDEM Deploy erhöhen.
+15. **Lazy Loading** — `loading="lazy"` auf allen Bildern. `onerror="this.style.display='none'"` als Fallback.
+16. **Kein großes Batch auf app.html** — 343KB Datei kann Node.js Heap overflow verursachen. Bei Problemen: `set NODE_OPTIONS=--max-old-space-size=8192`
+
+### i18n-Regeln
+17. **Keine hardcoded Strings** — `window.t('key', 'Fallback')` für dynamische Texte, `data-i18n="key"` für HTML.
+18. **KI Tool-Namen bleiben englisch** — Coach, Scan, Planner, Battery, Armor in allen 7 Sprachen.
+
+### Gemini-Regeln
+19. **Multi-Part Response** — Gemini 2.5 Flash ist ein Thinking Model. Immer alle `parts` iterieren, letzten text-Part nehmen.
+20. **Parallel Calls** — `Promise.all` für Training Plan Generation (Netlify 26s Timeout).
+21. **Error Handling** — Jeder fetch braucht: AbortController (30s), res.ok Check, 429 Check, catch mit User-Toast.
+
+### Git-Regeln
+22. **firebase-admin-key.json** — In .gitignore! Darf NIE auf GitHub.
+23. **Commit Messages** — Deutsch, beschreibend: "Feature: Übungsbilder aus CDN" oder "Fix: Firestore-Pfade korrigiert"
+
+---
+
+## Dev Environment
+- **Rechner:** Samsung Galaxy Book (Windows)
+- **Pfad:** `C:\Users\olli-\Desktop\Base-App\` (Achtung: Hyphen im Username)
+- **Windows sed:** Keine leeren Anführungszeichen verwenden
+- **Workflow:** Claude Desktop → Befehle/Prompts → Claude Code CLI → grep verify → `npx netlify deploy --prod`
+
+---
 
 ## Selbst-Verifikation (PFLICHT bei jeder Änderung)
 
-### Nach JEDER CSS-Änderung:
-1. Lies die geänderte CSS-Datei und prüfe: Werden die neuen Variablen/Werte tatsächlich in den Selektoren verwendet die du ändern wolltest?
-2. Suche mit grep nach dem alten Wert — er darf NICHT mehr vorkommen (außer in Fallbacks oder Kommentaren).
-3. Beispiel: `grep -n "rgba(163,201,168" design-override.css` → Wenn du die ersetzen solltest, darf hier nichts mehr stehen.
-
 ### Nach JEDER JS-Änderung:
-1. Suche die geänderte Funktion und prüfe ob sie syntaktisch korrekt ist.
-2. Prüfe ob alle IDs die saveWorkout() liest noch im generierten HTML existieren.
+```bash
+node -c js/dateiname.js && echo "OK"
+npx terser js/dateiname.js -o js/dateiname.min.js --compress --mangle
+```
 
 ### Nach JEDER HTML-Änderung:
-1. Prüfe ob die geänderte Stelle keine kaputten Tags hat.
+```bash
+# Inline Scripts prüfen
+node -e "var fs=require('fs');var c=fs.readFileSync('app.html','utf8');/* ... */"
+```
 
 ### VOR jedem Deploy:
-1. Prüfe dass sw.js Cache-Version erhöht wurde: `grep "cache-v" sw.js | head -1`
-2. Wenn design-override.css geändert wurde: Zeige die relevanten Zeilen als Beweis dass die Änderung drin ist.
-3. Mache KEINEN Deploy bevor die Verifikation gezeigt wurde.
+```bash
+grep "CACHE_NAME" sw.js | head -1    # Cache Version erhöht?
+grep "pointer-events-auto" app.html | wc -l   # Alle Buttons?
+npx netlify deploy --prod
+```
 
 ### Debugging-Prinzip:
-- Bevor du rätst was falsch sein könnte: LIES die aktuelle Datei.
-- Immer ERST lesen, DANN ändern, DANN verifizieren.
+- ERST lesen, DANN ändern, DANN verifizieren.
+- Kein Raten. Im Zweifel: grep, nicht annehmen.
+- Bei Heap Overflow: `set NODE_OPTIONS=--max-old-space-size=8192` oder frische Claude Code Session.
+
+---
+
+## Bekannte Einschränkungen
+- **localStorage Caching** — Alte Theme-Keys können :root Defaults überschreiben. Bei Bugs: Cache leeren.
+- **CSS Stacking Context** — z-index ist irrelevant zwischen Elementen inside vs. outside `<main>`. Modals müssen AUSSERHALB von `<main>` stehen.
+- **iOS Safari** — Touch Events auf Buttons in verschachtelten `overflow-y-auto` Containern: Immer native radio/label oder pointer-events-auto nutzen.
+- **i18n Schema Labels** — Nie übersetzte Strings in localStorage speichern. Immer `window.t()` zur Render-Zeit nutzen.
+
+---
+
+## User-Metriken (Stand April 2026)
+- 806+ anonyme User (Feb: 31, März: 746, April: 29)
+- 15 registrierte User (davon 8 Spam)
+- 1.8% Conversion (anon → email)
+- 30 AI-Usage User (~50 Calls)
+- 3 Push Subscriber
+- 0 aktive Challenges, 0 Feedback, 0 Trainer Profiles
+- Cloud Sync funktioniert seit Firestore-Pfad Fix (vorher kaputt)
+
+---
+
+## Kontakt
+Oliver Angermann
+Akazienweg 7, 49808 Lingen
+support.base-app@proton.me
+
+---
+
+## Landing Page — Design & Code Standards
+
+### Role
+Senior UI/UX Engineer Mindset: Awwwards-Level Qualität. Obsession für Micro-Interactions, Typografie, Whitespace und Performance.
+
+### Design Principles
+- Clarity over cleverness
+- Whitespace is a feature, not empty space
+- Every animation must have a purpose
+- Mobile-first, but desktop-refined
+- Accessibility is non-negotiable (WCAG AA minimum)
+- Performance budget: LCP < 2s, CLS < 0.1
+
+### Tech Stack (Landing Page)
+- Next.js 15 (App Router) + TypeScript
+- Tailwind CSS v4
+- shadcn/ui for base components
+- Framer Motion + GSAP for animations
+- Lucide icons
+
+### Code Standards (Landing Page)
+- Semantic HTML
+- No inline styles — Tailwind only
+- Component-driven, reusable
+- Comments only for non-obvious logic
+
+### Forbidden
+- Generic purple/blue gradient hero backgrounds
+- Stock hero illustrations
+- "Lorem ipsum" — always ask for real copy
+- Default shadcn color palette without customization

@@ -515,7 +515,7 @@ if(back) back.classList.toggle('hidden', _onboardStep === 1);
 if(next) next.textContent = _onboardStep === 3 ? window.t('btnCreate','Kunde anlegen') : window.t('ptNext','Weiter');
 // Render dynamic UI
 if(_onboardStep === 2) { window._renderObGoals(); window._renderObExp(); }
-if(_onboardStep === 3) { window._renderObDays(); window._renderObTimes(); }
+if(_onboardStep === 3) { window._renderObDays(); window._renderObTimes(); var _rateEl = document.getElementById('obMonthlyRate'); if(_rateEl) _rateEl.value = _onboardData.monthlyRate || ''; }
 };
 
 window._renderObGoals = function() {
@@ -584,6 +584,7 @@ if(_onboardStep === 1) {
     _onboardData.injuries = (document.getElementById('obInjuries')?.value || '').trim().substring(0, 200);
     _onboardStep = 3;
 } else if(_onboardStep === 3) {
+    _onboardData.monthlyRate = document.getElementById('obMonthlyRate')?.value || '';
     window.saveOnboardClient();
     return;
 }
@@ -599,7 +600,7 @@ if(window._GATING_ACTIVE && !window._userIsPro) {
  var clientLimit = window._FEATURE_LIMITS && window._FEATURE_LIMITS.client ? window._FEATURE_LIMITS.client.max : 2;
  if(clientCount >= clientLimit) { window._showUpgradePrompt('client', window._FEATURE_LIMITS ? window._FEATURE_LIMITS.client : { max: 2, period: 'total', label: 'PT Kunden', labelKey: 'gateClient' }); return; }
 }
-const client = { id: 'client_' + Date.now(), name: _onboardData.name };
+const client = { id: 'client_' + Date.now(), name: _onboardData.name, monthlyRate: parseFloat(_onboardData.monthlyRate) || 0 };
 window.clients.push(client);
 localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
 if(window.syncClientsToCloud) window.syncClientsToCloud();
@@ -618,6 +619,16 @@ window.saveClientProfile(client.id, profile);
 window.toggleModal('clientOnboardModal');
 window.renderPTClientsDashboard();
 window.showToast(`${window._escapeHtml(client.name)} ${window.t('ptAdded','hinzugefügt!')}`);
+};
+
+window._updateClientRate = function(clientId, value) {
+var c = window.clients.find(function(x) { return x.id === clientId; });
+if (c) {
+ c.monthlyRate = parseFloat(value) || 0;
+ localStorage.setItem('beastmode_v2_clients', JSON.stringify(window.clients));
+ if (window._renderRevenueDashboard) window._renderRevenueDashboard();
+ window.showToast(window._escapeHtml(c.name) + ': ' + c.monthlyRate + ' EUR/Mo');
+}
 };
 
 window.deleteClient = function() {
@@ -747,6 +758,12 @@ if(goalEl) goalEl.textContent = profile.goal || '—';
 if(expEl) expEl.textContent = profile.experience || '—';
 if(injEl) injEl.textContent = profile.injuries || '—';
 if(notesEl) notesEl.textContent = profile.notes || '—';
+// Monthly Rate Inline-Edit
+var _rateContainer = document.getElementById('clientProfileRate');
+if(_rateContainer) {
+ var _c = window.clients.find(function(x) { return x.id === id; });
+ _rateContainer.innerHTML = '<input type="number" value="' + ((_c && _c.monthlyRate) || 0) + '" onchange="window._updateClientRate(\'' + id + '\', this.value)" class="w-20 px-2 py-1 rounded-lg text-right text-sm text-white font-bold outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" aria-label="Monatlicher Betrag"> EUR/Mo';
+}
 
 // KI Toggle zurücksetzen
 const toggle = document.getElementById('clientKiReportToggle');
@@ -768,6 +785,9 @@ window._renderClientSessionsList(id);
 
 // Compliance Rings
 window._renderComplianceRings(id);
+
+// Client Progress Charts
+if (window._renderClientProgressCharts) window._renderClientProgressCharts(id);
 
 // PT Action Buttons
 var actionsEl = document.getElementById('clientDetailActions');
@@ -919,7 +939,7 @@ window._refreshLucide();
 
 // ── CLIENT DETAIL TABS ─────────────────────────────────────
 window.switchClientTab = function(tab) {
-['profile','workouts','sessions'].forEach(t => {
+['profile','workouts','sessions','progress'].forEach(t => {
     const panel = document.getElementById('clientPanel-' + t);
     const btn = document.getElementById('clientTab-' + t);
     if(panel) panel.classList.toggle('hidden', t !== tab);
@@ -2255,13 +2275,17 @@ Erstelle einen prägnanten Wochenbericht mit:
 
 Schreibe professionell aber motivierend. Max 200 Wörter. Antworte auf ${window.getPromptLang()}. Der Trainer entscheidet selbst was er mit dem Bericht macht.`;
 
+var _wrc = new AbortController(); var _wrt = setTimeout(function(){_wrc.abort();}, 30000);
 try {
-    const res = await fetch('/.netlify/functions/gemini', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
+    const res = await fetch('/.netlify/functions/gemini', { method:'POST', headers:{'Content-Type':'application/json'}, signal: _wrc.signal, body: JSON.stringify({contents:[{parts:[{text:prompt}]}], userId: window._getAiUserId()}) });
+    clearTimeout(_wrt);
     if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
+    if (!res.ok) { if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = 'Server-Fehler: ' + res.status; } return; }
     const raw = await res.text();
     const parsed = window._parseGeminiResponse(raw);
     if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = parsed || 'Keine Antwort.'; }
 } catch(e) {
+    clearTimeout(_wrt);
     if(resultEl) { resultEl.classList.remove('hidden'); resultEl.textContent = 'Fehler: ' + e.message; }
 } finally {
     if(btn) { btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4 pointer-events-none inline-block mr-2"></i> ' + window.t('ptWeeklyReport','Wochenbericht generieren'); if(window._refreshLucide) window._refreshLucide(); else if(window.lucide) lucide.createIcons(); }
@@ -2954,13 +2978,17 @@ ${recent || 'Keine Daten'}
 
 Antworte auf ${lang}.`;
 
+    var _cic = new AbortController(); var _cit = setTimeout(function(){_cic.abort();}, 30000);
     try {
         const res = await fetch('/.netlify/functions/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: _cic.signal,
             body: JSON.stringify({ prompt, userId: window._getAiUserId() })
         });
+        clearTimeout(_cit);
         if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
+        if (!res.ok) { window.showToast('Server-Fehler: ' + res.status, 'error'); return; }
         const raw = await res.text();
         _lastCheckInText = window._parseGeminiResponse(raw) || 'Keine Antwort erhalten.';
         const textEl = document.getElementById('kiCheckInText');
@@ -2968,6 +2996,7 @@ Antworte auf ${lang}.`;
         window.toggleModal('kiCheckInModal');
         window._refreshLucide();
     } catch(err) {
+        clearTimeout(_cit);
         window.showToast(window.t('lblError','Fehler') + ': ' + err.message);
     }
     if(btn) btn.innerHTML = '<i data-lucide="message-circle" class="w-3.5 h-3.5 pointer-events-none"></i> ' + window.t('ptKiCheckIn','KI Check-In');
@@ -3136,16 +3165,20 @@ window.saveCustomSessionType = async function() {
             'Beispiel fuer Entspannung: Felder waeren Dauer, Technik (select), Intensitaet (range 1-10), Wohlbefinden (range 1-10). ' +
             'Beispiel fuer Schwimmen: Felder waeren Distanz, Bahnen, Stil (select), Zeit, Tempo.';
 
+        var _csc = new AbortController(); var _cst = setTimeout(function(){_csc.abort();}, 30000);
         var res = await fetch('/.netlify/functions/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: _csc.signal,
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: { responseMimeType: 'application/json' },
                 userId: window._getAiUserId()
             })
         });
+        clearTimeout(_cst);
         if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
+        if (!res.ok) { window.showToast('Server-Fehler: ' + res.status, 'error'); return; }
         var data = await res.json();
         var replyText = data.reply || '';
         var result;
@@ -3423,8 +3456,9 @@ window._openWorkoutDelivery = function(clientId) {
  html += '<input id="deliveryPlanName" type="text" placeholder="Plan-Name (z.B. Hypertrophie Block 1)" class="w-full px-3 py-2.5 rounded-xl text-sm text-white font-bold outline-none pointer-events-auto mb-3" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
  html += '<div class="flex gap-2 mb-3"><div class="flex-1"><label class="text-[8px] font-bold uppercase block mb-1" style="color:#82828c">Wochen</label><select id="deliveryWeeks" class="w-full px-3 py-2 rounded-xl text-sm text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option></select></div>';
  html += '<div class="flex-1"><label class="text-[8px] font-bold uppercase block mb-1" style="color:#82828c">Start</label><input id="deliveryStart" type="date" class="w-full px-3 py-2 rounded-xl text-sm text-white outline-none pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)" value="' + new Date(Date.now()+86400000).toISOString().split('T')[0] + '"></div></div>';
- html += '<div class="flex gap-2"><button onclick="window._saveManualDelivery(\'' + clientId + '\')" class="flex-1 py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);color:#d4af37" aria-label="Plan senden">' + window.t('sendPlan','Plan senden') + '</button>';
- html += '<button onclick="window.toggleModal(\'deliveryModal\')" class="flex-1 py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:#82828c" aria-label="Abbrechen">' + window.t('btnCanc','Abbrechen') + '</button></div>';
+ html += '<div class="flex gap-2 mb-2"><button onclick="window._generateDeliveryViaAI(\'' + clientId + '\')" class="flex-1 py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8" aria-label="KI Plan erstellen">KI erstellt Plan</button>';
+ html += '<button onclick="window._saveManualDelivery(\'' + clientId + '\')" class="flex-1 py-3 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);color:#d4af37" aria-label="Plan senden">' + window.t('sendPlan','Manuell senden') + '</button></div>';
+ html += '<button onclick="window.toggleModal(\'deliveryModal\')" class="w-full py-2.5 rounded-xl text-xs font-bold cursor-pointer pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:#82828c" aria-label="Abbrechen">' + window.t('btnCanc','Abbrechen') + '</button>';
  var content = document.getElementById('deliveryContent');
  if (content) content.innerHTML = html;
  window.toggleModal('deliveryModal');
@@ -3446,6 +3480,161 @@ window._saveManualDelivery = function(clientId) {
  localStorage.setItem('base_client_plan_' + clientId, JSON.stringify(plan));
  window.toggleModal('deliveryModal');
  window.showToast(window.t('planSent','Plan gesendet!'));
+};
+
+// === KI PLAN DELIVERY ===
+window._generateDeliveryViaAI = function(clientId) {
+ var c = window.clients.find(function(x) { return x.id === clientId; });
+ if (!c) return;
+ var profile = window.getClientProfile ? window.getClientProfile(clientId) : {};
+ var planName = (document.getElementById('deliveryPlanName') || {}).value || c.name + ' Plan';
+ var weeks = parseInt((document.getElementById('deliveryWeeks') || {}).value) || 4;
+ var startDate = (document.getElementById('deliveryStart') || {}).value || new Date(Date.now() + 86400000).toISOString().split('T')[0];
+ var days = (profile.availableDays || []).length || 3;
+ window.toggleModal('deliveryModal');
+ window.showToast('KI generiert ' + weeks + '-Wochen Plan...');
+ var prompt = 'Erstelle einen ' + weeks + '-Wochen Mesozyklus-Trainingsplan.\n\nKUNDE:\n';
+ prompt += '- Name: ' + (c.name || '') + '\n';
+ prompt += '- Ziel: ' + (profile.goal || 'Muskelaufbau') + '\n';
+ prompt += '- Erfahrung: ' + (profile.experience || 'Mittel') + '\n';
+ prompt += '- Trainingstage: ' + days + ' pro Woche\n';
+ if (profile.injuries) prompt += '- Beschwerden: ' + profile.injuries + '\n';
+ if (profile.age) prompt += '- Alter: ' + profile.age + '\n';
+ if (profile.weight) prompt += '- Gewicht: ' + profile.weight + ' kg\n';
+ var clientWorkouts = JSON.parse(localStorage.getItem('beastmode_v2_cache_' + clientId) || '[]');
+ if (clientWorkouts.length > 0) {
+  prompt += '\nLetzte Workouts:\n';
+  clientWorkouts.filter(function(w){return w.archived;}).slice(-10).forEach(function(w) {
+   prompt += '- ' + w.date + ': ' + w.exercise + ' (' + (w.setDetails || []).length + ' Saetze)\n';
+  });
+ }
+ prompt += '\nAntworte NUR mit kompaktem JSON: {"weeks":[{"week":1,"phase":"accumulation","sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Uebung","sets":3,"reps":"8-10","rir":2}]}]}]}';
+ var controller = new AbortController();
+ var timeoutId = setTimeout(function() { controller.abort(); }, 60000);
+ fetch('/.netlify/functions/gemini', {
+  method: 'POST', headers: { 'Content-Type': 'application/json' },
+  signal: controller.signal,
+  body: JSON.stringify({ prompt: prompt, systemPrompt: 'Du bist ein Sportwissenschaftler. Erstelle periodisierte Trainingsplaene als JSON.', userId: window._getAiUserId ? window._getAiUserId() : '' })
+ }).then(function(res) {
+  clearTimeout(timeoutId);
+  if (!res.ok) throw new Error('Server error: ' + res.status);
+  return res.json();
+ }).then(function(data) {
+  var text = data.parts ? data.parts[data.parts.length-1].text : (data.reply || '');
+  var planData = null;
+  try { var match = text.match(/\{[\s\S]*\}/); if (match) planData = JSON.parse(match[0]); } catch(e) {}
+  if (!planData) { window.showToast('KI-Antwort konnte nicht verarbeitet werden.', 'error'); return; }
+  var plan = { planId: 'plan_' + Date.now(), clientId: clientId, planName: planName.trim(), startDate: startDate, weeks: weeks, createdAt: new Date().toISOString(), status: 'active', planData: planData };
+  var deliveries = JSON.parse(localStorage.getItem('base_pt_deliveries') || '[]');
+  deliveries.push(plan);
+  localStorage.setItem('base_pt_deliveries', JSON.stringify(deliveries));
+  localStorage.setItem('base_client_plan_' + clientId, JSON.stringify(plan));
+  window.showToast(weeks + '-Wochen Plan fuer ' + window._escapeHtml(c.name) + ' erstellt!');
+ }).catch(function(err) {
+  clearTimeout(timeoutId);
+  window.showToast('Fehler: ' + err.message, 'error');
+ });
+};
+
+// === CLIENT PROGRESS CHARTS ===
+window._renderClientProgressCharts = function(clientId) {
+ var container = document.getElementById('clientProgressChartsContainer');
+ if (!container) return;
+ var clientWorkouts = JSON.parse(localStorage.getItem('beastmode_v2_cache_' + clientId) || '[]');
+ var archived = clientWorkouts.filter(function(w) { return w.archived; });
+ if (archived.length < 2) {
+  container.innerHTML = '<div class="p-4 rounded-xl text-center" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="text-[10px]" style="color:#555">Mindestens 2 Workouts fuer Charts noetig</div></div>';
+  return;
+ }
+ var html = '';
+ // 1. Workout-Frequenz (letzte 8 Wochen)
+ var weeklyCount = {};
+ archived.forEach(function(w) {
+  var d = new Date(w.date);
+  var ws = new Date(d); ws.setDate(ws.getDate() - ws.getDay() + 1);
+  var key = ws.toISOString().split('T')[0];
+  weeklyCount[key] = (weeklyCount[key] || 0) + 1;
+ });
+ var weeks = Object.keys(weeklyCount).sort().slice(-8);
+ var counts = weeks.map(function(w) { return weeklyCount[w]; });
+ var maxCount = Math.max.apply(null, counts.concat([1]));
+ html += '<div class="p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+ html += '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--text-muted)">Trainingsfrequenz</div>';
+ html += '<div style="display:flex;gap:2px;align-items:flex-end;height:40px">';
+ weeks.forEach(function(w, i) {
+  var pct = Math.max(5, Math.round(counts[i] / maxCount * 100));
+  html += '<div style="flex:1;height:' + pct + '%;background:' + (i === weeks.length - 1 ? '#d4af37' : 'rgba(212,175,55,0.3)') + ';border-radius:3px 3px 0 0" title="' + counts[i] + ' Workouts"></div>';
+ });
+ html += '</div>';
+ html += '<div class="flex justify-between mt-1"><span class="text-[6px]" style="color:#555">' + (weeks[0] || '').slice(5) + '</span><span class="text-[6px]" style="color:#555">' + (weeks[weeks.length - 1] || '').slice(5) + '</span></div>';
+ html += '</div>';
+ // 2. Volume-Trend
+ var kraftW = archived.filter(function(w) { return w.category === 'strength' && w.setDetails; });
+ if (kraftW.length >= 2) {
+  var weeklyVol = {};
+  kraftW.forEach(function(w) {
+   var d = new Date(w.date);
+   var ws = new Date(d); ws.setDate(ws.getDate() - ws.getDay() + 1);
+   var key = ws.toISOString().split('T')[0];
+   if (!weeklyVol[key]) weeklyVol[key] = 0;
+   (w.setDetails || []).forEach(function(s) { weeklyVol[key] += ((parseFloat(s.reps) || 0) * (parseFloat(s.weight) || 0)); });
+  });
+  var vWeeks = Object.keys(weeklyVol).sort().slice(-8);
+  var volumes = vWeeks.map(function(w) { return weeklyVol[w]; });
+  var maxVol = Math.max.apply(null, volumes.concat([1]));
+  html += '<div class="p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+  html += '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--text-muted)">Volumen-Trend (kg/Woche)</div>';
+  html += '<div style="display:flex;gap:2px;align-items:flex-end;height:40px">';
+  vWeeks.forEach(function(w, i) {
+   var pct = Math.max(5, Math.round(volumes[i] / maxVol * 100));
+   html += '<div style="flex:1;height:' + pct + '%;background:' + (i === vWeeks.length - 1 ? '#d4af37' : 'rgba(212,175,55,0.3)') + ';border-radius:3px 3px 0 0" title="' + Math.round(volumes[i]) + ' kg"></div>';
+  });
+  html += '</div></div>';
+  // 3. Top-Uebungen
+  var exercises = {};
+  kraftW.forEach(function(w) {
+   if (!w.exercise) return;
+   var maxW = Math.max.apply(null, (w.setDetails || []).map(function(s) { return parseFloat(s.weight) || 0; }).concat([0]));
+   if (!exercises[w.exercise] || maxW > exercises[w.exercise]) exercises[w.exercise] = maxW;
+  });
+  var topEx = Object.entries(exercises).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
+  if (topEx.length > 0) {
+   html += '<div class="p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+   html += '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--text-muted)">Top Uebungen (Max)</div>';
+   topEx.forEach(function(e) {
+    html += '<div class="flex items-center justify-between py-1.5" style="border-bottom:1px solid var(--border-hex)">';
+    html += '<span class="text-[9px] text-white">' + window._escapeHtml(e[0]) + '</span>';
+    html += '<span class="text-[9px] font-bold" style="color:#d4af37">' + e[1] + ' kg</span>';
+    html += '</div>';
+   });
+   html += '</div>';
+  }
+ }
+ // 4. Check-In Trends
+ var checkIns = JSON.parse(localStorage.getItem('base_client_checkins_' + clientId) || '[]');
+ if (checkIns.length >= 2) {
+  html += '<div class="p-4 rounded-xl" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">';
+  html += '<div class="text-[9px] font-black uppercase tracking-widest mb-2" style="color:var(--text-muted)">Check-In Trends</div>';
+  var lastCI = checkIns[checkIns.length - 1];
+  var prevCI = checkIns[checkIns.length - 2];
+  var metrics = [{key:'energy',label:'Energie',color:'#e8c86a'},{key:'sleep',label:'Schlaf',color:'#8aafe8'},{key:'stress',label:'Stress',color:'#e88a8a'},{key:'weight',label:'Gewicht',color:'#a3c9a8',unit:'kg'}];
+  html += '<div class="grid grid-cols-4 gap-2">';
+  metrics.forEach(function(m) {
+   var curr = lastCI[m.key];
+   if (curr == null) return;
+   var prev = prevCI[m.key];
+   var diff = prev ? curr - prev : 0;
+   var arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+   var dc = m.key === 'stress' ? (diff > 0 ? '#e88a8a' : '#a3c9a8') : (diff > 0 ? '#a3c9a8' : diff < 0 ? '#e88a8a' : '#82828c');
+   html += '<div class="text-center p-2 rounded-lg" style="background:var(--inner-bg-hex)">';
+   html += '<div class="text-[7px]" style="color:#82828c">' + m.label + '</div>';
+   html += '<div class="text-sm font-bold" style="color:' + m.color + '">' + curr + (m.unit || '') + '</div>';
+   html += '<div class="text-[8px]" style="color:' + dc + '">' + arrow + Math.abs(diff).toFixed(1) + '</div>';
+   html += '</div>';
+  });
+  html += '</div></div>';
+ }
+ container.innerHTML = html;
 };
 
 // === CHECK-IN FORMS ===
@@ -3474,6 +3663,7 @@ window._sendCheckInForm = function(clientId) {
   html += '</div>';
  });
  html += '<button onclick="window._saveCheckIn(\'' + clientId + '\')" class="w-full py-3 rounded-xl text-sm font-bold cursor-pointer pointer-events-auto" style="background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.25);color:#d4af37" aria-label="Check-In speichern">Check-In speichern</button>';
+ html += '<button onclick="window._shareCheckInViaWhatsApp(\'' + clientId + '\')" class="w-full py-3 rounded-xl text-sm font-bold cursor-pointer pointer-events-auto mt-2" style="background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.2);color:#25d366" aria-label="Check-In per WhatsApp senden">\ud83d\udcf1 Check-In Formular per WhatsApp senden</button>';
  var content = document.getElementById('checkInContent');
  if (content) content.innerHTML = html;
  window.toggleModal('checkInModal');
@@ -3496,5 +3686,15 @@ window._saveCheckIn = function(clientId) {
  localStorage.setItem(key, JSON.stringify(cis));
  window.toggleModal('checkInModal');
  window.showToast(window.t('checkInSaved','Check-In gespeichert!'));
+};
+
+window._shareCheckInViaWhatsApp = function(clientId) {
+ var clients = JSON.parse(localStorage.getItem('base_pt_clients') || '[]');
+ if (!clients.length) clients = window.clients || [];
+ var client = clients.find(function(c) { return c.id === clientId; });
+ if (!client || !client.phone) { window.showToast('Keine Telefonnummer hinterlegt'); return; }
+ var text = 'Hey ' + (client.name || '') + '! \ud83d\udccb\n\nBitte f\u00fclle deinen w\u00f6chentlichen Check-In aus:\n\n1. Energie (1-10): \n2. Schlafqualit\u00e4t (1-10): \n3. Stress (1-10): \n4. Muskelkater (1-10): \n5. Gewicht (kg): \n6. Schmerzen/Beschwerden: \n7. Sonstiges: \n\nDanke! \ud83d\udcaa';
+ var url = 'https://wa.me/' + client.phone.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(text);
+ window.open(url, '_blank');
 };
 
