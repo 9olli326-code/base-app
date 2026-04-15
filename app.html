@@ -5039,6 +5039,26 @@ function _animateOrb() {
       o.lineGeo.setDrawRange(0, 0);
     }
 
+    // Audio-reaktive Orb-Bewegung
+    if (_state === 'speaking' && window._jarvisAnalyser) {
+      var dataArray = new Uint8Array(window._jarvisAnalyser.frequencyBinCount);
+      window._jarvisAnalyser.getByteFrequencyData(dataArray);
+      var sum = 0;
+      for (var di = 0; di < dataArray.length; di++) sum += dataArray[di];
+      var avgVolume = sum / dataArray.length;
+      var normalized = avgVolume / 128;
+      var audioScale = 1 + (normalized * 0.4);
+      targetR = (radiusMap['speaking'] || 28) * audioScale;
+      speed = (speedMap['speaking'] || 2.8) * (1 + normalized * 0.5);
+      var audioBrightness = Math.min(1.0, (opMap['speaking'] || 0.95) + (normalized * 0.2));
+      o.mat.opacity += (audioBrightness - o.mat.opacity) * 0.15;
+      var bassSum = 0;
+      for (var bi = 0; bi < 8; bi++) bassSum += dataArray[bi];
+      var bassLevel = bassSum / (8 * 255);
+      var lineTarget = (lOpMap['speaking'] || 0.55) + (bassLevel * 0.3);
+      o.lineMat.opacity += (lineTarget - o.lineMat.opacity) * 0.2;
+    }
+
     o.points.rotation.y += 0.001 * speed;
     o.renderer.render(o.scene, o.camera);
   }
@@ -5102,6 +5122,12 @@ function _processSpeechQueue() {
 }
 
 function _speakWithElevenLabs(text, onComplete, onError) {
+  if (!window._jarvisAudioCtx) {
+    try { window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { onError(); return; }
+  }
+  var ctx = window._jarvisAudioCtx;
+  if (ctx.state === 'suspended') ctx.resume().catch(function() {});
+
   fetch('/.netlify/functions/elevenlabs-tts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -5112,19 +5138,29 @@ function _speakWithElevenLabs(text, onComplete, onError) {
     return res.json();
   })
   .then(function(data) {
-    if (!data.audio) throw new Error('No audio data');
+    if (!data.audio) throw new Error('No audio');
     var binary = atob(data.audio);
-    var bytes  = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    var blob  = new Blob([bytes], { type: 'audio/mpeg' });
-    var url   = URL.createObjectURL(blob);
-    var audio = new Audio(url);
-    audio.volume = 1.0;
-    audio.onended = function() { URL.revokeObjectURL(url); onComplete(); };
-    audio.onerror = function() { URL.revokeObjectURL(url); onError(); };
-    audio.play().catch(function() { onError(); });
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+    ctx.decodeAudioData(bytes.buffer.slice(0), function(audioBuffer) {
+      var source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      if (!window._jarvisAnalyser) {
+        window._jarvisAnalyser = ctx.createAnalyser();
+        window._jarvisAnalyser.fftSize = 256;
+        window._jarvisAnalyser.smoothingTimeConstant = 0.8;
+      }
+      source.connect(window._jarvisAnalyser);
+      window._jarvisAnalyser.connect(ctx.destination);
+      source.onended = function() { window._jarvisCurrentSource = null; onComplete(); };
+      source.start(0);
+      window._jarvisCurrentSource = source;
+      _setState('speaking');
+    }, function(err) {
+      console.warn('[Jarvis] decodeAudioData:', err);
+      onError();
+    });
   })
   .catch(function(err) {
     console.warn('[Jarvis ElevenLabs]', err.message);
@@ -5154,6 +5190,10 @@ function _speakWithBrowser(text, onComplete) {
 function _stopSpeech() {
   _speechQueue = [];
   _isSpeaking  = false;
+  if (window._jarvisCurrentSource) {
+    try { window._jarvisCurrentSource.stop(); } catch(e) {}
+    window._jarvisCurrentSource = null;
+  }
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   if (_autoListenTimer) clearTimeout(_autoListenTimer);
   _setState('idle');
@@ -5244,6 +5284,11 @@ function _stopListening() {
 
 // ── Open / Close ──────────────────────────────
 window._openVoiceMode = function() {
+  if (!window._jarvisAudioCtx) {
+    try { window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  if (window._jarvisAudioCtx) window._jarvisAudioCtx.resume().catch(function(){});
+
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
     if (window.showToast) window.showToast('Jarvis ben\u00f6tigt Chrome oder Safari');
@@ -5273,6 +5318,8 @@ window._openVoiceMode = function() {
 
   var tapBtn = document.getElementById('voiceOrbTapBtn');
   if (tapBtn) tapBtn.onclick = function() {
+    if (!window._jarvisAudioCtx) { try { window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+    if (window._jarvisAudioCtx && window._jarvisAudioCtx.state === 'suspended') window._jarvisAudioCtx.resume();
     if (_state === 'listening') {
       _stopListening();
     } else if (_state === 'speaking') {
@@ -5291,6 +5338,10 @@ window._openVoiceMode = function() {
 window._closeVoiceMode = function() {
   _stopListening();
   _stopSpeech();
+  window._jarvisAnalyser = null;
+  if (window._jarvisAudioCtx && window._jarvisAudioCtx.state !== 'closed') {
+    window._jarvisAudioCtx.suspend().catch(function(){});
+  }
   _setState('idle');
   _destroyOrb();
   if (_autoListenTimer) clearTimeout(_autoListenTimer);
