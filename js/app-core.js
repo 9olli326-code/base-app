@@ -90,6 +90,21 @@
    window._trackActivity('visit');
   })();
 
+  // Mikrofon-Permission einmalig beim ersten Start anfragen
+  window._requestMicPermission = function() {
+    if (localStorage.getItem('base_mic_granted')) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function(stream) {
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        localStorage.setItem('base_mic_granted', '1');
+      })
+      .catch(function() {});
+  };
+  document.addEventListener('click', function() {
+    window._requestMicPermission();
+  }, { once: true, passive: true });
+
   window._showRetentionModal = function(hookId, config) {
    var existing = document.getElementById('retentionOverlay');
    if(existing) existing.remove();
@@ -298,57 +313,112 @@
 
   // === VOICE COACH ===
   window._voiceCoachEnabled = localStorage.getItem('base_voice_coach') === 'true';
-  var _ttsCache = {};
+
+  var LANG_CODE_MAP = { de: 'de-DE', en: 'en-US', fr: 'fr-FR', es: 'es-ES', it: 'it-IT', nl: 'nl-NL', ar: 'ar-SA' };
   var _ttsQueue = [];
   var _ttsPlaying = false;
+  var _ttsAudioCtx = null;
+  var _ttsGestureUnlocked = false;
+
+  function _unlockAudioCtx() {
+    if (_ttsGestureUnlocked) return;
+    _ttsGestureUnlocked = true;
+    try {
+      _ttsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var buf = _ttsAudioCtx.createBuffer(1, 1, 22050);
+      var src = _ttsAudioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(_ttsAudioCtx.destination);
+      src.start(0);
+    } catch(e) { _ttsGestureUnlocked = false; }
+  }
+  document.addEventListener('touchstart', _unlockAudioCtx, { once: true, passive: true });
+  document.addEventListener('click', _unlockAudioCtx, { once: true, passive: true });
+
+  function _processTtsQueue() {
+    if (_ttsPlaying || _ttsQueue.length === 0) return;
+    _ttsPlaying = true;
+    var item = _ttsQueue.shift();
+
+    fetch('/.netlify/functions/elevenlabs-tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: item.text })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (!data.audio) throw new Error('no audio');
+      var binary = atob(data.audio);
+      var bytes = new Uint8Array(binary.length);
+      for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      if (_ttsAudioCtx && _ttsAudioCtx.state !== 'closed') {
+        _ttsAudioCtx.resume().then(function() {
+          _ttsAudioCtx.decodeAudioData(bytes.buffer.slice(0), function(decoded) {
+            var source = _ttsAudioCtx.createBufferSource();
+            source.buffer = decoded;
+            source.connect(_ttsAudioCtx.destination);
+            source.onended = function() { _ttsPlaying = false; _processTtsQueue(); };
+            source.start(0);
+          }, function() {
+            _ttsPlaying = false;
+            window._speakBrowserFallback(item.text);
+            _processTtsQueue();
+          });
+        });
+      } else {
+        var blob = new Blob([bytes], { type: 'audio/mpeg' });
+        var url = URL.createObjectURL(blob);
+        var audio = new Audio(url);
+        audio.volume = 1.0;
+        audio.onended = function() { URL.revokeObjectURL(url); _ttsPlaying = false; _processTtsQueue(); };
+        audio.onerror = function() { URL.revokeObjectURL(url); _ttsPlaying = false; window._speakBrowserFallback(item.text); _processTtsQueue(); };
+        audio.play().catch(function() {
+          URL.revokeObjectURL(url); _ttsPlaying = false;
+          window._speakBrowserFallback(item.text);
+          _processTtsQueue();
+        });
+      }
+    })
+    .catch(function() {
+      _ttsPlaying = false;
+      window._speakBrowserFallback(item.text);
+      _processTtsQueue();
+    });
+  }
 
   window._speak = function(text, priority) {
-   if (!window._voiceCoachEnabled) return;
-   if (!text || !text.trim()) return;
-   if (priority === 'high' && window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-   }
-
-   fetch('/.netlify/functions/elevenlabs-tts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: text })
-   })
-   .then(function(res) { return res.json(); })
-   .then(function(data) {
-    if (!data.audio) throw new Error('no audio');
-    var binary = atob(data.audio);
-    var bytes  = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) {
-     bytes[i] = binary.charCodeAt(i);
+    if (!window._voiceCoachEnabled) return;
+    if (!text || !text.trim()) return;
+    if (priority === 'high') {
+      _ttsQueue = [];
+      if (_ttsAudioCtx && _ttsAudioCtx.state !== 'closed') {
+        try { _ttsAudioCtx.close().then(function() { _ttsAudioCtx = null; _ttsGestureUnlocked = false; }); } catch(e) {}
+      }
+      _ttsPlaying = false;
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
     }
-    var blob  = new Blob([bytes], { type: 'audio/mpeg' });
-    var url   = URL.createObjectURL(blob);
-    var audio = new Audio(url);
-    audio.volume  = 1.0;
-    audio.onended = function() { URL.revokeObjectURL(url); };
-    audio.play().catch(function() {
-     window._speakBrowserFallback(text);
-    });
-   })
-   .catch(function() {
-    window._speakBrowserFallback(text);
-   });
+    _ttsQueue.push({ text: text.trim() });
+    if (!_ttsPlaying) _processTtsQueue();
   };
 
   window._speakBrowserFallback = function(text) {
-   if (!window.speechSynthesis) return;
-   var utt = new SpeechSynthesisUtterance(text);
-   var langMap = { de: 'de-DE', en: 'en-US', fr: 'fr-FR', es: 'es-ES', it: 'it-IT', nl: 'nl-NL', ar: 'ar-SA' };
-   utt.lang = langMap[window.currentLang] || 'de-DE';
-   utt.rate = 1.05; utt.pitch = 1.0;
-   var voices = window.speechSynthesis.getVoices();
-   var lp = (window.currentLang || 'de');
-   var pref = voices.find(function(v) { return v.lang.startsWith(lp) && v.localService; });
-   if (!pref) pref = voices.find(function(v) { return v.lang.startsWith(lp); });
-   if (pref) utt.voice = pref;
-   window.speechSynthesis.speak(utt);
+    if (!window.speechSynthesis) return;
+    var utt = new SpeechSynthesisUtterance(text);
+    utt.lang = LANG_CODE_MAP[window.currentLang] || 'de-DE';
+    utt.rate = 1.05; utt.pitch = 1.0;
+    var voices = window.speechSynthesis.getVoices();
+    var lp = (window.currentLang || 'de');
+    var pref = voices.find(function(v) { return v.lang.startsWith(lp) && v.localService; });
+    if (!pref) pref = voices.find(function(v) { return v.lang.startsWith(lp); });
+    if (pref) utt.voice = pref;
+    window.speechSynthesis.speak(utt);
   };
+
+  window._voiceCoachSpeak = function(text, priority) {
+    window._speak(text, priority);
+  };
+
   window.toggleVoiceCoach = function() {
    window._voiceCoachEnabled = !window._voiceCoachEnabled;
    localStorage.setItem('base_voice_coach', String(window._voiceCoachEnabled));
@@ -3532,7 +3602,8 @@
      signal: _pushCtrl.signal,
      body: JSON.stringify({
       subscription: sub.toJSON(),
-      notification: notification
+      notification: notification,
+      internalSecret: 'BASE_PUSH_2026'
      })
     });
     clearTimeout(_pushTimeout);
@@ -13439,9 +13510,20 @@
     if (!userText || !userText.trim()) return null;
     var intent = window._detectJarvisIntent(userText);
     if (intent) {
-      var intentResult = intent.action();
-      if (intentResult === null) return { response: null, wasIntent: true };
-      return { response: intentResult, wasIntent: true };
+      if (isVoice) {
+        // Voice Mode: Konversations-Intents (null) überspringen
+        // → Gemini soll antworten, damit es etwas zum Sprechen gibt
+        var intentResult = intent.action();
+        if (intentResult === null) {
+          // Nicht crashen — Gemini-Fallthrough für gesprochene Antwort
+        } else {
+          return { response: intentResult, wasIntent: true };
+        }
+      } else {
+        var intentResult = intent.action();
+        if (intentResult === null) return { response: null, wasIntent: true };
+        return { response: intentResult, wasIntent: true };
+      }
     }
     if (window.checkFeatureGate && !window.checkFeatureGate('coach')) return null;
     try {

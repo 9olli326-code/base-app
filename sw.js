@@ -38,7 +38,7 @@ if (typeof firebase !== 'undefined' && firebase.messaging) {
   });
 }
 
-const CACHE_NAME = 'base-v2-cache-v267';
+const CACHE_NAME = 'base-v2-cache-v272';
 
 const PRECACHE_URLS = [
     '/app.html',
