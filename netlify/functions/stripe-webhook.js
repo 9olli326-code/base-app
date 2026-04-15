@@ -5,7 +5,7 @@ const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const FIREBASE_PROJECT_ID = 'beastmode-17f0d';
 
-const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y';
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 
 // Firestore REST API Helper
 function firestoreRequest(method, path, data) {

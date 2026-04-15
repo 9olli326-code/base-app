@@ -1,6 +1,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
   import { getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, browserLocalPersistence, setPersistence, GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, limit, getDoc, updateDoc, addDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, limit, getDoc, updateDoc, addDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y", authDomain: "beastmode-17f0d.firebaseapp.com", projectId: "beastmode-17f0d", storageBucket: "beastmode-17f0d.firebasestorage.app", messagingSenderId: "276195983881", appId: "1:276195983881:web:99d55a5656e6ed7daa2ed8" };
   
@@ -13,6 +13,7 @@
    window._fbWhere = where; window._fbOrderBy = orderBy; window._fbLimit = limit;
    window._fbUpdateDoc = updateDoc; window._fbAddDoc = addDoc; window._fbIncrement = increment;
    window._fbDeleteDoc = deleteDoc;
+   window._fbOnSnapshot = onSnapshot; window._fbArrayUnion = arrayUnion;
 
    window.googleSignIn = async function(onSuccess) {
     var provider = new GoogleAuthProvider();
@@ -277,12 +278,103 @@
      window._loadSubscriptionStatus();
      if(window.loadClientDataFromCloud) { setTimeout(function() { window.loadClientDataFromCloud(); }, 3000); }
      if(!user.isAnonymous && localStorage.getItem('base_anon_challenge_id') && window._migrateAnonChallenge) { window._migrateAnonChallenge(); }
+     if(!user.isAnonymous && window._initFCM) { setTimeout(function() { window._initFCM(); }, 5000); }
+     if(localStorage.getItem('base_lexoffice_key')) { localStorage.removeItem('base_lexoffice_key'); console.warn('[Security] Alten Lexoffice Key aus localStorage entfernt'); }
+     // Pending Ref Code prüfen
+     if(!user.isAnonymous && localStorage.getItem('base_pending_ref_code')) {
+       setTimeout(function() { if(window._applyPendingRefCode) window._applyPendingRefCode(user.uid); }, 2000);
+     }
     } else {
      try { await signInAnonymously(auth); } catch(e) { console.error("Firebase Auth Error", e); }
     }
    });
 
    window._firebaseAuth = auth;
+
+   // ============================================================
+   // REF CODE ANWENDEN
+   // ============================================================
+   window._applyPendingRefCode = async function(uid) {
+     var code = localStorage.getItem('base_pending_ref_code');
+     var ts = parseInt(localStorage.getItem('base_pending_ref_ts') || '0');
+
+     if (!code || Date.now() - ts > 7 * 86400000) {
+       localStorage.removeItem('base_pending_ref_code');
+       localStorage.removeItem('base_pending_ref_ts');
+       return;
+     }
+
+     try {
+       var codeSnap = await getDoc(doc(db, 'creator_codes', code));
+
+       if (!codeSnap.exists()) {
+         console.warn('[Ref] Code nicht gefunden:', code);
+         localStorage.removeItem('base_pending_ref_code');
+         localStorage.removeItem('base_pending_ref_ts');
+         return;
+       }
+
+       var codeData = codeSnap.data();
+
+       // Max-Uses prüfen
+       if (codeData.maxUses && codeData.usageCount >= codeData.maxUses) {
+         console.warn('[Ref] Code max uses erreicht:', code);
+         localStorage.removeItem('base_pending_ref_code');
+         localStorage.removeItem('base_pending_ref_ts');
+         if (window.showToast) window.showToast('Code leider nicht mehr gültig', 'error');
+         return;
+       }
+
+       // Bereits verwendet?
+       var profileSnap = await getDoc(doc(db, 'artifacts', 'base-v2-beta-test', 'users', uid, 'pt_data', 'ref_status'));
+       if (profileSnap.exists() && profileSnap.data().refCodeUsed) {
+         console.log('[Ref] User hat bereits einen Code verwendet');
+         localStorage.removeItem('base_pending_ref_code');
+         localStorage.removeItem('base_pending_ref_ts');
+         return;
+       }
+
+       var proDays = codeData.proDays || 30;
+       var proUntil = new Date(Date.now() + proDays * 86400000).toISOString();
+
+       // Ref-Status in User speichern
+       await setDoc(doc(db, 'artifacts', 'base-v2-beta-test', 'users', uid, 'pt_data', 'ref_status'), {
+         isPro: true,
+         proUntil: proUntil,
+         proSource: 'ref_code',
+         refCodeUsed: code,
+         refCodeOwner: codeData.creatorId || null,
+         refCodeAppliedAt: new Date().toISOString()
+       }, { merge: true });
+
+       // Creator Code Nutzung tracken
+       await updateDoc(doc(db, 'creator_codes', code), {
+         usageCount: increment(1),
+         lastUsedAt: new Date().toISOString()
+       });
+
+       // Lokales PRO Flag
+       localStorage.setItem('base_is_pro', 'true');
+       localStorage.setItem('base_pro_until', proUntil);
+       localStorage.setItem('base_pro_source', 'ref_code:' + code);
+
+       // Cleanup
+       localStorage.removeItem('base_pending_ref_code');
+       localStorage.removeItem('base_pending_ref_ts');
+
+       var msg = codeData.welcomeMessage || ('\uD83C\uDF89 ' + proDays + ' Tage PRO aktiviert! Willkommen bei BASE.');
+       setTimeout(function() {
+         if (window.showToast) window.showToast(msg, null, null, null, 6000);
+       }, 1000);
+
+       console.log('[Ref] PRO aktiviert für', proDays, 'Tage via', code);
+
+     } catch(e) {
+       console.warn('[Ref] Fehler:', e.message);
+       localStorage.removeItem('base_pending_ref_code');
+       localStorage.removeItem('base_pending_ref_ts');
+     }
+   };
 
    (async function() {
     const brandUid = new URLSearchParams(window.location.search).get('brand');
@@ -348,9 +440,11 @@
    window._chCreate = async (id, data) => {
     try { await setDoc(doc(db, 'challenges', id), data); return true; } catch(e) { return e.message; }
    };
+   var _challengeUnsub = null;
    window._chList = (callback) => {
-    const unsub = onSnapshot(collection(db, 'challenges'), (snap) => {
-     unsub();
+    if (_challengeUnsub) _challengeUnsub();
+    const q = query(collection(db, 'challenges'), orderBy('createdAt', 'desc'), limit(20));
+    _challengeUnsub = onSnapshot(q, (snap) => {
      const results = [];
      snap.docs.forEach(d => { const ch = d.data(); ch.id = d.id; results.push(ch); });
      callback(results);
@@ -442,4 +536,233 @@
      return data && data.paywallActive === true;
     } catch(e) { return false; }
    };
+
+   // ── Messaging Functions ──
+
+   window._getConversationId = function(ptId, clientId) {
+    return [ptId, clientId].sort().join('_');
+   };
+
+   window._sendMessage = async function(clientId, text) {
+    if (!text || !text.trim()) return;
+    if (!auth.currentUser) return;
+    var ptId = auth.currentUser.uid;
+    var convId = window._getConversationId(ptId, clientId);
+    var msg = {
+     text: text.trim(),
+     senderId: ptId,
+     senderName: (window.userProfile && window.userProfile.name) || 'Trainer',
+     senderRole: 'pt',
+     timestamp: new Date().toISOString(),
+     read: false
+    };
+    try {
+     await addDoc(collection(db, 'conversations', convId, 'messages'), msg);
+     await setDoc(doc(db, 'conversations', convId), {
+      ptId: ptId,
+      clientId: clientId,
+      lastMessage: text.trim().substring(0, 80),
+      lastMessageAt: new Date().toISOString(),
+      unreadByClient: true
+     }, { merge: true });
+    } catch(e) {
+     console.error('[Messaging]', e);
+     if (window.showToast) window.showToast('Nachricht konnte nicht gesendet werden', 'error');
+    }
+   };
+
+   window._listenToMessages = function(clientId, onMessage) {
+    if (!auth.currentUser) return function() {};
+    var ptId = auth.currentUser.uid;
+    var convId = window._getConversationId(ptId, clientId);
+    try {
+     var q = query(
+      collection(db, 'conversations', convId, 'messages'),
+      orderBy('timestamp', 'asc'),
+      limit(50)
+     );
+     return onSnapshot(q, function(snap) {
+      var messages = [];
+      snap.forEach(function(d) {
+       messages.push(Object.assign({ id: d.id }, d.data()));
+      });
+      onMessage(messages);
+     }, function(e) {
+      console.error('[Messaging onSnapshot]', e);
+     });
+    } catch(e) {
+     console.error('[Messaging listen]', e);
+     return function() {};
+    }
+   };
+
+   window._markMessagesRead = async function(clientId) {
+    if (!auth.currentUser) return;
+    var ptId = auth.currentUser.uid;
+    var convId = window._getConversationId(ptId, clientId);
+    try {
+     await updateDoc(doc(db, 'conversations', convId), { unreadByPT: false });
+    } catch(e) {}
+   };
+
+   // ── Firebase Cloud Messaging (FCM) ──
+
+   window._initFCM = async function() {
+    try {
+     var fcmModule = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js');
+     var messaging = fcmModule.getMessaging(app);
+
+     if ('serviceWorker' in navigator) {
+      var reg = await navigator.serviceWorker.ready;
+      var token = await fcmModule.getToken(messaging, {
+       vapidKey: 'BL_6HXCJ2EZF1nG40_oIQoJGdEFqieeU0x7t8aI3CMTwbvYxsKROg-UmfOZx1tqqXyeNiIlE8lIlE9ZPXAp_u-c',
+       serviceWorkerRegistration: reg
+      }).catch(function(e) { console.warn('[FCM] Token Error:', e.message); return null; });
+
+      if (token) {
+       window._fcmToken = token;
+       await window._saveFCMToken(token);
+      }
+     }
+
+     fcmModule.onMessage(messaging, function(payload) {
+      if (payload.notification && window.showToast) {
+       window.showToast(
+        '\uD83D\uDCAA ' + (payload.notification.title || 'Neues Workout') + ': ' + (payload.notification.body || ''),
+        null, null, null, 8000
+       );
+      }
+     });
+    } catch(e) {
+     console.warn('[FCM] Init fehlgeschlagen:', e.message);
+    }
+   };
+
+   window._saveFCMToken = async function(token) {
+    try {
+     if (!auth.currentUser || !token) return;
+     var uid = auth.currentUser.uid;
+     await setDoc(doc(db, 'fcm_tokens', uid), {
+      fcmToken: token,
+      fcmUpdatedAt: new Date().toISOString(),
+      platform: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'ios' : /Android/.test(navigator.userAgent) ? 'android' : 'web'
+     }, { merge: true });
+    } catch(e) {
+     console.warn('[FCM] Token speichern fehlgeschlagen:', e.message);
+    }
+   };
+
+   // FCM Token des Clients aus Firestore lesen (fuer PT)
+   window._getClientFCMToken = async function(clientUid) {
+    try {
+     var snap = await getDoc(doc(db, 'fcm_tokens', clientUid));
+     if (snap.exists()) return snap.data().fcmToken || null;
+     return null;
+    } catch(e) { return null; }
+   };
+
+   // ── Social System ──
+
+   window._socialInit = async function() {
+    if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+    var uid = auth.currentUser.uid;
+    try {
+     var profileRef = doc(db, 'profiles', uid);
+     var existing = await getDoc(profileRef);
+     if (!existing.exists()) {
+      var p = window.userProfile || {};
+      await setDoc(profileRef, {
+       uid: uid,
+       displayName: p.name || auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Athlet',
+       level: parseInt(localStorage.getItem('base_level') || '1'),
+       totalXP: parseInt(localStorage.getItem('base_total_xp') || '0'),
+       workoutCount: (window.workouts || []).filter(function(w) { return w.archived; }).length,
+       joinedAt: new Date().toISOString(),
+       followerCount: 0, followingCount: 0, routineCount: 0, isPublic: true
+      }, { merge: true });
+     }
+    } catch(e) { console.warn('[Social] Profile init:', e.message); }
+   };
+
+   window._followUser = async function(targetUid) {
+    if (!auth.currentUser) return;
+    var myUid = auth.currentUser.uid;
+    if (myUid === targetUid) return;
+    try {
+     await setDoc(doc(db, 'follows', myUid, 'following', targetUid), { followedAt: new Date().toISOString(), targetUid: targetUid });
+     await updateDoc(doc(db, 'profiles', myUid), { followingCount: increment(1) });
+     await updateDoc(doc(db, 'profiles', targetUid), { followerCount: increment(1) });
+     window.showToast('\u2705 Gefolgt!');
+     if (window.awardXP) window.awardXP('social');
+    } catch(e) { window.showToast('Fehler: ' + e.message, 'error'); }
+   };
+
+   window._unfollowUser = async function(targetUid) {
+    if (!auth.currentUser) return;
+    var myUid = auth.currentUser.uid;
+    try {
+     await deleteDoc(doc(db, 'follows', myUid, 'following', targetUid));
+     await updateDoc(doc(db, 'profiles', myUid), { followingCount: increment(-1) });
+     await updateDoc(doc(db, 'profiles', targetUid), { followerCount: increment(-1) });
+     window.showToast('Entfolgt');
+    } catch(e) { console.warn('[Social] Unfollow:', e.message); }
+   };
+
+   window._isFollowing = async function(targetUid) {
+    if (!auth.currentUser) return false;
+    try {
+     var snap = await getDoc(doc(db, 'follows', auth.currentUser.uid, 'following', targetUid));
+     return snap.exists();
+    } catch(e) { return false; }
+   };
+
+   window._likePost = async function(postId) {
+    if (!auth.currentUser) return;
+    var uid = auth.currentUser.uid;
+    try {
+     await setDoc(doc(db, 'likes', postId, 'likes', uid), { likedAt: new Date().toISOString() });
+     await updateDoc(doc(db, 'feed', postId), { likeCount: increment(1) });
+     var btn = document.querySelector('[data-like-post="' + postId + '"]');
+     if (btn) { btn.style.color = '#e88a8a'; btn.setAttribute('data-liked', 'true'); var c = btn.querySelector('.like-count'); if (c) c.textContent = parseInt(c.textContent || 0) + 1; }
+    } catch(e) { console.warn('[Social] Like:', e.message); }
+   };
+
+   window._unlikePost = async function(postId) {
+    if (!auth.currentUser) return;
+    var uid = auth.currentUser.uid;
+    try {
+     await deleteDoc(doc(db, 'likes', postId, 'likes', uid));
+     await updateDoc(doc(db, 'feed', postId), { likeCount: increment(-1) });
+     var btn = document.querySelector('[data-like-post="' + postId + '"]');
+     if (btn) { btn.style.color = 'var(--text-muted)'; btn.setAttribute('data-liked', 'false'); var c = btn.querySelector('.like-count'); if (c) c.textContent = Math.max(0, parseInt(c.textContent || 1) - 1); }
+    } catch(e) { console.warn('[Social] Unlike:', e.message); }
+   };
+
+   window._toggleLike = async function(postId, isLiked) {
+    if (isLiked === 'true' || isLiked === true) await window._unlikePost(postId);
+    else await window._likePost(postId);
+   };
+
+   window._postWorkoutToFeed = async function(workoutData) {
+    if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+    var uid = auth.currentUser.uid;
+    try {
+     var profileSnap = await getDoc(doc(db, 'profiles', uid));
+     var pd = profileSnap.exists() ? profileSnap.data() : {};
+     var vol = 0; var sets = 0;
+     if (workoutData.setDetails) { workoutData.setDetails.forEach(function(s) { if (s.type === 'warmup') return; vol += (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0); sets++; }); }
+     var post = { uid: uid, displayName: pd.displayName || 'Athlet', level: pd.level || 1, exercise: workoutData.exercise || '', category: workoutData.category || 'strength', volume: Math.round(vol), sets: sets, isPR: workoutData.isPR || false, date: new Date().toISOString(), likeCount: 0, isPublic: true };
+     await addDoc(collection(db, 'feed'), post);
+     await updateDoc(doc(db, 'profiles', uid), { workoutCount: increment(1), level: parseInt(localStorage.getItem('base_level') || '1'), totalXP: parseInt(localStorage.getItem('base_total_xp') || '0') });
+    } catch(e) { console.warn('[Social] Post failed:', e.message); }
+   };
+
+   window._getFollowingUids = async function() {
+    if (!auth.currentUser) return [];
+    try {
+     var snap = await getDocs(collection(db, 'follows', auth.currentUser.uid, 'following'));
+     var uids = []; snap.forEach(function(d) { uids.push(d.id); }); return uids;
+    } catch(e) { return []; }
+   };
+
   } catch(e) { console.error("Firebase Init Error", e); }

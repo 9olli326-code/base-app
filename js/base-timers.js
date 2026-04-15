@@ -51,15 +51,31 @@ window.startHiit = function() {
                 _hiitCurrentPhase = 'rest';
                 _hiitPhaseEndTime = Date.now() + (_hiitGetRestSecs() * 1000);
                 window.playBeep && window.playBeep();
+                if(window._voiceCoachSpeak || window._speak) {
+                    var fn = window._voiceCoachSpeak || window._speak;
+                    var msgs = {de:'Pause!',en:'Rest!',fr:'Repos!',es:'Descansa!',it:'Riposo!',nl:'Rust!',ar:'استرح!'};
+                    fn(msgs[window.currentLang||'de']||'Rest!', 'high');
+                }
             } else {
                 _hiitCurrentRound++;
                 if(_hiitCurrentRound > _hiitTotalRounds) {
                     window.resetHiit(); window.showToast(window.t('workoutDone','🎉 HIIT abgeschlossen!'));
-                    window.playBeep && window.playBeep(); return;
+                    window.playBeep && window.playBeep();
+                    if(window._voiceCoachSpeak || window._speak) {
+                        var fn = window._voiceCoachSpeak || window._speak;
+                        var msgs = {de:'HIIT abgeschlossen! Starke Leistung!',en:'HIIT complete! Great work!',fr:'HIIT terminé! Beau travail!',es:'HIIT completo! Buen trabajo!',it:'HIIT completato! Ottimo lavoro!',nl:'HIIT klaar! Goed gedaan!',ar:'انتهى هيت! عمل رائع!'};
+                        fn(msgs[window.currentLang||'de']||'Done!', 'high');
+                    }
+                    return;
                 }
                 _hiitCurrentPhase = 'work';
                 _hiitPhaseEndTime = Date.now() + (_hiitGetWorkSecs() * 1000);
                 window.playBeep && window.playBeep();
+                if(window._voiceCoachSpeak || window._speak) {
+                    var fn = window._voiceCoachSpeak || window._speak;
+                    var msgs = {de:'Los! Runde '+_hiitCurrentRound,en:'Go! Round '+_hiitCurrentRound,fr:'Allez! Tour '+_hiitCurrentRound,es:'Vamos! Ronda '+_hiitCurrentRound,it:'Dai! Giro '+_hiitCurrentRound,nl:'Ga! Ronde '+_hiitCurrentRound,ar:'هيا! الجولة '+_hiitCurrentRound};
+                    fn(msgs[window.currentLang||'de']||'Go!', 'high');
+                }
             }
         }
         window.updateHiitDisplay();
@@ -236,6 +252,7 @@ window.startRestCountdown = function(secs) {
             if (d) { d.textContent = '00:00'; d.classList.remove('timer-active'); }
             if (stopBtn) stopBtn.classList.add('hidden');
             window.playBeep();
+            if (window._liveVoiceRestDone) window._liveVoiceRestDone();
         }
     };
     tick();

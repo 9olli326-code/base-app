@@ -267,20 +267,8 @@ if(ptTabs) ptTabs.classList.remove('hidden');
 window.switchPTTab('clients');
 window._refreshLucide();
 if(typeof window.updateFloatingModeBtn === 'function') window.updateFloatingModeBtn();
-// PT First-Use Onboarding
-if(!localStorage.getItem('base_pt_onboarded')) {
-    localStorage.setItem('base_pt_onboarded', '1');
-    setTimeout(function() {
-        window.showModal(
-            window.t('ptWelcome','Willkommen im PT Modus!'),
-            window.t('ptWelcomeSub','Lege deinen ersten Kunden an und plane die erste Session. Nutze die KI Tools für Trainingspläne und Wochenberichte.'),
-            true,
-            function() { window.addNewClient(); }
-        );
-        var btn = document.getElementById('modalBtnConfirm');
-        if(btn) btn.textContent = window.t('ptAddClient','Ersten Kunden anlegen');
-    }, 500);
-}
+// PT Onboarding System
+if (window._checkPTOnboarding) window._checkPTOnboarding();
 };
 
 window.deactivatePTMode = function() {
@@ -330,7 +318,7 @@ if(activeBtn) activeBtn.style.color = _a;
 if(activeIndicator) activeIndicator.style.opacity = '1';
 const activeIcon = activeBtn?.querySelector('div');
 if(activeIcon) activeIcon.style.background = _a + '26';
-if(tab === 'clients') { window.renderPTClientsDashboard(); if(window._renderRevenueDashboard) window._renderRevenueDashboard(); if(window._checkClientReminders) window._checkClientReminders(); }
+if(tab === 'clients') { if(window._showPTDashboardSkeleton) window._showPTDashboardSkeleton(); window.renderPTClientsDashboard(); if(window._renderRevenueDashboard) window._renderRevenueDashboard(); if(window._checkClientReminders) window._checkClientReminders(); if(window._updateChatUnreadBadges) window._updateChatUnreadBadges(); }
 if(tab === 'plans') window.renderDayView();
 if(tab === 'mytraining') window.renderPTMyTraining();
 window._refreshLucide();
@@ -375,7 +363,7 @@ listEl.innerHTML = window.clients.map(c => {
     const profile = window.getClientProfile(c.id);
     const goalTag = profile.goal ? `<span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase" style="background:color-mix(in srgb,var(--primary-hex),transparent 90%);color:var(--primary-hex)">${window._escapeHtml(profile.goal)}</span>` : '';
 
-    return `<div role="button" tabindex="0" aria-label="${window._escapeHtml(c.name)} Details öffnen" onclick="window.openClientDetail('${c.id}')"
+    return `<div data-client-id="${c.id}" role="button" tabindex="0" aria-label="${window._escapeHtml(c.name)} Details öffnen" onclick="window.openClientDetail('${c.id}')"
         class="p-4 rounded-2xl cursor-pointer transition-all hover:opacity-90 active:scale-[0.98] pointer-events-auto"
         style="background:var(--surface-hex);border:1px solid var(--border-hex)">
         <div class="flex items-center gap-3 mb-2">
@@ -391,7 +379,10 @@ listEl.innerHTML = window.clients.map(c => {
                 <div class="w-1.5 h-1.5 rounded-full" style="background:${weekCount > 0 ? '#8aafe8' : '#52525b'}"></div>
                 <p class="text-[10px] font-bold" style="color:var(--text-muted)">${weekCount}× ${window.t('lblThisWeek','diese Woche')}</p>
             </div>
-            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 pointer-events-none"></i>
+            <div class="flex items-center gap-2">
+                <button onclick="event.stopPropagation();window.openPTChat('${c.id}','${window._escapeHtml(c.name || 'Client')}')" aria-label="Chat mit ${window._escapeHtml(c.name || 'Client')}" class="pointer-events-auto" style="position:relative;padding:7px 12px;border-radius:8px;background:transparent;border:1px solid var(--border-hex);color:var(--text-muted);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px"><span>💬</span><span>Chat</span><span class="chat-unread-badge hidden" style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:#ef4444"></span></button>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-zinc-600 pointer-events-none"></i>
+            </div>
         </div>
     </div>`;
 }).join('');
@@ -792,11 +783,22 @@ if (window._renderClientProgressCharts) window._renderClientProgressCharts(id);
 // PT Action Buttons
 var actionsEl = document.getElementById('clientDetailActions');
 if (actionsEl) {
- actionsEl.innerHTML = '<div class="grid grid-cols-3 gap-2 mt-3">' +
+ actionsEl.innerHTML = '<div class="grid grid-cols-5 gap-2 mt-3">' +
   '<button onclick="window._openWorkoutDelivery(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);color:#d4af37" aria-label="Plan senden">' + window.t('sendPlan','Plan senden') + '</button>' +
   '<button onclick="window._sendCheckInForm(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8" aria-label="Check-In">' + window.t('checkIn','Check-In') + '</button>' +
   '<button onclick="window._addProgressPhoto(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(138,175,232,0.1);border:1px solid rgba(138,175,232,0.2);color:#8aafe8" aria-label="Foto">' + window.t('photo','Foto') + '</button>' +
-  '</div>';
+  '<button onclick="window.openPTChat(\'' + id + '\',\'' + window._escapeHtml(c.name || '') + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(138,175,232,0.1);border:1px solid rgba(138,175,232,0.2);color:#8aafe8" aria-label="Chat">\uD83D\uDCAC Chat</button>' +
+  '<button onclick="window.openLexofficeInvoice(\'' + id + '\')" class="py-2.5 rounded-xl text-[9px] font-bold cursor-pointer pointer-events-auto text-center" style="background:rgba(232,200,106,0.1);border:1px solid rgba(232,200,106,0.2);color:#e8c86a" aria-label="Rechnung">\uD83D\uDCC4 Rechnung</button>' +
+  '</div>' +
+  '<button onclick="window.openPTNutritionChat(\'' + id + '\')" class="pointer-events-auto w-full mt-2 py-2.5 rounded-xl text-[10px] font-bold cursor-pointer text-center" style="background:rgba(74,184,212,0.1);border:1px solid rgba(74,184,212,0.2);color:#4ab8d4" aria-label="Ernaehrungs-Coach">\uD83E\uDD57 Ern\u00E4hrungs-Coach</button>';
+}
+
+// Client Habits laden
+window._currentClientId = id;
+var habitsContainer = document.getElementById('clientHabitsContainerPlaceholder');
+if (habitsContainer) {
+  habitsContainer.id = 'clientHabitsContainer_' + id;
+  window._renderClientHabits(id, 'clientHabitsContainer_' + id);
 }
 
 // Show profile tab by default
@@ -3055,13 +3057,18 @@ window.clearTrainerBranding = function() {
 };
 
 // ── INIT: Trainer-Profil beim PT-Tab-Switch laden ──────────
-const _origSwitchPTTab = window.switchPTTab;
-window.switchPTTab = function(tab) {
+if (!window._ptTabWrapped) {
+  window._ptTabWrapped = true;
+  var _origSwitchPTTab = window.switchPTTab;
+  window.switchPTTab = function(tab) {
     _origSwitchPTTab(tab);
     if(tab === 'pttools') {
         window.loadOwnTrainerProfile();
+        if (window._renderCreatorStats) setTimeout(window._renderCreatorStats, 200);
+        if (window._renderPTPublicSettings) setTimeout(window._renderPTPublicSettings, 300);
     }
-};
+  };
+}
 
 // ============================================================
 // CUSTOM SESSION TYPES für PT Session Planner (max 3)
@@ -3304,7 +3311,8 @@ window._renderCustomSessionFields = function() {
 
 // CSS für Custom Session Type (aktiver Zustand)
 var _origSetSessionType2 = window.setSessionType;
-if (_origSetSessionType2) {
+if (_origSetSessionType2 && !window._ptSessionTypeWrapped) {
+    window._ptSessionTypeWrapped = true;
     window.setSessionType = function(e) {
         _origSetSessionType2(e);
         // Custom Types: aktiven Style setzen
@@ -3359,7 +3367,8 @@ window._initCSTLongPress = function() {
 
 // Beim Öffnen des Session Modals: Custom Types rendern
 var _origOpenSession2 = window.openSessionModal;
-if (_origOpenSession2) {
+if (_origOpenSession2 && !window._ptSessionModalWrapped) {
+    window._ptSessionModalWrapped = true;
     window.openSessionModal = function(e) {
         _origOpenSession2(e);
         setTimeout(function() {
@@ -3480,6 +3489,7 @@ window._saveManualDelivery = function(clientId) {
  localStorage.setItem('base_client_plan_' + clientId, JSON.stringify(plan));
  window.toggleModal('deliveryModal');
  window.showToast(window.t('planSent','Plan gesendet!'));
+ if (window._sendWorkoutDeliveryPush) window._sendWorkoutDeliveryPush(clientId, name.trim(), sessions.length);
 };
 
 // === KI PLAN DELIVERY ===
@@ -3530,6 +3540,7 @@ window._generateDeliveryViaAI = function(clientId) {
   localStorage.setItem('base_pt_deliveries', JSON.stringify(deliveries));
   localStorage.setItem('base_client_plan_' + clientId, JSON.stringify(plan));
   window.showToast(weeks + '-Wochen Plan fuer ' + window._escapeHtml(c.name) + ' erstellt!');
+  if (window._sendWorkoutDeliveryPush) window._sendWorkoutDeliveryPush(clientId, planName.trim(), weeks + ' Wochen');
  }).catch(function(err) {
   clearTimeout(timeoutId);
   window.showToast('Fehler: ' + err.message, 'error');
@@ -3696,5 +3707,885 @@ window._shareCheckInViaWhatsApp = function(clientId) {
  var text = 'Hey ' + (client.name || '') + '! \ud83d\udccb\n\nBitte f\u00fclle deinen w\u00f6chentlichen Check-In aus:\n\n1. Energie (1-10): \n2. Schlafqualit\u00e4t (1-10): \n3. Stress (1-10): \n4. Muskelkater (1-10): \n5. Gewicht (kg): \n6. Schmerzen/Beschwerden: \n7. Sonstiges: \n\nDanke! \ud83d\udcaa';
  var url = 'https://wa.me/' + client.phone.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(text);
  window.open(url, '_blank');
+};
+
+// ============================================================
+// PT IN-APP MESSAGING
+// ============================================================
+var _ptChatUnsub = null;
+var _ptChatClientId = null;
+
+window.openPTChat = function(clientId, clientName) {
+  _ptChatClientId = clientId;
+  var nameEl = document.getElementById('ptChatClientName');
+  var avatarEl = document.getElementById('ptChatAvatar');
+  var statusEl = document.getElementById('ptChatStatus');
+  if (nameEl) nameEl.textContent = clientName || 'Client';
+  if (avatarEl) avatarEl.textContent = (clientName || 'C')[0].toUpperCase();
+  if (statusEl) statusEl.textContent = 'Echtzeit-Chat';
+  window.toggleModal('ptChatModal');
+  if (_ptChatUnsub) _ptChatUnsub();
+  if (window._listenToMessages) {
+    _ptChatUnsub = window._listenToMessages(clientId, function(messages) {
+      window._renderPTMessages(messages);
+    });
+  }
+  if (window._markMessagesRead) window._markMessagesRead(clientId);
+  setTimeout(function() { var input = document.getElementById('ptChatInput'); if (input) input.focus(); }, 300);
+};
+
+window.closePTChat = function() {
+  if (_ptChatUnsub) { _ptChatUnsub(); _ptChatUnsub = null; }
+  _ptChatClientId = null;
+  window.toggleModal('ptChatModal');
+};
+
+window._renderPTMessages = function(messages) {
+  var container = document.getElementById('ptChatMessages');
+  var empty = document.getElementById('ptChatEmpty');
+  if (!container) return;
+  if (messages.length === 0) { if (empty) empty.style.display = 'block'; return; }
+  if (empty) empty.style.display = 'none';
+  var ptId = (window._fbAuth && window._fbAuth.currentUser) ? window._fbAuth.currentUser.uid : '';
+  container.innerHTML = messages.map(function(msg) {
+    var isMe = msg.senderId === ptId;
+    var time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'}) : '';
+    return '<div style="display:flex;justify-content:' + (isMe ? 'flex-end' : 'flex-start') + '">' +
+      '<div style="max-width:75%;padding:8px 12px;border-radius:' + (isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px') + ';background:' + (isMe ? 'color-mix(in srgb,var(--primary-hex),transparent 20%)' : 'var(--inner-bg-hex)') + ';border:1px solid ' + (isMe ? 'transparent' : 'var(--border-hex)') + '">' +
+      '<p style="font-size:13px;color:' + (isMe ? '#0a0c0a' : 'var(--text-main)') + ';line-height:1.4">' + window._escapeHtml(msg.text) + '</p>' +
+      '<p style="font-size:9px;color:' + (isMe ? 'rgba(0,0,0,0.5)' : 'var(--text-muted)') + ';margin-top:3px;text-align:right">' + time + '</p>' +
+      '</div></div>';
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+};
+
+window._sendPTMessage = async function() {
+  if (!_ptChatClientId) return;
+  var input = document.getElementById('ptChatInput');
+  if (!input || !input.value.trim()) return;
+  var text = input.value.trim();
+  input.value = '';
+  input.focus();
+  if (window._sendMessage) await window._sendMessage(_ptChatClientId, text);
+};
+
+window._updateChatUnreadBadges = async function() {
+  if (!window._fbDb || !window._fbAuth || !window._fbAuth.currentUser) return;
+  var ptId = window._fbAuth.currentUser.uid;
+  try {
+    var q = window._fbQuery(
+      window._fbCollection(window._fbDb, 'conversations'),
+      window._fbWhere('ptId', '==', ptId),
+      window._fbWhere('unreadByPT', '==', true)
+    );
+    var snap = await window._fbGetDocs(q);
+    snap.forEach(function(d) {
+      var clientId = d.data().clientId;
+      var badge = document.querySelector('[data-client-id="' + clientId + '"] .chat-unread-badge');
+      if (badge) badge.classList.remove('hidden');
+    });
+  } catch(e) {}
+};
+
+// ============================================================
+// CLIENT HABIT TRACKING
+// ============================================================
+
+window._CLIENT_HABITS = [
+  { id: 'sleep',    icon: '\uD83D\uDE34', label: 'Schlaf',  unit: 'h',    placeholder: '7' },
+  { id: 'water',    icon: '\uD83D\uDCA7', label: 'Wasser',  unit: 'L',    placeholder: '2' },
+  { id: 'steps',    icon: '\uD83D\uDC5F', label: 'Schritte', unit: 'k',   placeholder: '8' },
+  { id: 'calories', icon: '\uD83D\uDD25', label: 'Kalorien', unit: 'kcal', placeholder: '2000' },
+  { id: 'stress',   icon: '\uD83E\uDDE0', label: 'Stress',  unit: '/10',  placeholder: '3' },
+  { id: 'protein',  icon: '\uD83E\uDD69', label: 'Protein', unit: 'g',    placeholder: '150' }
+];
+
+window._getClientHabits = function(clientId) {
+  return JSON.parse(localStorage.getItem('base_client_habits_' + clientId) || '{}');
+};
+
+window._saveClientHabit = function(clientId, habitId, value) {
+  var habits = window._getClientHabits(clientId);
+  var today = new Date().toISOString().split('T')[0];
+  if (!habits[today]) habits[today] = {};
+  habits[today][habitId] = parseFloat(value) || 0;
+  localStorage.setItem('base_client_habits_' + clientId, JSON.stringify(habits));
+};
+
+window._getClientHabitSummary = function(clientId) {
+  var habits = window._getClientHabits(clientId);
+  var days = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+    days.push({ date: d, data: habits[d] || {} });
+  }
+  return days;
+};
+
+window._renderClientHabits = function(clientId, containerId) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  var today = new Date().toISOString().split('T')[0];
+  var habits = window._getClientHabits(clientId);
+  var todayData = habits[today] || {};
+  var summary = window._getClientHabitSummary(clientId);
+
+  var habitsHtml = window._CLIENT_HABITS.map(function(h) {
+    var val = todayData[h.id];
+    var filled = val !== undefined && val !== null;
+    return '<button onclick="window._editClientHabit(\'' + clientId + '\',\'' + h.id + '\')" ' +
+      'class="pointer-events-auto" aria-label="' + h.label + ' tracken" ' +
+      'style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;' +
+      'border-radius:10px;border:1px solid ' + (filled ? 'rgba(163,201,168,0.3)' : 'var(--border-hex)') + ';' +
+      'background:' + (filled ? 'rgba(163,201,168,0.06)' : 'var(--inner-bg-hex)') + ';' +
+      'cursor:pointer;min-width:56px;flex:1">' +
+      '<span style="font-size:20px">' + h.icon + '</span>' +
+      (filled
+        ? '<span style="font-size:11px;font-weight:700;color:#a3c9a8">' + val + h.unit + '</span>'
+        : '<span style="font-size:9px;color:var(--text-muted)">' + h.label + '</span>') +
+      '</button>';
+  }).join('');
+
+  var weekHtml = '<div style="margin-top:12px">' +
+    '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">7-Tage \u00dcbersicht</p>' +
+    '<div style="display:flex;gap:4px">' +
+    summary.map(function(day) {
+      var filled = Object.keys(day.data).length;
+      var total = window._CLIENT_HABITS.length;
+      var pct = Math.round((filled / total) * 100);
+      var d = new Date(day.date);
+      var dayName = ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()];
+      var color = pct >= 80 ? '#a3c9a8' : pct >= 50 ? '#e8c86a' : pct > 0 ? '#e88a8a' : 'var(--border-hex)';
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">' +
+        '<div style="width:100%;height:32px;border-radius:5px;background:' + color + '22;' +
+        'border:1px solid ' + color + '55;display:flex;align-items:center;justify-content:center;' +
+        'font-size:10px;font-weight:700;color:' + color + '">' +
+        (pct > 0 ? pct + '%' : '\u2014') + '</div>' +
+        '<span style="font-size:9px;color:var(--text-muted)">' + dayName + '</span></div>';
+    }).join('') +
+    '</div></div>';
+
+  container.innerHTML =
+    '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Habits heute</p>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">' + habitsHtml + '</div>' + weekHtml;
+};
+
+window._editClientHabit = function(clientId, habitId) {
+  var h = window._CLIENT_HABITS.find(function(x) { return x.id === habitId; });
+  if (!h) return;
+  var habits = window._getClientHabits(clientId);
+  var today = new Date().toISOString().split('T')[0];
+  var cur = (habits[today] || {})[habitId] || '';
+  window.showInputModal(
+    h.icon + ' ' + h.label + (h.unit ? ' (' + h.unit + ')' : ''),
+    h.placeholder,
+    function(val) {
+      if (!val) return;
+      window._saveClientHabit(clientId, habitId, val);
+      window._renderClientHabits(clientId, 'clientHabitsContainer_' + clientId);
+      window.showToast(h.icon + ' ' + val + h.unit);
+    },
+    String(cur)
+  );
+};
+
+// ============================================================
+// LEXOFFICE INTEGRATION
+// ============================================================
+
+window._saveLexofficeKey = async function() {
+  var key = (document.getElementById('lexApiKeyInput') || {}).value || '';
+  if (!key || key.length < 10) { window.showToast('Bitte g\u00fcltigen API Key eingeben', 'error'); return; }
+  var auth = window._fbAuth;
+  if (!auth || !auth.currentUser) { window.showToast('Bitte erst einloggen', 'error'); return; }
+  try {
+    var res = await fetch('/.netlify/functions/lexoffice', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save_key', uid: auth.currentUser.uid, keyToSave: key }) });
+    var data = await res.json();
+    if (data.success) {
+      localStorage.setItem('base_lexoffice_configured', '1');
+      localStorage.removeItem('base_lexoffice_key');
+      var setup = document.getElementById('lexKeySetup');
+      if (setup) setup.style.display = 'none';
+      window.showToast('\u2705 Lexoffice Key sicher gespeichert!');
+    } else { throw new Error(data.error || 'Speichern fehlgeschlagen'); }
+  } catch(e) { window.showToast('Fehler: ' + window._escapeHtml(e.message), 'error'); }
+};
+
+window._currentLexInvoice = null;
+
+window.openLexofficeInvoice = function(clientId) {
+  var client = (window.clients || []).find(function(c) { return c.id === clientId; });
+  if (!client) return;
+
+  var setup = document.getElementById('lexKeySetup');
+  var hasConfigured = !!localStorage.getItem('base_lexoffice_configured');
+  if (setup) setup.style.display = hasConfigured ? 'none' : 'block';
+
+  var nameEl = document.getElementById('lexInvoiceClientName');
+  if (nameEl) nameEl.textContent = client.name || 'Client';
+
+  var now = new Date();
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  var sessions = window.getSessions
+    ? window.getSessions().filter(function(s) {
+        var d = new Date(s.date);
+        return s.clientId === clientId && d >= monthStart && d <= monthEnd && s.completed;
+      })
+    : [];
+
+  var sessionCount = sessions.length;
+  var netTotal = parseFloat(client.monthlyRate || 0);
+  var pricePerSession = netTotal / Math.max(sessionCount, 1);
+  var monthName = now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+
+  window._currentLexInvoice = {
+    clientId: clientId,
+    clientName: client.name,
+    clientStreet: client.street || '',
+    clientCity: client.city || '',
+    clientZip: client.zip || '',
+    date: now.toISOString(),
+    period: monthName,
+    sessionCount: sessionCount,
+    netTotal: netTotal,
+    pricePerSession: pricePerSession,
+    taxRate: 19,
+    paymentDays: 14,
+    kleinunternehmer: false,
+    sessions: [{
+      description: 'Personal Training ' + monthName + ' \u2014 ' + sessionCount + ' Sessions',
+      quantity: sessionCount || 1,
+      netAmount: pricePerSession || netTotal
+    }]
+  };
+
+  window._updateLexInvoicePreview();
+  window.toggleModal('lexofficeModal');
+};
+
+window._updateLexInvoicePreview = function() {
+  var inv = window._currentLexInvoice;
+  if (!inv) return;
+
+  var isKlein = (document.getElementById('lexKleinunternehmer') || {}).checked || false;
+  var payDays = parseInt((document.getElementById('lexPaymentDays') || {}).value || 14);
+  inv.kleinunternehmer = isKlein;
+  inv.paymentDays = payDays;
+
+  var net = inv.netTotal || 0;
+  var tax = isKlein ? 0 : net * (inv.taxRate / 100);
+  var gross = net + tax;
+  var fmt = function(n) { return n.toFixed(2).replace('.', ',') + ' \u20AC'; };
+  var setEl = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
+
+  setEl('lexInvoiceDate', new Date().toLocaleDateString('de-DE'));
+  setEl('lexInvoicePeriod', inv.period || '\u2014');
+  setEl('lexInvoiceSessions', inv.sessionCount + ' Sessions');
+  setEl('lexInvoiceNet', fmt(net));
+  setEl('lexInvoiceTax', isKlein ? '0,00 \u20AC' : fmt(tax));
+  setEl('lexTaxLabel', isKlein ? 'MwSt. (\u00A719 UStG)' : 'MwSt. 19%');
+  setEl('lexInvoiceTotal', fmt(gross));
+
+  var sw = document.getElementById('lexKleinSwitch');
+  var dot = document.getElementById('lexKleinDot');
+  if (sw) sw.style.background = isKlein ? 'var(--primary-hex)' : 'var(--border-hex)';
+  if (dot) dot.style.left = isKlein ? '18px' : '2px';
+};
+
+window._createLexofficeInvoice = async function(mode) {
+  var inv = window._currentLexInvoice;
+  if (!inv) return;
+
+  var auth = window._fbAuth;
+  if (!auth || !auth.currentUser) { window.showToast('Bitte erst einloggen', 'error'); return; }
+
+  var draftBtn = document.getElementById('lexDraftBtn');
+  var finalBtn = document.getElementById('lexFinalBtn');
+  var origDraft = draftBtn ? draftBtn.innerHTML : '';
+  var origFinal = finalBtn ? finalBtn.innerHTML : '';
+  if (mode === 'draft' && draftBtn) draftBtn.textContent = '\u23F3 Erstelle Entwurf...';
+  if (mode === 'finalize' && finalBtn) finalBtn.textContent = '\u23F3 Finalisiere...';
+
+  try {
+    var res = await fetch('/.netlify/functions/lexoffice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: auth.currentUser.uid,
+        mode: mode,
+        invoice: {
+          clientName: inv.clientName,
+          clientStreet: inv.clientStreet,
+          clientCity: inv.clientCity,
+          clientZip: inv.clientZip,
+          date: inv.date,
+          sessions: inv.sessions,
+          taxRate: inv.taxRate,
+          kleinunternehmer: inv.kleinunternehmer,
+          paymentDays: inv.paymentDays,
+          intro: 'Vielen Dank f\u00fcr Ihr Vertrauen in meine Dienstleistungen.',
+          remark: inv.kleinunternehmer ? 'Gem\u00e4\u00df \u00A719 UStG wird keine Umsatzsteuer berechnet.' : ''
+        }
+      })
+    });
+
+    var data = await res.json();
+    if (data.needsSetup) {
+      var s = document.getElementById('lexKeySetup');
+      if (s) s.style.display = 'block';
+      localStorage.removeItem('base_lexoffice_configured');
+      window.showToast('Bitte Lexoffice API Key eingeben', 'error');
+      if (draftBtn) draftBtn.innerHTML = origDraft;
+      if (finalBtn) finalBtn.innerHTML = origFinal;
+      return;
+    }
+    if (data.success) {
+      window.toggleModal('lexofficeModal');
+      window.showToast(
+        mode === 'finalize'
+          ? '\u2705 Rechnung in Lexoffice finalisiert!'
+          : '\uD83D\uDCC4 Entwurf in Lexoffice erstellt!',
+        null, null, null, 5000
+      );
+    } else {
+      throw new Error(data.error || 'Unbekannter Fehler');
+    }
+  } catch(e) {
+    window.showToast('Lexoffice Fehler: ' + window._escapeHtml(e.message), 'error');
+  } finally {
+    if (draftBtn) draftBtn.innerHTML = origDraft;
+    if (finalBtn) finalBtn.innerHTML = origFinal;
+  }
+};
+
+// ============================================================
+// WORKOUT DELIVERY PUSH NOTIFICATIONS
+// ============================================================
+
+// ============================================================
+// CREATOR CODE SYSTEM (PT)
+// ============================================================
+
+window._getCreatorStats = async function() {
+  var db = window._fbDb; var auth = window._fbAuth;
+  if (!db || !auth || !auth.currentUser) return null;
+  try {
+    var uid = auth.currentUser.uid;
+    var q = window._fbQuery(window._fbCollection(db, 'creator_codes'), window._fbWhere('uid', '==', uid));
+    var snap = await window._fbGetDocs(q);
+    if (snap.empty) return null;
+    var codeData = snap.docs[0].data();
+    return { code: codeData.code, useCount: codeData.useCount || 0, xpBonus: codeData.xpBonus || 200, createdAt: codeData.createdAt };
+  } catch(e) { return null; }
+};
+
+window._createCreatorCode = async function(code, xpBonus) {
+  var db = window._fbDb; var auth = window._fbAuth;
+  if (!db || !auth || !auth.currentUser) return;
+  if (!code || code.trim().length < 3) { window.showToast('Code muss mindestens 3 Zeichen haben', 'error'); return; }
+  code = code.trim().toUpperCase();
+  try {
+    var existing = window._fbQuery(window._fbCollection(db, 'creator_codes'), window._fbWhere('code', '==', code));
+    var existSnap = await window._fbGetDocs(existing);
+    if (!existSnap.empty) { window.showToast('Code "' + code + '" existiert bereits', 'error'); return; }
+    await window._fbAddDoc(window._fbCollection(db, 'creator_codes'), {
+      uid: auth.currentUser.uid,
+      code: code,
+      creatorName: (window.userProfile && window.userProfile.name) || (localStorage.getItem('base_trainer_branding') ? JSON.parse(localStorage.getItem('base_trainer_branding')).name : '') || 'Creator',
+      xpBonus: xpBonus || 200,
+      badge: '\uD83C\uDFAF',
+      active: true,
+      useCount: 0,
+      createdAt: new Date().toISOString()
+    });
+    window.showToast('\u2705 Creator Code "' + code + '" erstellt!');
+    window._renderCreatorStats();
+  } catch(e) { window.showToast('Fehler: ' + e.message, 'error'); }
+};
+
+window._renderCreatorStats = async function() {
+  var container = document.getElementById('creatorStatsContainer');
+  if (!container) return;
+  var stats = await window._getCreatorStats();
+  if (!stats) {
+    container.innerHTML = '<div style="padding:12px 14px;background:rgba(232,200,106,0.06);border:1px solid rgba(232,200,106,0.15);border-radius:12px">' +
+      '<p style="font-size:11px;font-weight:700;color:#e8c86a;margin-bottom:8px">Creator Code erstellen</p>' +
+      '<p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Erstelle deinen eigenen Code den deine Kunden/Follower einl\u00f6sen k\u00f6nnen.</p>' +
+      '<div style="display:flex;gap:8px"><input id="newCreatorCodeInput" type="text" placeholder="Dein Code (z.B. dein Name)" maxlength="20" class="pointer-events-auto" style="flex:1;padding:9px 12px;border-radius:9px;background:var(--bg-hex);border:1px solid var(--border-hex);color:var(--text-main);font-size:13px;font-weight:700;text-transform:uppercase;outline:none" oninput="this.value=this.value.toUpperCase()" aria-label="Creator Code erstellen"/>' +
+      '<button onclick="window._createCreatorCode(document.getElementById(\'newCreatorCodeInput\').value)" class="pointer-events-auto" style="padding:9px 16px;border-radius:9px;background:rgba(232,200,106,0.15);border:1px solid rgba(232,200,106,0.3);color:#e8c86a;font-size:12px;font-weight:700;cursor:pointer" aria-label="Erstellen">Erstellen</button></div></div>';
+    return;
+  }
+  container.innerHTML = '<div style="padding:12px 14px;background:rgba(232,200,106,0.08);border:1px solid rgba(232,200,106,0.2);border-radius:12px">' +
+    '<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#e8c86a;margin-bottom:8px">Dein Creator Code</p>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between"><div><p style="font-size:20px;font-weight:700;color:#e8c86a;letter-spacing:.1em">' + window._escapeHtml(stats.code) + '</p><p style="font-size:11px;color:var(--text-muted)">' + stats.useCount + '\u00d7 eingel\u00f6st \u00B7 ' + stats.xpBonus + ' XP pro User</p></div>' +
+    '<button onclick="if(navigator.share){navigator.share({title:\'BASE App\',text:\'Nutze meinen Creator Code: ' + window._escapeHtml(stats.code) + '\',url:\'https://base-app.tech?code=' + window._escapeHtml(stats.code) + '\'})}else{navigator.clipboard.writeText(\'https://base-app.tech?code=' + window._escapeHtml(stats.code) + '\');window.showToast(\'Link kopiert!\')}" class="pointer-events-auto" style="padding:8px 14px;border-radius:9px;background:rgba(232,200,106,0.15);border:1px solid rgba(232,200,106,0.3);color:#e8c86a;font-size:12px;font-weight:700;cursor:pointer" aria-label="Code teilen">Teilen</button></div></div>';
+};
+
+// ============================================================
+// PT ONBOARDING SYSTEM
+// ============================================================
+
+window._PT_ONBOARDING_KEY = 'base_pt_onboarding_complete';
+window._PT_ONBOARDING_STEP_KEY = 'base_pt_onboarding_step';
+
+window._PT_ONBOARDING_STEPS = [
+  { id:'welcome', icon:'\uD83D\uDC4B', title:'Willkommen im PT Mode!', subtitle:'Dein Business-Dashboard f\u00fcr Personal Trainer', description:'BASE hilft dir Kunden zu verwalten, Trainingspl\u00e4ne zu erstellen und dein Business zu skalieren. Lass uns in 5 Schritten loslegen.', action:null, actionLabel:null, skipLabel:'Los geht\'s \u2192' },
+  { id:'first_client', icon:'\uD83D\uDC64', title:'Ersten Kunden anlegen', subtitle:'Schritt 1 von 4', description:'Lege deinen ersten Kunden an. Du brauchst nur Name und Ziel \u2014 alles andere kannst du sp\u00e4ter erg\u00e4nzen. Kunden sehen ihr eigenes Client-Portal mit Trainingsplan und Fortschritt.', action:'window._ptOnboardingOpenAddClient()', actionLabel:'+ Ersten Kunden anlegen', skipLabel:'Sp\u00e4ter' },
+  { id:'session', icon:'\uD83D\uDCCB', title:'Session planen & tracken', subtitle:'Schritt 2 von 4', description:'Nach dem Anlegen eines Kunden kannst du Sessions loggen. Eine Session = ein Trainingstag. Du siehst alle Sessions im Client-Dashboard mit Fortschritts-Charts.', action:'window.switchPTTab&&window.switchPTTab(\'clients\')', actionLabel:'Zum Client-Dashboard', skipLabel:'Weiter' },
+  { id:'plan', icon:'\uD83D\uDCC5', title:'KI-Trainingsplan erstellen', subtitle:'Schritt 3 von 4', description:'BASE\'s KI erstellt in Sekunden einen personalisierten Mesozyklus-Plan f\u00fcr deinen Kunden. Einfach Ziel, Erfahrung und Trainingstage eingeben \u2014 der Rest passiert automatisch.', action:'window._ptOnboardingOpenPlanGen()', actionLabel:'\u2728 Plan generieren', skipLabel:'Weiter' },
+  { id:'revenue', icon:'\uD83D\uDCB6', title:'Revenue & Abrechnung', subtitle:'Schritt 4 von 4', description:'Trage dein monatliches Honorar pro Kunde ein \u2014 BASE berechnet automatisch deinen Gesamtumsatz. Mit LexOffice-Integration kannst du direkt Rechnungen erstellen.', action:'window._ptOnboardingOpenRevenue()', actionLabel:'Revenue einstellen', skipLabel:'Abschlie\u00dfen' },
+  { id:'done', icon:'\uD83C\uDF89', title:'Setup abgeschlossen!', subtitle:'Du bist bereit', description:'Dein PT-Dashboard ist eingerichtet. Tipp: Nutze den KI Ern\u00e4hrungs-Coach f\u00fcr deine Clients und die Creator Codes um BASE zu empfehlen.', action:null, actionLabel:null, skipLabel:'Dashboard \u00f6ffnen' }
+];
+
+window._isPTOnboardingComplete = function() { return localStorage.getItem(window._PT_ONBOARDING_KEY) === 'true'; };
+window._getPTOnboardingStep = function() { return parseInt(localStorage.getItem(window._PT_ONBOARDING_STEP_KEY) || '0'); };
+
+window._completePTOnboarding = function() {
+  localStorage.setItem(window._PT_ONBOARDING_KEY, 'true');
+  var modal = document.getElementById('ptOnboardingModal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+};
+
+window._setPTOnboardingStep = function(step) { localStorage.setItem(window._PT_ONBOARDING_STEP_KEY, String(step)); };
+
+window._renderPTOnboarding = function() {
+  var modal = document.getElementById('ptOnboardingModal');
+  if (!modal) return;
+  var stepIdx = window._getPTOnboardingStep();
+  var steps = window._PT_ONBOARDING_STEPS;
+  var step = steps[Math.min(stepIdx, steps.length - 1)];
+
+  var dots = steps.map(function(s, i) {
+    return '<div style="width:' + (i === stepIdx ? '20' : '6') + 'px;height:6px;border-radius:3px;transition:all .3s;background:' + (i <= stepIdx ? 'var(--primary-hex)' : 'var(--border-hex)') + '"></div>';
+  }).join('');
+
+  modal.querySelector('#ptOnboardingContent').innerHTML =
+    '<div style="font-size:48px;margin-bottom:16px;text-align:center">' + step.icon + '</div>' +
+    '<p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--primary-hex);text-align:center;margin-bottom:6px">' + window._escapeHtml(step.subtitle) + '</p>' +
+    '<p style="font-size:20px;font-weight:700;color:var(--text-main);text-align:center;margin-bottom:12px;line-height:1.3">' + window._escapeHtml(step.title) + '</p>' +
+    '<p style="font-size:13px;color:var(--text-muted);text-align:center;line-height:1.7;margin-bottom:24px">' + window._escapeHtml(step.description) + '</p>' +
+    (step.action ? '<button onclick="' + step.action + ';window._advancePTOnboarding()" class="pointer-events-auto w-full" aria-label="' + window._escapeHtml(step.actionLabel) + '" style="padding:14px;border-radius:13px;margin-bottom:10px;background:color-mix(in srgb,var(--primary-hex),transparent 85%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex);font-size:14px;font-weight:700;cursor:pointer">' + window._escapeHtml(step.actionLabel) + '</button>' : '') +
+    '<button onclick="window._advancePTOnboarding()" class="pointer-events-auto w-full" aria-label="Weiter" style="padding:12px;border-radius:12px;background:transparent;border:1px solid var(--border-hex);color:var(--text-muted);font-size:13px;cursor:pointer">' + window._escapeHtml(step.skipLabel || 'Weiter') + '</button>' +
+    '<div style="display:flex;justify-content:center;gap:6px;margin-top:20px">' + dots + '</div>';
+};
+
+window._advancePTOnboarding = function() {
+  var step = window._getPTOnboardingStep();
+  if (step >= window._PT_ONBOARDING_STEPS.length - 1) { window._completePTOnboarding(); return; }
+  window._setPTOnboardingStep(step + 1);
+  window._renderPTOnboarding();
+};
+
+window._startPTOnboarding = function() {
+  window._setPTOnboardingStep(0);
+  var modal = document.getElementById('ptOnboardingModal');
+  if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); window._renderPTOnboarding(); }
+};
+
+window._ptOnboardingOpenAddClient = function() {
+  var modal = document.getElementById('ptOnboardingModal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+  if (window.addNewClient) window.addNewClient();
+};
+
+window._ptOnboardingOpenPlanGen = function() {
+  var modal = document.getElementById('ptOnboardingModal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+  if (window.switchPTTab) window.switchPTTab('clients');
+};
+
+window._ptOnboardingOpenRevenue = function() {
+  var modal = document.getElementById('ptOnboardingModal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+  if (window.switchPTTab) window.switchPTTab('revenue');
+};
+
+window._checkPTOnboarding = function() {
+  if (!window._isPTOnboardingComplete() && !(window.clients && window.clients.length > 0)) {
+    setTimeout(function() { window._startPTOnboarding(); }, 800);
+  }
+};
+
+window._resetPTOnboarding = function() {
+  localStorage.removeItem(window._PT_ONBOARDING_KEY);
+  localStorage.removeItem(window._PT_ONBOARDING_STEP_KEY);
+  window._startPTOnboarding();
+};
+
+window._sendWorkoutDeliveryPush = async function(clientId, planName, workoutCount) {
+  try {
+    var fcmToken = null;
+    if (window._getClientFCMToken) {
+      fcmToken = await window._getClientFCMToken(clientId);
+    }
+    if (!fcmToken) {
+      var c = (window.clients || []).find(function(x) { return x.id === clientId; });
+      console.log('[Push] ' + (c ? c.name : 'Client') + ' hat kein FCM Token');
+      return;
+    }
+
+    var ptName = '';
+    var branding = localStorage.getItem('base_trainer_branding');
+    if (branding) {
+      try { ptName = JSON.parse(branding).name || ''; } catch(e) {}
+    }
+    if (!ptName && window.userProfile) ptName = window.userProfile.name || '';
+    if (!ptName) ptName = 'dein Trainer';
+
+    var c = (window.clients || []).find(function(x) { return x.id === clientId; });
+
+    var res = await fetch('/.netlify/functions/push-workout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientFcmToken: fcmToken,
+        clientName: c ? c.name : 'Client',
+        ptName: ptName,
+        planName: planName || 'Trainingsplan',
+        workoutCount: workoutCount || null
+      })
+    });
+
+    var data = await res.json();
+    if (data.success) {
+      window.showToast('\uD83D\uDCF2 Push-Notification gesendet!', null, null, null, 3000);
+    }
+  } catch(e) {
+    console.warn('[Push] Fehler:', e.message);
+  }
+};
+
+// ============================================================
+// PT ERNÄHRUNGS-CHAT — Phase 6
+// ============================================================
+
+window._PT_NUTRITION_CHAT_KEY = 'base_pt_nutrition_chat';
+window._ptNutritionClientId = null;
+
+window._getPTNutritionHistory = function(clientId) {
+  return JSON.parse(localStorage.getItem(window._PT_NUTRITION_CHAT_KEY + '_' + (clientId || 'general')) || '[]');
+};
+window._savePTNutritionHistory = function(clientId, history) {
+  localStorage.setItem(window._PT_NUTRITION_CHAT_KEY + '_' + (clientId || 'general'), JSON.stringify(history.slice(-50)));
+};
+
+window._sendPTNutritionMessage = async function(clientId) {
+  var input = document.getElementById('ptNutritionInput');
+  var msg = input ? input.value.trim() : '';
+  if (!msg) return;
+  if (input) input.value = '';
+
+  var client = clientId ? (window.clients || []).find(function(c) { return c.id === clientId; }) : null;
+  var clientContext = '';
+  if (client) {
+    clientContext = 'Client: ' + (client.name||'unbekannt') + '\nZiel: ' + (client.goal||'nicht angegeben') + '\nGewicht: ' + (client.weight||'?') + 'kg\n';
+  }
+
+  var history = window._getPTNutritionHistory(clientId);
+  history.push({ role: 'user', content: msg, ts: Date.now() });
+  window._savePTNutritionHistory(clientId, history);
+  window._renderPTNutritionChat(clientId);
+
+  var chatContainer = document.getElementById('ptNutritionMessages');
+  if (chatContainer) {
+    var ld = document.createElement('div'); ld.id = 'ptNutritionLoading';
+    ld.innerHTML = '<div style="display:flex;gap:8px;padding:6px 0"><div style="width:26px;height:26px;border-radius:50%;flex-shrink:0;background:color-mix(in srgb,var(--primary-hex),transparent 80%);display:flex;align-items:center;justify-content:center;font-size:11px">\uD83C\uDFCB</div><div style="padding:9px 12px;background:var(--inner-bg-hex);border-radius:12px;font-size:12px;color:var(--text-muted)">Analysiere...</div></div>';
+    chatContainer.appendChild(ld); chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  var userBloodwork = '';
+  if (!clientId && window._getLatestBloodwork && window._BLOODWORK_MARKERS) {
+    var _ptBw = window._getLatestBloodwork();
+    var _ptBwDef = (window._BLOODWORK_MARKERS || []).filter(function(m) { if (!_ptBw[m.id]) return false; var s = window._getBloodworkStatus ? window._getBloodworkStatus(m.id, _ptBw[m.id].value) : 'unknown'; return s === 'deficient' || s === 'low'; });
+    if (_ptBwDef.length > 0) userBloodwork = '\nRELEVANTE BLUTWERTE:\n' + _ptBwDef.map(function(m) { return '- ' + m.label + ': ' + _ptBw[m.id].value + ' ' + m.unit + ' (Mangel)'; }).join('\n') + '\n';
+  }
+  var systemPrompt = 'Du bist ein KI-Ernaehrungscoach fuer Personal Trainer.\n\nWISSENSCHAFTLICHE BASIS:\n- ISSN Position Stands, EFSA, DGE\n- Protein: 1.6-2.4g/kg (Morton 2018)\n- 4 Mahlzeiten a 20-40g Protein (Areta 2013)\n- Kein "30min Anabolic Window" (widerlegt)\n\nCLIENT:\n' + clientContext + userBloodwork + '\nREGELN:\n- Konkrete Empfehlungen\n- Bei med. Fragen: Arzt empfehlen\n- Auf Deutsch, max 200 Woerter\n- Fuer den PT geschrieben';
+
+  try {
+    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: msg, systemPrompt: systemPrompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
+    var data = await res.json();
+    var reply = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+    var ld2 = document.getElementById('ptNutritionLoading'); if (ld2) ld2.remove();
+    history.push({ role: 'model', content: reply, ts: Date.now() });
+    window._savePTNutritionHistory(clientId, history);
+    window._renderPTNutritionChat(clientId);
+  } catch(e) {
+    var ld3 = document.getElementById('ptNutritionLoading'); if (ld3) ld3.remove();
+    window.showToast('KI Fehler: ' + e.message, 'error');
+  }
+};
+
+window._renderPTNutritionChat = function(clientId) {
+  var container = document.getElementById('ptNutritionMessages'); if (!container) return;
+  var history = window._getPTNutritionHistory(clientId);
+  if (history.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:20px"><p style="font-size:13px;font-weight:600;color:var(--text-main);margin-bottom:6px">PT Ern\u00E4hrungs-Coach</p><p style="font-size:11px;color:var(--text-muted);line-height:1.6">Stelle Fragen zur Ern\u00E4hrung deines Clients.</p>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-top:14px">' +
+      ['Was soll mein Client heute essen?','Erstelle einen 7-Tage Meal-Plan','Erkl\u00E4re Protein-Timing einfach','Welche Supplemente empfiehlst du?'].map(function(q) {
+        return '<button onclick="document.getElementById(\'ptNutritionInput\').value=\'' + q.replace(/'/g,"\\'") + '\';window._sendPTNutritionMessage(\'' + (clientId||'') + '\')" class="pointer-events-auto" aria-label="' + q + '" style="padding:8px 12px;border-radius:9px;font-size:11px;cursor:pointer;background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted);text-align:left">' + q + '</button>';
+      }).join('') + '</div></div>';
+    return;
+  }
+  container.innerHTML = history.map(function(msg) {
+    var isUser = msg.role === 'user';
+    return '<div style="display:flex;gap:8px;padding:6px 0;justify-content:' + (isUser ? 'flex-end' : 'flex-start') + '">' +
+      (!isUser ? '<div style="width:26px;height:26px;border-radius:50%;flex-shrink:0;background:color-mix(in srgb,var(--primary-hex),transparent 80%);display:flex;align-items:center;justify-content:center;font-size:11px">\uD83C\uDFCB</div>' : '') +
+      '<div style="max-width:80%;padding:9px 12px;border-radius:12px;font-size:12px;line-height:1.6;' + (isUser ? 'background:color-mix(in srgb,var(--primary-hex),transparent 85%);color:var(--primary-hex);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 65%)' : 'background:var(--inner-bg-hex);color:var(--text-main);border:1px solid var(--border-hex)') + '">' + window._sanitizeAIHtml(msg.content) + '</div>' +
+      (isUser ? '<div style="width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--inner-bg-hex);display:flex;align-items:center;justify-content:center;font-size:11px">PT</div>' : '') + '</div>';
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+};
+
+window._generateClientMealPlan = async function(clientId) {
+  var client = clientId ? (window.clients || []).find(function(c) { return c.id === clientId; }) : null;
+  if (!client) { window.showToast('Client nicht gefunden', 'error'); return; }
+  var btn = document.getElementById('mealPlanGenBtn');
+  if (btn) { btn.style.opacity = '0.6'; btn.textContent = 'Generiere...'; }
+
+  var weight = parseFloat(client.weight) || 80;
+  var goal = client.goal || 'Muskelaufbau';
+  var dietType = client.dietType || 'Alles';
+  var allergies = client.allergies || [];
+  var calories = Math.round(weight * (goal.toLowerCase().indexOf('verlier') !== -1 ? 30 : 35));
+  var proteinG = Math.round(weight * (goal.toLowerCase().indexOf('verlier') !== -1 ? 2.4 : 2.0));
+  var fatG = Math.round(weight * 0.9);
+  var carbG = Math.round((calories - proteinG*4 - fatG*9) / 4);
+
+  var prompt = 'Erstelle einen 7-Tage Ernaehrungsplan.\n\nCLIENT:\n- Name: ' + (client.name||'Client') + '\n- Gewicht: ' + weight + 'kg\n- Ziel: ' + goal + '\n- Ernaehrung: ' + dietType + '\n' + (allergies.length > 0 ? '- Allergien (NICHT verwenden): ' + allergies.join(', ') + '\n' : '') + '\nTAGESZIELE (ISSN):\n- Kalorien: ' + calories + ' kcal\n- Protein: ' + proteinG + 'g (' + (proteinG/weight).toFixed(1) + 'g/kg)\n- Kohlenhydrate: ' + carbG + 'g\n- Fett: ' + fatG + 'g\n\nFORMAT:\n**Tag X**\n- Fruehstueck: [Gericht] - [kcal] kcal, P [g]g\n- Mittag: ...\n- Snack: ...\n- Abend: ...\n- Tagesgesamt: ...\n\nRealistisch, alltagstauglich. Trainings- vs Ruhetage unterscheiden. Auf Deutsch.';
+
+  try {
+    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
+    var data = await res.json();
+    var plan = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+    var plans = JSON.parse(localStorage.getItem('base_client_meal_plans') || '{}');
+    plans[clientId] = { plan: plan, clientName: client.name, createdAt: new Date().toISOString(), calories: calories, protein: proteinG };
+    localStorage.setItem('base_client_meal_plans', JSON.stringify(plans));
+    window._showMealPlanResult(clientId, plan);
+  } catch(e) { window.showToast('Fehler: ' + e.message, 'error'); }
+  finally { if (btn) { btn.style.opacity = '1'; btn.textContent = 'Ern\u00E4hrungsplan'; } }
+};
+
+window._showMealPlanResult = function(clientId, plan) {
+  var client = (window.clients || []).find(function(c) { return c.id === clientId; });
+  window.showModal('Ern\u00E4hrungsplan \u2014 ' + (client ? client.name : 'Client'),
+    '<div style="max-height:65vh;overflow-y:auto;font-size:12px;line-height:1.7;color:var(--text-main);white-space:pre-wrap">' + window._sanitizeAIHtml(plan) + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:12px">' +
+    '<button onclick="window._copyMealPlan(\'' + clientId + '\')" class="pointer-events-auto" aria-label="Kopieren" style="flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">Kopieren</button>' +
+    '<button onclick="window._sendMealPlanToClient(\'' + clientId + '\')" class="pointer-events-auto" aria-label="Senden" style="flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--primary-hex),transparent 85%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex)">An Client senden</button></div>', false);
+};
+
+window._copyMealPlan = function(clientId) {
+  var plans = JSON.parse(localStorage.getItem('base_client_meal_plans') || '{}');
+  if (plans[clientId] && navigator.clipboard) navigator.clipboard.writeText(plans[clientId].plan).then(function() { window.showToast('Plan kopiert!'); });
+};
+
+window._sendMealPlanToClient = async function(clientId) {
+  var plans = JSON.parse(localStorage.getItem('base_client_meal_plans') || '{}');
+  if (!plans[clientId]) return;
+  var db = window._db || window._fbDb; var auth = window._fbAuth;
+  if (!db || !auth || !auth.currentUser) return;
+  try {
+    var mod = window._firestoreModule;
+    var convId = [auth.currentUser.uid, clientId].sort().join('_');
+    await mod.addDoc(mod.collection(db, 'conversations', convId, 'messages'), { text: 'Dein Ern\u00E4hrungsplan:\n\n' + plans[clientId].plan, senderId: auth.currentUser.uid, type: 'meal_plan', createdAt: new Date().toISOString() });
+    window.toggleModal('customModal');
+    window.showToast('Plan an ' + (plans[clientId].clientName || 'Client') + ' gesendet!');
+  } catch(e) { window.showToast('Fehler: ' + e.message, 'error'); }
+};
+
+window.openPTNutritionChat = function(clientId) {
+  window._ptNutritionClientId = clientId || null;
+  var client = clientId ? (window.clients || []).find(function(c) { return c.id === clientId; }) : null;
+  var nameEl = document.getElementById('ptNutritionClientName');
+  if (nameEl) nameEl.textContent = client ? client.name + ' \u2014 Ern\u00E4hrung' : 'Allgemeine Ern\u00E4hrungsberatung';
+  window._renderPTNutritionChat(clientId);
+  var modal = document.getElementById('ptNutritionModal');
+  if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(function() { var input = document.getElementById('ptNutritionInput'); if (input) input.focus(); }, 300); }
+};
+
+window.closePTNutritionChat = function() {
+  var modal = document.getElementById('ptNutritionModal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+};
+
+// ============================================================
+// PT GRUPPEN-SESSION
+// ============================================================
+
+window._createGroupSession = function() {
+  var clients = window.clients || [];
+  if (clients.length < 2) { window.showToast('Mindestens 2 Kunden f\u00FCr Gruppen-Session', 'warn'); return; }
+  window.toggleModal('groupSessionModal');
+  window._renderGroupSessionSetup();
+};
+
+window._renderGroupSessionSetup = function() {
+  var container = document.getElementById('groupSessionContainer');
+  if (!container) return;
+  var clients = window.clients || [];
+  var html =
+    '<div style="margin-bottom:12px"><p style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Session-Bezeichnung</p>' +
+    '<input id="groupSessionName" type="text" placeholder="z.B. Bootcamp Montag, HIIT Gruppe A..." aria-label="Session Name" class="pointer-events-auto w-full" style="padding:9px 12px;border-radius:10px;background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-main);font-size:13px;outline:none"/></div>' +
+    '<div style="margin-bottom:12px"><p style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Datum</p>' +
+    '<input id="groupSessionDate" type="date" class="pointer-events-auto w-full" style="padding:9px 12px;border-radius:10px;background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-main);font-size:13px;outline:none"/></div>' +
+    '<p style="font-size:10px;color:var(--text-muted);margin-bottom:6px">Teilnehmer w\u00E4hlen</p>' +
+    '<div id="groupClientList" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
+  clients.forEach(function(c) {
+    html += '<label class="pointer-events-auto" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--inner-bg-hex);border:1px solid var(--border-hex);border-radius:9px;cursor:pointer"><input type="checkbox" class="groupClientCheck pointer-events-auto" value="' + window._escapeHtml(c.id || c.name) + '" data-name="' + window._escapeHtml(c.name) + '" style="width:16px;height:16px"><span style="font-size:12px;color:var(--text-main)">' + window._escapeHtml(c.name) + '</span></label>';
+  });
+  html += '</div>' +
+    '<p style="font-size:10px;color:var(--text-muted);margin-bottom:4px">\u00DCbungen / Inhalt</p>' +
+    '<textarea id="groupSessionContent" rows="4" placeholder="z.B. 3x Kniebeugen, 3x Push-Ups, AMRAP..." class="pointer-events-auto w-full" style="padding:9px 12px;border-radius:10px;resize:none;background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-main);font-size:12px;outline:none;margin-bottom:12px;font-family:inherit"></textarea>' +
+    '<button onclick="window._saveGroupSession()" class="pointer-events-auto w-full" aria-label="Gruppen-Session speichern" style="padding:12px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--primary-hex),transparent 88%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 65%);color:var(--primary-hex)">\uD83D\uDC65 Gruppen-Session speichern</button>';
+  container.innerHTML = html;
+  var dateInput = document.getElementById('groupSessionDate');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+};
+
+window._saveGroupSession = function() {
+  var name = (document.getElementById('groupSessionName') || {}).value || '';
+  var date = (document.getElementById('groupSessionDate') || {}).value || new Date().toISOString().split('T')[0];
+  var content = (document.getElementById('groupSessionContent') || {}).value || '';
+  var selected = Array.from(document.querySelectorAll('.groupClientCheck:checked')).map(function(cb) { return { id: cb.value, name: cb.dataset.name }; });
+  if (selected.length < 2) { window.showToast('Mindestens 2 Teilnehmer w\u00E4hlen', 'error'); return; }
+  if (!content.trim()) { window.showToast('Bitte Session-Inhalt eingeben', 'error'); return; }
+  var clients = window.clients || [];
+  var count = 0;
+  selected.forEach(function(sel) {
+    var client = clients.find(function(c) { return (c.id || c.name) === sel.id; });
+    if (!client) return;
+    if (!client.sessions) client.sessions = [];
+    client.sessions.unshift({ id: 'gs_' + Date.now() + '_' + sel.id, date: date, duration: '', type: 'group', notes: (name ? '[GRUPPE: ' + name + '] ' : '') + content, groupName: name, groupSize: selected.length });
+    count++;
+  });
+  localStorage.setItem('beastmode_v2_clients', JSON.stringify(clients));
+  window.toggleModal('groupSessionModal');
+  window.showToast('\uD83D\uDC65 Session f\u00FCr ' + count + ' Kunden gespeichert!');
+};
+
+// ============================================================
+// OEFFENTLICHE PT-SEITE (Trainer kontrolliert Sichtbarkeit)
+// ============================================================
+window._PT_PUBLIC_DEFAULTS = {
+  showName: true, showPhoto: false, showLocation: true,
+  showSpecializations: true, showPrice: false, showReviews: true,
+  showCertifications: true, showLanguages: true, showBookingLink: true,
+  showWhatsApp: false, showEmail: false, showClientCount: false,
+  showYearsExp: true, isPublic: false
+};
+
+window._getPTPublicSettings = function() {
+  try {
+    var stored = localStorage.getItem('base_pt_public_settings');
+    return stored ? Object.assign({}, window._PT_PUBLIC_DEFAULTS, JSON.parse(stored)) : Object.assign({}, window._PT_PUBLIC_DEFAULTS);
+  } catch(e) { return Object.assign({}, window._PT_PUBLIC_DEFAULTS); }
+};
+
+window._savePTPublicSettings = function(settings) {
+  localStorage.setItem('base_pt_public_settings', JSON.stringify(settings));
+};
+
+window._buildPublicPTProfile = function() {
+  var settings = window._getPTPublicSettings();
+  var profile = window.userProfile || {};
+  var branding = JSON.parse(localStorage.getItem('base_trainer_branding') || '{}');
+  var clients = window.clients || [];
+  if (!settings.isPublic) return null;
+  var pub = { slug: (branding.name || profile.displayName || 'trainer').toLowerCase().replace(/[^a-z0-9]/g, '-'), updatedAt: new Date().toISOString() };
+  if (settings.showName) pub.name = branding.name || profile.displayName || 'Personal Trainer';
+  if (settings.showLocation) pub.location = profile.location || profile.city || '';
+  if (settings.showSpecializations) pub.specializations = profile.specializations || branding.specializations || [];
+  if (settings.showPrice && branding.priceRange) pub.priceRange = branding.priceRange;
+  if (settings.showCertifications) pub.certifications = profile.certifications || [];
+  if (settings.showLanguages) pub.languages = profile.languages || ['Deutsch'];
+  if (settings.showBookingLink && branding.bookingLink) pub.bookingLink = branding.bookingLink;
+  if (settings.showWhatsApp && profile.phone) pub.whatsapp = profile.phone;
+  if (settings.showEmail && profile.email) pub.email = profile.email;
+  if (settings.showYearsExp && branding.yearsExperience) pub.yearsExperience = branding.yearsExperience;
+  if (settings.showClientCount) pub.activeClients = clients.length;
+  if (branding.tagline) pub.tagline = branding.tagline;
+  if (branding.color) pub.brandColor = branding.color;
+  return pub;
+};
+
+window._publishPTProfile = async function() {
+  var auth = window._fbAuth;
+  if (!auth || !auth.currentUser || !window._fbDb) { window.showToast('Bitte einloggen', 'error'); return; }
+  var profile = window._buildPublicPTProfile();
+  if (!profile) { window.showToast('Seite ist noch nicht aktiviert', 'warn'); return; }
+  try {
+    var ref = window._fbDoc(window._fbDb, 'public_trainers', auth.currentUser.uid);
+    await window._fbSetDoc(ref, Object.assign({}, profile, { uid: auth.currentUser.uid }));
+    var publicUrl = 'https://base-app.tech/trainer/' + profile.slug;
+    window.showModal(
+      'Profil ver\u00f6ffentlicht!',
+      '<div style="text-align:center;padding:12px">' +
+        '<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Dein Trainer-Profil ist jetzt unter dieser URL erreichbar:</p>' +
+        '<p style="font-size:12px;font-weight:700;color:var(--primary-hex);word-break:break-all;margin-bottom:14px;padding:8px 12px;background:rgba(163,201,168,0.1);border-radius:8px">' + publicUrl + '</p>' +
+        '<button onclick="navigator.share?navigator.share({url:\'' + publicUrl + '\',title:\'Mein Trainer-Profil auf BASE\'}):navigator.clipboard.writeText(\'' + publicUrl + '\').then(function(){window.showToast(\'Link kopiert\')})" ' +
+          'class="pointer-events-auto" aria-label="Link teilen" ' +
+          'style="padding:9px 18px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--primary-hex),transparent 88%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 65%);color:var(--primary-hex)">Link teilen</button>' +
+      '</div>', false
+    );
+  } catch(e) { window.showToast('Ver\u00f6ffentlichung fehlgeschlagen', 'error'); }
+};
+
+window._unpublishPTProfile = async function() {
+  var auth = window._fbAuth;
+  if (!auth || !auth.currentUser || !window._fbDb) return;
+  try {
+    var ref = window._fbDoc(window._fbDb, 'public_trainers', auth.currentUser.uid);
+    await window._fbSetDoc(ref, { isPublic: false }, { merge: true });
+    var settings = window._getPTPublicSettings();
+    settings.isPublic = false;
+    window._savePTPublicSettings(settings);
+    window._renderPTPublicSettings();
+    window.showToast('Profil offline genommen');
+  } catch(e) {}
+};
+
+window._togglePTPublicSetting = function(key, value) {
+  var settings = window._getPTPublicSettings();
+  settings[key] = value;
+  window._savePTPublicSettings(settings);
+  window._renderPTPublicSettings();
+};
+
+window._renderPTPublicSettings = function(containerId) {
+  var container = document.getElementById(containerId || 'ptPublicSettingsContainer');
+  if (!container) return;
+  var settings = window._getPTPublicSettings();
+  var toggleItems = [
+    { key: 'isPublic', label: 'Seite \u00f6ffentlich schalten', desc: 'Profil unter base-app.tech/trainer/... erreichbar', highlight: true },
+    { key: 'showName', label: 'Name anzeigen' },
+    { key: 'showLocation', label: 'Standort anzeigen' },
+    { key: 'showSpecializations', label: 'Spezialisierungen' },
+    { key: 'showCertifications', label: 'Zertifikate' },
+    { key: 'showYearsExp', label: 'Jahre Erfahrung' },
+    { key: 'showLanguages', label: 'Sprachen' },
+    { key: 'showBookingLink', label: 'Buchungs-Link' },
+    { key: 'showReviews', label: 'Bewertungen' },
+    { key: 'showClientCount', label: 'Kunden-Anzahl', desc: 'Zeigt aktuelle Anzahl aktiver Clients' },
+    { key: 'showPrice', label: 'Preisbereich', desc: 'Nur wenn Preis in Branding gesetzt' },
+    { key: 'showWhatsApp', label: 'WhatsApp Nummer', desc: '\u00d6ffentlich sichtbar!', danger: true },
+    { key: 'showEmail', label: 'E-Mail Adresse', desc: '\u00d6ffentlich sichtbar!', danger: true }
+  ];
+  var html = toggleItems.map(function(item) {
+    var checked = settings[item.key];
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:' + (item.highlight ? 'color-mix(in srgb,var(--primary-hex),transparent 93%)' : 'var(--inner-bg-hex)') + ';border:1px solid ' + (item.highlight ? 'color-mix(in srgb,var(--primary-hex),transparent 70%)' : 'var(--border-hex)') + ';border-radius:10px;margin-bottom:5px">' +
+      '<div><p style="font-size:12px;font-weight:' + (item.highlight ? '700' : '600') + ';color:' + (item.danger ? '#e8c86a' : 'var(--text-main)') + '">' + item.label + '</p>' +
+      (item.desc ? '<p style="font-size:9px;color:var(--text-muted)">' + item.desc + '</p>' : '') + '</div>' +
+      '<label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0" class="pointer-events-auto">' +
+        '<input type="checkbox" ' + (checked ? 'checked' : '') + ' class="pointer-events-auto" style="opacity:0;width:0;height:0" onchange="window._togglePTPublicSetting(\'' + item.key + '\',this.checked)"/>' +
+        '<span style="position:absolute;cursor:pointer;inset:0;background:' + (checked ? 'var(--primary-hex)' : 'var(--border-hex)') + ';border-radius:12px;transition:.3s"><span style="position:absolute;height:18px;width:18px;left:' + (checked ? '23px' : '3px') + ';bottom:3px;background:white;border-radius:50%;transition:.3s"></span></span>' +
+      '</label></div>';
+  }).join('');
+  html += '<div style="display:flex;gap:8px;margin-top:12px">' +
+    '<button onclick="window._publishPTProfile()" class="pointer-events-auto" aria-label="Veroeffentlichen" style="flex:1;padding:11px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--primary-hex),transparent 88%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 65%);color:var(--primary-hex)">' + (settings.isPublic ? 'Aktualisieren' : 'Ver\u00f6ffentlichen') + '</button>' +
+    (settings.isPublic ? '<button onclick="window._unpublishPTProfile()" class="pointer-events-auto" aria-label="Offline nehmen" style="padding:11px 14px;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;border:1px solid rgba(232,138,138,0.3);color:#e88a8a">Offline nehmen</button>' : '') +
+  '</div>';
+  container.innerHTML = html;
 };
 

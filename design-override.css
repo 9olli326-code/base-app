@@ -761,6 +761,37 @@ button {
     }
 }
 
+/* ═══ FIX: Training Input Felder iOS ═══ */
+
+/* Alle number inputs sichtbar */
+input[type="number"],
+input[inputmode="numeric"],
+input[inputmode="decimal"] {
+    color: var(--text-main) !important;
+    -webkit-text-fill-color: var(--text-main) !important;
+    opacity: 1 !important;
+    text-align: center !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: textfield !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+}
+
+/* Spinner entfernen */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Focus State */
+input[type="number"]:focus,
+input[inputmode="numeric"]:focus,
+input[inputmode="decimal"]:focus {
+    -webkit-text-fill-color: var(--text-main) !important;
+    outline: none !important;
+}
+
 /* ── CSS Token: text-dim and text-faint ────────────────── */
 :root {
     --text-dim: #9898a2;

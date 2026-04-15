@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -i \"garmin\\\\|fitbit\\\\|apple.*health\\\\|google.*fit\\\\|health.*kit\\\\|wearable\\\\|smartwatch\" /c/Users/olli-/Desktop/Base-App/js/*.js)"
+    ]
+  }
+}

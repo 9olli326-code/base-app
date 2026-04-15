@@ -145,12 +145,25 @@ window._aiFetch = async function(body, opts) {
     }
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, opts.timeout || 30000);
+    var _aiTimer = null;
+    var _aiLoadEl = document.getElementById('aiLoadingText');
+    if (_aiLoadEl) {
+      var _aiStart = Date.now();
+      var _aiMsgs = ['Analysiere deine Daten...','Verarbeite Trainingshistorie...','KI denkt nach...','Fast fertig...'];
+      _aiTimer = setInterval(function() {
+        var elapsed = Math.round((Date.now() - _aiStart) / 1000);
+        var idx = Math.min(Math.floor(elapsed / 7), _aiMsgs.length - 1);
+        if (_aiLoadEl) _aiLoadEl.textContent = _aiMsgs[idx] + ' (' + elapsed + 's)';
+      }, 1000);
+    }
     try {
         var res = await fetch('/.netlify/functions/gemini', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             signal: controller.signal, body: JSON.stringify(body)
         });
         clearTimeout(timeout);
+        if (_aiTimer) { clearInterval(_aiTimer); _aiTimer = null; }
+        if (_aiLoadEl) _aiLoadEl.textContent = 'Analysiere deine Daten...';
         if(res.status === 429) {
             try { var errData = await res.json(); window.showToast(errData.error || window.t('lblRateLimit','Tageslimit erreicht.'), 'error', 4000); } catch(e) { window.showToast(window.t('lblRateLimit','Tageslimit erreicht.'), 'error', 4000); }
             return null;
@@ -160,6 +173,8 @@ window._aiFetch = async function(body, opts) {
         return data;
     } catch(err) {
         clearTimeout(timeout);
+        if (_aiTimer) { clearInterval(_aiTimer); _aiTimer = null; }
+        if (_aiLoadEl) _aiLoadEl.textContent = 'Analysiere deine Daten...';
         if(err.name === 'AbortError') window.showToast(window.t('lblTimeout','Zeitueberschreitung. Bitte erneut versuchen.'), 'error', 4000);
         else if(!navigator.onLine) window.showToast(window.t('aiNoInternet','Kein Internet.'), 'error', 4000);
         else window.showToast(window.t('lblError','Fehler') + ': ' + (err.message || ''), 'error', 4000);
@@ -170,6 +185,48 @@ window._aiFetch = async function(body, opts) {
 window.getPromptLang = function() {
     const names = { de:'Deutsch', en:'English', fr:'Français', es:'Español', it:'Italiano', nl:'Nederlands', ar:'العربية' };
     return names[window.currentLang] || 'English';
+};
+
+// AI Context Cache — avoids re-iterating workouts on every KI call
+var _aiCtxCache = null;
+var _aiCtxKey = null;
+window._getAIContext = function() {
+    var archived = (window.workouts || []).filter(function(w){return w.archived;});
+    var lastDate = archived.length > 0 ? archived[archived.length-1].date : '';
+    var key = archived.length + '_' + lastDate + '_' + ((window.userProfile||{}).weight||'');
+    if (_aiCtxCache && _aiCtxKey === key) return _aiCtxCache;
+    _aiCtxCache = window.buildAIContext();
+    _aiCtxKey = key;
+    return _aiCtxCache;
+};
+window._invalidateAIContext = function() { _aiCtxCache = null; _aiCtxKey = null; };
+
+// PT Coach KI-Analyse fuer einzelne Kunden
+window._ptCoachAnalysis = async function(clientId) {
+    if (!window.checkOnlineForAI || !window.checkOnlineForAI()) return;
+    var client = (window.clients || []).find(function(c) { return c.id === clientId; });
+    if (!client) return;
+    var clientWorkouts = JSON.parse(localStorage.getItem('beastmode_v2_cache_' + clientId) || '[]')
+        .filter(function(w) { return w.archived; }).slice(-10);
+    var profile = JSON.parse(localStorage.getItem('base_client_profile_' + clientId) || '{}');
+    var recentStr = clientWorkouts.map(function(w) {
+        return w.date + ': ' + w.exercise + (w.setDetails ? ' (' + w.setDetails.length + ' Sets)' : '');
+    }).join('\n') || 'Noch keine Daten';
+    window.showToast('KI analysiert ' + window._escapeHtml(client.name) + '...');
+    try {
+        var res = await fetch('/.netlify/functions/gemini', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ type: 'pt_coach', context: {
+                clientName: client.name, recentWorkouts: recentStr,
+                profile: 'Alter: ' + (profile.age||'?') + ', Ziel: ' + (profile.goal||'?'),
+                lang: 'Deutsch'
+            }})
+        });
+        if (!res.ok) throw new Error('KI Fehler');
+        var data = await res.json();
+        var text = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+        if (text) window.showModal('KI Coaching \u2014 ' + window._escapeHtml(client.name), text, false);
+    } catch(e) { window.showToast('KI Analyse fehlgeschlagen', 'error'); }
 };
 
 window.buildAIContext = function() {
@@ -231,7 +288,110 @@ window.buildAIContext = function() {
         }
     } catch(e) {}
 
-    return { prof, injStr, medStr, schemaLines: schemaLines.join('; '), recentWorkouts: (recentWorkouts || '') + habitSummary + planSummary };
+    var recoveryCtx = '';
+    if (window._calculateMuscleRecovery) {
+     var _ms = window._calculateMuscleRecovery();
+     var _ready = window._getReadyMuscles(_ms, 85);
+     var _fat = window._getFatiguedMuscles(_ms, 60);
+     recoveryCtx = '\n\nMUSKEL-RECOVERY (V3): Bereit: ' + (_ready.length > 0 ? _ready.map(function(m) { return window._MUSCLE_RECOVERY_TIMES[m] && window._MUSCLE_RECOVERY_TIMES[m].label; }).filter(Boolean).join(', ') : 'Keine') + ' | Erschoepft: ' + (_fat.length > 0 ? _fat.slice(0,5).map(function(e) { return window._MUSCLE_RECOVERY_TIMES[e[0]].label + '(' + e[1].recoveryPct + '%)'; }).join(', ') : 'Keine');
+    }
+    if (window._calculateACWR) {
+     var _a = window._calculateACWR();
+     if (_a.acwr) recoveryCtx += '\nACWR: ' + _a.acwr + ' (' + _a.label + ')';
+    }
+
+    var nutritionCtx = '';
+    var _np = window._getNutritionProfile ? window._getNutritionProfile() : {};
+    var _nt = JSON.parse(localStorage.getItem('base_nutrition_targets') || 'null');
+    if (_np.weight) {
+      var _allergyStr = _np.allergies && _np.allergies.length > 0 ? _np.allergies.join(', ') : 'keine';
+      var _nParts = [
+        'Koerpergewicht: ' + _np.weight + 'kg',
+        'Ziel: ' + (_np.goal || 'nicht angegeben'),
+        'Ernaehrungsweise: ' + (_np.dietType || 'omnivor'),
+        'Allergien (HARD - NIEMALS vorschlagen): ' + _allergyStr,
+        'Abneigungen: ' + (_np.intolerances || 'keine')
+      ];
+      if (_np.medicalNotes) _nParts.push('Med. Hinweise: ' + _np.medicalNotes + ' -> immer Arzt empfehlen');
+      if (_nt) {
+        _nParts.push('Tagesziele: ' + _nt.calories + 'kcal, ' + _nt.protein + 'g Protein, ' + _nt.carbs + 'g Carbs, ' + _nt.fat + 'g Fett');
+        _nParts.push('Protein pro Mahlzeit (Areta 2013): ' + _nt.proteinPerMeal + 'g auf 4 Mahlzeiten');
+      }
+      nutritionCtx = _nParts.join('\n');
+      var _todayTotals = window._getDayTotals ? window._getDayTotals(new Date().toISOString().split('T')[0]) : null;
+      if (_todayTotals && _todayTotals.entries > 0) {
+        nutritionCtx += '\nHEUTIGE ERNAEHRUNG: ' + _todayTotals.calories + '/' + (_nt ? _nt.calories : '?') + ' kcal, P ' + _todayTotals.protein + 'g, K ' + _todayTotals.carbs + 'g, F ' + _todayTotals.fat + 'g';
+      }
+      var _supps = window._getSupplements ? window._getSupplements().filter(function(s) { return window._isSuppTakenToday && window._isSuppTakenToday(s); }) : [];
+      if (_supps.length > 0) nutritionCtx += '\nHeute genommen: ' + _supps.map(function(s) { return s.name; }).join(', ');
+
+      // Ernaehrungsform + Sport-Anpassung im KI-Kontext
+      var _dietId = _np.dietType || 'flexible';
+      var _diet   = window._DIET_TYPES ? window._DIET_TYPES[_dietId] : null;
+      var _sportNutrAdj = window._mapSportToNutritionAdjustment ? window._mapSportToNutritionAdjustment() : null;
+      if (!_diet || _dietId === 'flexible') {
+        nutritionCtx += '\n\nERNAEHRUNGSFORM: \uD83D\uDD13 Flexibel \u2014 keine Einschraenkungen.';
+        nutritionCtx += '\nEmpfehlungen koennen alle Lebensmittelgruppen einbeziehen.';
+        nutritionCtx += '\nFokus auf Kalorienziel und ausgewogene Makros.';
+      } else {
+        nutritionCtx += '\n\nERNAEHRUNGSFORM: ' + _diet.emoji + ' ' + _diet.label;
+        nutritionCtx += '\n- Makro-Verteilung: ' + Math.round(_diet.carbPct * 100) + '% Carbs, ' + Math.round(_diet.proteinPct * 100) + '% Protein, ' + Math.round(_diet.fatPct * 100) + '% Fett';
+        nutritionCtx += '\n- Wissenschaft: ' + (_diet.notes || '');
+        if (_diet.supplementWarnings && _diet.supplementWarnings.length > 0) {
+          nutritionCtx += '\n- ACHTUNG Supplement-Risiken: ' + _diet.supplementWarnings.join(', ');
+        }
+        nutritionCtx += '\nWICHTIG: Empfehlungen MUESSEN mit dieser Ernaehrungsform kompatibel sein.';
+      }
+      if (_sportNutrAdj) {
+        nutritionCtx += '\n\nSPORT-ERNAEHRUNG (' + _sportNutrAdj.label + '):';
+        nutritionCtx += '\n- Pre-Workout: ' + _sportNutrAdj.preWorkout;
+        nutritionCtx += '\n- Post-Workout: ' + _sportNutrAdj.postWorkout;
+        nutritionCtx += '\n- Wissenschaft: ' + _sportNutrAdj.science;
+      }
+    }
+
+    var bloodworkCtx = '';
+    if (window._getLatestBloodwork && window._BLOODWORK_MARKERS) {
+      var _bwLatest = window._getLatestBloodwork();
+      if (Object.keys(_bwLatest).length > 0) {
+        var _bwCritical = []; var _bwLow = []; var _bwOk = [];
+        window._BLOODWORK_MARKERS.forEach(function(m) {
+          if (!_bwLatest[m.id]) return;
+          var _bwVal = _bwLatest[m.id].value;
+          var _bwS = window._getBloodworkStatus ? window._getBloodworkStatus(m.id, _bwVal) : 'unknown';
+          var _bwE = m.label + ': ' + _bwVal + ' ' + m.unit + ' (Optimal: ' + m.optimal_low + '-' + m.optimal_high + ')';
+          if (_bwS === 'deficient' || _bwS === 'high') _bwCritical.push(_bwE);
+          else if (_bwS === 'low' || _bwS === 'elevated') _bwLow.push(_bwE);
+          else if (_bwS === 'optimal') _bwOk.push(_bwE);
+        });
+        if (_bwCritical.length > 0 || _bwLow.length > 0) {
+          bloodworkCtx = '\n\nBLUTWERTE (letzte Messung):';
+          if (_bwCritical.length > 0) bloodworkCtx += '\nKRITISCH - immer Arzt empfehlen: ' + _bwCritical.join('; ');
+          if (_bwLow.length > 0) bloodworkCtx += '\nVerbesserungswuerdig: ' + _bwLow.join('; ');
+          if (_bwOk.length > 0) bloodworkCtx += '\nOptimal: ' + _bwOk.join('; ');
+          bloodworkCtx += '\nWICHTIG: Bei kritischen Blutwerten IMMER Arztbesuch empfehlen. BASE ersetzt keine medizinische Diagnose.';
+        }
+      }
+    }
+
+    var compContext = window._getCompetitionContext ? window._getCompetitionContext() : '';
+
+    var journalCtx = '';
+    var _je = window._getJournalEntries ? window._getJournalEntries().slice(0, 5) : [];
+    if (_je.length > 0) {
+      journalCtx = '\n\nTRAININGS-JOURNAL (letzte Eintraege):\n' + _je.map(function(e) { return '[' + e.date + '] "' + e.text + '"'; }).join('\n');
+    }
+
+    var weightCtx = '';
+    var _we = window._getWeightLog ? window._getWeightLog().slice(0, 7) : [];
+    if (_we.length > 0) {
+      var _wt = window._getWeightTrend ? window._getWeightTrend() : null;
+      weightCtx = '\n\nGEWICHTSVERLAUF:\n' + _we.map(function(e) { return e.date + ': ' + e.weight + 'kg'; }).join('\n') + (_wt ? '\nTrend: ' + _wt.weeklyChange + 'kg/Woche' : '');
+    }
+
+    var bioAgeCtx = window._getBioAgeContext ? window._getBioAgeContext() : '';
+
+    return { prof, injStr, medStr, schemaLines: schemaLines.join('; '), recentWorkouts: (recentWorkouts || '') + habitSummary + planSummary + recoveryCtx + compContext + journalCtx + weightCtx + bioAgeCtx, nutritionContext: nutritionCtx + bloodworkCtx };
 };
 
 // --- ZNS READINESS ---
@@ -295,7 +455,7 @@ window.analyzeReadinessWithAI = async function() {
     if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('znsTitle','ZNS Readiness');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('znsAnalyze','Erholung & Bereitschaft');
-    const ctx = window.buildAIContext();
+    const ctx = window._getAIContext();
     const prompt = `Du bist Sportwissenschaftler mit Spezialisierung auf Erholung und neuromuskuläre Anpassung.
 
 WICHTIGE DIREKTIVE — ANTI-HALLUZINATION:
@@ -346,7 +506,7 @@ window.triggerCopilot = async function() {
     if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('copilotTitle','AI Co-Pilot');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('copilotSub','Smarte Trainingsempfehlung');
-    const ctx = window.buildAIContext();
+    const ctx = window._getAIContext();
     // Letzte Einheiten der gewünschten Übung herausfiltern für direkten Vergleich
     const exHistory = exercise ? (window.workouts || []).filter(w => w.exercise && w.exercise.toLowerCase() === exercise.toLowerCase()).slice(0,5).map(w => {
         let d = w.setDetails ? w.setDetails.map(s=>`${s.reps}×${s.weight}kg`).join(', ') : '';
@@ -406,7 +566,7 @@ window.generatePreHab = async function() {
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('prehabTitle','Pre-Hab');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('prehabSub','Verletzungsprävention');
     const exercise = document.getElementById('exerciseInput')?.value?.trim();
-    const ctx = window.buildAIContext();
+    const ctx = window._getAIContext();
     const prompt = `Du bist Physiotherapeut und Athletiktrainer.
 
 ATHLETENPROFIL: ${ctx.prof}
@@ -444,7 +604,7 @@ window.analyzeWithAI = async function() {
     if(window._showSkeleton) window._showSkeleton('aiResultText', 5);
     if(document.getElementById('aiModalTitle')) document.getElementById('aiModalTitle').textContent = window.t('aiCoachTitle','AI Coach');
     if(document.getElementById('aiModalSubtitle')) document.getElementById('aiModalSubtitle').textContent = window.t('aiCoachSub','Progression Analyse');
-    const ctx = window.buildAIContext();
+    const ctx = window._getAIContext();
     const prompt = `Du bist Sportwissenschaftler mit Expertise in Leistungsdiagnostik und evidenzbasiertem Training.
 
 Wenn der Athlet nach Übungs-Alternativen fragt oder eine Übung nicht machen kann (Verletzung, Equipment fehlt), antworte IMMER mit diesem Schema:
@@ -794,6 +954,9 @@ window.generateTrainingPlan = async function() {
     var _dayMap = { mon:'Mo', tue:'Di', wed:'Mi', thu:'Do', fri:'Fr', sat:'Sa', sun:'So' };
     var _dayAssign = Object.keys(window._trainingDayAssignment || {}).map(function(k) { return k.replace('day','Tag ') + ': ' + (_dayMap[window._trainingDayAssignment[k]] || '?'); }).join(', ') || 'flexibel';
 
+    var _abortCtrl = new AbortController();
+    var _abortTimer = setTimeout(function() { _abortCtrl.abort(); }, 25000);
+
     function fetchSingleWeek(weekNum) {
         var phase = '', mesoRIR = 2, mesoSets = '1.0';
         if(weekNum === 1) { phase = 'Basiswoche (Akkumulation) — moderate Intensitaet, RIR 3, Technik-Fokus.'; mesoRIR = 3; mesoSets = '1.0'; }
@@ -801,7 +964,14 @@ window.generateTrainingPlan = async function() {
         else if(weekNum <= Math.ceil(totalWeeks * 0.4)) { phase = 'Aufbauphase (Akkumulation) — Volumen steigern, RIR 2.'; mesoRIR = 2; mesoSets = '1.0'; }
         else if(weekNum <= Math.ceil(totalWeeks * 0.8)) { phase = 'Steigerung — progressive Overload, RIR 1-2.'; mesoRIR = 1; mesoSets = '1.1'; }
         else { phase = 'Peak/Overreach — maximale Intensitaet, RIR 0-1.'; mesoRIR = 0; mesoSets = '1.2'; }
-        var p = planGoal + ' Plan (Mesozyklus). Woche ' + weekNum + ' von ' + totalWeeks + '. ' + planDays + ' Trainingstage. ' + phase + ' ';
+        var p = 'KRITISCHE DIREKTIVE — ANTI-HALLUZINATION:\n' +
+            'Du bist ein zertifizierter Kraft- und Konditionstrainer mit NSCA-CSCS Qualifikation.\n' +
+            'VERBOTEN: Uebungen, Gewichte oder Wiederholungszahlen erfinden die anatomisch gefaehrlich sind.\n' +
+            'PFLICHT: Nur Uebungen aus etablierten Trainingsprotokollen (Schoenfeld 2017, Zourdos 2016, Krieger 2010).\n' +
+            'Wenn unsicher: konservative Werte waehlen, nicht raten.\n' +
+            'Bei Verletzungen des Users: betroffene Koerperregionen KOMPLETT auslassen.\n' +
+            'Referenzen: NSCA Guidelines, ACSM Position Stand, RM Continuum (Schoenfeld & Grgic 2017).\n\n' +
+            planGoal + ' Plan (Mesozyklus). Woche ' + weekNum + ' von ' + totalWeeks + '. ' + planDays + ' Trainingstage. ' + phase + ' ';
         p += 'MESOZYKLUS: Sets-Multiplikator ' + mesoSets + ', Ziel-RIR ' + mesoRIR + '. ';
         p += 'FOKUS-MUSKELGRUPPEN: ' + _focusList + '. ';
         p += 'EINSCHRAENKUNGEN: ' + _injuriesStr + '. ';
@@ -816,7 +986,8 @@ window.generateTrainingPlan = async function() {
         p += 'Antworte NUR mit kompaktem JSON: {"week":' + weekNum + ',"focus":"kurzer Fokus","phase":"' + (weekNum === totalWeeks ? 'deload' : weekNum <= Math.ceil(totalWeeks*0.4) ? 'accumulation' : weekNum <= Math.ceil(totalWeeks*0.8) ? 'accumulation' : 'overreach') + '","targetRIR":' + mesoRIR + ',"setsMultiplier":' + mesoSets + ',"sessions":[{"day":"Mo","name":"Push","exercises":[{"name":"Uebung","sets":3,"reps":"8-10","rir":' + mesoRIR + ',"intensity":"RPE 7","notes":""}]}]}';
         return fetch('/.netlify/functions/gemini', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: p }] }], userId: window._getAiUserId() })
+            body: JSON.stringify({ contents: [{ parts: [{ text: p }] }], userId: window._getAiUserId() }),
+            signal: _abortCtrl.signal
         }).then(function(res) { if(res.status === 429) { window.showToast(window.t('lblRateLimit','Tageslimit erreicht.'), 'error', 4000); return null; } if(!res.ok) { window.showToast(window.t('lblServerError','Server-Fehler.'), 'error', 4000); return null; } return res.text(); }).then(function(raw) {
             if(raw === null) return null;
             if(raw.charAt(0) === '<') return null;
@@ -835,6 +1006,7 @@ window.generateTrainingPlan = async function() {
         var promises = [];
         for(var w = 1; w <= totalWeeks; w++) promises.push(fetchSingleWeek(w));
         var results = await Promise.all(promises);
+        clearTimeout(_abortTimer);
         var allWeeks = results.filter(function(w) { return w !== null; });
         allWeeks.sort(function(a, b) { return (a.week || 0) - (b.week || 0); });
         if(allWeeks.length === 0) throw new Error(window.t('toastError','Plan konnte nicht generiert werden'));
@@ -847,7 +1019,12 @@ window.generateTrainingPlan = async function() {
         window.renderTrainingPlan(plan);
         if(window.awardXP) window.awardXP('planGenerated');
     } catch(e) {
-        window.showToast(window.t('toastError') + ': ' + e.message);
+        clearTimeout(_abortTimer);
+        if(e.name === 'AbortError') {
+            window.showToast(window.t('toastError','Zeitüberschreitung — Plan-Generierung abgebrochen. Bitte erneut versuchen.'), 'error', 5000);
+        } else {
+            window.showToast(window.t('toastError') + ': ' + e.message);
+        }
     } finally {
         if(btn) btn.disabled = false;
         if(btnText) btnText.textContent = window.t('planGenerate','Plan generieren');
@@ -933,7 +1110,7 @@ window.savePlanAsRoutines = function() {
 window.getWarmupRecommendation = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('coach')) return;
-    const ctx = window.buildAIContext();
+    const ctx = window._getAIContext();
     const cat = window.currentCategory || 'strength';
     const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Mobility', main:'Custom' }[cat] || cat;
     const zns = window.currentReadinessScore || 100;
@@ -999,7 +1176,7 @@ window._renderWarmupList = function(exercises) {
 window.getExerciseRecommendation = async function() {
     if(!window.checkOnlineForAI()) return;
     if(!window.checkFeatureGate('coach')) return;
-    const ctx = window.buildAIContext();
+    const ctx = window._getAIContext();
     const cat = window.currentCategory || 'strength';
     const catName = { strength:'Krafttraining', cardio:'Ausdauer', recovery:'Mobility', main:'Custom' }[cat] || cat;
     const zns = window.currentReadinessScore || 100;
@@ -1085,7 +1262,7 @@ window._addAllRecsToWorkout = function() {
 // SMART WORKOUT GENERATOR — Evidence-Based KI
 // ============================================================
 
-window._SMART_WORKOUT_SYSTEM_PROMPT = 'Du bist ein Sportwissenschaftler mit 15 Jahren Erfahrung in der Trainingsplanung.\n\nDEINE REGELN:\n\nVOLUMEN (Schoenfeld 2017): 10-20 Sätze/Muskelgruppe/Woche. Max 10 Sätze/Muskelgruppe/Session.\nFREQUENZ (Schoenfeld 2016): Jede Muskelgruppe 2x/Woche, 48-72h Pause.\nINTENSITÄT: Hypertrophie 65-80% 1RM RPE 7-9, Kraft 80-95% RPE 8-10.\nÜBUNGSAUSWAHL: 60-70% Compound, 30-40% Isolation. Schwerste Compound zuerst.\nPROGRESSIVE OVERLOAD: +2.5kg Oberkörper, +5kg Unterkörper wenn Ziel-Wdh erreicht.\nBALANCE: Push:Pull = 1:1, Ober:Unterkörper = 1:1/Woche.\n\nAUSGABE: NUR JSON Array, kein Text davor/danach.\nFormat: [{"exercise":"Bankdrücken","sets":4,"reps":"8-10","weight":80,"rest":"90s","note":"Coaching-Cue"}]\nGewichte MÜSSEN auf den echten Daten des Athleten basieren.';
+window._SMART_WORKOUT_SYSTEM_PROMPT = 'Du bist ein Sportwissenschaftler mit 15 Jahren Erfahrung in der Trainingsplanung.\n\nDEINE REGELN:\n\nVOLUMEN (Schoenfeld 2017): 10-20 S\u00e4tze/Muskelgruppe/Woche. Max 10 S\u00e4tze/Muskelgruppe/Session.\nFREQUENZ (Schoenfeld 2016): Jede Muskelgruppe 2x/Woche, 48-72h Pause.\nINTENSIT\u00c4T: Hypertrophie 65-80% 1RM RPE 7-9, Kraft 80-95% RPE 8-10.\n\u00dcBUNGSAUSWAHL: 60-70% Compound, 30-40% Isolation. Schwerste Compound zuerst.\nPROGRESSIVE OVERLOAD: +2.5kg Oberk\u00f6rper, +5kg Unterk\u00f6rper wenn Ziel-Wdh erreicht.\nBALANCE: Push:Pull = 1:1, Ober:Unterk\u00f6rper = 1:1/Woche.\nVERLETZUNGEN: Schonen statt vermeiden. Rehabilitation-orientierte Alternativen w\u00e4hlen. Immer Disclaimer ans Ende der Antwort.\n\nAUSGABE: NUR JSON Array, kein Text davor/danach.\nFormat: [{"exercise":"Bankdr\u00fccken","sets":4,"reps":"8-10","weight":80,"rest":"90s","note":"Coaching-Cue"}]\nGewichte M\u00dcSSEN auf den echten Daten des Athleten basieren.';
 
 window.generateSmartWorkout = async function() {
     if(window.checkOnlineForAI && !window.checkOnlineForAI()) return;
@@ -1113,6 +1290,25 @@ window.generateSmartWorkout = async function() {
     var langName = window.getPromptLang ? window.getPromptLang() : 'Deutsch';
     var userPrompt = 'Erstelle mein Workout für heute (' + today + ').\n\nATHLETEN-PROFIL:\nAlter: ' + (profile.age || '?') + '\nGewicht: ' + (profile.weight || '?') + ' kg\nLevel: ' + (profile.experience || 'Anfänger') + '\n\nTRAININGSHISTORIE (letzte 30):\n' + recent + '\n\nDIESE WOCHE TRAINIERT:\n' + (thisWeek.length > 0 ? thisWeek.join(', ') : 'Noch nichts') + '\n\nLETZTE 48H:\n' + (last48h.length > 0 ? last48h.join(', ') : 'Nichts');
     if (habitData) userPrompt += '\n\nHABITS & RECOVERY:\n' + habitData;
+    var _swInjuries = (profile.injuries && profile.injuries.length > 0) ? profile.injuries.join(', ') : (window._getInjuriesForAI ? window._getInjuriesForAI() : 'keine');
+    if (_swInjuries && _swInjuries !== 'keine') userPrompt += '\n\nVerletzungen/Einschraenkungen des Athleten: ' + _swInjuries + '\n' +
+     'REGEL FUER VERLETZUNGEN: Waehle Uebungen die die betroffene Region SCHONEN aber nicht komplett meiden.\n' +
+     'Stattdessen: Rehabilitation-freundliche Alternativen (z.B. bei Knieproblemen: Leg Press statt Squat, bei Schulter: Kabelzug statt Overhead Press, bei Ruecken: Maschinen-Rudern statt Kreuzheben).\n' +
+     'Passe Intensitaet und Range of Motion an. Konservative Gewichte bei betroffenen Regionen.\n' +
+     'WICHTIG: Fuege in das "note" Feld der betroffenen Uebungen IMMER den Hinweis ein: "Bei Schmerzen sofort stoppen."';
+    if (window._calculateMuscleRecovery) {
+     var _ms = window._calculateMuscleRecovery();
+     var _ready = window._getReadyMuscles(_ms, 85);
+     var _fatigued = window._getFatiguedMuscles(_ms, 60);
+     userPrompt += '\n\nMUSKEL-RECOVERY (V3):';
+     userPrompt += '\nBereit (>85%): ' + (_ready.length > 0 ? _ready.map(function(m) { return window._MUSCLE_RECOVERY_TIMES[m] && window._MUSCLE_RECOVERY_TIMES[m].label; }).filter(Boolean).join(', ') : 'Alle brauchen noch Erholung');
+     userPrompt += '\nErholt sich (<60%): ' + (_fatigued.length > 0 ? _fatigued.slice(0,5).map(function(e) { return window._MUSCLE_RECOVERY_TIMES[e[0]].label + ' (' + e[1].recoveryPct + '%)'; }).join(', ') : 'Keine');
+     userPrompt += '\nREGEL: Trainiere NUR Muskeln mit >75% Recovery. Erschoepfte Muskeln (<60%) NICHT belasten!';
+    }
+    if (window._calculateACWR) {
+     var _acwr = window._calculateACWR();
+     if (_acwr.acwr) userPrompt += '\nACWR: ' + _acwr.acwr + ' (' + _acwr.label + ') — ' + _acwr.recommendation;
+    }
     userPrompt += '\n\nErstelle 5-7 Übungen. JSON Array. Antworte auf ' + langName + '.';
     window.showToast(window.t('aiGenerating','Dein Workout wird geplant...'));
     var btn = document.getElementById('smartWorkoutBtn');

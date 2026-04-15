@@ -1,4 +1,44 @@
-const CACHE_NAME = 'base-v2-cache-v192';
+// Firebase Cloud Messaging Service Worker
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+
+var _fcmFirebaseConfig = {
+  apiKey: "AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y",
+  authDomain: "beastmode-17f0d.firebaseapp.com",
+  projectId: "beastmode-17f0d",
+  storageBucket: "beastmode-17f0d.firebasestorage.app",
+  messagingSenderId: "276195983881",
+  appId: "1:276195983881:web:99d55a5656e6ed7daa2ed8"
+};
+
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+  firebase.initializeApp(_fcmFirebaseConfig);
+}
+
+if (typeof firebase !== 'undefined' && firebase.messaging) {
+  var _fcmMessaging = firebase.messaging();
+  _fcmMessaging.onBackgroundMessage(function(payload) {
+    var title = (payload.notification && payload.notification.title) || '\uD83D\uDCAA BASE Fitness';
+    var body = (payload.notification && payload.notification.body) || 'Neues Workout bereit!';
+    var data = payload.data || {};
+    self.registration.showNotification(title, {
+      body: body,
+      icon: '/icon-192.png',
+      badge: '/icon-48.png',
+      tag: 'base-workout-delivery',
+      renotify: true,
+      requireInteraction: true,
+      data: data,
+      vibrate: [100, 50, 100],
+      actions: [
+        { action: 'open', title: 'Workout oeffnen' },
+        { action: 'dismiss', title: 'Spaeter' }
+      ]
+    });
+  });
+}
+
+const CACHE_NAME = 'base-v2-cache-v266';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -9,7 +49,8 @@ const PRECACHE_URLS = [
     '/icon-48.png',
     '/js/base-timers.min.js?v=17',
     '/js/base-ai.min.js?v=17',
-    '/js/base-settings.min.js?v=17',
+    '/js/base-settings.min.js?v=26',
+    '/js/base-analytics.min.js?v=1',
     '/js/base-pt.min.js?v=17',
     '/js/exercise-db.min.js?v=17',
     '/js/machine-db.min.js?v=1',
@@ -142,12 +183,15 @@ self.addEventListener('push', function(event) {
 
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
+    if (event.action === 'dismiss') return;
+    var url = '/app.html';
+    if (event.notification.data && event.notification.data.url) url = event.notification.data.url;
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
             for (var i = 0; i < list.length; i++) {
-                if (list[i].url.includes('/app.html') && 'focus' in list[i]) return list[i].focus();
+                if (list[i].url.includes('base-app.tech') && 'focus' in list[i]) return list[i].focus();
             }
-            if (clients.openWindow) return clients.openWindow('/app.html');
+            if (clients.openWindow) return clients.openWindow(url);
         })
     );
 });

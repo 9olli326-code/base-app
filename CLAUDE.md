@@ -29,12 +29,14 @@ BASE ist eine KI-getriebene All-in-One Fitness PWA für alle Sportarten. 86 Spor
 ### Frontend (App)
 ```
 app.html                    343 KB   HTML + CSS + kleine inline Scripts, 38 Modals
-js/app-core.js              380 KB   Haupt-Logik (132 window.* Funktionen)
-js/app-core.min.js          291 KB   Minified
-js/base-ai.js                66 KB   KI-Features (24 Funktionen)
-js/base-ai.min.js            49 KB   Minified
-js/base-pt.js               175 KB   PT Business Mode (81 Funktionen)
-js/base-pt.min.js           128 KB   Minified
+js/app-core.js              562 KB   Haupt-Logik (200+ window.* Funktionen)
+js/app-core.min.js          420 KB   Minified
+js/base-ai.js                73 KB   KI-Features (32 Funktionen)
+js/base-ai.min.js            54 KB   Minified
+js/base-pt.js               203 KB   PT Business Mode (115 Funktionen)
+js/base-pt.min.js           150 KB   Minified
+js/muscle-map.js              25 KB   Muskel-Ranking SVG Map
+js/muscle-map.min.js          18 KB   Minified
 js/base-settings.js          31 KB   Profil, Module, Onboarding
 js/base-settings.min.js      23 KB   Minified
 js/base-timers.js             13 KB   Rest/Workout/HIIT Timer
@@ -229,6 +231,21 @@ BASE-Android.apk            Signed APK
 - aria-label auf allen Buttons
 - Focus-Styles (outline: 2px solid #a3c9a8)
 - prompt() durch Custom Modals ersetzt
+- aria-live="polite" auf Toast, KI-Chat, AI-Output (April 2026)
+- Farbkontrast #82828c → #9898a2 in app.html (April 2026)
+- inputmode="numeric" auf allen Zahlen-Inputs (Reps, Gewicht, RIR, HR)
+
+### Fixes April 2026
+- Anti-Halluzination in Plan Generator (NSCA/Schoenfeld/Zourdos Referenzen)
+- Injuries an Smart Workout Prompt gesendet
+- AbortController + 25s Timeout auf Plan Generator
+- HTTP-Timeout 22s auf Gemini Server-Side Request
+- DSGVO: Training Data Collection auf 100 Chars + Name-Anonymisierung
+- localStorage 5MB Limit Warnung + Auto-Cleanup
+- Strava alert() → showToast()
+- 8 console.error → User-facing Toast Meldungen
+- Plausible Analytics auf Landing Page
+- og:image + canonical + JSON-LD Schema auf Landing Page
 
 ### i18n
 - 7 Sprachen: de, en, fr, es, it, nl, ar

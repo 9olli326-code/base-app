@@ -15,6 +15,8 @@ const RATE_LIMITS = {
     builder:    5,
     report:    10,
     scan:      10,
+    pt_coach:  10,
+    pt_copilot:10,
     generic:   20,
     raw:       20,
 };
@@ -100,6 +102,133 @@ function buildAthleteSummary(workouts, profile) {
 }
 
 // ============================================================
+// NUTRITION KI — WISSENSCHAFTLICHE DIREKTIVEN
+// ============================================================
+const NUTRITION_SCIENCE_DIRECTIVES = `
+NUTRITION KI — WISSENSCHAFTLICHE DIREKTIVEN (BASE APP)
+
+EVIDENZ-QUELLEN (ausschliesslich diese verwenden):
+- ISSN Position Stands (International Society of Sports Nutrition)
+- EFSA Dietary Reference Values
+- DGE Referenzwerte (Deutsche Gesellschaft fuer Ernaehrung)
+- Peer-reviewed Meta-Analysen:
+  * Schoenfeld & Aragon (Protein timing, totale Menge)
+  * Morton et al. 2018 (Protein dose response, NEJM)
+  * Areta et al. 2013 (Protein distribution, MPS)
+  * van Loon et al. (Protein quality, casein/whey)
+  * Kerksick et al. 2017 (ISSN Nutrient Timing)
+  * Stokes et al. 2018 (Protein fuer aeltere Athleten)
+  * Burke et al. (Kohlenhydrat-Periodisierung)
+  * Antonio et al. (Kreatin, Koffein)
+
+KRITISCHE WISSENSCHAFTLICHE FAKTEN:
+
+1. PROTEIN GESAMT:
+   - Muskelaufbau: 1.6-2.2g/kg Koerpergewicht/Tag (Morton 2018)
+   - Bei Kaloriendefizit: bis 2.4-3.1g/kg (Helms et al.)
+   - Aeltere Athleten (>50): 1.8-2.4g/kg wegen anaboler Resistenz
+   - Maximal verwertbar pro Mahlzeit: KEIN festes Limit, aber
+     20-40g optimiert MPS pro Episode (Areta 2013)
+
+2. PROTEIN TIMING — NUANCIERT:
+   - Gesamtmenge > Timing (Schoenfeld & Aragon 2013, 2017)
+   - ABER: Verteilung ueber den Tag optimiert MPS:
+     * 4 Mahlzeiten a 20-40g Protein alle 3-5h BESSER als
+       2 grosse Mahlzeiten mit gleicher Gesamtmenge
+     * Grund: MPS-Refraktaerperiode ~3-5h nach Stimulation
+     * Areta et al. 2013: 4x20g > 2x40g > 8x10g
+   - Post-Workout-Fenster:
+     * "30-Minuten Anabolic Window" ist WIDERLEGT (Schoenfeld 2013)
+     * Wenn 1-2h VOR Training gegessen: Fenster = 4-6h
+     * Bei nuechternem Training: zeitnahe Zufuhr sinnvoller
+     * Maximaler Benefit: Protein innerhalb 2h post-workout
+   - Pre-Sleep Protein:
+     * 30-40g Casein vor dem Schlafen verbessert overnight MPS
+     * Res et al. 2012, Snijders et al. 2015 — starke Evidenz
+
+3. KOHLENHYDRATE:
+   - Leistungssport: 5-10g/kg/Tag (Burke ISSN 2011)
+   - Kraftsport: 3-5g/kg ausreichend fuer Hypertrophie
+   - Glykogen-Repletion: nur bei <24h zwischen Sessions kritisch
+   - Carb periodization: legitim fuer Body Recomposition
+   - Insulin-Spike post-workout: klinisch irrelevant fuer Hypertrophie
+     wenn Tagesgesamtmenge stimmt
+
+4. FETTE:
+   - Minimum: 0.5g/kg fuer Hormonproduktion (Testosterone)
+   - Optimal: 0.8-1.2g/kg
+   - Omega-3: 1-3g EPA+DHA/Tag fuer Entzuendungsreduktion
+
+5. SUPPLEMENTE (ISSN Grade A Evidenz):
+   - Kreatin Monohydrat: 3-5g/Tag, Timing irrelevant
+   - Koffein: 3-6mg/kg, 30-60min pre-workout
+   - Beta-Alanin: 3.2-6.4g/Tag, Kribbeln = normal, harmlos
+   - Citrullin: 6-8g, 60min pre-workout
+   INSUFFICIENT EVIDENCE:
+   - BCAAs wenn ausreichend Protein vorhanden: NICHT noetig
+   - Arginin standalone: schlechte Bioverfuegbarkeit
+
+6. MIKRONAEHRSTOFFE FUER ATHLETEN:
+   - Vitamin D: 1000-4000 IU/Tag wenn Mangel
+   - Magnesium: 400-420mg/Tag
+   - Antioxidantien hochdosiert: koennen Trainingsadaptation BLOCKIEREN
+
+HALLUZINATIONS-PRAEVENTION:
+Wenn die Studienlage unklar/widersprüchlich ist oder individuelle Variation gross:
+IMMER sagen: "Die Studienlage hier ist [unklar/widersprüchlich]. Was ich sicher sagen kann: [sicherer Teil]. Fuer deine Situation empfehle ich [Arzt/Ernaehrungsberater]."
+
+ERNAEHRUNGSFORM-KOMPATIBILITAET (HARD RULE):
+Wenn die Ernaehrungsform des Athleten bekannt ist,
+muessen ALLE Empfehlungen kompatibel sein:
+
+- LOW CARB / KETO: Keine Pasta, Reis, Brot empfehlen.
+  Stattdessen: Gemuese, Fleisch, Fisch, Eier, Avocado, Nuesse.
+  Warnung wenn Training >90min: Glykogen-Limitierung erklaeren.
+
+- HIGH PROTEIN: Protein-reiche Optionen priorisieren.
+  Fuer jede Mahlzeit Protein-Quelle nennen.
+
+- VEGAN: NIEMALS tierische Produkte empfehlen.
+  Immer auf B12, Omega-3, Zink, Eisen hinweisen.
+  Pflanzliche Protein-Quellen: Tofu, Tempeh, Huelsenfruechte, Seitan.
+
+- HIGH CARB: Carb-reiche, naehrstoffdichte Optionen priorisieren.
+  Timing wichtig: Carbs vor und nach Training.
+
+- CARB CYCLING: Zwischen Trainings- und Ruhetagen unterscheiden.
+  An Trainingstagen: hohe Carbs. Ruhetage: niedrige Carbs, hoeheres Fett.
+
+SPORT-SPEZIFISCHE ERNAEHRUNGS-DIREKTIVEN:
+
+KRAFTSPORT/BODYBUILDING:
+- Protein-Timing: 20-40g alle 3-5h (Areta 2013)
+- Pre-Workout Carbs fuer Kraft-Output
+- Kreatin 3-5g/Tag ist evidenzbasiert (Branch 2003)
+- Kein 30-Minuten-Anabolic-Window Mythos - 2h Fenster ist korrekt
+
+AUSDAUER (Laufen, Radfahren, Triathlon):
+- Carb-Loading vor Wettkaempfen (>90min): 7-10g/kg/Tag
+- Waehrend Ausdauer >60min: 30-60g Carbs/h
+- Elektrolyte bei Schweiss >1L: Na, K, Mg
+
+TEAMSPORT (Fussball, Basketball, Volleyball):
+- Glykogen-Resynthese nach Spiel: 1.2g/kg Carbs in 4h
+- Protein fuer Muskelreparatur nach Kontakt
+- Hydration: 500ml 2h vor Spiel
+
+KAMPFSPORT / MMA:
+- Gewichtsklassen-Management: langsamer Gewichtsverlust bevorzugt
+- Hohe Protein-Zufuhr fuer Muskelerhalt in Defizit
+- Keine extremen Cutting-Methoden empfehlen
+
+VERBOTENE AUSSAGEN:
+- "30 Minuten Anabolic Window"
+- Spezifische Kalorienmengen ohne Koerpergewicht/Ziel
+- Medikamenten-Interaktionen (immer Arzt empfehlen)
+- Heilsversprechen fuer Erkrankungen
+`;
+
+// ============================================================
 // SYSTEM DIRECTIVE + PROMPT INJECTION SCHUTZ
 // ============================================================
 const SD = [
@@ -121,7 +250,7 @@ const SD = [
 // PROMPT TEMPLATES — User-Daten in <user_data> Tags
 // ============================================================
 const PT={
-coach:(c)=>`Du bist Sportwissenschaftler mit umfassendem Wissen über Gym-Maschinen aller Hersteller (Hammer Strength, Life Fitness, Technogym, Cybex, Matrix, Nautilus, Hoist, Rogue, Arsenal Strength, Prime Fitness). Wenn nach einer Maschine gefragt: erkläre Muskeln, Kraftkurve (aufsteigend/absteigend/konstant/glockenförmig), Biomechanik, häufige Fehler, und Freigewicht-Alternativen.\n\nWenn der Athlet nach Übungs-Alternativen fragt oder eine Übung nicht machen kann (Verletzung, Equipment fehlt), antworte IMMER mit diesem Schema:\n1. WARUM die Alternative funktioniert (gleiche Muskelgruppe + ähnliche Kraftkurve)\n2. UNTERSCHIED in der Kraftkurve: aufsteigend (leicht unten, schwer oben), absteigend (schwer unten, leicht oben), konstant (Kabel), glockenförmig (Mitte am schwersten)\n3. BIOMECHANISCHER Vorteil/Nachteil der Alternative\n4. WIE ANPASSEN: Gewicht, Reps, ROM Empfehlung für den Wechsel\n\nKraftkurven-Wissen:\n- Langhantel/Kurzhantel: Aufsteigend bei Drücken, Absteigend bei Curls\n- Kabel: Konstant (gleichmäßiger Widerstand)\n- Maschine (Cam-basiert): Je nach Hersteller unterschiedlich — Nautilus = variable Kurve, Hammer Strength = meist aufsteigend\n- Widerstandsbänder: Stark aufsteigend (am schwersten am Ende)\n- Pec Deck/Butterfly: Glockenförmig\n\n${SD}\n\n<user_data>\nATHLETENPROFIL: ${c.profile}\nVERLETZUNGEN: ${c.injuries}\nZNS: ${c.znsScore}%\n\n=== ATHLETE INTELLIGENCE SUMMARY ===\n${c.athleteSummary}\n\n=== LETZTE WORKOUTS ===\n${c.recentWorkouts||'Keine'}\n</user_data>\n\nAUFGABE:\n1) Stärken mit Zahlen\n2) Schwächen/Plateaus\n3) Empfehlungen 2 Wochen\n\nMax 350 Wörter. Antworte auf ${c.lang}.`,
+coach:(c)=>`Du bist Sportwissenschaftler mit umfassendem Wissen über Gym-Maschinen aller Hersteller (Hammer Strength, Life Fitness, Technogym, Cybex, Matrix, Nautilus, Hoist, Rogue, Arsenal Strength, Prime Fitness). Wenn nach einer Maschine gefragt: erkläre Muskeln, Kraftkurve (aufsteigend/absteigend/konstant/glockenförmig), Biomechanik, häufige Fehler, und Freigewicht-Alternativen.\n\nWenn der Athlet nach Übungs-Alternativen fragt oder eine Übung nicht machen kann (Verletzung, Equipment fehlt), antworte IMMER mit diesem Schema:\n1. WARUM die Alternative funktioniert (gleiche Muskelgruppe + ähnliche Kraftkurve)\n2. UNTERSCHIED in der Kraftkurve: aufsteigend (leicht unten, schwer oben), absteigend (schwer unten, leicht oben), konstant (Kabel), glockenförmig (Mitte am schwersten)\n3. BIOMECHANISCHER Vorteil/Nachteil der Alternative\n4. WIE ANPASSEN: Gewicht, Reps, ROM Empfehlung für den Wechsel\n\nKraftkurven-Wissen:\n- Langhantel/Kurzhantel: Aufsteigend bei Drücken, Absteigend bei Curls\n- Kabel: Konstant (gleichmäßiger Widerstand)\n- Maschine (Cam-basiert): Je nach Hersteller unterschiedlich — Nautilus = variable Kurve, Hammer Strength = meist aufsteigend\n- Widerstandsbänder: Stark aufsteigend (am schwersten am Ende)\n- Pec Deck/Butterfly: Glockenförmig\n\n${SD}\n\n${NUTRITION_SCIENCE_DIRECTIVES}\n\n<user_data>\nATHLETENPROFIL: ${c.profile}\nVERLETZUNGEN: ${c.injuries}\nZNS: ${c.znsScore}%\n${c.nutritionContext?'\\nERNAEHRUNGS-PROFIL:\\n'+c.nutritionContext:''}\n\n=== ATHLETE INTELLIGENCE SUMMARY ===\n${c.athleteSummary}\n\n=== LETZTE WORKOUTS ===\n${c.recentWorkouts||'Keine'}\n</user_data>\n\nAUFGABE:\n1) Stärken mit Zahlen\n2) Schwächen/Plateaus\n3) Empfehlungen 2 Wochen\n\nMax 350 Wörter. Antworte auf ${c.lang}.`,
 copilot:(c)=>`Du bist CSCS Personal Trainer.\n\n${SD}\n\n<user_data>\nATHLETENPROFIL: ${c.profile}\nVERLETZUNGEN: ${c.injuries}\nZNS: ${c.znsScore}%\n${c.exercise?`ÜBUNG: ${c.exercise}`:''}\n${c.exerciseHistory?`VERLAUF:\n${c.exerciseHistory}`:''}\n\n=== SUMMARY ===\n${c.athleteSummary}\n</user_data>\n\nAUFGABE:\n1) Empfohlene Sätze/Wdh/Gewicht\n2) Ziel-RPE\n3) Verletzungsmodifikation\n\nMax 200 Wörter. Antworte auf ${c.lang}.`,
 readiness:(c)=>`Du bist Sportwissenschaftler für Erholung.\n\n${SD}\n\n<user_data>\nATHLETENPROFIL: ${c.profile}\nVERLETZUNGEN: ${c.injuries}\nZNS: ${c.znsScore}%\n\n=== SUMMARY ===\n${c.athleteSummary}\n\n=== WORKOUTS ===\n${c.recentWorkouts||'Keine'}\n</user_data>\n\nAUFGABE:\n1) Erholungseinschätzung\n2) Empfehlung heute\n3) Fehlende Daten nennen\n\nMax 180 Wörter. Antworte auf ${c.lang}.`,
 prehab:(c)=>`Du bist Physiotherapeut.\n\n${SD}\n\n<user_data>\nATHLETENPROFIL: ${c.profile}\nVERLETZUNGEN: ${c.injuries}\n${c.exercise?`ÜBUNG: ${c.exercise}`:''}\n\n=== SUMMARY ===\n${c.athleteSummary}\n\n=== WORKOUTS ===\n${c.recentWorkouts||'Keine'}\n</user_data>\n\nAUFGABE:\n1) 3-5 Aktivierungsübungen\n2) Was vermeiden\n3) Tipps\n\nMax 220 Wörter. Antworte auf ${c.lang}.`,
@@ -147,20 +276,26 @@ function sanitizeForPrompt(str, maxLen) {
 function callGemini(prompt,temperature,jsonMode,systemPrompt,contentsParts){return new Promise((resolve,reject)=>{const url=`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;const b={contents:contentsParts||[{parts:[{text:prompt}]}],generationConfig:{temperature:temperature||0.3}};if(jsonMode)b.generationConfig.responseMimeType='application/json';if(systemPrompt)b.system_instruction={parts:[{text:systemPrompt}]};const pd=JSON.stringify(b);const u=new URL(url);const req=https.request({hostname:u.hostname,path:u.pathname+u.search,method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(pd)}},(res)=>{let d='';res.on('data',ch=>d+=ch);res.on('end',()=>{try{const p=JSON.parse(d);if(p.error){console.error('Gemini API Error:',JSON.stringify(p.error));reject(new Error(p.error.message||'Gemini API Error'));return;}const parts=p?.candidates?.[0]?.content?.parts||[];
             let t='';
             for(const part of parts){if(part.text)t=part.text;}
-            if(!t&&parts.length>0)t=parts[0]?.text||'';if(!t)console.error('Gemini empty response:',d.substring(0,500));resolve(t);}catch(e){reject(new Error('Parse Error: '+e.message+' Raw: '+d.substring(0,200)));}});});req.on('error',reject);req.write(pd);req.end();});}
+            if(!t&&parts.length>0)t=parts[0]?.text||'';if(!t)console.error('Gemini empty response:',d.substring(0,500));resolve(t);}catch(e){reject(new Error('Parse Error: '+e.message+' Raw: '+d.substring(0,200)));}});});req.setTimeout(22000,()=>{req.destroy(new Error('Gemini API Timeout nach 22s'));});req.on('error',reject);req.write(pd);req.end();});}
 
 // ============================================================
 // TRAINING DATA COLLECTOR (anonymisiert fuer eigenes KI-Modell)
+// DSGVO: Prompt-Daten werden auf 100 Zeichen gekuerzt und
+// potenzielle Personennamen durch [NAME] ersetzt, um zu
+// verhindern, dass personenbezogene Athletendaten gespeichert werden.
 // ============================================================
 async function logTrainingData(type, promptText, responseText, lang, category) {
     try {
         const trainingStore = getStore('training-data');
         const entryId = Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+        const anonymizedPrompt = typeof promptText === 'string'
+            ? promptText.substring(0, 100).replace(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g, '[NAME]')
+            : '';
         const entry = {
             id: entryId,
             timestamp: new Date().toISOString(),
             type: type || 'unknown',
-            prompt: typeof promptText === 'string' ? promptText.substring(0, 2000) : '',
+            prompt: anonymizedPrompt,
             response: typeof responseText === 'string' ? responseText.substring(0, 2000) : '',
             promptTokens: promptText ? promptText.length : 0,
             responseTokens: responseText ? responseText.length : 0,
@@ -247,8 +382,23 @@ try{const as=buildAthleteSummary(context.workouts||[],context.profile||{});const
     days: context.days || 4,
     orms: sanitizeForPrompt(context.orms, 300) || '',
     clientName: sanitizeForPrompt(context.clientName, 50) || '',
-    builderPrompt: sanitizeForPrompt(context.builderPrompt, 1000) || ''
+    builderPrompt: sanitizeForPrompt(context.builderPrompt, 1000) || '',
+    nutritionContext: sanitizeForPrompt(context.nutritionContext, 800) || ''
 };
-const tf=PT[type];if(!tf)return{statusCode:400,headers:h,body:JSON.stringify({error:'Unbekannter Typ: '+type})};
-const prompt=tf(ctx);const temp=type==='plan'?0.4:type==='builder'?0.2:0.3;const jm=type==='builder'&&context.jsonMode;
-const reply=await callGemini(prompt,temp,jm);logTrainingData(type,prompt,reply,ctx.lang,type);return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as,limits:rateCheck.remaining})};}catch(e){console.error('AI Engine Error:',e);return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}};
+// PT-specific typed prompts
+var reply;
+switch(type){
+case 'pt_coach':
+case 'pt_copilot':
+  var clientName = sanitizeForPrompt(ctx.clientName || 'Athlet', 100);
+  var ptPrompt = type === 'pt_coach'
+    ? SD + '\nDu bist ein professioneller Personal Trainer. Analysiere die Trainingsdaten von Kunde "' + clientName + '" und gib konkrete Coaching-Empfehlungen.\n\n<user_data>\nTrainingsdaten:\n' + sanitizeForPrompt(ctx.recentWorkouts || '', 3000) + '\nProfil: ' + sanitizeForPrompt(ctx.profile || '', 500) + '\nCheck-in: ' + sanitizeForPrompt(ctx.checkIn || 'Kein aktueller Check-in', 300) + '\n</user_data>\n\nAntworte auf ' + sanitizeForPrompt(ctx.lang || 'Deutsch', 20) + '. Max 200 Woerter. Konkret und umsetzbar.'
+    : SD + '\nDu bist Sportwissenschaftler. Empfehle die naechste Uebung fuer Kunde "' + clientName + '".\n\n<user_data>\nLetzte Session: ' + sanitizeForPrompt(ctx.recentWorkouts || '', 3000) + '\nFokus: ' + sanitizeForPrompt(ctx.goal || 'Allgemein', 200) + '\n</user_data>\n\nAntworte auf ' + sanitizeForPrompt(ctx.lang || 'Deutsch', 20) + '. Gib 3 Uebungen mit Sets/Reps.';
+  reply = await callGemini(ptPrompt, 0.3);
+  logTrainingData(type, ptPrompt, reply, ctx.lang, type);
+  return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as,limits:rateCheck.remaining})};
+default:
+  var tf=PT[type];if(!tf)return{statusCode:400,headers:h,body:JSON.stringify({error:'Unbekannter Typ: '+type})};
+  var prompt=tf(ctx);var temp=type==='plan'?0.4:type==='builder'?0.2:0.3;var jm=type==='builder'&&context.jsonMode;
+  reply=await callGemini(prompt,temp,jm);logTrainingData(type,prompt,reply,ctx.lang,type);return{statusCode:200,headers:h,body:JSON.stringify({reply,athleteSummary:as,limits:rateCheck.remaining})};
+}}catch(e){console.error('AI Engine Error:',e);return{statusCode:500,headers:h,body:JSON.stringify({error:e.message})};}};
