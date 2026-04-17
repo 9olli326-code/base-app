@@ -130,6 +130,33 @@ window.checkOnlineForAI = function() {
     return true;
 };
 
+// === UNIFIED GEMINI RESPONSE PARSER ===
+// Handhabt alle 3 Gemini-Response-Formate:
+//   - {reply: "..."} (typed endpoint)
+//   - {parts: [{text: "..."}]} (prompt endpoint, Thinking-Model: letzter Part = echte Antwort)
+//   - {candidates: [{content: {parts: [{text: "..."}]}}]} (image endpoint)
+// Nimmt IMMER den letzten text-haltigen Part. Fallback verhindert "undefined" im UI.
+window._extractGeminiText = function(data, fallback) {
+    if (!data || typeof data !== 'object') return fallback || '';
+    if (typeof data.reply === 'string' && data.reply.length > 0) return data.reply;
+    if (Array.isArray(data.parts) && data.parts.length > 0) {
+        for (var i = data.parts.length - 1; i >= 0; i--) {
+            if (data.parts[i] && typeof data.parts[i].text === 'string' && data.parts[i].text.length > 0) {
+                return data.parts[i].text;
+            }
+        }
+    }
+    if (Array.isArray(data.candidates) && data.candidates[0] && data.candidates[0].content && Array.isArray(data.candidates[0].content.parts)) {
+        var cparts = data.candidates[0].content.parts;
+        for (var j = cparts.length - 1; j >= 0; j--) {
+            if (cparts[j] && typeof cparts[j].text === 'string' && cparts[j].text.length > 0) {
+                return cparts[j].text;
+            }
+        }
+    }
+    return fallback || '';
+};
+
 // Robuster Gemini Fetch-Wrapper mit Timeout, Error Handling, res.ok Check
 window._aiFetch = async function(body, opts) {
     opts = opts || {};
@@ -142,6 +169,10 @@ window._aiFetch = async function(body, opts) {
             });
             body.profile = { age: (window.userProfile||{}).age, weight: (window.userProfile||{}).weight, experience: (window.userProfile||{}).experience };
         }
+    }
+    // Plan für Tier-basierte Rate-Limits (Beta: Client-vertrauend)
+    if (!body.plan) {
+        try { body.plan = localStorage.getItem('base_plan') || 'free'; } catch(e) { body.plan = 'free'; }
     }
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, opts.timeout || 30000);
@@ -224,7 +255,7 @@ window._ptCoachAnalysis = async function(clientId) {
         });
         if (!res.ok) throw new Error('KI Fehler');
         var data = await res.json();
-        var text = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+        var text = window._extractGeminiText(data, '');
         if (text) window.showModal('KI Coaching \u2014 ' + window._escapeHtml(client.name), text, false);
     } catch(e) { window.showToast('KI Analyse fehlgeschlagen', 'error'); }
 };
@@ -654,6 +685,64 @@ Max 320 Wörter, präzise und datenbasiert. Antworte auf ${window.getPromptLang(
         document.getElementById('aiLoadingState')?.classList.add('hidden');
         const rEl = document.getElementById('aiResultText');
         if(rEl){ rEl.classList.remove('hidden'); rEl.textContent = window.t('toastError','Fehler') + ': ' + e.message; }
+    }
+};
+
+// === MORNING BRIEFING ===
+window.generateMorningBriefing = async function(autoplay) {
+    if(!window.checkOnlineForAI()) return null;
+    if(window.checkFeatureGate && !window.checkFeatureGate('briefing')) return null;
+
+    var readiness = window._calculateReadinessV2 ? window._calculateReadinessV2() : null;
+    var profile = window.userProfile || {};
+    var archived = (window.workouts || []).filter(function(w) { return w.archived; });
+    archived.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+    var lastDate = archived.length > 0 ? archived[0].date : null;
+    var daysSince = lastDate ? Math.floor((Date.now() - new Date(lastDate).getTime()) / 86400000) : '?';
+    var injuries = Array.from(window.selectedInjuries || []).join(', ') || 'keine';
+    var voiceStyle = localStorage.getItem('base_voice_style') || 'calm';
+    var firstName = (profile.name || profile.firstName || 'Oliver').split(' ')[0];
+
+    var todayPlan = 'Kein aktiver Trainingsplan';
+    try {
+        var plan = JSON.parse(localStorage.getItem('base_active_plan') || 'null');
+        if (plan && plan.weeks) {
+            var startDate = new Date(plan.startDate || Date.now());
+            var weekIdx = Math.min(Math.floor((Date.now() - startDate.getTime()) / (7*86400000)), plan.weeks.length - 1);
+            if (weekIdx >= 0 && plan.weeks[weekIdx]) {
+                todayPlan = 'Woche ' + (weekIdx + 1) + ' \u2014 ' + (plan.weeks[weekIdx].focus || 'Training');
+            }
+        }
+    } catch(e) {}
+
+    var body = {
+        type: 'briefing',
+        context: {
+            persona: voiceStyle,
+            honorific: firstName,
+            batteryScore: readiness ? readiness.score : '?',
+            batteryLabel: readiness ? readiness.label : '',
+            todayPlan: todayPlan,
+            daysSinceLast: daysSince,
+            injuries: injuries,
+            lang: window.getPromptLang ? window.getPromptLang() : 'Deutsch'
+        }
+    };
+
+    try {
+        var data = await window._aiFetch(body, { timeout: 25000 });
+        if (!data) return null;
+        var text = window._extractGeminiText(data, '');
+        if (!text) { if (window.showToast) window.showToast('Briefing konnte nicht erstellt werden.', 'error'); return null; }
+
+        if (autoplay && window._speak) {
+            window._speak(text, 'high');
+        }
+        return text;
+    } catch(e) {
+        console.error('[briefing] Error:', e);
+        if (window.showToast) window.showToast('Briefing Fehler: ' + e.message, 'error');
+        return null;
     }
 };
 
@@ -1316,10 +1405,7 @@ window.generateSmartWorkout = async function() {
     try {
         var data = await window._aiFetch({ prompt: userPrompt, systemPrompt: window._SMART_WORKOUT_SYSTEM_PROMPT, userId: window._getAiUserId() });
         if(!data) { if(btn) btn.style.opacity = '1'; return; }
-        var text = '';
-        if(data.parts) { for(var i = data.parts.length - 1; i >= 0; i--) { if(data.parts[i].text) { text = data.parts[i].text; break; } } }
-        else if(data.reply) text = data.reply;
-        else if(data.text) text = data.text;
+        var text = window._extractGeminiText(data, '');
         var jsonMatch = text.match(/\[[\s\S]*?\]/);
         if(!jsonMatch) { window.showToast(window.t('toastError','Workout konnte nicht erstellt werden')); if(btn) btn.style.opacity = '1'; return; }
         var exercises = JSON.parse(jsonMatch[0]);

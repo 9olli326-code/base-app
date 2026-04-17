@@ -1,5 +1,5 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, browserLocalPersistence, setPersistence, GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword, browserLocalPersistence, setPersistence, GoogleAuthProvider, signInWithPopup, linkWithPopup, signInWithRedirect, linkWithRedirect, getRedirectResult, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, query, where, orderBy, limit, getDoc, updateDoc, addDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyAW4KVFdyuj4xAvvU-Td-yx6KuSaFb3B4Y", authDomain: "beastmode-17f0d.firebaseapp.com", projectId: "beastmode-17f0d", storageBucket: "beastmode-17f0d.firebasestorage.app", messagingSenderId: "276195983881", appId: "1:276195983881:web:99d55a5656e6ed7daa2ed8" };
@@ -153,6 +153,45 @@
 
    window.toggleAuthMode = function() {
     window.setAuthMode(_authMode === 'login' ? 'register' : 'login');
+   };
+
+   // === GOOGLE SIGN-IN ===
+   window.signInWithGoogle = async function() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    try {
+        let result;
+        if (auth.currentUser && auth.currentUser.isAnonymous) {
+            try {
+                result = await linkWithPopup(auth.currentUser, provider);
+                if (typeof window.showToast === 'function') window.showToast("Google-Account verkn\u00fcpft! \uD83D\uDD10 Deine Daten sind jetzt in der Cloud gesichert.", 'success', 4000);
+            } catch (linkErr) {
+                if (linkErr.code === 'auth/credential-already-in-use' || linkErr.code === 'auth/email-already-in-use') {
+                    result = await signInWithPopup(auth, provider);
+                    if (typeof window.showToast === 'function') window.showToast("Mit Google angemeldet! Dieser Account existierte bereits.", 'info', 4000);
+                } else { throw linkErr; }
+            }
+        } else {
+            result = await signInWithPopup(auth, provider);
+            if (typeof window.showToast === 'function') window.showToast("Mit Google angemeldet! \uD83D\uDD10", 'success');
+        }
+        if (typeof window.toggleModal === 'function') window.toggleModal('authModal');
+        return result;
+    } catch (e) {
+        console.error('Google Sign-In error:', e);
+        if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
+        if (typeof window.showToast === 'function') window.showToast("Google Sign-In fehlgeschlagen: " + (e.message || 'Unbekannter Fehler'), 'error', 4000);
+    }
+   };
+
+   // === LOGOUT ===
+   window.signOutUser = async function() {
+    try {
+        await signOut(auth);
+        if (typeof window.showToast === 'function') window.showToast("Abgemeldet.", 'info');
+    } catch (e) {
+        console.error('Sign-out error:', e);
+    }
    };
 
    window.handleAuthAction = async () => {

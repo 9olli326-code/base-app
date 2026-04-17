@@ -3187,7 +3187,7 @@ window.saveCustomSessionType = async function() {
         if (res.status === 429) { try { var errData = await res.json(); if(typeof window.showToast==='function') window.showToast(errData.error || 'Tageslimit erreicht.', 'error', 4000); } catch(e){} return; }
         if (!res.ok) { window.showToast('Server-Fehler: ' + res.status, 'error'); return; }
         var data = await res.json();
-        var replyText = data.reply || '';
+        var replyText = window._extractGeminiText(data, '');
         var result;
         try {
             result = typeof replyText === 'string' ? JSON.parse(replyText) : replyText;
@@ -3530,7 +3530,7 @@ window._generateDeliveryViaAI = function(clientId) {
   if (!res.ok) throw new Error('Server error: ' + res.status);
   return res.json();
  }).then(function(data) {
-  var text = data.parts ? data.parts[data.parts.length-1].text : (data.reply || '');
+  var text = window._extractGeminiText(data, '');
   var planData = null;
   try { var match = text.match(/\{[\s\S]*\}/); if (match) planData = JSON.parse(match[0]); } catch(e) {}
   if (!planData) { window.showToast('KI-Antwort konnte nicht verarbeitet werden.', 'error'); return; }
@@ -4304,9 +4304,11 @@ window._sendPTNutritionMessage = async function(clientId) {
   var systemPrompt = 'Du bist ein KI-Ernaehrungscoach fuer Personal Trainer.\n\nWISSENSCHAFTLICHE BASIS:\n- ISSN Position Stands, EFSA, DGE\n- Protein: 1.6-2.4g/kg (Morton 2018)\n- 4 Mahlzeiten a 20-40g Protein (Areta 2013)\n- Kein "30min Anabolic Window" (widerlegt)\n\nCLIENT:\n' + clientContext + userBloodwork + '\nREGELN:\n- Konkrete Empfehlungen\n- Bei med. Fragen: Arzt empfehlen\n- Auf Deutsch, max 200 Woerter\n- Fuer den PT geschrieben';
 
   try {
-    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: msg, systemPrompt: systemPrompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
+    var _ncc = new AbortController(); var _nct = setTimeout(function(){_ncc.abort();}, 30000);
+    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: _ncc.signal, body: JSON.stringify({ prompt: msg, systemPrompt: systemPrompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
+    clearTimeout(_nct);
     var data = await res.json();
-    var reply = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+    var reply = window._extractGeminiText(data, '');
     var ld2 = document.getElementById('ptNutritionLoading'); if (ld2) ld2.remove();
     history.push({ role: 'model', content: reply, ts: Date.now() });
     window._savePTNutritionHistory(clientId, history);
@@ -4356,9 +4358,11 @@ window._generateClientMealPlan = async function(clientId) {
   var prompt = 'Erstelle einen 7-Tage Ernaehrungsplan.\n\nCLIENT:\n- Name: ' + (client.name||'Client') + '\n- Gewicht: ' + weight + 'kg\n- Ziel: ' + goal + '\n- Ernaehrung: ' + dietType + '\n' + (allergies.length > 0 ? '- Allergien (NICHT verwenden): ' + allergies.join(', ') + '\n' : '') + '\nTAGESZIELE (ISSN):\n- Kalorien: ' + calories + ' kcal\n- Protein: ' + proteinG + 'g (' + (proteinG/weight).toFixed(1) + 'g/kg)\n- Kohlenhydrate: ' + carbG + 'g\n- Fett: ' + fatG + 'g\n\nFORMAT:\n**Tag X**\n- Fruehstueck: [Gericht] - [kcal] kcal, P [g]g\n- Mittag: ...\n- Snack: ...\n- Abend: ...\n- Tagesgesamt: ...\n\nRealistisch, alltagstauglich. Trainings- vs Ruhetage unterscheiden. Auf Deutsch.';
 
   try {
-    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
+    var _mpc = new AbortController(); var _mpt = setTimeout(function(){_mpc.abort();}, 30000);
+    var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: _mpc.signal, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
+    clearTimeout(_mpt);
     var data = await res.json();
-    var plan = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+    var plan = window._extractGeminiText(data, '');
     var plans = JSON.parse(localStorage.getItem('base_client_meal_plans') || '{}');
     plans[clientId] = { plan: plan, clientName: client.name, createdAt: new Date().toISOString(), calories: calories, protein: proteinG };
     localStorage.setItem('base_client_meal_plans', JSON.stringify(plans));

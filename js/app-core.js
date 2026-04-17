@@ -343,7 +343,7 @@
     fetch('/.netlify/functions/elevenlabs-tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: item.text })
+      body: JSON.stringify({ text: item.text, lang: window.currentLang || 'de' })
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
@@ -531,6 +531,227 @@
        window._speak(window.t('voiceStyleSet', 'Pers\u00f6nlichkeit gewechselt!'), 'high');
      }, 300);
    }
+  };
+
+  // === MORNING BRIEFING MODAL (ElevenLabs TTS) ===
+  window._currentBriefingText = null;
+  window._currentBriefingAudio = null;
+
+  window.openBriefingModal = async function() {
+    if (window._briefingModalActive) {
+      console.log('[briefing] Modal already active');
+      return;
+    }
+    window._briefingModalActive = true;
+    try {
+      var modal = document.getElementById('briefingModal');
+      if (!modal) { window._briefingModalActive = false; return; }
+      // === AUDIO-UNLOCK f\u00fcr iOS Safari ===
+      if (!window._briefingAudioUnlocked) {
+        try {
+          if (!window._audioCtx) {
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) window._audioCtx = new AC();
+          }
+          if (window._audioCtx) {
+            if (window._audioCtx.state === 'suspended') {
+              await window._audioCtx.resume().catch(function() {});
+            }
+            var buffer = window._audioCtx.createBuffer(1, 1, 22050);
+            var source = window._audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(window._audioCtx.destination);
+            source.start(0);
+          }
+          var silentAudio = new Audio();
+          silentAudio.muted = true;
+          silentAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+          silentAudio.play().then(function() { silentAudio.pause(); }).catch(function() {});
+          window._briefingAudioUnlocked = true;
+        } catch(e) { window._briefingAudioUnlocked = true; }
+      }
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+
+      var profile = window.userProfile || {};
+      var firstName = (profile.name || profile.firstName || 'Oliver').split(' ')[0];
+      var hour = new Date().getHours();
+      var greeting = hour < 11 ? 'Guten Morgen' : hour < 17 ? 'Hallo' : 'Guten Abend';
+      var greetEl = document.getElementById('briefingGreeting');
+      if (greetEl) greetEl.textContent = greeting + ', ' + firstName;
+
+      var loadEl = document.getElementById('briefingLoading');
+      var contentEl = document.getElementById('briefingContent');
+      var controlsEl = document.getElementById('briefingControls');
+      if (loadEl) loadEl.classList.remove('hidden');
+      if (contentEl) contentEl.classList.add('hidden');
+      if (controlsEl) controlsEl.classList.add('hidden');
+
+      var orb = document.getElementById('briefingOrb');
+      if (orb) orb.style.animation = 'briefingPulse 1.5s ease-in-out infinite';
+      if (window._refreshLucide) window._refreshLucide();
+
+      if (!window.generateMorningBriefing) {
+        var loadText = document.getElementById('briefingLoadingText');
+        if (loadText) loadText.textContent = 'Briefing-Feature nicht verf\u00fcgbar.';
+        window._briefingModalActive = false;
+        return;
+      }
+
+      var text = await window.generateMorningBriefing(false);
+      if (!text) {
+        var loadText2 = document.getElementById('briefingLoadingText');
+        if (loadText2) loadText2.textContent = 'Briefing konnte nicht erstellt werden.';
+        if (orb) orb.style.animation = 'none';
+        window._briefingModalActive = false;
+        return;
+      }
+      window._currentBriefingText = text;
+
+      if (loadEl) loadEl.classList.add('hidden');
+      var textEl = document.getElementById('briefingText');
+      if (textEl) textEl.textContent = text;
+      if (contentEl) contentEl.classList.remove('hidden');
+      if (controlsEl) controlsEl.classList.remove('hidden');
+
+      window.playBriefingAgain();
+      if (window.awardXP) window.awardXP('briefingUsed');
+
+    } catch(e) {
+      console.error('[briefing] Error:', e);
+      var loadText3 = document.getElementById('briefingLoadingText');
+      if (loadText3) loadText3.textContent = 'Fehler: ' + e.message;
+      var orbErr = document.getElementById('briefingOrb');
+      if (orbErr) orbErr.style.animation = 'none';
+      window._briefingModalActive = false;
+    }
+  };
+
+  window.playBriefingAgain = function() {
+    if (!window._currentBriefingText) return;
+    if (window._briefingTTSInFlight) {
+      console.log('[briefing] Ignoring duplicate call \u2014 TTS still in flight');
+      return;
+    }
+    if (window._currentBriefingAudio) {
+      try {
+        window._currentBriefingAudio.pause();
+        window._currentBriefingAudio.currentTime = 0;
+        window._currentBriefingAudio.onended = null;
+        window._currentBriefingAudio.onerror = null;
+        window._currentBriefingAudio.src = '';
+      } catch(e) {}
+      window._currentBriefingAudio = null;
+    }
+    if (window._currentBriefingAudioUrl) {
+      try { URL.revokeObjectURL(window._currentBriefingAudioUrl); } catch(e) {}
+      window._currentBriefingAudioUrl = null;
+    }
+
+    var orb = document.getElementById('briefingOrb');
+    if (orb) orb.style.animation = 'briefingPulse 0.8s ease-in-out infinite';
+    window._briefingTTSInFlight = true;
+
+    fetch('/.netlify/functions/elevenlabs-tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: window._currentBriefingText,
+        lang: window.currentLang || 'de'
+      })
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('TTS HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      window._briefingTTSInFlight = false;
+      if (!data.audio) throw new Error('Kein Audio');
+      if (!window._currentBriefingText) return;
+      if (window._currentBriefingAudio) return;
+
+      var binary = atob(data.audio);
+      var bytes = new Uint8Array(binary.length);
+      for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      var blob = new Blob([bytes], { type: 'audio/mpeg' });
+      var url = URL.createObjectURL(blob);
+      var audio = new Audio(url);
+      audio.volume = 1.0;
+      audio.onended = function() {
+        try { URL.revokeObjectURL(url); } catch(e) {}
+        if (orb) orb.style.animation = 'none';
+        if (window._currentBriefingAudio === audio) {
+          window._currentBriefingAudio = null;
+          window._currentBriefingAudioUrl = null;
+        }
+      };
+      audio.onerror = function() {
+        try { URL.revokeObjectURL(url); } catch(e) {}
+        if (orb) orb.style.animation = 'none';
+        if (window._currentBriefingAudio === audio) {
+          window._currentBriefingAudio = null;
+          window._currentBriefingAudioUrl = null;
+        }
+        if (window.showToast) window.showToast('Audio-Wiedergabe fehlgeschlagen', 'error');
+      };
+      window._currentBriefingAudio = audio;
+      window._currentBriefingAudioUrl = url;
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        if (orb) orb.style.animation = 'none';
+        var playBtn = document.getElementById('briefingPlayBtn');
+        if (playBtn) playBtn.style.animation = 'briefingPulse 1.2s ease-in-out infinite';
+        if (window.showToast) window.showToast('Tippe auf "Abspielen" um zu starten', 'info', 5000);
+      } else {
+        audio.play().catch(function(err) {
+          console.error('[briefing] autoplay blocked:', err);
+          if (orb) orb.style.animation = 'none';
+          var playBtn2 = document.getElementById('briefingPlayBtn');
+          if (playBtn2) playBtn2.style.animation = 'briefingPulse 1.2s ease-in-out infinite';
+          if (window.showToast) window.showToast('Tippe auf "Abspielen" um zu starten', 'info', 4000);
+        });
+      }
+    })
+    .catch(function(err) {
+      window._briefingTTSInFlight = false;
+      console.error('[briefing] TTS error:', err);
+      if (orb) orb.style.animation = 'none';
+      if (window.showToast) window.showToast('TTS Fehler: ' + err.message, 'error');
+    });
+  };
+
+  window.regenerateBriefing = function() {
+    window._currentBriefingText = null;
+    if (window._currentBriefingAudio) {
+      window._currentBriefingAudio.pause();
+      window._currentBriefingAudio = null;
+    }
+    window.openBriefingModal();
+  };
+
+  window.closeBriefingModal = function() {
+    var modal = document.getElementById('briefingModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = '';
+    }
+    window._briefingModalActive = false;
+    window._briefingTTSInFlight = false;
+    if (window._currentBriefingAudio) {
+      try {
+        window._currentBriefingAudio.pause();
+        window._currentBriefingAudio.onended = null;
+        window._currentBriefingAudio.onerror = null;
+        window._currentBriefingAudio.src = '';
+      } catch(e) {}
+      window._currentBriefingAudio = null;
+    }
+    if (window._currentBriefingAudioUrl) {
+      try { URL.revokeObjectURL(window._currentBriefingAudioUrl); } catch(e) {}
+      window._currentBriefingAudioUrl = null;
+    }
+    var orb = document.getElementById('briefingOrb');
+    if (orb) orb.style.animation = 'none';
   };
 
   // === +/- INPUT HELPERS ===
@@ -1691,7 +1912,7 @@
     });
     if (res.ok) {
      var data = await res.json();
-     var txt = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+     var txt = window._extractGeminiText(data, '');
      txt = txt.trim().replace(/^["']|["']$/g, '');
      if (txt && txt.length > 5 && txt.length < 120) msg = txt;
     }
@@ -7313,9 +7534,7 @@
         body: JSON.stringify({ prompt: prompt, type: 'micro_tasks' })
       });
       var data = await res.json();
-      var text = data.reply ||
-        (data.parts && data.parts[data.parts.length-1] &&
-          data.parts[data.parts.length-1].text) || '[]';
+      var text = window._extractGeminiText(data, '[]');
 
       var clean = text.replace(/```json|```/g,'').trim();
       var newTasks = JSON.parse(clean);
@@ -8125,8 +8344,7 @@
         return '<div class="pointer-events-auto" data-cat="' + m.cat + '" ' +
           'style="padding:10px 12px;background:var(--inner-bg-hex);' +
           'border:1px solid var(--border-hex);border-radius:11px;cursor:pointer"' +
-          ' onclick="this.querySelector(\'.mr-detail\').style.display=' +
-            'this.querySelector(\'.mr-detail\').style.display===\'none\'?\'block\':\'none\'">' +
+          ' onclick="var _d=this.querySelector(\'.mr-detail\');if(_d)_d.style.display=_d.style.display===\'none\'?\'block\':\'none\'">' +
 
           '<div style="display:flex;align-items:center;gap:9px">' +
           '<span style="font-size:16px;width:22px;text-align:center">' + m.emoji + '</span>' +
@@ -8720,7 +8938,7 @@
     try {
       var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
       var data = await res.json();
-      var text = data.reply || (data.parts && data.parts.length > 0 ? data.parts[data.parts.length-1].text : '') || '';
+      var text = window._extractGeminiText(data, '');
       window.showModal('KI Stack-Analyse', '<div style="font-size:12px;line-height:1.7;color:var(--text-main);max-height:60vh;overflow-y:auto">' + window._sanitizeAIHtml(text) + '</div>', false);
     } catch(e) { window.showToast('KI Analyse fehlgeschlagen', 'error'); }
     finally { if (btn) btn.textContent = 'KI Stack-Analyse'; }
@@ -8865,7 +9083,7 @@
     var btn = document.querySelector('[onclick*="_generateMicroAnalysis"]'); if (btn) btn.textContent = 'Analysiere...';
     try {
       var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
-      var data = await res.json(); var text = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+      var data = await res.json(); var text = window._extractGeminiText(data, '');
       window.showModal('Mikron\u00E4hrstoff-Analyse', '<div style="font-size:12px;line-height:1.7;color:var(--text-main);max-height:60vh;overflow-y:auto">' + window._sanitizeAIHtml(text) + '</div>', false);
     } catch(e) { window.showToast('Analyse fehlgeschlagen', 'error'); }
     finally { if (btn) btn.textContent = 'KI Mikron\u00E4hrstoff-Analyse'; }
@@ -8884,7 +9102,7 @@
     var btn = document.querySelector('[onclick*="_generateWeeklyNutritionAnalysis"]'); if (btn) { btn.style.opacity = '0.6'; btn.textContent = 'Analysiere...'; }
     try {
       var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
-      var data = await res.json(); var text = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+      var data = await res.json(); var text = window._extractGeminiText(data, '');
       window.showModal('Wochen-Analyse', '<div style="font-size:12px;line-height:1.7;color:var(--text-main);max-height:60vh;overflow-y:auto">' + window._sanitizeAIHtml(text) + '</div>', false);
     } catch(e) { window.showToast('Analyse fehlgeschlagen', 'error'); }
     finally { if (btn) { btn.style.opacity = '1'; btn.textContent = 'Wochen-Analyse'; } }
@@ -8983,7 +9201,7 @@
     var btn = document.querySelector('[onclick*="_generateMealPrepPlan"]'); if (btn) { btn.style.opacity = '0.6'; btn.textContent = 'Erstelle...'; }
     try {
       var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
-      var data = await res.json(); var plan = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+      var data = await res.json(); var plan = window._extractGeminiText(data, '');
       localStorage.setItem('base_meal_prep_plan', JSON.stringify({ plan: plan, week: new Date().toISOString().split('T')[0] }));
       window.showModal('Meal Prep Plan', '<div style="font-size:12px;line-height:1.7;color:var(--text-main);white-space:pre-wrap;max-height:65vh;overflow-y:auto">' + window._sanitizeAIHtml(plan) + '</div><button onclick="navigator.clipboard&&navigator.clipboard.writeText(JSON.parse(localStorage.getItem(\'base_meal_prep_plan\')||\'{}\').plan||\'\')" class="pointer-events-auto w-full" aria-label="Kopieren" style="margin-top:12px;padding:11px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;background:var(--inner-bg-hex);border:1px solid var(--border-hex);color:var(--text-muted)">In Zwischenablage kopieren</button>', false);
     } catch(e) { window.showToast('Fehler: ' + e.message, 'error'); }
@@ -9147,7 +9365,7 @@
         var barPct = hasVal ? Math.max(0, Math.min(100, Math.round((val - m.low) / (m.high - m.low) * 100))) : 0;
         var optLeft = Math.round((m.optimal_low - m.low) / (m.high - m.low) * 100);
         var optWidth = Math.round((m.optimal_high - m.optimal_low) / (m.high - m.low) * 100);
-        html += '<div style="padding:10px 12px;background:var(--inner-bg-hex);border:1px solid ' + (status==='deficient'||status==='high' ? 'rgba(232,138,138,0.25)' : 'var(--border-hex)') + ';border-radius:11px;margin-bottom:5px;cursor:pointer" onclick="this.querySelector(\'.bw-detail\').style.display=this.querySelector(\'.bw-detail\').style.display===\'none\'?\'block\':\'none\'">' +
+        html += '<div style="padding:10px 12px;background:var(--inner-bg-hex);border:1px solid ' + (status==='deficient'||status==='high' ? 'rgba(232,138,138,0.25)' : 'var(--border-hex)') + ';border-radius:11px;margin-bottom:5px;cursor:pointer" onclick="var _d=this.querySelector(\'.bw-detail\');if(_d)_d.style.display=_d.style.display===\'none\'?\'block\':\'none\'">' +
           '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:14px">' + m.icon + '</span><p style="font-size:12px;font-weight:600;color:var(--text-main);flex:1">' + m.label + '</p><span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;background:' + sc + '22;color:' + sc + '">' + sl + '</span>' + (hasVal ? '<span style="font-size:12px;font-weight:700;color:var(--text-main);margin-left:4px">' + val + ' ' + m.unit + '</span>' : '<span style="font-size:10px;color:var(--text-muted)">kein Wert</span>') + '</div>' +
           '<div style="position:relative;height:4px;background:var(--border-hex);border-radius:2px;margin-bottom:4px"><div style="position:absolute;left:' + optLeft + '%;width:' + optWidth + '%;height:100%;background:rgba(163,201,168,0.3);border-radius:2px"></div>' + (hasVal ? '<div style="position:absolute;left:' + barPct + '%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:' + sc + ';top:-2px"></div>' : '') + '</div>' +
           '<div style="display:flex;justify-content:space-between"><span style="font-size:8px;color:var(--text-muted)">' + m.low + '</span><span style="font-size:8px;color:var(--primary-hex)">Optimal: ' + m.optimal_low + '\u2013' + m.optimal_high + '</span><span style="font-size:8px;color:var(--text-muted)">' + m.high + '</span></div>' +
@@ -9167,7 +9385,7 @@
     var btn = document.querySelector('[onclick*="_analyzeBloodwork"]'); if (btn) { btn.style.opacity = '0.6'; btn.textContent = 'Analysiere...'; }
     try {
       var res = await fetch('/.netlify/functions/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: prompt, userId: window._getAiUserId ? window._getAiUserId() : '' }) });
-      var data = await res.json(); var text = data.reply || (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || '';
+      var data = await res.json(); var text = window._extractGeminiText(data, '');
       window.showModal('Blutwert-Analyse', '<div style="padding:8px 10px;background:rgba(138,175,232,0.08);border:1px solid rgba(138,175,232,0.2);border-radius:8px;margin-bottom:10px"><p style="font-size:10px;color:#8aafe8">Diese Analyse ersetzt keine \u00E4rztliche Beratung.</p></div><div style="font-size:12px;line-height:1.7;color:var(--text-main);max-height:60vh;overflow-y:auto">' + window._sanitizeAIHtml(text) + '</div>', false);
     } catch(e) { window.showToast('Analyse fehlgeschlagen', 'error'); }
     finally { if (btn) { btn.style.opacity = '1'; btn.textContent = 'KI-Analyse'; } }
@@ -9871,7 +10089,7 @@
     });
     if (!res.ok) throw new Error('KI nicht verf\u00fcgbar');
     var data = await res.json();
-    var text = (data.parts && data.parts[data.parts.length-1] && data.parts[data.parts.length-1].text) || data.reply || '';
+    var text = window._extractGeminiText(data, '');
     text = text.replace(/```json|```/g, '').trim();
     var match = text.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Kein JSON');
@@ -10781,7 +10999,7 @@
   };
 
   window.BASE_XP = {
-   sources: { workout: 50, coachChat: 15, scanAnalysis: 25, planGenerated: 40, challengeJoin: 30, goalComplete: 500, streak7: 200, streak30: 1000, weeklyConsistency: 100, milestone: 100, achievement: 200, referral_new: 500, referral_invite: 500 },
+   sources: { workout: 50, coachChat: 15, scanAnalysis: 25, planGenerated: 40, challengeJoin: 30, goalComplete: 500, streak7: 200, streak30: 1000, weeklyConsistency: 100, milestone: 100, achievement: 200, referral_new: 500, referral_invite: 500, briefingUsed: 10 },
    maxPerDay: { workout: 2, coachChat: 3, scanAnalysis: 1, planGenerated: 1, challengeJoin: 1, weeklyConsistency: 1, milestone: 99, achievement: 99 },
    ranks: [
     { name: 'Rookie', minXP: 0, maxLevel: 4 },
@@ -12248,7 +12466,7 @@
       }
       if (!res.ok) throw new Error('Server Fehler');
       var data = await res.json();
-      var text = data.reply || (data.parts && data.parts[data.parts.length - 1] && data.parts[data.parts.length - 1].text) || '';
+      var text = window._extractGeminiText(data, '');
 
       window.toggleModal('planCheckerModal');
       window.showModal(
@@ -12931,7 +13149,7 @@
       if (res.status === 429) { window.showToast('Tageslimit erreicht.', 'error'); return; }
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
-      var text = data.reply || (data.parts && data.parts[data.parts.length - 1] && data.parts[data.parts.length - 1].text) || '{}';
+      var text = window._extractGeminiText(data, '{}');
       var clean = text.replace(/```json|```/g, '').trim();
       var parsed;
       try { parsed = JSON.parse(clean); } catch(e) { window.showToast('Liste konnte nicht erstellt werden', 'error'); return; }
@@ -13403,9 +13621,7 @@
         body: JSON.stringify({ prompt: prompt, systemPrompt: 'Du bist Jarvis, Fitness-Coach.', userId: window._getAiUserId ? window._getAiUserId() : 'anon' })
       });
       var data = await res.json();
-      var reply = '';
-      if (data.parts) { for (var i = data.parts.length-1; i >= 0; i--) { if (data.parts[i] && data.parts[i].text) { reply = data.parts[i].text; break; } } }
-      if (!reply) reply = data.reply || 'Analyse nicht m\u00f6glich.';
+      var reply = window._extractGeminiText(data, 'Analyse nicht m\u00f6glich.');
 
       if (typeof _addChatMessage === 'function') {
         _addChatMessage('ai', '\uD83E\uDDEC **Dein Trainings-DNA Profil**\n\n' + reply);
@@ -13794,7 +14010,7 @@
                 body: JSON.stringify({ prompt: prompt, type: 'nudge' })
               });
               var data = await res.json();
-              var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+              var reply = window._extractGeminiText(data, '');
               _addChatMessage('ai', '\uD83D\uDCCA **Deine Habit-Analyse**\n\n' + reply);
             } catch(e) {
               _addChatMessage('ai', 'Habit-Analyse konnte nicht geladen werden.');
@@ -13911,9 +14127,7 @@
         body: JSON.stringify({ prompt: conversation + '\nJarvis:', systemPrompt: systemPrompt, userId: window._getAiUserId ? window._getAiUserId() : 'anonymous' })
       });
       var data = await res.json();
-      var response = '';
-      if (data.parts && Array.isArray(data.parts)) { for (var pi = data.parts.length - 1; pi >= 0; pi--) { if (data.parts[pi] && data.parts[pi].text) { response = data.parts[pi].text; break; } } }
-      if (!response) response = data.reply || 'Keine Antwort.';
+      var response = window._extractGeminiText(data, 'Keine Antwort.');
       window._kiChatHistory.push({ role: 'assistant', content: response });
       return { response: response, wasIntent: false };
     } catch(e) { return { response: 'Entschuldigung, ein Fehler ist aufgetreten.', wasIntent: false }; }
@@ -13948,7 +14162,7 @@
         body: JSON.stringify({ prompt: prompt, type: 'nudge' })
       });
       var data = await res.json();
-      var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+      var reply = window._extractGeminiText(data, '');
       reply = reply.trim();
 
       if (reply) {
@@ -14063,7 +14277,7 @@
         body: JSON.stringify({ prompt: prompt, type: 'nudge' })
       });
       var data = await res.json();
-      var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+      var reply = window._extractGeminiText(data, '');
 
       if (window._openKiChat) {
         window._openKiChat();

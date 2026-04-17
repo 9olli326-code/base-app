@@ -799,3 +799,8 @@ input[inputmode="decimal"]:focus {
     --surface-light: color-mix(in srgb, var(--bg-hex, #0f110f), white 8%);
 }
 
+@keyframes briefingPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary-hex), transparent 70%); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 20px color-mix(in srgb, var(--primary-hex), transparent 100%); }
+}
+
