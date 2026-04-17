@@ -95,6 +95,10 @@ window.renderWidgetStoreUI = function() {
     });
     var vcToggle = document.getElementById('mod_voiceCoach');
     if (vcToggle) vcToggle.checked = localStorage.getItem('base_voice_coach') === 'true';
+    var gcToggle = document.getElementById('mod_goalCoaching');
+    if (gcToggle) gcToggle.checked = localStorage.getItem('base_goal_coaching_enabled') === 'true';
+    var hlToggle = document.getElementById('mod_habitLoop');
+    if (hlToggle) hlToggle.checked = localStorage.getItem('base_habit_loop_enabled') === 'true';
 };
 
 window.saveModules = function() {

@@ -488,7 +488,7 @@
      (sel ? '<span style="margin-left:auto;color:var(--primary-hex);font-size:16px">\u2713</span>' : '') +
      '</button>';
    });
-   html += '<p style="font-size:10px;color:var(--text-muted);text-align:center;margin-top:12px;margin-bottom:8px">Powered by OpenAI \u00B7 Echtzeit-Generierung</p>';
+   html += '<p style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;padding:0 4px;text-align:center">Die gew\u00e4hlte Pers\u00f6nlichkeit gilt f\u00fcr Chat UND Voice Mode</p>';
    html += '<button type="button" onclick="document.getElementById(\'voiceStyleSheet\').remove();var _bd=document.getElementById(\'voiceStyleBackdrop\');if(_bd)_bd.remove();" ' +
     'class="pointer-events-auto" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border-hex);background:transparent;color:var(--text-muted);cursor:pointer;margin-top:4px">' + window.t('btnClose','Abbrechen') + '</button>';
    sheet.innerHTML = html;
@@ -13338,16 +13338,98 @@
   };
 
   // ============================================================
+  // TRAININGS-DNA ANALYSE
+  // ============================================================
+
+  window._generateDNAReport = async function() {
+    var workouts = (window.workouts || []).filter(function(w) { return w.archived; });
+    if (workouts.length < 20) {
+      window.showToast('F\u00fcr die DNA-Analyse ben\u00f6tige ich noch ' + (20 - workouts.length) + ' weitere Workouts.');
+      return;
+    }
+
+    window.showToast('\uD83E\uDDEC Analysiere dein Trainings-DNA...');
+    window._openKiChat && window._openKiChat();
+    setTimeout(function() {
+      if (typeof _addChatMessage === 'function') {
+        _addChatMessage('ai', '\uD83E\uDDEC **Trainings-DNA Analyse l\u00e4uft...**\n\nIch analysiere ' + workouts.length + ' Workouts nach Mustern. Einen Moment...');
+      }
+    }, 400);
+
+    var dayCount = {};
+    var dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    var exerciseCount = {};
+    var categoryCount = {strength:0, cardio:0, recovery:0, main:0};
+    var monthlyVolume = {};
+
+    workouts.forEach(function(w) {
+      var d = new Date(w.date);
+      var day = dayNames[d.getDay()];
+      dayCount[day] = (dayCount[day]||0) + 1;
+      if (w.category) categoryCount[w.category] = (categoryCount[w.category]||0) + 1;
+      if (w.exercise) exerciseCount[w.exercise] = (exerciseCount[w.exercise]||0) + 1;
+      var month = w.date.substring(0,7);
+      if (!monthlyVolume[month]) monthlyVolume[month] = 0;
+      if (w.volume) monthlyVolume[month] += w.volume;
+    });
+
+    var bestDay = Object.keys(dayCount).sort(function(a,b){ return dayCount[b]-dayCount[a]; })[0];
+    var topEx = Object.keys(exerciseCount).sort(function(a,b){ return exerciseCount[b]-exerciseCount[a]; }).slice(0,5);
+    var mainCat = Object.keys(categoryCount).sort(function(a,b){ return categoryCount[b]-categoryCount[a]; })[0];
+    var weeks = Math.ceil(workouts.length / 3.5);
+    var freq = (workouts.length / Math.max(weeks, 1)).toFixed(1);
+
+    var summary = 'Analysiere ' + workouts.length + ' Workouts:\n' +
+      'H\u00e4ufigster Trainingstag: ' + bestDay + ' (' + (dayCount[bestDay]||0) + 'x)\n' +
+      'Hauptkategorie: ' + mainCat + '\n' +
+      'Top-\u00dcbungen: ' + topEx.join(', ') + '\n' +
+      'Durchschnittliche Frequenz: ' + freq + ' Einheiten/Woche\n' +
+      'Gesamtworkouts: ' + workouts.length;
+
+    try {
+      var profile = window.userProfile || {};
+      var prompt = 'Du bist Jarvis, ein KI Fitness-Coach. Analysiere diese Trainingsdaten und erstelle ein pr\u00e4gnantes "Trainings-DNA Profil".\n\n' +
+        summary + '\n\n' +
+        'Profil: ' + (profile.age||'?') + 'J, ' + (profile.experience||'?') + ', Ziel: ' + (profile.goal||'allgemeine Fitness') + '\n\n' +
+        'Erstelle ein DNA-Profil mit:\n' +
+        '1. Athleten-Typ (1 Satz)\n' +
+        '2. St\u00e4rken (2-3 Punkte)\n' +
+        '3. Blinde Flecken (1-2 Punkte)\n' +
+        '4. Kern-Empfehlung (1 Satz)\n\n' +
+        'Stil: direkt, pers\u00f6nlich, motivierend. Kein Essay. Markdown erlaubt.';
+
+      var res = await fetch('/.netlify/functions/gemini', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt: prompt, systemPrompt: 'Du bist Jarvis, Fitness-Coach.', userId: window._getAiUserId ? window._getAiUserId() : 'anon' })
+      });
+      var data = await res.json();
+      var reply = '';
+      if (data.parts) { for (var i = data.parts.length-1; i >= 0; i--) { if (data.parts[i] && data.parts[i].text) { reply = data.parts[i].text; break; } } }
+      if (!reply) reply = data.reply || 'Analyse nicht m\u00f6glich.';
+
+      if (typeof _addChatMessage === 'function') {
+        _addChatMessage('ai', '\uD83E\uDDEC **Dein Trainings-DNA Profil**\n\n' + reply);
+      }
+      if (window._jarvisSpeak) window._jarvisSpeak('Dein Trainings-DNA Profil ist fertig. Schau in den Chat.');
+
+    } catch(e) {
+      if (typeof _addChatMessage === 'function') {
+        _addChatMessage('ai', 'DNA-Analyse konnte nicht abgeschlossen werden. Versuch es sp\u00e4ter.');
+      }
+    }
+  };
+
+  // ============================================================
   // JARVIS INTENT ENGINE
   // ============================================================
 
   window._JARVIS_INTENTS = {
     navigate_training: {
-      patterns: ['training starten','training \u00f6ffnen','trainieren','zum training','workout starten','start training','open training','let\'s train'],
+      patterns: ['training starten','training \u00f6ffnen','trainieren','zum training','workout starten','start training','open training','let\'s train','lass uns loslegen','ich will trainieren','leg los','starten wir','let\'s go','loslegen'],
       action: function() { window.switchTab && window.switchTab('training'); return 'Ich \u00f6ffne deinen Training-Tab. Los geht\u2019s! \uD83D\uDCAA'; }
     },
     navigate_analyse: {
-      patterns: ['analyse','\u00f6ffne analyse','analytics','statistiken','stats','meine daten','charts','diagramme','fortschritt','progress','show stats','show analytics'],
+      patterns: ['analyse','\u00f6ffne analyse','analytics','statistiken','stats','meine daten','charts','diagramme','fortschritt','progress','show stats','show analytics','wie war meine woche','wie lief es','mein fortschritt','zeig mir meine zahlen','was hab ich diese woche','meine statistiken'],
       action: function() { window.switchTab && window.switchTab('analyse'); return 'Hier sind deine Statistiken und Fortschritte.'; }
     },
     navigate_nutrition: {
@@ -13411,7 +13493,7 @@
     },
     open_dna: {
       patterns: ['trainings dna','dna','trainingstyp','mein trainingstyp','dna analyse'],
-      action: function() { setTimeout(function() { window._generateDNAReport && window._generateDNAReport(); }, 500); return 'Ich analysiere dein Trainings-DNA Profil.'; }
+      action: function() { setTimeout(function() { window._generateDNAReport && window._generateDNAReport(); }, 500); return null; }
     },
     query_weight: {
       patterns: ['gewicht','k\u00f6rpergewicht','wie viel wiege ich','weight','mein gewicht'],
@@ -13483,6 +13565,273 @@
       patterns: ['history importieren','daten importieren','strong importieren','hevy importieren','import history','csv importieren'],
       action: function() { setTimeout(function() { window.openHistoryImport && window.openHistoryImport(); }, 500); return 'Ich \u00f6ffne den History-Import.'; }
     },
+    action_show_prs: {
+      patterns: ['meine prs','meine rekorde','pers\u00f6nliche rekorde',
+                 'best lifts','meine bestleistungen','was sind meine prs',
+                 'show my prs','my records'],
+      action: function() {
+        window.switchTab && window.switchTab('analyse');
+        return 'Ich zeige dir deine pers\u00f6nlichen Rekorde.';
+      }
+    },
+
+    action_streak: {
+      patterns: ['mein streak','wie viele tage','meine serie',
+                 'streak check','how many days','my streak'],
+      action: function() {
+        var s = parseInt(localStorage.getItem('base_streak_count') || '0');
+        return s > 0
+          ? 'Du bist auf einem ' + s + '-Tage Streak. Stark! Mach weiter so.'
+          : 'Noch kein aktiver Streak. Ein Workout heute \u00e4ndert das sofort.';
+      }
+    },
+
+    action_last_workout: {
+      patterns: ['letztes training details','was hab ich zuletzt gemacht','wann war ich zuletzt im gym',
+                 'last workout details','was habe ich trainiert gestern','mein letztes workout'],
+      action: function() {
+        var ws = (window.workouts || []).filter(function(w){ return w.archived; });
+        if (!ws.length) return 'Noch kein Training aufgezeichnet. Lass uns das \u00e4ndern!';
+        ws.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+        var l = ws[0];
+        var days = Math.floor((Date.now()-new Date(l.date))/86400000);
+        var when = days === 0 ? 'heute' : days === 1 ? 'gestern' : 'vor ' + days + ' Tagen';
+        return 'Dein letztes Training war ' + when + ': ' + (l.exercise || l.sportCategory || 'Training') + '.';
+      }
+    },
+
+    action_battery: {
+      patterns: ['wie ist meine battery','battery check','readiness check',
+                 'bin ich erholt','wie fit bin ich heute','energie heute check',
+                 'zns score check','wie erholt bin ich','can i train hard'],
+      action: function() {
+        var score = window.currentReadinessScore || 100;
+        return score >= 80
+          ? 'Deine Battery steht bei ' + score + '%. Gr\u00fcnes Licht \u2014 voll belasten heute.'
+          : score >= 60
+          ? 'Battery ' + score + '%. Moderate Belastung empfohlen.'
+          : 'Battery bei ' + score + '%. Heute lieber leicht oder Mobility.';
+      }
+    },
+
+    action_body_weight: {
+      patterns: ['mein aktuelles gewicht','aktuelles k\u00f6rpergewicht','wie viel wiege ich genau',
+                 'my current weight','body weight check','k\u00f6rpergewicht aktuell'],
+      action: function() {
+        var p = window.userProfile || {};
+        if (p.weight) return 'Dein eingetragenes Gewicht: ' + p.weight + 'kg. Zum Aktualisieren: Men\u00fc \u2192 Profil.';
+        return 'Noch kein Gewicht eingetragen. Geh zu Men\u00fc \u2192 Profil.';
+      }
+    },
+
+    plan_meso: {
+      patterns: ['mesozyklus','mesozyklus erstellen','neuen plan',
+                 'trainingsplan erstellen','erstell mir einen plan',
+                 'create plan','new plan','training plan',
+                 'plan erstellen','ich will einen plan'],
+      action: function() {
+        setTimeout(function() {
+          window._openKiChat && window._openKiChat();
+          setTimeout(function() {
+            if (typeof _addChatMessage === 'function') {
+              _addChatMessage('ai',
+                'Ich erstelle deinen Mesozyklus. Drei kurze Fragen:\n\n' +
+                '**Was ist dein Hauptziel?**\n\n' +
+                '\uD83D\uDCAA Muskelmasse \u00b7 \u26A1 Kraft \u00b7 \uD83C\uDFC3 Ausdauer \u00b7 \uD83D\uDD25 Abnehmen'
+              );
+              window._jarvisConvState = { flow: 'plan_meso', step: 1 };
+            }
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
+    plan_competition: {
+      patterns: ['wettkampf','competition','wettkampfvorbereitung',
+                 'ich habe einen wettkampf','vorbereitung wettkampf',
+                 'prepare competition','peaking','peak phase',
+                 'wettkampf vorbereiten','auf wettkampf vorbereiten',
+                 'turnier','meisterschaft','race','rennen vorbereiten'],
+      action: function() {
+        setTimeout(function() {
+          window._openKiChat && window._openKiChat();
+          setTimeout(function() {
+            if (typeof _addChatMessage === 'function') {
+              _addChatMessage('ai',
+                '\uD83C\uDFC6 Wettkampfvorbereitung \u2014 ich plane das f\u00fcr dich.\n\n' +
+                '**Wann ist dein Wettkampf?**\n' +
+                'Schreib mir das Datum (z.B. "15. Juni" oder "in 10 Wochen")'
+              );
+              window._jarvisConvState = { flow: 'plan_competition', step: 1 };
+            }
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
+    pt_client_summary: {
+      patterns: ['wie war','woche von','training von','progress von',
+                 'wie l\u00e4uft es bei','client check','kunden check',
+                 'wie macht sich','wie trainiert','update zu'],
+      action: function() {
+        if (window.currentMode !== 'pt') {
+          return 'Ich bin gerade im Athleten-Modus. Wechsle zum PT-Modus um Kunden-Infos abzurufen.';
+        }
+        setTimeout(function() {
+          window._openKiChat && window._openKiChat();
+          var clients = window.clients || [];
+          if (clients.length === 0) {
+            setTimeout(function() {
+              if (typeof _addChatMessage === 'function')
+                _addChatMessage('ai', 'Du hast noch keine Kunden angelegt.');
+            }, 400);
+            return;
+          }
+          var clientList = clients.map(function(c,i){ return (i+1) + '. ' + c.name; }).join(', ');
+          setTimeout(function() {
+            if (typeof _addChatMessage === 'function') {
+              _addChatMessage('ai', '\u00dcber welchen Kunden soll ich berichten?\n\n' + clientList);
+              window._jarvisConvState = { flow: 'pt_summary', step: 1, clients: clients };
+            }
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
+    pt_all_clients: {
+      patterns: ['alle kunden','kunden \u00fcbersicht','alle clients',
+                 'wer hat diese woche','weekly overview','pt \u00fcbersicht'],
+      action: function() {
+        if (window.currentMode !== 'pt') return 'Wechsle zum PT-Modus f\u00fcr Kunden-Infos.';
+        setTimeout(function() {
+          var clients = window.clients || [];
+          window._openKiChat && window._openKiChat();
+          setTimeout(function() {
+            if (typeof _addChatMessage !== 'function') return;
+            if (clients.length === 0) { _addChatMessage('ai', 'Keine Kunden angelegt.'); return; }
+            var weekAgo = new Date(Date.now()-7*86400000).toISOString().split('T')[0];
+            var summary = clients.map(function(c) {
+              var ws = (window.workouts||[]).filter(function(w){ return w.client === c.id && w.archived && w.date >= weekAgo; });
+              return '**' + c.name + '**: ' + ws.length + ' Workouts diese Woche' + (ws.length === 0 ? ' \u26a0\ufe0f kein Training' : ' \u2705');
+            }).join('\n');
+            _addChatMessage('ai', '\uD83D\uDCCB **Kunden-\u00dcbersicht \u2014 Diese Woche**\n\n' + summary);
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
+    start_experiment: {
+      patterns: ['experiment starten','experiment','teste','4 wochen test',
+                 'start experiment','ich will testen','experiment modus'],
+      action: function() {
+        setTimeout(function() {
+          window._openKiChat && window._openKiChat();
+          setTimeout(function() {
+            if (typeof _addChatMessage !== 'function') return;
+            var current = JSON.parse(localStorage.getItem('base_active_experiment') || 'null');
+            if (current && current.status === 'active') {
+              _addChatMessage('ai', '\uD83E\uDDEA Du hast bereits ein aktives Experiment: **' + current.name + '** (l\u00e4uft bis ' + current.endDate + ').');
+              return;
+            }
+            var opts = window._EXPERIMENT_TEMPLATES.map(function(t,i) {
+              return (i+1) + '. **' + t.name + '** \u2014 ' + t.desc;
+            }).join('\n');
+            _addChatMessage('ai', '\uD83E\uDDEA **Experiment-Modus**\n\nW\u00e4hle einen 4-Wochen-Test:\n\n' + opts + '\n\nSchreib die Nummer oder beschreibe dein eigenes Experiment.');
+            window._jarvisConvState = { flow: 'experiment', step: 1 };
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
+    habit_correlation: {
+      patterns: ['welche habits','habit analyse','habits und training',
+                 'habit korrelation','was hilft meinem training',
+                 'habits performance'],
+      action: function() {
+        setTimeout(async function() {
+          var log = JSON.parse(localStorage.getItem('base_habit_loop_log') || '[]');
+          if (log.length < 7) {
+            window._openKiChat && window._openKiChat();
+            setTimeout(function() {
+              if (typeof _addChatMessage === 'function')
+                _addChatMessage('ai', 'Ich brauche noch mehr Check-In Daten. Aktiviere den Habit Loop in Einstellungen und checke t\u00e4glich ein!');
+            }, 400);
+            return;
+          }
+
+          window._openKiChat && window._openKiChat();
+          setTimeout(async function() {
+            if (typeof _addChatMessage !== 'function') return;
+            _addChatMessage('ai', '\uD83D\uDCCA Analysiere deine Habit-Performance-Korrelation...');
+
+            var habitStats = {};
+            log.forEach(function(entry) {
+              if (!entry.habits) return;
+              Object.keys(entry.habits).forEach(function(k) {
+                if (!habitStats[k]) habitStats[k] = { done: 0, total: 0 };
+                habitStats[k].total++;
+                if (entry.habits[k]) habitStats[k].done++;
+              });
+            });
+
+            var habitSummary = Object.keys(habitStats).map(function(k) {
+              var rate = Math.round((habitStats[k].done / habitStats[k].total) * 100);
+              return k + ': ' + rate + '% Einhaltung';
+            }).join(', ');
+
+            try {
+              var prompt = 'Habit Check-In Daten der letzten ' + log.length + ' Tage:\n' + habitSummary + '\n\n' +
+                'Analysiere kurz welche Habits regelm\u00e4\u00dfig eingehalten werden und was das f\u00fcr das Training bedeutet. ' +
+                'Max 60 W\u00f6rter, direkt und konkret.';
+
+              var res = await fetch('/.netlify/functions/gemini', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ prompt: prompt, type: 'nudge' })
+              });
+              var data = await res.json();
+              var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+              _addChatMessage('ai', '\uD83D\uDCCA **Deine Habit-Analyse**\n\n' + reply);
+            } catch(e) {
+              _addChatMessage('ai', 'Habit-Analyse konnte nicht geladen werden.');
+            }
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
+    check_goals: {
+      patterns: ['meine ziele','ziel fortschritt','wie stehe ich bei meinen zielen',
+                 'check goals','ziele check','bin ich on track',
+                 'mein ziel','ziel status'],
+      action: function() {
+        setTimeout(function() {
+          var goals = window.getGoals ? window.getGoals() : [];
+          var active = goals.filter(function(g) { return !g.completed; });
+          window._openKiChat && window._openKiChat();
+          setTimeout(function() {
+            if (typeof _addChatMessage !== 'function') return;
+            if (active.length === 0) {
+              _addChatMessage('ai', 'Du hast noch keine aktiven Ziele. Geh zu Men\u00fc \u2192 Meine Ziele um dein erstes Ziel zu setzen.');
+              return;
+            }
+            var summary = active.map(function(g) {
+              var pct = g.targetValue > 0 ? Math.round((g.currentValue/g.targetValue)*100) : 0;
+              var days = Math.max(0, Math.ceil((new Date(g.deadline)-new Date())/86400000));
+              return '**' + g.title + '**: ' + pct + '% ' + (days > 0 ? '(' + days + ' Tage verbleibend)' : '(abgelaufen)');
+            }).join('\n');
+            _addChatMessage('ai', '\uD83C\uDFAF **Deine aktiven Ziele:**\n\n' + summary);
+          }, 400);
+        }, 200);
+        return null;
+      }
+    },
+
     help: {
       patterns: ['hilfe','help','was kannst du','was kannst du alles','what can you do','jarvis hilfe','jarvis help','zeig mir was du kannst'],
       action: function() {
@@ -13509,10 +13858,22 @@
   window._executeJarvis = async function(userText, isVoice) {
     if (!userText || !userText.trim()) return null;
     var intent = window._detectJarvisIntent(userText);
+    // Gelernte Phrasen pr\u00fcfen
+    if (!intent && window._jarvisCheckLearned) {
+      var learnedIntent = window._jarvisCheckLearned(userText);
+      if (learnedIntent && window._JARVIS_INTENTS[learnedIntent]) {
+        intent = window._JARVIS_INTENTS[learnedIntent];
+      }
+    }
     if (intent) {
+      // Intent lernen falls User-Text noch nicht bekannt
+      if (window._jarvisLearnPhrase) {
+        var matchedKey = Object.keys(window._JARVIS_INTENTS).find(function(k) {
+          return window._JARVIS_INTENTS[k] === intent;
+        });
+        if (matchedKey) window._jarvisLearnPhrase(userText, matchedKey);
+      }
       if (isVoice) {
-        // Voice Mode: Konversations-Intents (null) überspringen
-        // → Gemini soll antworten, damit es etwas zum Sprechen gibt
         var intentResult = intent.action();
         if (intentResult === null) {
           // Nicht crashen — Gemini-Fallthrough für gesprochene Antwort
@@ -13531,6 +13892,14 @@
       window._kiChatHistory.push({ role: 'user', content: userText });
       var systemPrompt = typeof window._buildChatSystemPrompt === 'function'
         ? window._buildChatSystemPrompt() : 'Du bist Jarvis, der pers\u00f6nliche KI Fitness Coach in BASE.';
+      var _persona = localStorage.getItem('base_voice_style') || 'motivator';
+      var _personaInstructions = {
+        motivator: 'PERS\u00d6NLICHKEIT: Energetisch, direkt, motivierend. Kurze kraftvolle S\u00e4tze. Keine langen Erkl\u00e4rungen. Feiere Fortschritte laut.',
+        calm:      'PERS\u00d6NLICHKEIT: Ruhig, pr\u00e4zise, professionell. Erkl\u00e4re Dinge klar und strukturiert. Keine Ausrufezeichen.',
+        drill:     'PERS\u00d6NLICHKEIT: Drill Sergeant \u2014 knapp, direkt, keine Ausreden gelten. Maximal 2 S\u00e4tze. Milit\u00e4rischer Ton.',
+        funny:     'PERS\u00d6NLICHKEIT: Warm, freundlich, leicht humorvoll. Sprich wie ein guter Freund. Darf gelegentlich scherzen.'
+      };
+      systemPrompt += '\n\n' + (_personaInstructions[_persona] || _personaInstructions.motivator);
       systemPrompt += isVoice
         ? '\n\nVOICE: Max 2-3 S\u00e4tze. Kein Markdown. Nat\u00fcrlich sprechen.'
         : '\n\nTEXT: Antworte hilfreich und konkret. Markdown ist erlaubt.';
@@ -13548,4 +13917,180 @@
       window._kiChatHistory.push({ role: 'assistant', content: response });
       return { response: response, wasIntent: false };
     } catch(e) { return { response: 'Entschuldigung, ein Fehler ist aufgetreten.', wasIntent: false }; }
+  };
+
+  // ── Jarvis Sprachlernmodul ──
+  // ── Goal Coaching ──
+  window._runGoalCoaching = async function() {
+    if (localStorage.getItem('base_goal_coaching_enabled') !== 'true') return;
+    var goals = window.getGoals ? window.getGoals() : [];
+    var active = goals.filter(function(g) { return !g.completed && g.deadline; });
+    if (active.length === 0) return;
+
+    var today = new Date().toISOString().split('T')[0];
+    var lastCoaching = localStorage.getItem('base_goal_coaching_last');
+    var daysSinceLast = lastCoaching ? Math.floor((new Date(today) - new Date(lastCoaching)) / 86400000) : 999;
+    if (daysSinceLast < 6) return;
+    localStorage.setItem('base_goal_coaching_last', today);
+
+    var goalSummary = active.map(function(g) {
+      var pct = g.targetValue > 0 ? Math.round((g.currentValue / g.targetValue) * 100) : 0;
+      var daysLeft = Math.max(0, Math.ceil((new Date(g.deadline) - new Date()) / 86400000));
+      return '"' + g.title + '": ' + pct + '% erreicht, ' + daysLeft + ' Tage verbleibend';
+    }).join('; ');
+
+    try {
+      var prompt = 'W\u00f6chentlicher Ziel-Check-In. Aktive Ziele: ' + goalSummary + '. ' +
+        'Gib einen kurzen motivierenden Check-In (max 3 S\u00e4tze): Was l\u00e4uft gut, was braucht Aufmerksamkeit, eine konkrete Empfehlung f\u00fcr diese Woche.';
+
+      var res = await fetch('/.netlify/functions/gemini', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt: prompt, type: 'nudge' })
+      });
+      var data = await res.json();
+      var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+      reply = reply.trim();
+
+      if (reply) {
+        window.showToast('\uD83C\uDFAF Jarvis: ' + reply.substring(0, 80) + '...', 'info', 6000);
+        setTimeout(function() {
+          window._openKiChat && window._openKiChat();
+          setTimeout(function() {
+            if (typeof _addChatMessage === 'function') {
+              _addChatMessage('ai', '\uD83C\uDFAF **W\u00f6chentlicher Ziel-Check-In**\n\n' + reply);
+            }
+          }, 400);
+        }, 2000);
+        if (window._jarvisSpeak) window._jarvisSpeak('Ich habe deinen w\u00f6chentlichen Ziel-Check-In. Schau in den Chat.');
+      }
+    } catch(e) { console.log('Goal coaching error:', e); }
+  };
+
+  window._jarvisLearnPhrase = function(userText, intent) {
+    if (!userText || !intent) return;
+    var learned = JSON.parse(localStorage.getItem('base_jarvis_learned') || '{}');
+    var key = userText.toLowerCase().trim();
+    if (key.length < 3 || key.length > 60) return;
+    if (!learned[key]) learned[key] = { intent: intent, count: 0, learned: new Date().toISOString() };
+    learned[key].count++;
+    var keys = Object.keys(learned);
+    if (keys.length > 100) {
+      keys.sort(function(a,b){ return learned[a].count - learned[b].count; });
+      delete learned[keys[0]];
+    }
+    localStorage.setItem('base_jarvis_learned', JSON.stringify(learned));
+  };
+
+  // ── Experiment-Modus ──
+  window._EXPERIMENT_TEMPLATES = [
+    { id: 'volume_plus', name: '+20% Volumen', desc: 'Erh\u00f6he dein Trainingsvolumen um 20%', metric: 'volume', change: '+20%' },
+    { id: 'frequency_plus', name: 'Mehr Frequenz', desc: '1 Trainingstag pro Woche mehr', metric: 'frequency', change: '+1 Tag' },
+    { id: 'intensity_plus', name: 'Mehr Intensit\u00e4t', desc: 'Reduziere RIR um 1 (schwerer trainieren)', metric: 'intensity', change: 'RIR -1' },
+    { id: 'sleep_focus', name: 'Schlaf-Fokus', desc: '8h Schlaf pro Nacht f\u00fcr 4 Wochen', metric: 'sleep', change: '8h/Nacht' },
+    { id: 'custom', name: 'Eigenes Experiment', desc: 'Beschreibe selbst was du testen willst', metric: 'custom', change: '' }
+  ];
+
+  window._startExperiment = function(templateId, customDesc) {
+    var template = window._EXPERIMENT_TEMPLATES.find(function(t){ return t.id === templateId; });
+    if (!templateId && !customDesc) return;
+
+    var experiment = {
+      id: Date.now().toString(),
+      templateId: templateId || 'custom',
+      name: template ? template.name : 'Eigenes Experiment',
+      description: customDesc || (template ? template.desc : ''),
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 28 * 86400000).toISOString().split('T')[0],
+      metric: template ? template.metric : 'custom',
+      baselineWorkouts: (window.workouts||[]).filter(function(w){return w.archived;}).length,
+      baselineAvgVolume: 0,
+      status: 'active'
+    };
+
+    var ws = (window.workouts||[]).filter(function(w){return w.archived;}).slice(-8);
+    if (ws.length > 0) {
+      var totalVol = ws.reduce(function(s,w){ return s + (w.volume||0); }, 0);
+      experiment.baselineAvgVolume = Math.round(totalVol / ws.length);
+    }
+
+    localStorage.setItem('base_active_experiment', JSON.stringify(experiment));
+    window.showToast('\uD83E\uDDEA Experiment gestartet! L\u00e4uft 4 Wochen bis ' + experiment.endDate);
+
+    if (window._openKiChat) {
+      window._openKiChat();
+      setTimeout(function() {
+        if (typeof _addChatMessage === 'function') {
+          _addChatMessage('ai',
+            '\uD83E\uDDEA **Experiment gestartet!**\n\n' +
+            '**Was:** ' + experiment.description + '\n' +
+            '**Dauer:** 4 Wochen (bis ' + experiment.endDate + ')\n' +
+            '**Baseline:** ' + experiment.baselineAvgVolume + 'kg Durchschnittsvolumen\n\n' +
+            'Nach 4 Wochen werde ich dir eine vollst\u00e4ndige Auswertung geben \u2014 ob die \u00c4nderung gewirkt hat oder nicht.'
+          );
+        }
+      }, 400);
+    }
+  };
+
+  window._checkExperimentStatus = async function() {
+    var exp = JSON.parse(localStorage.getItem('base_active_experiment') || 'null');
+    if (!exp || exp.status !== 'active') return;
+
+    var today = new Date().toISOString().split('T')[0];
+    if (today < exp.endDate) return;
+
+    exp.status = 'completed';
+    localStorage.setItem('base_active_experiment', JSON.stringify(exp));
+
+    var ws = (window.workouts||[]).filter(function(w){ return w.archived && w.date >= exp.startDate; });
+    var newAvgVol = 0;
+    if (ws.length > 0) {
+      var total = ws.reduce(function(s,w){ return s + (w.volume||0); }, 0);
+      newAvgVol = Math.round(total / ws.length);
+    }
+    var volChange = exp.baselineAvgVolume > 0 ? Math.round(((newAvgVol - exp.baselineAvgVolume) / exp.baselineAvgVolume) * 100) : 0;
+
+    try {
+      var prompt = 'Experiment-Auswertung nach 4 Wochen:\n' +
+        'Was getestet wurde: ' + exp.description + '\n' +
+        'Baseline-Volumen: ' + exp.baselineAvgVolume + 'kg/Session\n' +
+        'Neues Volumen: ' + newAvgVol + 'kg/Session (' + (volChange > 0 ? '+' : '') + volChange + '%)\n' +
+        'Anzahl Workouts im Experiment: ' + ws.length + '\n\n' +
+        'Gib eine klare Auswertung: Hat das Experiment funktioniert? Was empfiehlst du jetzt? Max 4 S\u00e4tze.';
+
+      var res = await fetch('/.netlify/functions/gemini', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt: prompt, type: 'nudge' })
+      });
+      var data = await res.json();
+      var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+
+      if (window._openKiChat) {
+        window._openKiChat();
+        setTimeout(function() {
+          if (typeof _addChatMessage === 'function') {
+            _addChatMessage('ai',
+              '\uD83E\uDDEA **Experiment abgeschlossen!**\n\n' +
+              '**' + exp.name + '** \u2014 4 Wochen\n\n' +
+              '\uD83D\uDCCA Volumen: ' + exp.baselineAvgVolume + ' \u2192 ' + newAvgVol + 'kg (' + (volChange > 0 ? '+' : '') + volChange + '%)\n\n' +
+              reply
+            );
+          }
+        }, 400);
+      }
+      if (window._jarvisSpeak) window._jarvisSpeak('Dein 4-Wochen Experiment ist abgeschlossen. Ich habe die Auswertung im Chat.');
+    } catch(e) { console.log('Experiment eval error:', e); }
+  };
+
+  window._jarvisCheckLearned = function(text) {
+    var learned = JSON.parse(localStorage.getItem('base_jarvis_learned') || '{}');
+    var lower = text.toLowerCase().trim();
+    if (learned[lower] && learned[lower].count >= 2) return learned[lower].intent;
+    var keys = Object.keys(learned);
+    for (var i = 0; i < keys.length; i++) {
+      if (learned[keys[i]].count >= 3 && lower.indexOf(keys[i]) !== -1) {
+        return learned[keys[i]].intent;
+      }
+    }
+    return null;
   };

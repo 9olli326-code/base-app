@@ -1611,248 +1611,229 @@
         </div>
 
         <div id="tab-tools" class="tab-panel hidden">
-            <div id="kiEmptyHint" class="hidden mb-4 mx-4 p-4 rounded-xl text-center" style="background:color-mix(in srgb,var(--primary-hex),transparent 92%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 75%)">
-                <p style="font-size:13px;font-weight:700;color:var(--primary-hex);margin-bottom:4px">Tracke zuerst ein paar Workouts</p>
-                <p style="font-size:11px;color:var(--text-muted)">Die KI-Features werden besser je mehr Trainingsdaten du hast.</p>
-            </div>
-            <div id="kiDiscoveryHints" class="hidden px-4 mb-4"></div>
-            <div class="space-y-3 pb-4">
+<div style="padding:16px 16px 0">
 
-                <button onclick="window._toggleKICategory('training')" class="pointer-events-auto" aria-label="Training Kategorie" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 0;background:none;border:none;border-bottom:1px solid var(--border-hex);margin-bottom:8px;cursor:pointer"><p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--primary-hex)">Training</p><svg id="kiArrow_training" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text-muted);transition:transform .2s;transform:rotate(180deg)"><polyline points="6 9 12 15 18 9"/></svg></button>
-                <div id="kiCat_training" style="display:block">
+  <!-- JARVIS HERO CARD -->
+  <div style="background:linear-gradient(135deg,rgba(163,201,168,0.12),rgba(163,201,168,0.04));border:1px solid rgba(163,201,168,0.25);border-radius:20px;padding:20px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i data-lucide="bot" class="w-5 h-5 pointer-events-none" style="color:#a3c9a8"></i>
+      </div>
+      <div style="flex:1">
+        <p style="font-size:18px;font-weight:900;color:#fff;margin:0;letter-spacing:-0.02em">Jarvis</p>
+        <p id="jarvisStatusLine" style="font-size:11px;color:rgba(163,201,168,0.7);margin:0;font-weight:600">Dein persönlicher KI Coach</p>
+      </div>
+      <div id="jarvisBatteryBadge" style="padding:4px 10px;border-radius:20px;background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);font-size:11px;font-weight:800;color:#a3c9a8"></div>
+    </div>
+    <div id="jarvisDailyInsight" style="background:rgba(0,0,0,0.2);border-radius:12px;padding:12px 14px;margin-bottom:14px;min-height:44px;display:flex;align-items:center">
+      <p style="font-size:13px;color:rgba(255,255,255,0.75);margin:0;line-height:1.5;font-style:italic">Lade Analyse...</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <button onclick="window._openKiChat && window._openKiChat()" aria-label="Mit Jarvis chatten" class="pointer-events-auto active:scale-95" style="padding:12px;border-radius:14px;background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.25);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+        <i data-lucide="message-circle" class="w-5 h-5 pointer-events-none" style="color:#a3c9a8"></i>
+        <span style="font-size:12px;font-weight:800;color:#fff">Chat</span>
+      </button>
+      <button onclick="window._openVoiceMode && window._openVoiceMode()" aria-label="Jarvis Voice Mode" class="pointer-events-auto active:scale-95" style="padding:12px;border-radius:14px;background:linear-gradient(135deg,rgba(163,201,168,0.2),rgba(163,201,168,0.08));border:1px solid rgba(163,201,168,0.35);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative">
+        <i data-lucide="mic" class="w-5 h-5 pointer-events-none" style="color:#a3c9a8"></i>
+        <span style="font-size:12px;font-weight:800;color:#fff">Voice</span>
+      </button>
+    </div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none">
+      <button onclick="window._jarvisQuickCmd && window._jarvisQuickCmd('Wie war meine letzte Woche?')" class="pointer-events-auto flex-shrink-0 active:scale-95" style="padding:6px 12px;border-radius:20px;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15);font-size:10px;font-weight:700;color:rgba(163,201,168,0.8);cursor:pointer;white-space:nowrap">📊 Letzte Woche</button>
+      <button onclick="window._jarvisQuickCmd && window._jarvisQuickCmd('Bin ich heute bereit zu trainieren?')" class="pointer-events-auto flex-shrink-0 active:scale-95" style="padding:6px 12px;border-radius:20px;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15);font-size:10px;font-weight:700;color:rgba(163,201,168,0.8);cursor:pointer;white-space:nowrap">⚡ Bereit heute?</button>
+      <button onclick="window._jarvisQuickCmd && window._jarvisQuickCmd('Erstell mir einen Trainingsplan')" class="pointer-events-auto flex-shrink-0 active:scale-95" style="padding:6px 12px;border-radius:20px;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15);font-size:10px;font-weight:700;color:rgba(163,201,168,0.8);cursor:pointer;white-space:nowrap">📅 Plan erstellen</button>
+      <button onclick="window._jarvisQuickCmd && window._jarvisQuickCmd('Was sind meine aktuellen PRs?')" class="pointer-events-auto flex-shrink-0 active:scale-95" style="padding:6px 12px;border-radius:20px;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15);font-size:10px;font-weight:700;color:rgba(163,201,168,0.8);cursor:pointer;white-space:nowrap">🏆 Meine PRs</button>
+      <button onclick="window._jarvisQuickCmd && window._jarvisQuickCmd('Ich habe einen Wettkampf')" class="pointer-events-auto flex-shrink-0 active:scale-95" style="padding:6px 12px;border-radius:20px;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15);font-size:10px;font-weight:700;color:rgba(163,201,168,0.8);cursor:pointer;white-space:nowrap">🏆 Wettkampf</button>
+    </div>
+  </div>
 
-                <button aria-label="GPS Tracking" onclick="window.openGPSTracking()" class="w-full mb-4 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group active:scale-[0.98]" style="background:linear-gradient(135deg,rgba(74,184,212,0.08),rgba(74,184,212,0.03));border:1px solid rgba(74,184,212,0.2)">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(74,184,212,0.15);border:1px solid rgba(74,184,212,0.25)">
-                        <i data-lucide="map-pin" class="w-6 h-6 pointer-events-none" style="color:#4ab8d4"></i>
-                    </div>
-                    <div class="text-left flex-1">
-                        <p class="text-sm font-bold text-white">GPS Tracking</p>
-                        <p class="text-[11px] text-zinc-500 mt-0.5">Outdoor-Aktivit&auml;ten mit Live-Pace &amp; Route</p>
-                    </div>
-                    <span class="text-[8px] font-black uppercase px-2 py-1 rounded" style="background:rgba(74,184,212,0.15);color:#4ab8d4;border:1px solid rgba(74,184,212,0.2)">NEU</span>
-                </button>
+  <!-- ANALYSE & INSIGHTS -->
+  <div style="margin-bottom:8px">
+    <button onclick="var s=this.nextElementSibling;s.style.display=s.style.display==='none'?'grid':'none';this.querySelector('i').style.transform=s.style.display==='none'?'rotate(0deg)':'rotate(180deg)'" class="pointer-events-auto w-full" aria-label="Analyse" style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px;cursor:pointer">
+      <span style="font-size:10px;font-weight:800;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase">Analyse & Insights</span>
+      <i data-lucide="chevron-down" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3);transition:transform 0.2s"></i>
+    </button>
+    <div style="display:none;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);border-radius:16px;padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i data-lucide="battery-charging" class="w-4 h-4 pointer-events-none" style="color:#a3c9a8"></i><span style="font-size:12px;font-weight:800;color:#fff">Battery</span></div>
+        <p id="toolsBatteryScore" style="font-size:24px;font-weight:900;color:#a3c9a8;margin:0">--</p>
+        <p id="toolsBatteryLabel" style="font-size:10px;color:rgba(255,255,255,0.4);margin:4px 0 8px;font-weight:600">Lade...</p>
+        <button onclick="window.analyzeReadiness && window.analyzeReadiness()" class="pointer-events-auto w-full active:scale-95" aria-label="KI Analyse" style="padding:6px;border-radius:8px;background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);font-size:10px;font-weight:700;color:#a3c9a8;cursor:pointer">KI Analyse</button>
+      </div>
+      <div style="background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);border-radius:16px;padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i data-lucide="trending-up" class="w-4 h-4 pointer-events-none" style="color:#a3c9a8"></i><span style="font-size:12px;font-weight:800;color:#fff">Scan</span></div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 8px;line-height:1.4">Progression in deinen Daten</p>
+        <button onclick="window.analyzeWithAI && window.analyzeWithAI()" class="pointer-events-auto w-full active:scale-95" aria-label="Analysieren" style="padding:6px;border-radius:8px;background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2);font-size:10px;font-weight:700;color:#a3c9a8;cursor:pointer">Analysieren</button>
+      </div>
+    </div>
+  </div>
 
-                <!-- JARVIS HERO -->
-                <div style="margin-bottom:20px;padding:20px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(163,201,168,0.08) 0%,rgba(15,17,15,0) 100%);border:1px solid rgba(163,201,168,0.2)">
-                    <p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:rgba(163,201,168,0.5);margin-bottom:6px;text-align:center">DEIN PERS&Ouml;NLICHER KI-COACH</p>
-                    <p style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-.02em;font-family:'Sora',sans-serif;text-align:center;margin-bottom:4px;line-height:1">JARVIS</p>
-                    <p style="font-size:11px;color:rgba(163,201,168,0.6);text-align:center;margin-bottom:16px">Kennt alle deine Daten &middot; Antwortet auf alles</p>
-                    <button onclick="window._openKiChat()" class="pointer-events-auto w-full active:scale-[0.98]" aria-label="Mit Jarvis chatten" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;cursor:pointer;margin-bottom:10px;text-align:left;background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.25)"><div style="width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.3)"><i data-lucide="bot" class="w-5 h-5 pointer-events-none" style="color:#a3c9a8"></i></div><div style="flex:1"><p style="font-size:14px;font-weight:700;color:#fff">Mit Jarvis chatten</p><p style="font-size:11px;color:rgba(255,255,255,0.4)">Tippe oder sprich deine Frage</p></div><i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(163,201,168,0.4)"></i></button>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-                        <button onclick="window._openVoiceMode?window._openVoiceMode():window.showToast('Voice Mode l&auml;dt...')" class="pointer-events-auto active:scale-95" aria-label="Voice Mode" style="padding:12px;border-radius:12px;cursor:pointer;text-align:center;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15)"><p style="font-size:20px;margin-bottom:4px">&#127908;</p><p style="font-size:11px;font-weight:700;color:#fff">Voice Mode</p><p style="font-size:9px;color:rgba(255,255,255,0.35)">Jarvis sprechen</p></button>
-                        <button onclick="window._toggleWakeWord?window._toggleWakeWord():window.showToast('L&auml;dt...')" class="pointer-events-auto active:scale-95" aria-label="Wake Word Toggle" style="padding:12px;border-radius:12px;cursor:pointer;text-align:center;background:rgba(163,201,168,0.06);border:1px solid rgba(163,201,168,0.15)"><p style="font-size:20px;margin-bottom:4px">&#128066;</p><p style="font-size:11px;font-weight:700;color:#fff">&quot;Hey Jarvis&quot;</p><p style="font-size:9px;color:rgba(255,255,255,0.35)">Wake Word</p></button>
-                    </div>
-                    <div style="display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px">
-                        <button onclick="window._jarvisQuickCmd?window._jarvisQuickCmd('Erstell mir einen Trainingsplan'):window._openKiChat()" class="pointer-events-auto flex-shrink-0" style="padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8;white-space:nowrap">&#128197; Trainingsplan</button>
-                        <button onclick="window._jarvisQuickCmd?window._jarvisQuickCmd('Bin ich heute bereit?'):window._openKiChat()" class="pointer-events-auto flex-shrink-0" style="padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8;white-space:nowrap">&#9889; Bereit heute?</button>
-                        <button onclick="window._jarvisQuickCmd?window._jarvisQuickCmd('Wie war meine letzte Woche?'):window._openKiChat()" class="pointer-events-auto flex-shrink-0" style="padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8;white-space:nowrap">&#128202; Letzte Woche</button>
-                        <button onclick="window._jarvisQuickCmd?window._jarvisQuickCmd('Was kannst du alles?'):window._openKiChat()" class="pointer-events-auto flex-shrink-0" style="padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;background:rgba(163,201,168,0.08);border:1px solid rgba(163,201,168,0.2);color:#a3c9a8;white-space:nowrap">&#10067; Hilfe</button>
-                    </div>
-                </div>
-                <!-- JARVIS HERO ENDE -->
+  <!-- TOOLS -->
+  <div style="margin-bottom:8px">
+    <button onclick="var s=this.nextElementSibling;s.style.display=s.style.display==='none'?'flex':'none';this.querySelector('i').style.transform=s.style.display==='none'?'rotate(0deg)':'rotate(180deg)'" class="pointer-events-auto w-full" aria-label="Tools" style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px;cursor:pointer">
+      <span style="font-size:10px;font-weight:800;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase">Tools</span>
+      <i data-lucide="chevron-down" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3);transition:transform 0.2s"></i>
+    </button>
+    <div style="display:none;flex-direction:column;gap:8px">
+      <button onclick="window.openTrainingPlanModal && window.openTrainingPlanModal()" class="pointer-events-auto active:scale-95 w-full" aria-label="Planner" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);cursor:pointer;text-align:left">
+        <i data-lucide="calendar-check" class="w-5 h-5 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>
+        <div style="flex:1"><p style="font-size:13px;font-weight:700;color:#fff;margin:0">Planner</p><p style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0 0">Mesozyklus · Fokus · Wochentage</p></div>
+        <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3)"></i>
+      </button>
+      <button onclick="window.generatePreHab && window.generatePreHab()" class="pointer-events-auto active:scale-95 w-full" aria-label="Armor" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);cursor:pointer;text-align:left">
+        <i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>
+        <div style="flex:1"><p style="font-size:13px;font-weight:700;color:#fff;margin:0">Armor</p><p style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0 0">Verletzungen vorbeugen</p></div>
+        <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3)"></i>
+      </button>
+      <button onclick="window.openCopilot && window.openCopilot()" class="pointer-events-auto active:scale-95 w-full" aria-label="Spotter" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);cursor:pointer;text-align:left">
+        <i data-lucide="cpu" class="w-5 h-5 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>
+        <div style="flex:1"><p style="font-size:13px;font-weight:700;color:#fff;margin:0">Spotter</p><p style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0 0">Gewicht, Sätze & RPE Vorschläge</p></div>
+        <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3)"></i>
+      </button>
+      <button onclick="window.open1RMModal && window.open1RMModal()" class="pointer-events-auto active:scale-95 w-full" aria-label="1RM Rechner" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);cursor:pointer;text-align:left">
+        <i data-lucide="target" class="w-5 h-5 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>
+        <div style="flex:1"><p style="font-size:13px;font-weight:700;color:#fff;margin:0">1RM Rechner</p><p style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0 0">Maximalkraft berechnen & verwalten</p></div>
+        <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3)"></i>
+      </button>
+      <button onclick="window.openFormCheck && window.openFormCheck()" class="pointer-events-auto active:scale-95 w-full" aria-label="Form Check" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);cursor:pointer;text-align:left">
+        <i data-lucide="scan-eye" class="w-5 h-5 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>
+        <div style="flex:1"><p style="font-size:13px;font-weight:700;color:#fff;margin:0">Form Check</p><p style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0 0">KI analysiert deine Übungsform</p></div>
+        <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3)"></i>
+      </button>
+      <button onclick="window.openChallenges && window.openChallenges()" class="pointer-events-auto active:scale-95 w-full" aria-label="Challenges" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface-hex,#1a1d1a);border:1px solid var(--border-hex,#2a2d2a);cursor:pointer;text-align:left">
+        <i data-lucide="trophy" class="w-5 h-5 flex-shrink-0 pointer-events-none" style="color:#a3c9a8"></i>
+        <div style="flex:1"><p style="font-size:13px;font-weight:700;color:#fff;margin:0">Challenges</p><p style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0 0">Fordere Freunde heraus</p></div>
+        <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:rgba(255,255,255,0.3)"></i>
+      </button>
+    </div>
+  </div>
 
-                <button aria-label="Aktion" onclick="window._openKiChat()" class="w-full mb-4 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group active:scale-[0.98]" style="background:linear-gradient(135deg,rgba(163,201,168,0.08),rgba(163,201,168,0.03));border:1px solid rgba(163,201,168,0.2)">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.25)">
-                        <i data-lucide="message-circle" class="w-6 h-6 pointer-events-none" style="color:#a3c9a8"></i>
-                    </div>
-                    <div class="text-left flex-1">
-                        <p class="text-sm font-bold text-white" data-i18n="kiChatTitle">Coach</p>
-                        <p class="text-[11px] text-zinc-500 mt-0.5" data-i18n="kiChatCardSub">Stell jede Trainingsfrage — die KI kennt dein Profil</p>
-                    </div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 pointer-events-none transition-colors"></i>
-                </button>
+</div>
 
-                <div class="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-primary/30 rounded-2xl overflow-hidden">
-                    <div class="p-5 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="sparkles" class="w-6 h-6 text-indigo-400"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="aiCoachTitle">Scan</p>
-                            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="aiCoachSub">Zeigt dir was in deinen Daten steckt</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 border-t border-indigo-500/20">
-                        <button aria-label="Analyse" id="mainAiButton" onclick="window.analyzeWithAI()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-primary/10 transition-all cursor-pointer pointer-events-auto border-r border-indigo-500/20">
-                            <i data-lucide="trending-up" class="w-3.5 h-3.5 text-indigo-400 pointer-events-none"></i>
-                            <span class="text-[10px] font-black text-indigo-300 uppercase tracking-widest" data-i18n="aiProg">Progression</span>
-                        </button>
-                        <button aria-label="KI Co-Pilot" onclick="window.triggerCopilot()" class="flex items-center justify-center gap-2 py-3.5 px-4 hover:bg-primary/10 transition-all cursor-pointer pointer-events-auto">
-                            <i data-lucide="bot" class="w-3.5 h-3.5 text-indigo-400 pointer-events-none"></i>
-                            <span class="text-[10px] font-black text-indigo-300 uppercase tracking-widest" data-i18n="toolCopilot">Spotter</span>
-                        </button>
-                    </div>
-                </div>
+<script>
+window._updateJarvisHeroCard = function() {
+  var badge = document.getElementById('jarvisBatteryBadge');
+  var bScore = document.getElementById('toolsBatteryScore');
+  var bLabel = document.getElementById('toolsBatteryLabel');
+  var s = window.currentReadinessScore || 100;
+  if (badge) badge.textContent = '⚡ ' + s + '%';
+  if (bScore) bScore.textContent = s + '%';
+  if (bLabel) bLabel.textContent = s >= 80 ? 'Frisch & bereit' : s >= 60 ? 'Moderate Belastung' : 'Erhöhte Müdigkeit';
+  var insight = document.getElementById('jarvisDailyInsight');
+  if (insight) {
+    var msg = '';
+    var streak = parseInt(localStorage.getItem('base_streak_count') || '0');
+    var ws = (window.workouts||[]).filter(function(w){return w.archived;});
+    ws.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+    if (s < 60) msg = '⚠️ ZNS-Score niedrig. Heute Mobility oder Regeneration empfohlen.';
+    else if (streak >= 7) msg = '🔥 ' + streak + ' Tage Streak — du bist im Rhythmus!';
+    else if (ws.length > 0) {
+      var days = Math.floor((Date.now()-new Date(ws[0].date))/86400000);
+      if (days === 0) msg = '✅ Training heute erledigt. Erholung läuft.';
+      else if (days === 1) msg = '💪 Gestern trainiert: ' + (ws[0].exercise||'Workout') + '. Bereit für heute?';
+      else if (days > 3) msg = '⏰ ' + days + ' Tage seit letztem Training.';
+      else msg = '📊 ' + ws.length + ' Workouts getrackt. Jarvis kennt deine Daten.';
+    } else { msg = '🤖 Starte dein erstes Workout für personalisierte Insights.'; }
+    insight.querySelector('p').textContent = msg;
+  }
+};
+var _origST = window.switchTab;
+window.switchTab = function(tab) {
+  if (_origST) _origST(tab);
+  if (tab === 'tools') {
+    setTimeout(window._updateJarvisHeroCard, 100);
+    if (window._refreshLucide) window._refreshLucide();
+  }
+};
+setTimeout(window._updateJarvisHeroCard, 1500);
+setTimeout(function() { if (window._runGoalCoaching) window._runGoalCoaching(); }, 6000);
+setTimeout(function() { if (window._checkHabitLoopCheckin) window._checkHabitLoopCheckin(); }, 5000);
+setTimeout(function() { if (window._checkExperimentStatus) window._checkExperimentStatus(); }, 7000);
 
-                <button onclick="window.openFormCheck()" class="w-full flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all pointer-events-auto text-left" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2)"><i data-lucide="scan-eye" class="w-6 h-6" style="color:#a3c9a8"></i></div>
-                    <div class="flex-1"><p class="font-black text-white text-sm" data-i18n="fcTitle">Form Check</p><p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)" data-i18n="fcButtonDesc">KI analysiert deine Übungsform (Beta)</p></div>
-                    <span class="text-[8px] font-black uppercase px-2 py-1 rounded" style="background:rgba(163,201,168,0.15);color:#a3c9a8;border:1px solid rgba(163,201,168,0.2)">NEU</span>
-                </button>
+// ── Habit Loop Check-In ──
+window._checkHabitLoopCheckin = function() {
+  if (localStorage.getItem('base_habit_loop_enabled') !== 'true') return;
 
-                <button aria-label="Aktion" onclick="window.openOneRMModal()" class="w-full bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="target" class="w-6 h-6 text-orange-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="orm1RMTitle">1RM Rechner</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="orm1RMSub">Maximalkraft berechnen & verwalten</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
+  var today = new Date().toISOString().split('T')[0];
+  var lastCheckin = localStorage.getItem('base_habit_checkin_date');
+  if (lastCheckin === today) return;
 
-                <button aria-label="Aktion" onclick="window.openTrainingPlanModal()" class="w-full bg-violet-500/5 hover:bg-violet-500/10 border border-violet-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-days" class="w-6 h-6 text-violet-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="planTitle">Planner</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Mesozyklus · Fokus-Muskeln · Wochentage</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
+  var hour = new Date().getHours();
+  if (hour < 6 || hour > 11) return;
 
-                <button aria-label="Plan pruefen" onclick="window.openPlanChecker()" class="w-full bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="search-check" class="w-6 h-6 text-red-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Plan-Check</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">KI findet Fehler &amp; optimiert deinen Plan</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
+  var habits = JSON.parse(localStorage.getItem('base_habits') || '{}');
+  var habitKeys = Object.keys(habits).filter(function(k) {
+    return habits[k] && habits[k].name;
+  }).slice(0, 4);
 
-                </div>
+  if (habitKeys.length === 0) return;
+  localStorage.setItem('base_habit_checkin_date', today);
 
-                <button onclick="window._toggleKICategory('analyse')" class="pointer-events-auto" aria-label="Analyse Kategorie" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 0;background:none;border:none;border-bottom:1px solid var(--border-hex);margin-bottom:8px;cursor:pointer"><p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--primary-hex)">Analyse &amp; Insights</p><svg id="kiArrow_analyse" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text-muted);transition:transform .2s;transform:rotate(0deg)"><polyline points="6 9 12 15 18 9"/></svg></button>
-                <div id="kiCat_analyse" style="display:none">
+  setTimeout(function() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.9);display:flex;align-items:flex-end;padding:24px;pointer-events:auto';
 
-                <button aria-label="Biologisches Alter" onclick="window.openBioAgeModal()" class="w-full bg-teal-500/5 hover:bg-teal-500/10 border border-teal-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#129516;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Bio Age</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">12-Faktoren biologisches Alter &middot; Longevity</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
+    var html = '<div style="background:#1a1d1a;border:1px solid rgba(163,201,168,0.25);border-radius:20px;padding:20px;width:100%;max-width:400px">' +
+      '<p style="font-size:11px;font-weight:800;letter-spacing:0.1em;color:rgba(163,201,168,0.6);text-transform:uppercase;margin-bottom:4px">Jarvis Morgen-Check</p>' +
+      '<p style="font-size:16px;font-weight:900;color:#fff;margin-bottom:16px">Was hast du heute schon erledigt?</p>';
 
-                <button aria-label="Wettkampf-Coach" onclick="window.openCompetitionCoach()" class="w-full bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#127942;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Wettkampf-Coach</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Trainings- &amp; Ern&auml;hrungsplan f&uuml;r deinen Wettkampf</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
+    habitKeys.forEach(function(k) {
+      var h = habits[k];
+      html += '<button onclick="window._habitCheckin(\'' + window._escapeHtml(k) + '\', this, \'' + today + '\')" ' +
+        'class="pointer-events-auto w-full active:scale-95" aria-label="' + window._escapeHtml(h.name || k) + '" ' +
+        'style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);margin-bottom:8px;cursor:pointer;text-align:left" ' +
+        'data-habit="' + window._escapeHtml(k) + '">' +
+        '<div style="width:24px;height:24px;border-radius:6px;border:2px solid rgba(163,201,168,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0" class="habit-check-box"></div>' +
+        '<span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8)">' + window._escapeHtml(h.name || k) + '</span>' +
+        '</button>';
+    });
 
-                <button aria-label="Was waere wenn" onclick="window.openWhatIfPlanner()" class="w-full bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#128302;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Was w&auml;re wenn</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Szenario-Simulator &middot; KI Trainingsplaner</p></div>
-                    <span style="font-size:8px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(232,200,106,0.2);color:#e8c86a;flex-shrink:0">NEU</span>
-                </button>
+    html += '<button onclick="window._submitHabitCheckin(\'' + today + '\')" ' +
+      'class="pointer-events-auto w-full active:scale-95 mt-2" aria-label="Fertig" ' +
+      'style="padding:14px;border-radius:12px;background:rgba(163,201,168,0.15);border:1px solid rgba(163,201,168,0.3);color:#a3c9a8;font-weight:800;font-size:13px;cursor:pointer">' +
+      'Fertig</button></div>';
 
-                </div>
+    overlay.innerHTML = html;
+    overlay.id = 'habitLoopOverlay';
+    document.body.appendChild(overlay);
+  }, 3000);
+};
 
-                <button onclick="window._toggleKICategory('tools')" class="pointer-events-auto" aria-label="Tools Kategorie" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 0;background:none;border:none;border-bottom:1px solid var(--border-hex);margin-bottom:8px;cursor:pointer"><p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--primary-hex)">Tools</p><svg id="kiArrow_tools" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text-muted);transition:transform .2s;transform:rotate(0deg)"><polyline points="6 9 12 15 18 9"/></svg></button>
-                <div id="kiCat_tools" style="display:none">
+window._habitCheckinData = {};
+window._habitCheckin = function(habitKey, btn) {
+  var checked = !window._habitCheckinData[habitKey];
+  window._habitCheckinData[habitKey] = checked;
+  var box = btn.querySelector('.habit-check-box');
+  if (box) {
+    box.style.background = checked ? '#a3c9a8' : 'transparent';
+    box.innerHTML = checked ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f110f" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+  }
+};
 
-                <button aria-label="History importieren" onclick="window.openHistoryImport()" class="w-full bg-zinc-500/5 hover:bg-zinc-500/10 border border-zinc-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-zinc-500/10 border border-zinc-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#128229;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">History Import</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Strong &middot; Hevy &middot; Garmin &middot; CSV</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
+window._submitHabitCheckin = function(today) {
+  var overlay = document.getElementById('habitLoopOverlay');
+  if (overlay) overlay.remove();
 
-                </div>
+  var log = JSON.parse(localStorage.getItem('base_habit_loop_log') || '[]');
+  log.push({
+    date: today,
+    habits: window._habitCheckinData,
+    battery: window.currentReadinessScore || null
+  });
+  if (log.length > 60) log = log.slice(-60);
+  localStorage.setItem('base_habit_loop_log', JSON.stringify(log));
+  window._habitCheckinData = {};
 
-                <button onclick="window._toggleKICategory('ernaehrung')" class="pointer-events-auto" aria-label="Ernaehrung Kategorie" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 0;background:none;border:none;border-bottom:1px solid var(--border-hex);margin-bottom:8px;cursor:pointer"><p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--primary-hex)">Ern&auml;hrung</p><svg id="kiArrow_ernaehrung" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text-muted);transition:transform .2s;transform:rotate(0deg)"><polyline points="6 9 12 15 18 9"/></svg></button>
-                <div id="kiCat_ernaehrung" style="display:none">
+  window.showToast('\u2705 Check-In gespeichert!');
 
-                <button aria-label="Supplement-Check" onclick="window.openSuppEvidence()" class="w-full bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#128300;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Supplement-Check</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Evidenz-Datenbank &middot; S/A/B/C/F Tier</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Ernaehrungsplan erstellen" onclick="window.openUserMealPlanGenerator()" class="w-full bg-lime-500/5 hover:bg-lime-500/10 border border-lime-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-lime-500/10 border border-lime-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#127869;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Meal Planner</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">KI Ern&auml;hrungsplan &middot; 3-7 Tage</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Artikel analysieren" onclick="window.openArticleAnalyzer()" class="w-full bg-sky-500/5 hover:bg-sky-500/10 border border-sky-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#128300;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Artikel pr&uuml;fen</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Ist das evidenzbasiert? KI Fact-Check</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Wochen-Brief lesen" onclick="window._readWeeklyBrief()" class="w-full bg-purple-500/5 hover:bg-purple-500/10 border border-purple-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0" style="font-size:20px">&#128236;</div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Wochen-Brief</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Dein pers&ouml;nlicher KI-Coach Brief</p></div>
-                    <span style="font-size:8px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(232,200,106,0.2);color:#e8c86a;flex-shrink:0">NEU</span>
-                </button>
-
-                <button aria-label="Ernaehrungsprofil einrichten" onclick="window.openNutritionSetup()" class="w-full bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="apple" class="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight">Nutrition</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">ISSN/DGE-basierte Tagesziele &middot; Allergien</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Supplement Shop" onclick="window.openSuppShop()" class="pointer-events-auto w-full" style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--inner-bg-hex);border:1px solid var(--border-hex);border-radius:13px;cursor:pointer;text-align:left">
-                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(163,201,168,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128722;</div>
-                    <div style="flex:1"><p style="font-size:14px;font-weight:700;color:var(--text-main)">Supplement Shop</p><p style="font-size:11px;color:var(--text-muted)">Evidenz + Produkt-Empfehlungen</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 pointer-events-none" style="color:var(--text-muted)"></i>
-                </button>
-                </div>
-
-                <button onclick="window._toggleKICategory('recovery')" class="pointer-events-auto" aria-label="Recovery Kategorie" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 0;background:none;border:none;border-bottom:1px solid var(--border-hex);margin-bottom:8px;cursor:pointer"><p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--primary-hex)">Recovery &amp; Tracking</p><svg id="kiArrow_recovery" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--text-muted);transition:transform .2s;transform:rotate(0deg)"><polyline points="6 9 12 15 18 9"/></svg></button>
-                <div id="kiCat_recovery" style="display:none">
-
-                <div class="w-full bg-green-500/5 border border-green-500/20 rounded-2xl overflow-hidden">
-
-                    <div class="p-5 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="battery-charging" id="toolsZnsIcon" class="w-6 h-6 text-green-400 pointer-events-none"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="znsTitle">Battery</p>
-                            <p id="toolsZnsStatus" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="znsCalculating">Berechne...</p>
-
-                            <div class="h-1 bg-zinc-800 rounded-full mt-2 overflow-hidden">
-                                <div id="toolsZnsBar" class="h-full rounded-full transition-all duration-1000 bg-green-400" style="width:0%"></div>
-                            </div>
-                        </div>
-                        <div class="text-right flex-shrink-0">
-                            <span id="toolsZnsScore" class="text-2xl font-black text-white">--%</span>
-                        </div>
-                    </div>
-
-                    <button aria-label="Readiness Analyse" onclick="window.analyzeReadinessWithAI()" class="w-full border-t border-green-500/15 px-5 py-3 flex items-center justify-center gap-2 hover:bg-green-500/10 transition-all cursor-pointer pointer-events-auto">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-green-400 pointer-events-none"></i>
-                        <span class="text-[10px] font-black text-green-400 uppercase tracking-widest" data-i18n="znsAnalyze">KI Analyse starten</span>
-                    </button>
-                </div>
-
-                <div id="muscleRecoveryV3" style="margin-top:12px;padding:16px;border-radius:18px;background:var(--surface-hex);border:1px solid var(--border-hex)">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                        <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)">Muskel-Recovery &middot; V3</p>
-                    </div>
-                    <div id="muscleRecoveryContainer"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px">Wird geladen...</div></div>
-                </div>
-
-                <div id="acwrBatteryContainer" style="margin-top:12px"></div>
-
-                <div style="margin-top:16px">
-                    <button onclick="window._generateDailyOutlook()" class="pointer-events-auto w-full" style="padding:12px;border-radius:12px;margin-bottom:12px;background:color-mix(in srgb,var(--primary-hex),transparent 85%);border:1px solid color-mix(in srgb,var(--primary-hex),transparent 60%);color:var(--primary-hex);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" aria-label="Daily Outlook">&#9728;&#65039; Daily Outlook generieren</button>
-                    <div id="habitCorrelationsContainer"></div>
-                </div>
-
-                <button aria-label="Challenges oeffnen" onclick="window.openChallenges()" class="w-full bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="trophy" class="w-6 h-6 text-amber-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left flex-1"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="challengeTitle">Challenges</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="challengeSub">Fordere Freunde heraus</p></div>
-                    <span id="activeChallengesBadge" class="hidden bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full"></span>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Squad Goals oeffnen" onclick="window.openSquads()" class="w-full bg-violet-500/5 hover:bg-violet-500/10 border border-violet-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="target" class="w-6 h-6 text-violet-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left flex-1"><p class="text-sm font-black text-white uppercase tracking-tight">Squad Goals</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Gemeinsame Gruppenziele</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Generieren" onclick="window.generatePreHab()" class="w-full bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="shield-plus" class="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="prehabTitle">Armor</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="prehabSub">Schützt dich vor Verletzungen</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-
-                <button aria-label="Aktion" onclick="window.openTrainerDirectory()" class="w-full bg-cyan-500/5 hover:bg-cyan-500/10 border border-cyan-500/20 p-5 rounded-2xl flex items-center gap-4 transition-all cursor-pointer pointer-events-auto group">
-                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="user-search" class="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform pointer-events-none"></i></div>
-                    <div class="text-left"><p class="text-sm font-black text-white uppercase tracking-tight" data-i18n="ptFindTrainer">Trainer finden</p><p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5" data-i18n="findTrainerSub">Finde Personal Trainer in deiner Nähe</p></div>
-                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600 ml-auto pointer-events-none"></i>
-                </button>
-                </div>
-            </div>
-        </div>
+  if (log.length >= 14 && log.length % 7 === 0) {
+    setTimeout(function() {
+      window.showToast('\uD83D\uDCA1 Jarvis hat genug Daten \u2014 frag ihn: "Welche Habits helfen meinem Training?"', 'info');
+    }, 2000);
+  }
+};
+</script>
+</div>
 
         <div id="tab-social" class="tab-panel hidden">
             <div style="padding:0 0 100px">
@@ -2209,6 +2190,8 @@
                 <div class="h-px bg-zinc-800 my-2"></div>
                 <label for="mod_voiceCoach" class="flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);border-radius:18px 18px 0 0"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2)"><i data-lucide="volume-2" class="w-5 h-5" style="color:#a3c9a8"></i></div><div><p class="text-sm font-black text-white" data-i18n="voiceCoachLabel">Jarvis</p><p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)" data-i18n="voiceCoachDesc">KI-Sprachassistent</p></div></div><div class="ios-toggle"><input type="checkbox" id="mod_voiceCoach" onchange="window.toggleVoiceCoach()"><span class="slider"></span></div></label>
                 <button type="button" onclick="window._showVoiceStylePicker()" aria-label="Voice Coach Stil w&auml;hlen" class="w-full flex items-center justify-between px-4 py-3 cursor-pointer transition-all pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex);border-top:none;border-radius:0 0 18px 18px"><span class="text-xs font-bold text-zinc-400">Jarvis Pers&ouml;nlichkeit</span><span class="text-xs font-bold text-primary" id="voiceStyleLabel">Motivator</span></button>
+                <label for="mod_habitLoop" class="flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(163,201,168,0.1);border:1px solid rgba(163,201,168,0.2)"><i data-lucide="repeat" class="w-5 h-5" style="color:#a3c9a8"></i></div><div><p class="text-sm font-black text-white">Habit Loop</p><p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Morgendlicher Check-In + Performance-Korrelation</p></div></div><div class="ios-toggle"><input type="checkbox" id="mod_habitLoop" onchange="localStorage.setItem('base_habit_loop_enabled',this.checked?'true':'false')"><span class="slider"></span></div></label>
+                <label for="mod_goalCoaching" class="flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all pointer-events-auto" style="background:var(--inner-bg-hex);border:1px solid var(--border-hex)"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(232,200,106,0.1);border:1px solid rgba(232,200,106,0.2)"><i data-lucide="target" class="w-5 h-5" style="color:#e8c86a"></i></div><div><p class="text-sm font-black text-white">Goal Coaching</p><p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">W&ouml;chentlicher Ziel-Check-In von Jarvis</p></div></div><div class="ios-toggle"><input type="checkbox" id="mod_goalCoaching" onchange="localStorage.setItem('base_goal_coaching_enabled',this.checked?'true':'false')"><span class="slider"></span></div></label>
                 <div class="h-px bg-zinc-800 my-2"></div>
                 <label for="mod_ptMode" class="flex items-center justify-between bg-primary/5 hover:bg-primary/10 p-4 rounded-2xl cursor-pointer transition-all border border-indigo-500/20 shadow-sm group pointer-events-auto"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-primary/20 text-indigo-400 flex items-center justify-center border border-primary/30"><i data-lucide="users-2" class="w-5 h-5"></i></div><div><p class="text-sm font-black text-white" data-i18n="ptBusinessSuite">PT Business Modus</p><p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest" data-i18n="ptManageClients">Klienten verwalten</p></div></div><div class="ios-toggle"><input type="checkbox" id="mod_ptMode"><span class="slider"></span></div></label>
             </div>
@@ -4402,7 +4385,51 @@
    }
   }
 
-  return 'Du bist der KI Fitness Coach in der App BASE. Antworte IMMER auf ' + langName + '.\n\n' +
+  // 1RM Daten
+  var ormContext = '';
+  try {
+    var orms = JSON.parse(localStorage.getItem('base_1rm_data') || '{}');
+    var ormKeys = Object.keys(orms).slice(0, 5);
+    if (ormKeys.length > 0) {
+      ormContext = 'Geschätzte 1RMs: ' + ormKeys.map(function(k) {
+        return k + ': ' + orms[k] + 'kg';
+      }).join(', ') + '. ';
+    }
+  } catch(e) {}
+
+  // Battery Score
+  var batteryContext = '';
+  if (window.currentReadinessScore) {
+    batteryContext = 'ZNS/Battery Score heute: ' + window.currentReadinessScore + '%. ';
+  }
+
+  // Aktiver Plan
+  var planContext = '';
+  try {
+    var plan = JSON.parse(localStorage.getItem('base_active_plan') || 'null');
+    if (plan && plan.title) {
+      planContext = 'Aktiver Trainingsplan: "' + plan.title + '"';
+      if (plan.currentWeek) planContext += ', Woche ' + plan.currentWeek;
+      planContext += '. ';
+    }
+  } catch(e) {}
+
+  // Streak
+  var streakContext = '';
+  var streak = parseInt(localStorage.getItem('base_streak_count') || '0');
+  if (streak > 0) streakContext = 'Aktueller Streak: ' + streak + ' Tage. ';
+
+  // Pump & Soreness
+  var recoveryContext = '';
+  try {
+    var ps = JSON.parse(localStorage.getItem('base_pump_soreness') || '[]');
+    if (ps.length > 0) {
+      var last = ps[ps.length - 1];
+      recoveryContext = 'Letztes Feedback: Pump ' + (last.pump || '?') + '/10, Soreness ' + (last.soreness || '?') + '/10. ';
+    }
+  } catch(e) {}
+
+  return 'Du bist Jarvis, der pers\u00f6nliche KI Fitness-Coach in der App BASE. Dein Name ist JARVIS \u2014 nenne dich niemals "Scan", "Coach" oder anders. Antworte IMMER auf ' + langName + '.\n\n' +
    'DEINE ROLLE:\n' +
    '- Du bist ein erfahrener Strength & Conditioning Coach mit breitem Wissen ueber 86+ Sportarten.\n' +
    '- Du gibst praxisnahe, direkte Antworten. Maximal 4-5 Saetze pro Antwort. Kein Essay.\n' +
@@ -4422,9 +4449,16 @@
    '- Wenn der User mehrere Sportarten trackt, gib Empfehlungen die ALLE beruecksichtigen.\n' +
    '- Nutze die Workout-History um Muster zu erkennen (Uebertraining, einseitige Belastung, fehlende Regeneration).\n\n' +
    'USER-KONTEXT:\n' +
-   (profileContext ? profileContext + '\n' : 'Kein Profil hinterlegt.\n') +
+   '<user_data>\n' +
+   (profileContext ? 'Profil: ' + profileContext + '\n' : '') +
+   (ormContext ? ormContext + '\n' : '') +
+   (batteryContext ? batteryContext + '\n' : '') +
+   (planContext ? planContext + '\n' : '') +
+   (streakContext ? streakContext + '\n' : '') +
+   (recoveryContext ? recoveryContext + '\n' : '') +
    (activeSports.length ? 'Aktive Sportarten: ' + activeSports.join(', ') + '.\n' : '') +
-   (recentSummary ? recentSummary + '\n' : 'Noch keine archivierten Workouts.\n') +
+   (recentSummary ? recentSummary + '\n' : '') +
+   '</user_data>\n' +
    (function() {
     var np = window._getNutritionProfile ? window._getNutritionProfile() : {};
     var nt = JSON.parse(localStorage.getItem('base_nutrition_targets') || 'null');
@@ -4506,12 +4540,194 @@
   if (el && el.parentNode) el.parentNode.removeChild(el);
     }
 
+window._jarvisConvState = null;
+
+window._handleJarvisConvFlow = function(userText) {
+  var state = window._jarvisConvState;
+  if (!state) return false;
+  var lower = userText.toLowerCase().trim();
+
+  // ═══ FLOW: MESOZYKLUS ═══
+  if (state.flow === 'plan_meso') {
+    if (state.step === 1) {
+      var goal = null;
+      if (lower.match(/muske|masse|hyper|aufbau|bodybuilding/)) goal = 'Muskelmasse';
+      else if (lower.match(/kraft|power|stark|powerlifting|strength/)) goal = 'Kraft';
+      else if (lower.match(/ausdauer|cardio|laufen|endurance|kondition/)) goal = 'Ausdauer';
+      else if (lower.match(/abnehm|fett|definiti|cut|lean/)) goal = 'Abnehmen';
+      if (!goal) {
+        _addChatMessage('ai', 'Nicht ganz verstanden. Sag mir:\n\n\uD83D\uDCAA Muskelmasse \u00b7 \u26A1 Kraft \u00b7 \uD83C\uDFC3 Ausdauer \u00b7 \uD83D\uDD25 Abnehmen');
+        return true;
+      }
+      state.goal = goal; state.step = 2;
+      window.setPlanGoal && window.setPlanGoal(goal);
+      _addChatMessage('ai', '\u2705 Ziel: **' + goal + '**\n\n**Wie viele Wochen?**\n4 \u00b7 6 \u00b7 8 \u00b7 10 \u00b7 12\n\n_Empfehlung: 8 Wochen_');
+      return true;
+    }
+    if (state.step === 2) {
+      var wm = userText.match(/(\d+)\s*(?:wochen|weeks|w)/i) || userText.match(/^(\d+)$/);
+      var weeks = wm ? parseInt(wm[1]) : null;
+      if (!weeks || weeks < 2 || weeks > 12) { _addChatMessage('ai', 'Bitte eine Zahl zwischen 2 und 12.'); return true; }
+      state.weeks = weeks; state.step = 3;
+      window.setPlanDuration && window.setPlanDuration(weeks);
+      _addChatMessage('ai', '\u2705 **' + weeks + ' Wochen**\n\n**Wie viele Trainingstage pro Woche?**\n2 \u00b7 3 \u00b7 4 \u00b7 5');
+      return true;
+    }
+    if (state.step === 3) {
+      var dm = userText.match(/(\d)\s*(?:tage?|days?|mal|x)/i) || userText.match(/^(\d)$/);
+      var days = dm ? parseInt(dm[1]) : null;
+      if (!days || days < 2 || days > 6) { _addChatMessage('ai', 'Bitte eine Zahl zwischen 2 und 6.'); return true; }
+      window._jarvisConvState = null;
+      window.setPlanDays && window.setPlanDays(days);
+      _addChatMessage('ai', '\u2705 ' + days + ' Tage/Woche\n\n\uD83E\uDD16 Generiere **' + state.weeks + '-Wochen ' + state.goal + '-Mesozyklus**...\n\n_Deine 1RMs, Verletzungen und Workouts werden einbezogen._');
+      setTimeout(function() { window.generateTrainingPlan && window.generateTrainingPlan(); }, 800);
+      return true;
+    }
+  }
+
+  // ═══ FLOW: WETTKAMPF ═══
+  if (state.flow === 'plan_competition') {
+    if (state.step === 1) {
+      var weeksUntil = null;
+      var inW = userText.match(/in\s+(\d+)\s*wochen/i);
+      if (inW) weeksUntil = parseInt(inW[1]);
+      if (!weeksUntil) {
+        var months = {jan:1,feb:2,'m\u00e4r':3,mar:3,apr:4,mai:5,may:5,jun:6,jul:7,aug:8,sep:9,okt:10,oct:10,nov:11,dez:12,dec:12};
+        var dm2 = userText.match(/(\d{1,2})\.\s*(\w+)/);
+        if (dm2) {
+          var month = months[dm2[2].toLowerCase().substring(0,3)];
+          if (month) {
+            var now = new Date();
+            var target = new Date(now.getFullYear(), month-1, parseInt(dm2[1]));
+            if (target < now) target.setFullYear(target.getFullYear()+1);
+            weeksUntil = Math.round((target - now)/(7*24*60*60*1000));
+          }
+        }
+      }
+      if (!weeksUntil || weeksUntil < 2) {
+        _addChatMessage('ai', 'Datum nicht erkannt. Sag es so: **"15. Juni"** oder **"in 10 Wochen"**');
+        return true;
+      }
+      state.weeks = Math.min(weeksUntil, 16);
+      state.peakWeeks = state.weeks <= 6 ? 2 : state.weeks <= 10 ? 3 : 4;
+      state.buildWeeks = state.weeks - state.peakWeeks - 1;
+      state.step = 2;
+      var orms = '';
+      try {
+        var od = JSON.parse(localStorage.getItem('base_1rm_data')||'{}');
+        var keys = Object.keys(od).slice(0,4);
+        if (keys.length) orms = keys.map(function(k){ return k+': '+od[k]+'kg'; }).join(', ');
+      } catch(e){}
+      _addChatMessage('ai',
+        '\u2705 Wettkampf in **' + state.weeks + ' Wochen**\n\n' +
+        '\uD83D\uDCC8 ' + state.buildWeeks + ' Wochen Aufbau\n' +
+        '\uD83D\uDD25 ' + state.peakWeeks + ' Wochen Peak\n' +
+        '\uD83D\uDE34 1 Woche Taper\n\n' +
+        (orms ? '**Deine 1RMs:** ' + orms + '\n\n' : '') +
+        '**Welche Sportart / was willst du peaken?**\n' +
+        'z.B. Powerlifting \u00b7 Laufen \u00b7 Kampfsport \u00b7 Schwimmen'
+      );
+      return true;
+    }
+    if (state.step === 2) {
+      var compGoal = lower.match(/lauf|run|marath|ausdauer/) ? 'Ausdauer'
+        : lower.match(/muske|bodybuilding/) ? 'Muskelmasse' : 'Kraft';
+      window._jarvisConvState = null;
+      window.setPlanGoal && window.setPlanGoal(compGoal);
+      window.setPlanDuration && window.setPlanDuration(state.weeks);
+      window.setPlanDays && window.setPlanDays(4);
+      _addChatMessage('ai',
+        '\uD83C\uDFC6 **Wettkampfvorbereitung: ' + userText.trim() + '**\n\n' +
+        '**' + state.buildWeeks + ' Wochen Aufbau** \u2014 Volumen aufbauen\n' +
+        '**' + state.peakWeeks + ' Wochen Peak** \u2014 Intensit\u00e4t maximieren\n' +
+        '**1 Woche Taper** \u2014 K\u00f6rper frisch halten\n\n' +
+        '\u26A1 Generiere Plan...'
+      );
+      setTimeout(function() { window.generateTrainingPlan && window.generateTrainingPlan(); }, 800);
+      return true;
+    }
+  }
+
+  // ═══ FLOW: PT SUMMARY ═══
+  if (state.flow === 'pt_summary') {
+    if (state.step === 1) {
+      var clients = state.clients || [];
+      var found = null;
+      var lower2 = userText.toLowerCase();
+      clients.forEach(function(c) {
+        if (c.name && lower2.indexOf(c.name.toLowerCase()) !== -1) found = c;
+      });
+      if (!found) {
+        var numM = userText.match(/^(\d)/);
+        if (numM) found = clients[parseInt(numM[1])-1];
+      }
+      if (!found) {
+        _addChatMessage('ai', 'Kunden nicht gefunden. Schreib den Namen oder die Nummer.');
+        return true;
+      }
+      window._jarvisConvState = null;
+      var weekAgo = new Date(Date.now()-7*86400000).toISOString().split('T')[0];
+      var cWs = (window.workouts||[]).filter(function(w){ return (w.client === found.id || w.clientId === found.id) && w.archived; });
+      var thisWeek = cWs.filter(function(w){ return w.date >= weekAgo; });
+      var totalVol = thisWeek.reduce(function(s,w){ return s+(w.volume||0); }, 0);
+      var summary = 'Klient: ' + found.name + '\n' +
+        'Workouts diese Woche: ' + thisWeek.length + '\n' +
+        'Volumen diese Woche: ' + Math.round(totalVol) + 'kg\n' +
+        'Gesamt Workouts: ' + cWs.length;
+      _addChatMessage('ai', '\u23F3 Analysiere ' + found.name + '...');
+      fetch('/.netlify/functions/gemini', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          prompt: 'PT-Assistent Zusammenfassung f\u00fcr: ' + summary + '\n\nGib eine kurze Einsch\u00e4tzung (3 S\u00e4tze): Fortschritt, Auff\u00e4lligkeiten, Empfehlung f\u00fcr n\u00e4chste Woche.',
+          type: 'nudge'
+        })
+      }).then(function(r){ return r.json(); }).then(function(data) {
+        var reply = (data.parts && data.parts[0] && data.parts[0].text) || data.reply || '';
+        if (typeof _addChatMessage === 'function') {
+          _addChatMessage('ai', '\uD83D\uDC64 **' + found.name + ' \u2014 Wochenbericht**\n\n' + summary + '\n\n' + reply);
+        }
+      }).catch(function() {
+        if (typeof _addChatMessage === 'function')
+          _addChatMessage('ai', '\uD83D\uDC64 **' + found.name + '**\n\n' + summary);
+      });
+      return true;
+    }
+  }
+
+  // ═══ FLOW: EXPERIMENT ═══
+  if (state.flow === 'experiment') {
+    if (state.step === 1) {
+      var numMatch = userText.match(/^(\d)/);
+      var num = numMatch ? parseInt(numMatch[1]) - 1 : -1;
+      if (num >= 0 && num < (window._EXPERIMENT_TEMPLATES||[]).length) {
+        window._jarvisConvState = null;
+        window._startExperiment(window._EXPERIMENT_TEMPLATES[num].id);
+      } else {
+        window._jarvisConvState = null;
+        window._startExperiment('custom', userText.trim());
+      }
+      return true;
+    }
+  }
+
+  return false;
+};
+
     window._sendKiChat = async function() {
   var input = document.getElementById('kiChatInput');
   if (!input) return;
   var text = input.value.trim();
   if (!text) return;
   input.value = '';
+
+  if (window._jarvisConvState && window._handleJarvisConvFlow) {
+    _addChatMessage('user', text);
+    var handled = window._handleJarvisConvFlow(text);
+    if (handled) {
+      document.getElementById('kiChatSendBtn').style.opacity = '1';
+      return;
+    }
+  }
 
   if (!window.checkFeatureGate('coach')) return;
 
@@ -4529,6 +4745,7 @@
 
   if (result && result.response) {
     _addChatMessage('ai', result.response);
+    if (window._jarvisSpeak) window._jarvisSpeak(result.response);
     if (result.wasIntent) {
       _addChatMessage('ai', '<span style="font-size:10px;color:var(--primary-hex);opacity:0.7">\u2713 Aktion ausgef\u00fchrt</span>');
     } else {
@@ -4875,21 +5092,102 @@ function _splitSentences(text) {
 }
 
 // ── State ─────────────────────────────────────
+var _JARVIS_LANG = {
+  de: {
+    code: 'de-DE',
+    states: { idle:'TIPPEN ZUM SPRECHEN', listening:'JARVIS H\u00d6RT ZU...', thinking:'JARVIS DENKT...', speaking:'JARVIS SPRICHT...' },
+    hint: 'TIPPEN = SPRECHEN \u00b7 NOCHMAL = STOPP',
+    greetMorning:'Guten Morgen', greetDay:'Hallo', greetEvening:'Guten Abend',
+    streakMsg:  function(n){ return n+' Tage Streak \u2014 stark. Was trainieren wir heute?'; },
+    lastMsg:    function(ex,d){ return 'Letztes Training '+(d===0?'heute':d===1?'gestern':'vor '+d+' Tagen')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' Tage Pause. Bereit wieder einzusteigen?'; },
+    batteryLow: function(s){ return 'ZNS-Score bei '+s+' Prozent. Heute lieber leicht trainieren.'; },
+    ready:'Was kann ich f\u00fcr dich tun?', notSupported:'Spracheingabe nicht unterst\u00fctzt'
+  },
+  en: {
+    code: 'en-US',
+    states: { idle:'TAP TO SPEAK', listening:'JARVIS LISTENING...', thinking:'JARVIS THINKING...', speaking:'JARVIS SPEAKING...' },
+    hint: 'TAP = SPEAK \u00b7 TAP AGAIN = STOP',
+    greetMorning:'Good morning', greetDay:'Hello', greetEvening:'Good evening',
+    streakMsg:  function(n){ return n+'-day streak \u2014 impressive. What are we training today?'; },
+    lastMsg:    function(ex,d){ return 'Last workout '+(d===0?'today':d===1?'yesterday':d+' days ago')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' days off. Ready to get back at it?'; },
+    batteryLow: function(s){ return 'ZNS score at '+s+' percent. Better to train light today.'; },
+    ready:'What can I do for you?', notSupported:'Speech input not supported'
+  },
+  fr: {
+    code: 'fr-FR',
+    states: { idle:'APPUYER POUR PARLER', listening:'JARVIS \u00c9COUTE...', thinking:'JARVIS R\u00c9FL\u00c9CHIT...', speaking:'JARVIS PARLE...' },
+    hint: 'APPUYER = PARLER \u00b7 ENCORE = ARR\u00caT',
+    greetMorning:'Bonjour', greetDay:'Salut', greetEvening:'Bonsoir',
+    streakMsg:  function(n){ return n+' jours de suite. On s\'entra\u00eene quoi aujourd\'hui?'; },
+    lastMsg:    function(ex,d){ return 'Dernier entra\u00eenement '+(d===0?'aujourd\'hui':d===1?'hier':'il y a '+d+' jours')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' jours de repos. Pr\u00eat \u00e0 reprendre?'; },
+    batteryLow: function(s){ return 'Score ZNS \u00e0 '+s+' pourcent. Mieux vaut s\'entra\u00eener l\u00e9ger.'; },
+    ready:'Que puis-je faire pour toi?', notSupported:'Saisie vocale non support\u00e9e'
+  },
+  es: {
+    code: 'es-ES',
+    states: { idle:'TOCA PARA HABLAR', listening:'JARVIS ESCUCHA...', thinking:'JARVIS PIENSA...', speaking:'JARVIS HABLA...' },
+    hint: 'TOCA = HABLAR \u00b7 OTRA VEZ = PARAR',
+    greetMorning:'Buenos d\u00edas', greetDay:'Hola', greetEvening:'Buenas noches',
+    streakMsg:  function(n){ return n+' d\u00edas seguidos. \u00bfQu\u00e9 entrenamos hoy?'; },
+    lastMsg:    function(ex,d){ return '\u00daltimo entreno '+(d===0?'hoy':d===1?'ayer':'hace '+d+' d\u00edas')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' d\u00edas de descanso. \u00bfListo para volver?'; },
+    batteryLow: function(s){ return 'Score ZNS en '+s+' porciento. Mejor entrenar suave hoy.'; },
+    ready:'\u00bfEn qu\u00e9 puedo ayudarte?', notSupported:'Entrada de voz no compatible'
+  },
+  it: {
+    code: 'it-IT',
+    states: { idle:'TOCCA PER PARLARE', listening:'JARVIS ASCOLTA...', thinking:'JARVIS PENSA...', speaking:'JARVIS PARLA...' },
+    hint: 'TOCCA = PARLA \u00b7 ANCORA = STOP',
+    greetMorning:'Buongiorno', greetDay:'Ciao', greetEvening:'Buonasera',
+    streakMsg:  function(n){ return n+' giorni consecutivi. Cosa alleniamo oggi?'; },
+    lastMsg:    function(ex,d){ return 'Ultimo allenamento '+(d===0?'oggi':d===1?'ieri':d+' giorni fa')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' giorni di pausa. Pronto a ricominciare?'; },
+    batteryLow: function(s){ return 'Score ZNS al '+s+' percento. Meglio allenarsi leggero oggi.'; },
+    ready:'Come posso aiutarti?', notSupported:'Input vocale non supportato'
+  },
+  nl: {
+    code: 'nl-NL',
+    states: { idle:'TIK OM TE SPREKEN', listening:'JARVIS LUISTERT...', thinking:'JARVIS DENKT...', speaking:'JARVIS SPREEKT...' },
+    hint: 'TIKKEN = SPREKEN \u00b7 NOGMAALS = STOP',
+    greetMorning:'Goedemorgen', greetDay:'Hallo', greetEvening:'Goedenavond',
+    streakMsg:  function(n){ return n+' dagen op rij. Wat trainen we vandaag?'; },
+    lastMsg:    function(ex,d){ return 'Laatste training '+(d===0?'vandaag':d===1?'gisteren':d+' dagen geleden')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' dagen rust. Klaar om weer te beginnen?'; },
+    batteryLow: function(s){ return 'ZNS-score op '+s+' procent. Beter licht trainen vandaag.'; },
+    ready:'Wat kan ik voor je doen?', notSupported:'Spraakinvoer niet ondersteund'
+  },
+  ar: {
+    code: 'ar-SA',
+    states: { idle:'\u0627\u0636\u063a\u0637 \u0644\u0644\u062a\u062d\u062f\u062b', listening:'\u062c\u0627\u0631\u0641\u064a\u0633 \u064a\u0633\u062a\u0645\u0639...', thinking:'\u062c\u0627\u0631\u0641\u064a\u0633 \u064a\u0641\u0643\u0631...', speaking:'\u062c\u0627\u0631\u0641\u064a\u0633 \u064a\u062a\u062d\u062f\u062b...' },
+    hint: '\u0627\u0636\u063a\u0637 = \u062a\u062d\u062f\u062b \u00b7 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649 = \u062a\u0648\u0642\u0641',
+    greetMorning:'\u0635\u0628\u0627\u062d \u0627\u0644\u062e\u064a\u0631', greetDay:'\u0645\u0631\u062d\u0628\u0627', greetEvening:'\u0645\u0633\u0627\u0621 \u0627\u0644\u062e\u064a\u0631',
+    streakMsg:  function(n){ return n+' \u0623\u064a\u0627\u0645 \u0645\u062a\u062a\u0627\u0644\u064a\u0629. \u0645\u0627\u0630\u0627 \u0646\u062a\u062f\u0631\u0628 \u0627\u0644\u064a\u0648\u0645\u061f'; },
+    lastMsg:    function(ex,d){ return '\u0622\u062e\u0631 \u062a\u0645\u0631\u064a\u0646 '+(d===0?'\u0627\u0644\u064a\u0648\u0645':d===1?'\u0623\u0645\u0633':'\u0642\u0628\u0644 '+d+' \u0623\u064a\u0627\u0645')+': '+ex+'.'; },
+    restMsg:    function(d){ return d+' \u0623\u064a\u0627\u0645 \u0631\u0627\u062d\u0629. \u0647\u0644 \u0623\u0646\u062a \u0645\u0633\u062a\u0639\u062f \u0644\u0644\u0639\u0648\u062f\u0629\u061f'; },
+    batteryLow: function(s){ return '\u0646\u062a\u064a\u062c\u0629 ZNS \u0639\u0646\u062f '+s+' \u0628\u0627\u0644\u0645\u0626\u0629. \u0645\u0646 \u0627\u0644\u0623\u0641\u0636\u0644 \u0627\u0644\u062a\u062f\u0631\u064a\u0628 \u0627\u0644\u062e\u0641\u064a\u0641 \u0627\u0644\u064a\u0648\u0645.'; },
+    ready:'\u0643\u064a\u0641 \u064a\u0645\u0643\u0646\u0646\u064a \u0645\u0633\u0627\u0639\u062f\u062a\u0643\u061f', notSupported:'\u0627\u0644\u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0635\u0648\u062a\u064a \u063a\u064a\u0631 \u0645\u062f\u0639\u0648\u0645'
+  }
+};
+function _getLang() { return _JARVIS_LANG[window.currentLang] || _JARVIS_LANG.de; }
+
 var _state = 'idle';
 var _isListening = false;
 var _recognition = null;
 var _speechQueue = [];
 var _isSpeaking = false;
 var _orbObjects = null;
-var _orbAnim = null;
+var _orbAnim    = null;
 var _autoListenTimer = null;
 
-// ── Orb (Three.js) ────────────────────────────
-var COLOR_MAP = {
-  idle:      0x2a3d2f,
-  listening: 0xa3c9a8,
-  thinking:  0x6b9b70,
-  speaking:  0xc8e6cb
+// ── Orb (Three.js) — 4 States + Elektronen + Tumble + Camera-Drift ──
+var ORB_COLORS = {
+  idle:      { pt: 0x2a4a32, ln: 0x2a4a32 },
+  listening: { pt: 0xa3c9a8, ln: 0xa3c9a8 },
+  thinking:  { pt: 0x6ec4ff, ln: 0x6ec4ff },
+  speaking:  { pt: 0x5ab8f0, ln: 0x5ab8f0 }
 };
 
 function _initOrb() {
@@ -4898,65 +5196,78 @@ function _initOrb() {
   if (!canvas || _orbObjects) return;
 
   var W = window.innerWidth, H = window.innerHeight;
-  var renderer = new THREE.WebGLRenderer({
-    canvas: canvas, antialias: true, alpha: false
-  });
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(W, H);
   renderer.setClearColor(0x000000, 1);
 
   var scene  = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(45, W/H, 1, 1000);
+  var camera = new THREE.PerspectiveCamera(45, W / H, 1, 1000);
   camera.position.z = 80;
 
-  var N   = 1200;
+  var N   = 2000;
   var geo = new THREE.BufferGeometry();
   var pos = new Float32Array(N * 3);
   var vel = new Float32Array(N * 3);
-  var phase = new Float32Array(N);
+  var phs = new Float32Array(N);
 
   for (var i = 0; i < N; i++) {
     var theta = Math.random() * Math.PI * 2;
     var phi   = Math.acos(2 * Math.random() - 1);
-    var r     = Math.pow(Math.random(), 0.5) * 22;
+    var r     = Math.pow(Math.random(), 0.5) * 25;
     pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
     pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
     pos[i*3+2] = r * Math.cos(phi);
-    vel[i*3]   = (Math.random() - 0.5) * 0.02;
-    vel[i*3+1] = (Math.random() - 0.5) * 0.02;
-    vel[i*3+2] = (Math.random() - 0.5) * 0.02;
-    phase[i]   = Math.random() * 1000;
+    phs[i] = Math.random() * 1000;
   }
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 
   var mat = new THREE.PointsMaterial({
-    color: 0x4ca8e8, size: 0.5, transparent: true,
-    opacity: 0.7, sizeAttenuation: true,
-    blending: THREE.AdditiveBlending, depthWrite: false
+    color: 0xa3c9a8, size: 0.4, transparent: true, opacity: 0.6,
+    sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
   });
   var points = new THREE.Points(geo, mat);
   scene.add(points);
 
-  var MAX_L   = 3000;
+  var MAX_L   = 8000;
   var linePos = new Float32Array(MAX_L * 6);
   var lineGeo = new THREE.BufferGeometry();
-  lineGeo.setAttribute('position',
-    new THREE.BufferAttribute(linePos, 3));
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
   lineGeo.setDrawRange(0, 0);
   var lineMat = new THREE.LineBasicMaterial({
-    color: 0x4ca8e8, transparent: true, opacity: 0,
+    color: 0xa3c9a8, transparent: true, opacity: 0.0,
     blending: THREE.AdditiveBlending, depthWrite: false
   });
   var lines = new THREE.LineSegments(lineGeo, lineMat);
   scene.add(lines);
 
+  var MAX_EL  = 200;
+  var elPos   = new Float32Array(MAX_EL * 3);
+  var elGeo   = new THREE.BufferGeometry();
+  elGeo.setAttribute('position', new THREE.BufferAttribute(elPos, 3));
+  elGeo.setDrawRange(0, 0);
+  var elMat = new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.9, transparent: true, opacity: 1.0,
+    sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  var electrons = new THREE.Points(elGeo, elMat);
+  scene.add(electrons);
+
   _orbObjects = {
     renderer: renderer, scene: scene, camera: camera,
-    points: points, lines: lines,
-    geo: geo, lineGeo: lineGeo, lineMat: lineMat, mat: mat,
-    pos: pos, vel: vel, phase: phase,
-    N: N, MAX_L: MAX_L, linePos: linePos,
-    currentColor: new THREE.Color(0x2a3d2f)
+    points: points, lines: lines, electrons: electrons,
+    geo: geo, lineGeo: lineGeo, elGeo: elGeo,
+    mat: mat, lineMat: lineMat, elMat: elMat,
+    pos: pos, vel: vel, phs: phs, N: N,
+    MAX_L: MAX_L, linePos: linePos,
+    elPos: elPos, MAX_EL: MAX_EL,
+    activeElectrons: [], lastElSpawn: 0,
+    activeConnections: [],
+    spinX: 0, spinY: 0, spinZ: 0, transEnergy: 0, lastState: 'idle',
+    cloudZ: 0, cloudZVel: 0,
+    currentRadius: 25, currentSpeed: 0.3,
+    currentBright: 0.6, currentSize: 0.4,
+    lineAmount: 0, elRate: 0, targetElRate: 0
   };
 
   window.addEventListener('resize', function() {
@@ -4971,95 +5282,165 @@ function _initOrb() {
 }
 
 function _animateOrb() {
-  var t = 0;
-  var speedMap   = { idle:0.3, listening:1.2, thinking:2.0, speaking:2.8 };
-  var radiusMap  = { idle:22,  listening:18,  thinking:25,  speaking:28 };
-  var opacityMap = { idle:0.4, listening:0.75, thinking:0.85, speaking:0.95 };
-  var lineOpMap  = { idle:0,   listening:0.12, thinking:0.35, speaking:0.55 };
+  var clock = { start: Date.now(), t: function() { return (Date.now() - this.start) / 1000; } };
 
   function frame() {
     _orbAnim = requestAnimationFrame(frame);
     var o = _orbObjects;
     if (!o) return;
-    t += 0.01;
+    var t = clock.t();
 
-    var speed    = speedMap[_state]   || 0.3;
-    var targetR  = radiusMap[_state]  || 22;
-    var tOp      = opacityMap[_state] || 0.4;
-    var tLOp     = lineOpMap[_state]  || 0;
-    var tColor   = new THREE.Color(COLOR_MAP[_state] || 0x2a3d2f);
+    var tRadius, tSpeed, tBright, tSize, tLineAmt, tElRate;
+    switch (_state) {
+      case 'idle':
+        tRadius=28; tSpeed=0.2; tBright=0.5; tSize=0.35; tLineAmt=0.15; tElRate=0; break;
+      case 'listening':
+        tRadius=22; tSpeed=0.3; tBright=0.65; tSize=0.4; tLineAmt=0.4; tElRate=0; break;
+      case 'thinking':
+        tRadius=16; tSpeed=0.5; tBright=0.7; tSize=0.3; tLineAmt=1.0; tElRate=0.015; break;
+      case 'speaking':
+        tRadius=18; tSpeed=0.2; tBright=0.7; tSize=0.4; tLineAmt=0.8; tElRate=0; break;
+      default:
+        tRadius=25; tSpeed=0.3; tBright=0.6; tSize=0.4; tLineAmt=0; tElRate=0;
+    }
 
-    o.mat.opacity     += (tOp  - o.mat.opacity)     * 0.05;
-    o.lineMat.opacity += (tLOp - o.lineMat.opacity) * 0.05;
-    o.mat.color.lerp(tColor, 0.04);
-    o.lineMat.color.lerp(tColor, 0.04);
+    var lp = 0.02;
+    o.currentRadius += (tRadius    - o.currentRadius) * lp;
+    o.currentSpeed  += (tSpeed     - o.currentSpeed)  * lp;
+    o.currentBright += (tBright    - o.currentBright) * lp;
+    o.currentSize   += (tSize      - o.currentSize)   * lp;
+    o.lineAmount    += (tLineAmt   - o.lineAmount)     * lp;
+    o.targetElRate   = tElRate;
+    o.elRate        += (o.targetElRate - o.elRate) * lp;
 
-    var arr = o.geo.getAttribute('position').array;
+    if (_state !== o.lastState) { o.transEnergy = 1.0; o.lastState = _state; }
+    o.transEnergy *= 0.985;
+    if (o.transEnergy > 0.05) {
+      o.spinX += o.transEnergy * 0.012 * Math.sin(t * 1.7);
+      o.spinY += o.transEnergy * 0.015;
+      o.spinZ += o.transEnergy * 0.008 * Math.cos(t * 1.3);
+    }
+
+    var bass = 0, mid = 0;
+    if (window._jarvisAnalyser) {
+      var fd = new Uint8Array(window._jarvisAnalyser.frequencyBinCount);
+      window._jarvisAnalyser.getByteFrequencyData(fd);
+      var bS = 0, mS = 0;
+      for (var qi = 0; qi < 8; qi++) bS += fd[qi];
+      for (var qi2 = 8; qi2 < 24; qi2++) mS += fd[qi2];
+      bass = bS / (8 * 255); mid = mS / (16 * 255);
+    }
+
+    var zTarget = Math.sin(t * 0.12) * 8;
+    if (_state === 'thinking') zTarget = Math.sin(t*0.3)*15 + Math.sin(t*0.9)*6;
+    else if (_state === 'speaking') zTarget = Math.sin(t*0.15)*6 - bass*10;
+    o.cloudZVel += (zTarget - o.cloudZ) * 0.008;
+    o.cloudZVel *= 0.94;
+    o.cloudZ += o.cloudZVel;
+
+    [o.points, o.lines, o.electrons].forEach(function(obj) {
+      obj.rotation.x = o.spinX;
+      obj.rotation.y = o.spinY;
+      obj.rotation.z = o.spinZ;
+      obj.position.z = o.cloudZ;
+    });
+
+    var a = o.geo.getAttribute('position').array;
     for (var i = 0; i < o.N; i++) {
-      var px = arr[i*3], py = arr[i*3+1], pz = arr[i*3+2];
-      var breathe = 1 + 0.08 * Math.sin(t * speed * 2 + o.phase[i]);
-      if (_state === 'speaking') {
-        var ang = t * speed * 0.5;
-        px += (-pz*0.01 + Math.cos(ang+o.phase[i])*0.02) * speed;
-        py += (Math.sin(t*2+o.phase[i])*0.015) * speed;
-        pz += (px*0.01  + Math.sin(ang+o.phase[i])*0.02) * speed;
+      var i3 = i * 3;
+      var x = a[i3], y = a[i3+1], z = a[i3+2];
+      var px = o.phs[i];
+
+      o.vel[i3]   += Math.sin(t*0.05+px)         * 0.001 * o.currentSpeed;
+      o.vel[i3+1] += Math.cos(t*0.06+px*1.3)     * 0.001 * o.currentSpeed;
+      o.vel[i3+2] += Math.sin(t*0.055+px*0.7)    * 0.001 * o.currentSpeed;
+      o.vel[i3]   += Math.sin(t*0.02+px*2.1+y*0.1) * 0.0008 * o.currentSpeed;
+      o.vel[i3+1] += Math.cos(t*0.025+px*1.7+z*0.1)* 0.0008 * o.currentSpeed;
+      o.vel[i3+2] += Math.sin(t*0.022+px*0.9+x*0.1)* 0.0008 * o.currentSpeed;
+
+      var dist = Math.sqrt(x*x+y*y+z*z) || 0.01;
+      var pull = Math.max(0, dist - o.currentRadius) * 0.002 + 0.0003;
+      o.vel[i3]   -= (x/dist)*pull;
+      o.vel[i3+1] -= (y/dist)*pull;
+      o.vel[i3+2] -= (z/dist)*pull;
+
+      if (bass > 0.05) {
+        o.vel[i3]   += (x/dist)*bass*0.02;
+        o.vel[i3+1] += (y/dist)*bass*0.02;
+        o.vel[i3+2] += (z/dist)*bass*0.02;
       }
-      px += o.vel[i*3]   * speed;
-      py += o.vel[i*3+1] * speed;
-      pz += o.vel[i*3+2] * speed;
-      var d = Math.sqrt(px*px+py*py+pz*pz) || 0.001;
-      var pull = 0.005 * speed;
-      var td   = targetR * breathe;
-      px += (px/d)*(td-d)*pull;
-      py += (py/d)*(td-d)*pull;
-      pz += (pz/d)*(td-d)*pull;
-      arr[i*3]=px; arr[i*3+1]=py; arr[i*3+2]=pz;
+      if (_state === 'speaking' && mid > 0.1) {
+        var pulse = Math.sin(t*8+px);
+        o.vel[i3]   += (x/dist)*mid*0.012*pulse;
+        o.vel[i3+1] += (y/dist)*mid*0.012*pulse;
+      }
+
+      o.vel[i3] *= 0.992; o.vel[i3+1] *= 0.992; o.vel[i3+2] *= 0.992;
+      a[i3]   += o.vel[i3];
+      a[i3+1] += o.vel[i3+1];
+      a[i3+2] += o.vel[i3+2];
     }
     o.geo.getAttribute('position').needsUpdate = true;
 
-    if (_state !== 'idle') {
+    o.activeConnections = [];
+    if (o.lineAmount > 0.01) {
       var la  = o.lineGeo.getAttribute('position').array;
       var lc  = 0;
-      var th  = _state==='speaking'?14 : _state==='thinking'?11 : 9;
-      var stp = _state==='speaking'?5 : 8;
-      for (var a=0; a<o.N && lc<o.MAX_L-6; a+=stp) {
-        for (var b=a+stp; b<o.N && lc<o.MAX_L-6; b+=stp) {
-          var dx=arr[a*3]-arr[b*3], dy=arr[a*3+1]-arr[b*3+1],
-              dz=arr[a*3+2]-arr[b*3+2];
-          if (Math.sqrt(dx*dx+dy*dy+dz*dz) < th) {
-            la[lc*6]=arr[a*3]; la[lc*6+1]=arr[a*3+1]; la[lc*6+2]=arr[a*3+2];
-            la[lc*6+3]=arr[b*3]; la[lc*6+4]=arr[b*3+1]; la[lc*6+5]=arr[b*3+2];
+      var mxD = 8 * (1 + bass * 0.5);
+      var mxDSq = mxD * mxD;
+      var stp = Math.max(1, Math.floor(o.N / 600));
+      for (var ai = 0; ai < o.N && lc < o.MAX_L; ai += stp) {
+        var ai3 = ai*3, x1=a[ai3], y1=a[ai3+1], z1=a[ai3+2];
+        for (var bi = ai+stp; bi < o.N && lc < o.MAX_L; bi += stp) {
+          var bi3=bi*3, dx=a[bi3]-x1, dy=a[bi3+1]-y1, dz=a[bi3+2]-z1;
+          if (dx*dx+dy*dy+dz*dz < mxDSq) {
+            var idx=lc*6;
+            la[idx]=x1; la[idx+1]=y1; la[idx+2]=z1;
+            la[idx+3]=a[bi3]; la[idx+4]=a[bi3+1]; la[idx+5]=a[bi3+2];
+            if (lc < 500) o.activeConnections.push({ x1:x1,y1:y1,z1:z1, x2:a[bi3],y2:a[bi3+1],z2:a[bi3+2] });
             lc++;
           }
         }
       }
       o.lineGeo.getAttribute('position').needsUpdate = true;
-      o.lineGeo.setDrawRange(0, lc*2);
+      o.lineGeo.setDrawRange(0, lc * 2);
+      o.lineMat.opacity = o.lineAmount * 0.12;
     } else {
       o.lineGeo.setDrawRange(0, 0);
     }
 
-    // Audio-reaktive Orb-Bewegung
-    if (_state === 'speaking' && window._jarvisAnalyser) {
-      var dataArray = new Uint8Array(window._jarvisAnalyser.frequencyBinCount);
-      window._jarvisAnalyser.getByteFrequencyData(dataArray);
-      var sum = 0;
-      for (var di = 0; di < dataArray.length; di++) sum += dataArray[di];
-      var avgVolume = sum / dataArray.length;
-      var normalized = avgVolume / 128;
-      var audioScale = 1 + (normalized * 0.4);
-      targetR = (radiusMap['speaking'] || 28) * audioScale;
-      speed = (speedMap['speaking'] || 2.8) * (1 + normalized * 0.5);
-      var audioBrightness = Math.min(1.0, (opMap['speaking'] || 0.95) + (normalized * 0.2));
-      o.mat.opacity += (audioBrightness - o.mat.opacity) * 0.15;
-      var bassSum = 0;
-      for (var bi = 0; bi < 8; bi++) bassSum += dataArray[bi];
-      var bassLevel = bassSum / (8 * 255);
-      var lineTarget = (lOpMap['speaking'] || 0.55) + (bassLevel * 0.3);
-      o.lineMat.opacity += (lineTarget - o.lineMat.opacity) * 0.2;
+    if (o.activeConnections.length > 0 && o.elRate > 0.005) {
+      if (o.activeElectrons.length < 3 && (t - o.lastElSpawn) > 1.0) {
+        var c = o.activeConnections[Math.floor(Math.random()*o.activeConnections.length)];
+        o.activeElectrons.push({ sx:c.x1,sy:c.y1,sz:c.z1, ex:c.x2,ey:c.y2,ez:c.z2, tp:0, spd:0.003+Math.random()*0.003 });
+        o.lastElSpawn = t;
+      }
     }
+    var ea = o.elGeo.getAttribute('position').array;
+    var alive = 0;
+    for (var ei = o.activeElectrons.length-1; ei >= 0; ei--) {
+      var el = o.activeElectrons[ei];
+      el.tp += el.spd;
+      if (el.tp >= 1) { o.activeElectrons.splice(ei, 1); continue; }
+      var eidx = alive*3;
+      ea[eidx]   = el.sx + (el.ex-el.sx)*el.tp;
+      ea[eidx+1] = el.sy + (el.ey-el.sy)*el.tp;
+      ea[eidx+2] = el.sz + (el.ez-el.sz)*el.tp;
+      alive++;
+    }
+    o.elGeo.setDrawRange(0, alive);
+    o.elGeo.getAttribute('position').needsUpdate = true;
 
-    o.points.rotation.y += 0.001 * speed;
+    var tc = ORB_COLORS[_state] || ORB_COLORS.idle;
+    o.mat.color.lerp(new THREE.Color(tc.pt), 0.015);
+    o.lineMat.color.lerp(new THREE.Color(tc.ln), 0.015);
+    o.mat.opacity = o.currentBright + bass * 0.08;
+    o.mat.size    = o.currentSize   + bass * 0.05;
+
+    o.camera.position.x = Math.sin(t * 0.02) * 5;
+    o.camera.position.y = Math.cos(t * 0.03) * 3;
+    o.camera.lookAt(0, 0, o.cloudZ * 0.2);
+
     o.renderer.render(o.scene, o.camera);
   }
   frame();
@@ -5079,13 +5460,7 @@ function _setState(state) {
   _state = state;
   var el = document.getElementById('voiceStatusLabel');
   if (!el) return;
-  var labels = {
-    idle:      'TIPPEN ZUM SPRECHEN',
-    listening: 'JARVIS H\u00d6RT ZU...',
-    thinking:  'JARVIS DENKT...',
-    speaking:  'JARVIS SPRICHT...'
-  };
-  el.textContent = labels[state] || '';
+  el.textContent = _getLang().states[state] || '';
 }
 
 // ── Speech Queue (Jarvis SeamlessPlayer Konzept) ──
@@ -5098,12 +5473,9 @@ function _processSpeechQueue() {
   if (_speechQueue.length === 0) {
     _isSpeaking = false;
     _setState('idle');
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (!isIOS) {
-      var overlay = document.getElementById('voiceModeOverlay');
-      if (overlay && overlay.style.display !== 'none') {
-        _autoListenTimer = setTimeout(_startListening, 800);
-      }
+    var overlay = document.getElementById('voiceModeOverlay');
+    if (overlay && overlay.style.display !== 'none') {
+      _autoListenTimer = setTimeout(_resumeListening, 800);
     }
     return;
   }
@@ -5126,65 +5498,86 @@ function _speakWithElevenLabs(text, onComplete, onError) {
     try { window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { onError(); return; }
   }
   var ctx = window._jarvisAudioCtx;
-  if (ctx.state === 'suspended') ctx.resume().catch(function() {});
 
-  fetch('/.netlify/functions/elevenlabs-tts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: text })
-  })
-  .then(function(res) {
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
-  })
-  .then(function(data) {
-    if (!data.audio) throw new Error('No audio');
-    var binary = atob(data.audio);
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  var doFetch = function() {
+    fetch('/.netlify/functions/fish-tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, lang: window.currentLang || 'de' })
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      if (!data.audio) throw new Error('No audio data');
+      var binary = atob(data.audio);
+      var bytes  = new Uint8Array(binary.length);
+      for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-    ctx.decodeAudioData(bytes.buffer.slice(0), function(audioBuffer) {
-      var source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      if (!window._jarvisAnalyser) {
-        window._jarvisAnalyser = ctx.createAnalyser();
-        window._jarvisAnalyser.fftSize = 256;
-        window._jarvisAnalyser.smoothingTimeConstant = 0.8;
-      }
-      source.connect(window._jarvisAnalyser);
-      window._jarvisAnalyser.connect(ctx.destination);
-      source.onended = function() { window._jarvisCurrentSource = null; onComplete(); };
-      source.start(0);
-      window._jarvisCurrentSource = source;
-      _setState('speaking');
-    }, function(err) {
-      console.warn('[Jarvis] decodeAudioData:', err);
+      ctx.decodeAudioData(bytes.buffer.slice(0), function(audioBuffer) {
+        if (!window._jarvisAnalyser) {
+          window._jarvisAnalyser = ctx.createAnalyser();
+          window._jarvisAnalyser.fftSize = 256;
+          window._jarvisAnalyser.smoothingTimeConstant = 0.8;
+          window._jarvisAnalyser.connect(ctx.destination);
+        }
+        var source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(window._jarvisAnalyser);
+        source.onended = function() {
+          window._jarvisCurrentSource = null;
+          onComplete();
+        };
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(function() {
+            source.start(0);
+            window._jarvisCurrentSource = source;
+            _setState('speaking');
+          }).catch(function() { onError(); });
+        } else {
+          source.start(0);
+          window._jarvisCurrentSource = source;
+          _setState('speaking');
+        }
+      }, function(decodeErr) {
+        console.warn('[Jarvis] decodeAudioData Fehler:', decodeErr);
+        onError();
+      });
+    })
+    .catch(function(err) {
+      console.warn('[Jarvis ElevenLabs]', err.message);
       onError();
     });
-  })
-  .catch(function(err) {
-    console.warn('[Jarvis ElevenLabs]', err.message);
-    onError();
-  });
+  };
+
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(doFetch).catch(function() { onError(); });
+  } else {
+    doFetch();
+  }
 }
 
 function _speakWithBrowser(text, onComplete) {
   if (!window.speechSynthesis) { onComplete(); return; }
-  var utter = new SpeechSynthesisUtterance(text);
-  utter.lang  = (window.currentLang === 'en') ? 'en-US' : 'de-DE';
-  utter.rate  = 1.05;
-  utter.pitch = 1.0;
-  var voices   = window.speechSynthesis.getVoices();
-  var langCode = utter.lang.split('-')[0];
-  var pref = voices.find(function(v) {
-    return v.lang.startsWith(langCode) && v.localService;
-  }) || voices.find(function(v) {
-    return v.lang.startsWith(langCode);
-  });
-  if (pref) utter.voice = pref;
-  utter.onend   = function() { onComplete(); };
-  utter.onerror = function() { onComplete(); };
-  window.speechSynthesis.speak(utter);
+  try {
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.lang  = _getLang().code;
+    utter.rate  = 1.0;
+    utter.pitch = 1.0;
+    utter.volume = 1.0;
+    var voices = window.speechSynthesis.getVoices();
+    var lp = utter.lang.split('-')[0];
+    var pref = voices.find(function(v) { return v.lang.startsWith(lp) && v.localService; })
+            || voices.find(function(v) { return v.lang.startsWith(lp); });
+    if (pref) utter.voice = pref;
+    utter.onend   = function() { onComplete(); };
+    utter.onerror = function() { onComplete(); };
+    window.speechSynthesis.cancel();
+    setTimeout(function() {
+      window.speechSynthesis.speak(utter);
+    }, 100);
+  } catch(e) { onComplete(); }
 }
 
 function _stopSpeech() {
@@ -5212,11 +5605,30 @@ async function _handleVoiceInput(userText) {
   _speechQueue = [];
 
   var result = await window._executeJarvis(userText, true);
-  if (!result) { _setState('idle'); return; }
 
-  var response = result.response;
+  if (window._jarvisConvState && window._handleJarvisConvFlow) {
+    var vHandled = window._handleJarvisConvFlow(userText);
+    if (vHandled) {
+      var msgs = document.querySelectorAll('#kiChatMessages .flex.justify-start');
+      if (msgs.length > 0) {
+        var lastMsg = msgs[msgs.length-1].querySelector('p,div');
+        if (lastMsg) {
+          var vt = lastMsg.textContent.replace(/[*#]/g,'').trim().substring(0,300);
+          _enqueueSpeech(vt);
+        }
+      }
+      _setState('idle');
+      setTimeout(_startListening, 1500);
+      return;
+    }
+  }
+
+  if (!result || !result.response) { _setState('idle'); return; }
+
+  var response = String(result.response);
   response = response.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<[^>]+>/g, '').replace(/\*+/g, '').replace(/#+\s*/g, '').replace(/\n+/g, ' ').replace(/\u2713[^\s]*/g, '').replace(/\s{2,}/g, ' ').trim();
 
+  if (!response) { _setState('idle'); return; }
   if (responseEl) responseEl.textContent = response;
 
   var sentences = response.split(/(?<=[.!?])\s+/);
@@ -5224,16 +5636,18 @@ async function _handleVoiceInput(userText) {
   if (!_isSpeaking && _speechQueue.length > 0) _processSpeechQueue();
 }
 
-// ── Speech Recognition ────────────────────────
+// ── Speech Recognition (jarvis-main voice.ts Pattern) ──
+var _shouldListen = false;
+
 function _startListening() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    if (window.showToast) window.showToast('Spracheingabe nicht unterst\u00fctzt');
+    if (window.showToast) window.showToast(_getLang().notSupported);
     return;
   }
-  if (_isListening) { _stopListening(); return; }
 
-  _isListening = true;
+  _shouldListen = true;
+  _isListening  = true;
   _setState('listening');
 
   var transcriptEl = document.getElementById('voiceTranscript');
@@ -5241,45 +5655,142 @@ function _startListening() {
   if (transcriptEl) transcriptEl.textContent = '';
   if (responseEl)   responseEl.textContent   = '';
 
-  _recognition = new SR();
-  _recognition.lang = (window.currentLang === 'en') ? 'en-US'
-    : (window.currentLang === 'fr') ? 'fr-FR'
-    : (window.currentLang === 'es') ? 'es-ES'
-    : 'de-DE';
-  _recognition.continuous     = false;
-  _recognition.interimResults = true;
+  if (!_recognition) {
+    _recognition = new SR();
+    _recognition.lang = _getLang().code;
+    _recognition.continuous     = true;
+    _recognition.interimResults = true;
 
-  _recognition.onresult = function(event) {
-    var transcript = '';
-    for (var i = event.resultIndex; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
-    }
-    if (transcriptEl) transcriptEl.textContent = transcript;
-    if (event.results[event.results.length-1].isFinal) {
-      _isListening = false;
-      _handleVoiceInput(transcript.trim());
-    }
-  };
-  _recognition.onerror = function(e) {
-    _isListening = false;
-    _setState('idle');
-    if (e.error !== 'no-speech' && window.showToast) {
-      window.showToast('Mikrofon-Fehler: ' + e.error, 'error');
-    }
-  };
-  _recognition.onend = function() {
-    if (_isListening) {
+    _recognition.onresult = function(event) {
+      var transcript = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      if (transcriptEl) transcriptEl.textContent = transcript;
+      if (event.results[event.results.length - 1].isFinal && transcript.trim()) {
+        _isListening = false;
+        if (_recognition) {
+          try { _recognition.stop(); } catch(ex) {}
+          _recognition = null;
+        }
+        _handleVoiceInput(transcript.trim());
+      }
+    };
+
+    _recognition.onerror = function(e) {
+      if (e.error === 'aborted' || e.error === 'no-speech') return;
       _isListening = false;
       _setState('idle');
-    }
-  };
-  _recognition.start();
+      if (window.showToast) window.showToast('Mikrofon-Fehler: ' + e.error, 'error');
+    };
+
+    _recognition.onend = function() {
+      _isListening = false;
+      if (_shouldListen) {
+        setTimeout(function() {
+          if (_shouldListen && _recognition) {
+            try { _recognition.start(); _isListening = true; } catch(ex) {}
+          }
+        }, 300);
+      } else {
+        _setState('idle');
+      }
+    };
+  }
+
+  try { _recognition.start(); } catch(ex) {}
+}
+
+function _pauseListening() {
+  _isListening  = false;
+  _shouldListen = false;
+  if (_recognition) {
+    try { _recognition.stop(); } catch(ex) {}
+  }
+}
+
+function _resumeListening() {
+  if (!_recognition) { _startListening(); return; }
+  _shouldListen = true;
+  _isListening  = true;
+  _setState('listening');
+  var transcriptEl = document.getElementById('voiceTranscript');
+  var responseEl   = document.getElementById('voiceAiResponse');
+  if (transcriptEl) transcriptEl.textContent = '';
+  if (responseEl)   responseEl.textContent   = '';
+  try { _recognition.start(); } catch(ex) {}
 }
 
 function _stopListening() {
-  if (_recognition) { _recognition.stop(); _recognition = null; }
-  _isListening = false;
+  _shouldListen = false;
+  _isListening  = false;
+  if (_recognition) {
+    try { _recognition.stop(); } catch(ex) {}
+    _recognition = null;
+  }
   _setState('idle');
+}
+
+// ── Jarvis Sprache für Chat zugänglich machen ──
+window._jarvisSpeak = function(text) {
+  if (!text || !text.trim()) return;
+  var clean = text
+    .replace(/<[^>]+>/g, '')
+    .replace(/\*+/g, '')
+    .replace(/#+\s*/g, '')
+    .replace(/\n+/g, ' ')
+    .trim()
+    .substring(0, 400);
+  if (!clean) return;
+  if (!window._jarvisAudioCtx) {
+    try {
+      window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {}
+  }
+  if (window._jarvisAudioCtx && window._jarvisAudioCtx.state === 'suspended') {
+    window._jarvisAudioCtx.resume().catch(function(){});
+  }
+  _enqueueSpeech(clean);
+};
+
+// ── Global AudioContext Unlock (jarvis-main Pattern) ──────────────
+if (!window._audioCtxUnlockRegistered) {
+  window._audioCtxUnlockRegistered = true;
+  function _ensureJarvisAudio() {
+    if (window._jarvisAudioCtx && window._jarvisAudioCtx.state === 'suspended') {
+      window._jarvisAudioCtx.resume().catch(function(){});
+    }
+  }
+  document.addEventListener('click',      _ensureJarvisAudio, { passive: true });
+  document.addEventListener('touchstart', _ensureJarvisAudio, { passive: true });
+  document.addEventListener('touchend',   _ensureJarvisAudio, { passive: true });
+}
+
+function _buildJarvisGreeting() {
+  var L = typeof _getLang === 'function' ? _getLang() : null;
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? 'Guten Morgen' : hour < 18 ? 'Hallo' : 'Guten Abend';
+  if (L) greet = hour < 12 ? L.greetMorning : hour < 18 ? L.greetDay : L.greetEvening;
+
+  if (window.currentReadinessScore && window.currentReadinessScore < 60) {
+    return greet + '. ZNS-Score bei ' + window.currentReadinessScore + ' Prozent. Heute lieber leicht trainieren.';
+  }
+  var streak = parseInt(localStorage.getItem('base_streak_count') || '0');
+  if (streak >= 7) {
+    return greet + '. ' + streak + ' Tage Streak — beeindruckend. Was trainieren wir heute?';
+  }
+  var workouts = window.workouts || [];
+  var archived = workouts.filter(function(w) { return w.archived; });
+  if (archived.length > 0) {
+    archived.sort(function(a,b) { return new Date(b.date)-new Date(a.date); });
+    var last = archived[0];
+    var days = Math.floor((Date.now()-new Date(last.date))/86400000);
+    var ex = last.exercise || last.sportCategory || 'Training';
+    if (days === 0) return greet + '. Du hast heute schon trainiert. Was brauchst du?';
+    if (days === 1) return greet + '. Letztes Training war gestern: ' + ex + '. Was steht heute an?';
+    if (days > 3) return greet + '. ' + days + ' Tage seit letztem Training. Bereit wieder einzusteigen?';
+  }
+  return greet + '. Bereit zu trainieren. Was kann ich für dich tun?';
 }
 
 // ── Open / Close ──────────────────────────────
@@ -5302,6 +5813,8 @@ window._openVoiceMode = function() {
   overlay.style.position = 'fixed';
   overlay.style.zIndex = '99999';
   document.body.style.overflow = 'hidden';
+  var hintEl = document.getElementById('voiceHint');
+  if (hintEl) hintEl.textContent = _getLang().hint;
 
   setTimeout(function() {
     if (window.THREE) {
@@ -5314,22 +5827,36 @@ window._openVoiceMode = function() {
     }
     _setState('idle');
     setTimeout(_startListening, 600);
+    setTimeout(function() {
+      var greeting = _buildJarvisGreeting();
+      if (greeting) _enqueueSpeech(greeting);
+    }, 900);
   }, 100);
 
   var tapBtn = document.getElementById('voiceOrbTapBtn');
-  if (tapBtn) tapBtn.onclick = function() {
-    if (!window._jarvisAudioCtx) { try { window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
-    if (window._jarvisAudioCtx && window._jarvisAudioCtx.state === 'suspended') window._jarvisAudioCtx.resume();
-    if (_state === 'listening') {
-      _stopListening();
-    } else if (_state === 'speaking') {
-      _stopSpeech();
-      setTimeout(_startListening, 300);
-    } else if (_state === 'idle') {
-      if (_autoListenTimer) clearTimeout(_autoListenTimer);
-      _startListening();
-    }
-  };
+  if (tapBtn) {
+    var _handleTap = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!window._jarvisAudioCtx) {
+        try { window._jarvisAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(ex) {}
+      }
+      if (window._jarvisAudioCtx && window._jarvisAudioCtx.state === 'suspended') {
+        window._jarvisAudioCtx.resume();
+      }
+      if (_state === 'listening') {
+        _stopListening();
+      } else if (_state === 'speaking') {
+        _stopSpeech();
+        setTimeout(_resumeListening, 300);
+      } else {
+        if (_autoListenTimer) clearTimeout(_autoListenTimer);
+        _resumeListening();
+      }
+    };
+    tapBtn.ontouchend = _handleTap;
+    tapBtn.onclick    = _handleTap;
+  }
 
   var closeBtn = document.getElementById('voiceModeCloseBtn');
   if (closeBtn) closeBtn.onclick = window._closeVoiceMode;
@@ -5453,12 +5980,12 @@ window._toggleWakeWord = function() {
     </script>
 
     <div id="voiceModeOverlay" class="hidden" style="background:#000;position:fixed;inset:0;z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;isolation:isolate">
-        <canvas id="voiceOrbCanvas" style="position:absolute;inset:0;width:100%;height:100%;background:#000000"></canvas>
+        <canvas id="voiceOrbCanvas" style="position:absolute;inset:0;width:100%;height:100%;background:#000000;pointer-events:none"></canvas>
         <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;pointer-events:none">
             <div id="voiceStatusLabel" style="position:absolute;top:48px;left:0;right:0;text-align:center;font-size:11px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(163,201,168,0.6);font-family:'Outfit',sans-serif">TIPPEN ZUM SPRECHEN</div>
             <div id="voiceTranscript" style="position:absolute;top:80px;left:24px;right:24px;text-align:center;font-size:15px;font-weight:600;color:rgba(255,255,255,0.85);font-family:'Outfit',sans-serif;min-height:24px;line-height:1.5"></div>
-            <div id="voiceAiResponse" style="position:absolute;bottom:140px;left:24px;right:24px;text-align:center;font-size:14px;color:rgba(163,201,168,0.9);font-family:'Outfit',sans-serif;min-height:24px;line-height:1.6;max-height:120px;overflow:hidden"></div>
-            <button id="voiceOrbTapBtn" aria-label="Sprechen" style="position:absolute;width:200px;height:200px;border-radius:50%;background:transparent;border:none;cursor:pointer;pointer-events:auto;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20"></button>
+            <div id="voiceAiResponse" style="position:absolute;bottom:120px;left:24px;right:24px;text-align:center;font-size:13px;color:rgba(163,201,168,0.9);font-family:'Outfit',sans-serif;min-height:24px;line-height:1.5;max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:auto"></div>
+            <button id="voiceOrbTapBtn" aria-label="Sprechen" style="position:absolute;inset:0;width:100%;height:100%;background:transparent;border:none;cursor:pointer;pointer-events:auto;z-index:20"></button>
             <button id="voiceModeCloseBtn" aria-label="Schliessen" style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:30">&times;</button>
             <div id="voiceHint" style="position:absolute;bottom:60px;left:0;right:0;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.2);font-family:'Outfit',sans-serif">TIPPEN = SPRECHEN &middot; NOCHMAL = STOPP</div>
         </div>

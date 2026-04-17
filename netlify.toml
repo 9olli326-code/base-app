@@ -10,8 +10,6 @@ publishOrigin = "config"
 functions = "netlify/functions"
 
   [build.environment]
-  ELEVENLABS_API_KEY = "sk_b7801f4c0dabf0244b59d0fd2646ae29c3e6b000bdf90c9c"
-  ELEVENLABS_VOICE_ID = "wDsJlOXPqcvIUKdLXjDs"
 
   [build.processing]
 

@@ -2,14 +2,25 @@ const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const VOICE_ID           = process.env.ELEVENLABS_VOICE_ID
   || 'wDsJlOXPqcvIUKdLXjDs';
 
+const CORS = {
+  'Access-Control-Allow-Origin': 'https://base-app.tech',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json'
+};
+
 exports.handler = async function(event) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: CORS, body: '' };
+  }
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
   }
 
   if (!ELEVENLABS_API_KEY) {
     return {
       statusCode: 500,
+      headers: CORS,
       body: JSON.stringify({ error: 'ElevenLabs API key not configured' })
     };
   }
@@ -18,12 +29,12 @@ exports.handler = async function(event) {
   try {
     body = JSON.parse(event.body);
   } catch(e) {
-    return { statusCode: 400, body: 'Invalid JSON' };
+    return { statusCode: 400, headers: CORS, body: 'Invalid JSON' };
   }
 
   const text = (body.text || '').slice(0, 500);
   if (!text.trim()) {
-    return { statusCode: 400, body: 'No text provided' };
+    return { statusCode: 400, headers: CORS, body: 'No text provided' };
   }
 
   try {
@@ -54,7 +65,8 @@ exports.handler = async function(event) {
       console.error('[ElevenLabs]', response.status, errText);
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: 'ElevenLabs API error: ' + response.status })
+        headers: CORS,
+        body: JSON.stringify({ error: 'ElevenLabs API error: ' + response.status, details: errText.slice(0, 500) })
       };
     }
 
@@ -63,10 +75,7 @@ exports.handler = async function(event) {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type':  'application/json',
-        'Cache-Control': 'no-cache'
-      },
+      headers: CORS,
       body: JSON.stringify({
         audio:    base64,
         mimeType: 'audio/mpeg'
@@ -77,6 +86,7 @@ exports.handler = async function(event) {
     console.error('[ElevenLabs] Fetch error:', err.message);
     return {
       statusCode: 500,
+      headers: CORS,
       body: JSON.stringify({ error: err.message })
     };
   }

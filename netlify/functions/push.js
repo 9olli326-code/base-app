@@ -16,6 +16,11 @@ exports.handler = async function(event) {
         return { statusCode: 400, body: JSON.stringify({ error: 'Ungueltiges JSON' }) };
     }
 
+    const INTERNAL_SECRET = process.env.PUSH_INTERNAL_SECRET;
+    if (INTERNAL_SECRET && body.internalSecret !== INTERNAL_SECRET) {
+        return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+    }
+
     if (!body.subscription || !body.notification) {
         return { statusCode: 400, body: JSON.stringify({ error: 'subscription und notification erforderlich' }) };
     }
