@@ -1,98 +1,74 @@
-// netlify/functions/elevenlabs-tts.js
-// TTS via ElevenLabs — sprach-abhängige Voice-Auswahl
-const https = require('https');
+const ELEVENLABS_API_KEY   = process.env.ELEVENLABS_API_KEY;
+const VOICE_ID_DE          = process.env.ELEVENLABS_VOICE_ID_DE;
+const VOICE_ID_EN          = process.env.ELEVENLABS_VOICE_ID_EN;
+const VOICE_ID_FALLBACK    = VOICE_ID_DE || VOICE_ID_EN;
 
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
-const VOICE_ID_DE = process.env.ELEVENLABS_VOICE_ID_DE || '';
-const VOICE_ID_EN = process.env.ELEVENLABS_VOICE_ID_EN || VOICE_ID_DE;
-const MAX_TEXT_LENGTH = 800;
-const MODEL_ID = 'eleven_multilingual_v2';
+const CORS = {
+  'Access-Control-Allow-Origin':  'https://base-app.tech',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json'
+};
 
-function pickVoiceId(lang, explicitVoiceId) {
-  if (explicitVoiceId) return explicitVoiceId;
-  const l = String(lang || 'de').toLowerCase().slice(0, 2);
-  if (l === 'en') return VOICE_ID_EN;
-  return VOICE_ID_DE;
-}
-
-exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
-  if (!ELEVENLABS_API_KEY) return { statusCode: 500, headers, body: JSON.stringify({ error: 'ELEVENLABS_API_KEY nicht konfiguriert' }) };
+exports.handler = async function(event) {
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
+  if (event.httpMethod !== 'POST')    return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
+  if (!ELEVENLABS_API_KEY)            return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'ELEVENLABS_API_KEY nicht konfiguriert' }) };
 
   let body;
-  try { body = JSON.parse(event.body); } catch (e) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ungültiges JSON' }) };
+  try { body = JSON.parse(event.body); }
+  catch(e) { return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Ungültiges JSON' }) }; }
+
+  const text = (body.text || '').trim().slice(0, 500);
+  const lang = (body.lang || 'de').toLowerCase();
+  if (!text) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Kein Text' }) };
+
+  // Voice ID nach Sprache auswählen
+  let voiceId;
+  if (lang === 'en') {
+    voiceId = VOICE_ID_EN || VOICE_ID_FALLBACK;
+  } else {
+    voiceId = VOICE_ID_DE || VOICE_ID_FALLBACK;
   }
+  if (!voiceId) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Keine Voice ID konfiguriert' }) };
 
-  const text = String(body.text || '').slice(0, MAX_TEXT_LENGTH);
-  if (!text.trim()) return { statusCode: 400, headers, body: JSON.stringify({ error: 'text erforderlich' }) };
-
-  const voiceId = pickVoiceId(body.lang, body.voiceId);
-  if (!voiceId) return { statusCode: 500, headers, body: JSON.stringify({ error: 'Keine Voice-ID konfiguriert' }) };
-
-  const payload = JSON.stringify({
-    text: text,
-    model_id: MODEL_ID,
-    voice_settings: {
-      stability: 0.45,
-      similarity_boost: 0.80,
-      style: 0.30,
-      use_speaker_boost: true
-    }
-  });
-
-  return new Promise((resolve) => {
-    const req = https.request({
-      hostname: 'api.elevenlabs.io',
-      path: '/v1/text-to-speech/' + voiceId + '?output_format=mp3_44100_128',
+  try {
+    const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'xi-api-key': ELEVENLABS_API_KEY,
+        'xi-api-key':   ELEVENLABS_API_KEY,
         'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg',
-        'Content-Length': Buffer.byteLength(payload)
+        'Accept':       'audio/mpeg'
       },
-      timeout: 25000
-    }, (res) => {
-      const chunks = [];
-      res.on('data', (c) => chunks.push(c));
-      res.on('end', () => {
-        const buf = Buffer.concat(chunks);
-        if (res.statusCode !== 200) {
-          console.error('[ElevenLabs]', res.statusCode, buf.toString('utf-8').slice(0, 500));
-          resolve({
-            statusCode: res.statusCode,
-            headers,
-            body: JSON.stringify({ error: 'ElevenLabs ' + res.statusCode, message: buf.toString('utf-8').slice(0, 300) })
-          });
-          return;
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: {
+          stability:        0.5,
+          similarity_boost: 0.85,
+          style:            0.2,
+          use_speaker_boost: true
         }
-        resolve({
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({ audio: buf.toString('base64'), format: 'mp3' })
-        });
-      });
+      })
     });
 
-    req.on('error', (err) => {
-      console.error('[ElevenLabs] request error:', err.message);
-      resolve({ statusCode: 500, headers, body: JSON.stringify({ error: err.message }) });
-    });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('[ElevenLabs]', response.status, errText);
+      return { statusCode: response.status, headers: CORS, body: JSON.stringify({ error: 'ElevenLabs Fehler: ' + response.status }) };
+    }
 
-    req.on('timeout', () => {
-      req.destroy();
-      resolve({ statusCode: 504, headers, body: JSON.stringify({ error: 'ElevenLabs timeout' }) });
-    });
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    return {
+      statusCode: 200,
+      headers: { ...CORS, 'Cache-Control': 'no-cache' },
+      body: JSON.stringify({ audio: base64, mimeType: 'audio/mpeg' })
+    };
 
-    req.write(payload);
-    req.end();
-  });
+  } catch(err) {
+    console.error('[ElevenLabs] Fehler:', err.message);
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
+  }
 };

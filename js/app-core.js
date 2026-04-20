@@ -726,7 +726,7 @@
       window._currentBriefingAudio.pause();
       window._currentBriefingAudio = null;
     }
-    window.openBriefingModal();
+    // Morning Briefing Auto-Trigger deaktiviert
   };
 
   window.closeBriefingModal = function() {

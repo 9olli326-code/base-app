@@ -196,12 +196,54 @@ window.syncToCloud = async (entry) => {
 
 window.removeFromCloud = async (id) => {
     if (!auth.currentUser || !id) return;
-    const path = window.currentMode === 'personal' ? 
-        `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/workouts` : 
+    const path = window.currentMode === 'personal' ?
+        `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/workouts` :
         `artifacts/${appIdGlobal}/users/${auth.currentUser.uid}/clients/${window.currentClient}/workouts`;
-    try { 
-        await deleteDoc(doc(db, path, id)); 
-    } catch(e) { 
-        console.error("Fehler Cloud-Löschen", e); 
+    try {
+        await deleteDoc(doc(db, path, id));
+    } catch(e) {
+        console.error("Fehler Cloud-Löschen", e);
     }
+};
+
+window.signInWithGoogle = async function() {
+  try {
+    var auth = window._fbAuth;
+    if (!auth) throw new Error('Firebase Auth nicht initialisiert');
+    var provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    var currentUser = auth.currentUser;
+    if (currentUser && currentUser.isAnonymous) {
+      try {
+        var linkResult = await linkWithPopup(currentUser, provider);
+        window.showToast && window.showToast('✅ Google Account verknüpft!');
+        return linkResult.user;
+      } catch(linkErr) {
+        if (linkErr.code === 'auth/credential-already-in-use' ||
+            linkErr.code === 'auth/email-already-in-use') {
+          var r2 = await signInWithPopup(auth, provider);
+          return r2.user;
+        }
+        throw linkErr;
+      }
+    }
+    var result = await signInWithPopup(auth, provider);
+    window.showToast && window.showToast('✅ Mit Google angemeldet!');
+    return result.user;
+  } catch(err) {
+    console.error('[Google Auth]', err);
+    if (err.code === 'auth/cancelled-popup-request') return;
+    var msg = err.code === 'auth/popup-blocked'
+      ? 'Popup blockiert — bitte Popup-Blocker deaktivieren'
+      : err.code === 'auth/popup-closed-by-user'
+      ? 'Anmeldung abgebrochen'
+      : 'Google Login fehlgeschlagen';
+    window.showToast && window.showToast('⚠️ ' + msg, 'error');
+    var errEl = document.getElementById('authError');
+    if (errEl) {
+      errEl.style.display = 'flex';
+      var span = errEl.querySelector('span');
+      if (span) span.textContent = msg;
+    }
+  }
 };

@@ -38,7 +38,7 @@ if (typeof firebase !== 'undefined' && firebase.messaging) {
   });
 }
 
-const CACHE_NAME = 'base-v2-cache-v301';
+const CACHE_NAME = 'base-v5-cache-v318';
 
 const PRECACHE_URLS = [
     '/app.html',
@@ -104,6 +104,11 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('fetch', function(event) {
     var url = event.request.url;
+
+    if (event.request.url.includes('/js/')) {
+      event.respondWith(fetch(event.request));
+      return;
+    }
 
     // Skip non-GET, Firestore writes, Netlify functions, Auth
     if (event.request.method !== 'GET' ||

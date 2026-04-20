@@ -95,16 +95,16 @@ for = "/js/*.js"
   Cache-Control = "public, max-age=0, must-revalidate"
 
 [[redirects]]
+from = "/app.html"
+to = "/app.html"
+status = 200
+force = true
+
+[[redirects]]
 from = "/"
 to = "/index.html"
 status = 200
 force = false
-
-  [redirects.query]
-
-  [redirects.conditions]
-
-  [redirects.headers]
 
 [[headers]]
   for = "/.well-known/*"

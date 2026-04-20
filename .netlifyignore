@@ -1,8 +1,12 @@
-android/
+_next/
+*.map
 node_modules/
-*.jks
-*.keystore
+android/
 *.apk
 *.aab
+*.jks
+*.keystore
+base-landing/
+*.bak
 www/
 .git/
